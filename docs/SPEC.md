@@ -236,3 +236,17 @@ origins: [
 - Origins differ in start stats (balanced: total within ±15 of the default) and set an `origin_<id>` flag; add 1–3 origin-specific choices/beats later in the route via `require:{flag:"origin_<id>"}` (+ `hideIfLocked`) where it's natural — not required everywhere.
 - Prologue nodes follow all rules (result beats, scenes/sprites from the key lists, ≤90 zh).
 - Records/saves store `origin`; the ending screen and 生涯 show race · origin.
+
+## 17. Faction stat help after first death (第四属性说明)
+Each faction gets `renownHelp:{zh,en}` (≤80 zh / ≤55 en words): what the faction stat (信仰 / 神恩 / 大义 / 命运 / 价值) means in-world, how it rises/falls, and what it unlocks (choices with `require:{stat:"renown"}`, better endings). The first time the player dies on a given faction (global, persisted per faction), the death/ending screen shows a "提示 / Tip" card with the stat icon, label and renownHelp. Also viewable afterwards via a ⓘ next to the stat in the status bar.
+
+## 18. Hidden Chaos-god taint (邪神污染，隐藏)
+- Engine state `taint:{khorne,nurgle,tzeentch,slaanesh}`, 0–100 each, starts 0, **never shown during play** (no bars, no numbers, no floaters).
+- Effects anywhere (node, choice, event): `taint:{khorne:+10}`; cleanse with `taint:{nurgle:-15}` or `taint:{all:-10}`.
+- Requirements: `require:{taint:"tzeentch", min:40}` (also `max`). Hidden choices using taint should use `hideIfLocked:true`.
+- Event weighting: when picking a random event, an event of god G has weight `1 + taint[G]/25`; cleansing events (`cleanse:true`) have weight `1 + (sum of taint)/100`.
+- Subtle tells only: at taint ≥ 50 for a god, rare one-line whispers / vignette tint in that god's colour (khorne #b3261e, nurgle #7a9a3a, tzeentch #3b6fd1, slaanesh #b45cc8); never a number.
+- Claim: when any god reaches 100, the engine immediately fires that god's **claim event** (`trigger:"claim"`, `god`, from the event pool, fires once) — typically corruption +25, a flag `claimed_<god>`, sanity loss — then continues.
+- Reveal: the ending screen's "你遇到的邪神" section shows the final taint per god as bars with a verdict line (e.g. "恐虐在注视你" ≥30, "你已被打上恐虐的烙印" ≥70). Run records store taint.
+- Content: every route has **3–5 route-flavoured taint events** (at least 2 polluting different gods, at least 1 cleansing — e.g. Imperium confession / Ecclesiarch blessing, T'au Ethereal's calm, Aeldari spirit-stone ward, Necron null-field / soulless calm, Chaos route: a rival god's purge or a moment of human kindness), in `data/events_taint.js` with `factions:[route]`, plus **4 claim events** (one per god, `factions:["*"]`) and 2–4 shared taint events. Existing shared chaos events in data/events.js may gain `taint` deltas on their choices.
+Load order: … data/events.js → data/events_taint.js → data/factions/*.
