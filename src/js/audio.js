@@ -21,7 +21,8 @@
 
   /* =====================================================================================
    * 1. MUSIC DATA
-   * Song: {key, bpm, meter (16th-steps per bar), ch:{channel:instrument}, drums:{v, pats}, sections, order, intro?}
+   * Song: {key, bpm, meter (16th-steps per bar), ch:{channel:instrument}, drums:{v, pats}, sections, order, intro?,
+   *   dly? [beats, feedback] per-song echo (default [0.75, 0.32]), wobble? [depth, periodS], rnd? random detune cents}
    * Instrument: w wave ("p12"|"p25"|"p50" pulse duty, "tri", "sine", "saw"; array = cycle per note = duty variation)
    *   v volume, env [attack, decay, sustain, release] (s), vib [rateHz, depthCents, delayS], lp lowpass Hz,
    *   echo / rev send 0..1, uni detuned 2nd osc (cents), stack [semitones] extra oscs, pan -1..1, gate 0..1, tr semitones
@@ -30,7 +31,7 @@
    *   chord pattern {p:"0-1-2-1-", o:octave, r:stepsPerChar}: digits = chord tones upward from the root (0 root, 1 3rd,
    *   2 5th, 3 7th or octave …), R = bass (slash note), O = bass+12, c = whole chord (voice-led), - hold, . rest.
    *   drums: one pattern name per bar (tiled), "-" = none. from:"A" inherits a section; tr:{ch:semis}; inst:{ch:{w}}; vol
-   * Drum pattern: {k kick, s snare, h hat, H open hat, t tom, c crash, m metal, w whoosh}: strings of meter chars,
+   * Drum pattern: {k kick, s snare, h hat, H open hat, t tom, c crash, m metal, w whoosh, z glitch scan}: strings of meter chars,
    *   X accent, x normal, o ghost, . rest.
    * ===================================================================================== */
   var SONGS = {
@@ -226,6 +227,64 @@
       order: ["A", "B", "A2", "B2"]
     },
 
+    /* Aeldari — "Thread of Fate". D dorian (B natural = the bright raised 6th: Dm–G), 70 bpm. Harp-like triangle
+     * arpeggios (instant attack, long decay, octave shimmer) through a long dotted-quarter echo, a glassy sine lead with
+     * slow vibrato, open-fifth bass, airy reverb, only a breath of percussion. */
+    aeldari: {
+      key: "D dorian", bpm: 70, meter: 16, dly: [1.5, 0.42],
+      ch: {
+        lead:  {w: "sine", v: 0.13, env: [0.05, 0.5, 0.7, 0.9], vib: [4.2, 14, 0.35], stack: [12], echo: 0.4, rev: 0.55},
+        harp:  {w: "tri", v: 0.085, env: [0.002, 0.7, 0, 0.9], stack: [12], echo: 0.5, rev: 0.45, pan: -0.3},
+        glass: {w: "p12", v: 0.03, env: [0.002, 0.4, 0, 0.6], lp: 4000, echo: 0.6, rev: 0.5, pan: 0.4},
+        pad:   {w: "sine", v: 0.055, env: [0.9, 0.6, 0.85, 1.5], uni: 7, rev: 0.6, gate: 1, pan: 0.15},
+        bass:  {w: "tri", v: 0.24, env: [0.3, 0.5, 0.85, 1.0], rev: 0.25, gate: 1}
+      },
+      drums: {v: 0.32, pats: {W: {w: "x..............."}, S: {H: "........o......."}, S2: {H: "....o.......o...", t: "o..............."}}},
+      sections: {
+        A: {chords: "Dm | G | Fmaj7 | C | Dm | G | Em | Asus4",
+            lead: "A4:8 D5:4 F5:4 | G5:6 F5:2 D5:4 B4:4 | A5:6 G5:2 E5:8 | G5:4 E5:4 C5:8 | D5:4 F5:4 A5:8 | B5:6 A5:2 G5:4 D5:4 | E5:8 G5:4 B5:4 | A5:8 E5:8",
+            harp: {p: "0-2-3-4-5-4-3-2-", o: 3}, pad: {p: "c---------------", o: 3}, bass: {p: "R-------2-------", o: 2},
+            drums: "W - - - - - - -"},
+        B: {chords: "F | G | Am | Em | F | G | Dm | Dm",
+            lead: "C6:8 A5:8 | B5:6 A5:2 G5:8 | A5:4 C6:4 E6:8 | E6:6 D6:2 B5:8 | A5:4 F5:4 C5:4 F5:4 | D5:4 G5:4 B5:6 A5:2 | A5:8 F5:4 E5:4 | D5:16",
+            harp: {p: "5-4-3-2-1-0-1-2-", o: 3}, pad: {p: "c---------------", o: 3}, bass: {p: "R-------2-------", o: 2},
+            drums: "- - - S - - - S"},
+        A2: {from: "A", glass: {p: "5.......3.......", o: 5}, drums: "S", inst: {lead: {w: "tri"}}},
+        B2: {from: "B", glass: {p: "..4...3...2...1.", o: 5}, drums: "S S S S S S S S2", inst: {lead: {w: "tri"}}}
+      },
+      order: ["A", "B", "A2", "B2"]
+    },
+
+    /* Necron — "The Sleepers Wake". A minor with locrian/phrygian colour (Bb = bII, Eb = b5), 88 bpm. Low-passed detuned
+     * saw drone on pedal tones, a 12.5% pulse ostinato, a stiff sparse lead, metallic ticks and glitchy "scan" sweeps (z). */
+    necron: {
+      key: "A minor / locrian colour", bpm: 88, meter: 16, dly: [0.5, 0.28],
+      ch: {
+        lead:  {w: "p12", v: 0.10, env: [0.003, 0.25, 0.5, 0.3], lp: 3200, echo: 0.35, rev: 0.3, pan: 0.15},
+        pulse: {w: "p12", v: 0.06, env: [0.002, 0.07, 0.15, 0.05], lp: 1400, pan: -0.25},
+        glyph: {w: "sine", v: 0.05, env: [0.002, 0.25, 0, 0.3], echo: 0.5, rev: 0.4, pan: 0.4},
+        drone: {w: "saw", v: 0.07, env: [1.2, 0.5, 0.9, 1.5], lp: 320, uni: 8, rev: 0.2, gate: 1},
+        bass:  {w: "tri", v: 0.30, env: [0.01, 0.3, 0.6, 0.3]}
+      },
+      drums: {v: 0.5, pats: {
+        N1: {k: "x.......x.......", m: "..............o."},
+        N2: {k: "x.......x..x....", m: "....o.......x...", h: "..o...o...o...o."},
+        NZ: {k: "x.......x.......", m: "....o...........", z: "........x......."}
+      }},
+      sections: {
+        A: {chords: "Am | Bb/A | Am | Gm/A | Fmaj7 | Bb | Dm | E5",
+            lead: ".:8 E5:4 C5:4 | F5:8 D5:4 Bb4:4 | A4:12 .:4 | .:8 G4:4 Bb4:4 | C5:8 E5:4 F5:4 | D5:4 Eb5:4 D5:8 | F5:6 E5:2 D5:8 | E5:4 .:4 B4:4 .:4",
+            drone: {p: "R---------------", o: 2}, pulse: {p: "R..R..R.R..R..R.", o: 3}, drums: "N1 N1 N1 NZ"},
+        B: {chords: "Dm | Eb/D | Dm | Eb/D | Bb | Am | Gm | E5",
+            lead: "D5:2 .:2 D5:2 .:2 A5:4 F5:4 | G5:4 .:4 Eb5:4 .:4 | F5:4 .:4 A4:8 | Bb4:4 .:4 G4:4 .:4 | D5:8 F5:4 D5:4 | E5:8 C5:4 A4:4 | Bb4:4 D5:4 G5:4 F5:4 | E5:8 B4:8",
+            drone: {p: "R---------------", o: 2}, pulse: {p: "R.R.O.R.R.R.O.R.", o: 2}, bass: {p: "R-------R--R----", o: 2},
+            drums: "N2 N2 N2 NZ"},
+        A2: {from: "A", glyph: {p: "3...........1...", o: 5}, drums: "N2 N2 N2 NZ", inst: {lead: {w: "p25"}}},
+        B2: {from: "B", glyph: {p: "..3.....2.....1.", o: 5}, drums: "N2 NZ N2 NZ", inst: {lead: {w: ["p12", "p25"]}}}
+      },
+      order: ["A", "B", "A2", "B2"]
+    },
+
     /* Happy — "Dawn After the Siege". C major, 132 bpm. Bouncy oom-pah bass, offbeat stabs, dotted-rhythm B section. */
     happy: {
       key: "C major", bpm: 132, meter: 16,
@@ -299,7 +358,7 @@
 
   var MOODS = Object.keys(SONGS);
   var SFX_NAMES = ["click", "hover", "select", "start", "type", "damage", "heal", "sanity", "corrupt",
-                   "event", "warp", "codex", "save", "death", "ending_good"];
+                   "event", "warp", "codex", "save", "death", "ending_good", "consequence", "scan"];
   var URGENT = {battle: 1, boss: 1, warp: 1, death: 1, bad: 1, happy: 1, title: 1};   // switch immediately (no hysteresis); warp = chaos events
   var HYSTERESIS_MS = 8000;
   var DEFAULT_FADE = {battle: 600, boss: 600, death: 400, bad: 1200, happy: 800};
@@ -312,7 +371,7 @@
               "7": [0, 4, 7, 10], m7: [0, 3, 7, 10], maj7: [0, 4, 7, 11], dim7: [0, 3, 6, 9], m7b5: [0, 3, 6, 10],
               "6": [0, 4, 7, 9], m6: [0, 3, 7, 9], "5": [0, 7]};
   var RESERVED = {chords: 1, drums: 1, from: 1, tr: 1, inst: 1, vol: 1};
-  var DRUM_KEYS = {k: 1, s: 1, h: 1, H: 1, t: 1, c: 1, m: 1, w: 1};
+  var DRUM_KEYS = {k: 1, s: 1, h: 1, H: 1, t: 1, c: 1, m: 1, w: 1, z: 1};
   var VEL = {X: 1, x: 0.75, o: 0.4};
 
   function pcOf(s) {
@@ -574,10 +633,10 @@
     P.E = E; P.id = id; P.S = S; P.song = compileSong(id); P.active = false; P.stopAt = null;
     P.out = ctx.createGain(); P.out.gain.value = 0; P.out.connect(E.musicBus);
     P.wet = ctx.createGain(); P.wet.gain.value = 0; P.wet.connect(E.musicWet);
-    var beat = 60 / S.bpm;
-    P.dly = ctx.createDelay(2); P.dly.delayTime.value = Math.min(1.5, beat * 0.75);
+    var beat = 60 / S.bpm, dl = S.dly || [0.75, 0.32];
+    P.dly = ctx.createDelay(2); P.dly.delayTime.value = Math.min(1.9, beat * dl[0]);
     P.dlyLp = ctx.createBiquadFilter(); P.dlyLp.type = "lowpass"; P.dlyLp.frequency.value = 2600;
-    P.dlyFb = ctx.createGain(); P.dlyFb.gain.value = 0.32;
+    P.dlyFb = ctx.createGain(); P.dlyFb.gain.value = Math.min(0.6, dl[1]);
     P.dly.connect(P.dlyLp); P.dlyLp.connect(P.dlyFb); P.dlyFb.connect(P.dly); P.dlyLp.connect(P.out);
     P.ch = {};
     Object.keys(S.ch).forEach(function (k) {
@@ -679,9 +738,9 @@
     };
   };
   Player.prototype.drumHit = function (k, t, vel) {
-    var P = this, E = P.E, ctx = E.ctx, end = t + (k === "c" ? 1.5 : k === "w" ? 2.6 : 0.4);
+    var P = this, E = P.E, ctx = E.ctx, end = t + (k === "c" ? 1.5 : k === "w" ? 2.6 : k === "z" ? 0.6 : 0.4);
     if (!E.voiceOk("drum", t, end)) return;
-    var g = ctx.createGain(), src, o;
+    var g = ctx.createGain(), src, o, extra = null;
     var env = function (peak, decay) { g.gain.setValueAtTime(peak, t); g.gain.exponentialRampToValueAtTime(0.0008, t + decay); };
     if (k === "k" || k === "t") {
       o = ctx.createOscillator(); o.type = "sine";
@@ -705,8 +764,19 @@
       bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(1800, t + 1.2); bp.frequency.exponentialRampToValueAtTime(250, t + 2.5);
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vel * 0.35, t + 1.1); g.gain.exponentialRampToValueAtTime(0.0005, t + 2.5);
       src.connect(bp); bp.connect(g); g.connect(P.drum); src.start(t, P.rand()); src.stop(t + 2.55);
+    } else if (k === "z") {             // glitch "scan": stepped (sample-and-hold) 12.5% pulse sweep up then down, with dropouts
+      o = E.osc("p12"); var nz = 14, dz = 0.5, lv = vel * 0.13;
+      g.gain.setValueAtTime(0, t);
+      for (var q = 0; q < nz; q++) {
+        var tq = t + q * dz / nz, ph = q < nz / 2 ? q / (nz / 2) : (nz - q) / (nz / 2);
+        o.frequency.setValueAtTime(320 * Math.pow(7, ph) * (0.9 + P.rand() * 0.2), tq);
+        g.gain.setValueAtTime(P.rand() < 0.22 ? lv * 0.1 : lv * (1 - 0.4 * q / nz), tq);
+      }
+      g.gain.exponentialRampToValueAtTime(0.0008, t + dz + 0.04);
+      var zl = ctx.createBiquadFilter(); zl.type = "lowpass"; zl.frequency.value = 3800;
+      o.connect(g); g.connect(zl); zl.connect(P.drum); zl.connect(P.wet); o.start(t); o.stop(t + dz + 0.06); src = o; extra = zl;
     }
-    if (src) src.onended = function () { try { g.disconnect(); src.disconnect(); } catch (e) {} };
+    if (src) src.onended = function () { try { g.disconnect(); src.disconnect(); if (extra) extra.disconnect(); } catch (e) {} };
   };
 
   /* =====================================================================================
@@ -844,6 +914,32 @@
       tone(E, t2, N("G2"), 0.12, {w: "tri", v: 0.28, r: 0.05});
       tone(E, t2 + 0.15, N("C3"), 0.45, {w: "tri", v: 0.28, r: 0.3});
       noise(E, t2, 1.2, {type: "highpass", f: 4000, v: 0.08});
+    },
+    consequence: function (E, t) {      // soft page-turn (rising filtered noise brush) + a quiet two-note chime
+      noise(E, t, 0.16, {type: "bandpass", f: 700, f2: 3200, q: 1.2, v: 0.07, a: 0.06});
+      noise(E, t + 0.1, 0.09, {type: "highpass", f: 4500, v: 0.035, a: 0.01});
+      tone(E, t + 0.13, N("A5"), 0.04, {w: "sine", v: 0.075, r: 0.5, hold: false, rev: true});
+      tone(E, t + 0.13, N("A6"), 0.03, {w: "tri", v: 0.015, r: 0.3, hold: false});
+      tone(E, t + 0.21, N("E6"), 0.04, {w: "sine", v: 0.06, r: 0.6, hold: false, echo: true, rev: true});
+    },
+    scan: function (E, t) {             // necron scan: stepped 12.5% pulse sweep up/down, metallic grit, low servo hum
+      var ctx = E.ctx, n = 16, d = 0.6, end = t + d + 0.08;
+      if (!E.voiceOk("sfx", t, end)) return;
+      var o = E.osc("p12"), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+      lp.type = "lowpass"; lp.frequency.value = 4200;
+      g.gain.setValueAtTime(0, t);
+      for (var i = 0; i < n; i++) {
+        var ti = t + i * d / n, ph = i < n / 2 ? i / (n / 2) : (n - i) / (n / 2);
+        o.frequency.setValueAtTime(300 * Math.pow(8, ph) * (0.92 + E.rand() * 0.16), ti);
+        g.gain.setValueAtTime(E.rand() < 0.2 ? 0.01 : 0.085, ti);
+      }
+      g.gain.exponentialRampToValueAtTime(0.0005, t + d + 0.05);
+      o.connect(g); g.connect(lp); lp.connect(E.sfxIn); lp.connect(E.sfxEcho);
+      o.start(t); o.stop(end);
+      o.onended = function () { try { o.disconnect(); g.disconnect(); lp.disconnect(); } catch (e) {} };
+      noise(E, t, 0.05, {metal: true, type: "bandpass", f: 3000, q: 1.5, v: 0.1});
+      noise(E, t + d * 0.5, 0.05, {metal: true, type: "bandpass", f: 4200, q: 1.5, v: 0.07});
+      tone(E, t, 55, d, {w: "p12", v: 0.07, to: 49, lp: 400, a: 0.04, r: 0.12});
     }
   };
 
@@ -991,11 +1087,15 @@
   }
 
   /* ---------- mood rules ---------- */
-  var BOSS_FOES = {hive_tyrant: 1, daemon_prince: 1, grey_knight: 1, tyranid_warrior: 1, ork_boss: 1, heretic_astartes: 1, chaos_sorcerer: 1};
+  var BOSS_FOES = {hive_tyrant: 1, daemon_prince: 1, grey_knight: 1, tyranid_warrior: 1, ork_boss: 1, heretic_astartes: 1, chaos_sorcerer: 1,
+                   greater_daemon_slaanesh: 1, wraith_construct: 1, necron_lord: 1, canoptek_spyder: 1, omen_ctan: 1};
   var WARP_SCENES = {warp: 1, daemon_world: 1, cult_shrine: 1};
   var HOLY_SCENES = {cathedral: 1, throne_light: 1};
   var TAU_SCENES = {tau_city: 1, tau_outpost: 1};
+  var AELDARI_SCENES = {craftworld: 1, webway: 1, maiden_world: 1};
+  var NECRON_SCENES = {tomb_exterior: 1, tomb_interior: 1, stasis_gallery: 1, dig_site: 1};
   var TENSE_SCENES = {trench: 1, burning_city: 1, ruins: 1, spore_sky: 1};
+  var FACTION_MOOD = {tau: "tau", aeldari: "aeldari", necrons: "necron", necron: "necron"};   // route default instead of calm
   function moodFor(node, state, faction) {
     if (!node) return "calm";
     if (node.music && SONGS[node.music]) return node.music;
@@ -1006,10 +1106,12 @@
     if (WARP_SCENES[sc]) return "warp";
     if (HOLY_SCENES[sc]) return "holy";
     if (TAU_SCENES[sc]) return "tau";
+    if (AELDARI_SCENES[sc]) return "aeldari";
+    if (NECRON_SCENES[sc]) return "necron";
     var san = state && state.stats ? state.stats.sanity : null;
     if (TENSE_SCENES[sc] || (typeof san === "number" && san < 30)) return "tense";
     var fid = typeof faction === "string" ? faction : (faction && faction.id) || (state && state.faction);
-    return fid === "tau" ? "tau" : "calm";
+    return FACTION_MOOD[fid] || "calm";
   }
 
   /* ---------- offline rendering (tests: tools/dev/audio_render.py) ---------- */

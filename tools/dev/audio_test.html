@@ -36,6 +36,9 @@
   <label>SFX <input type="range" id="sv" min="0" max="100" value="70"> <span id="svv">70</span></label>
 </div>
 
+<h2>Scene → moodFor() (v0.2 routes)</h2>
+<div class="grid" id="scenes"></div>
+
 <h2>SFX</h2>
 <div class="grid" id="sfx"></div>
 <div class="row"><button id="typeburst">type ×40 (rate-limit test)</button></div>
@@ -72,6 +75,14 @@
     b.onclick = function () { A.unlock(); A.sfx(s); };
     b.onmouseenter = function () { A.sfx("hover"); };
     sfxBox.appendChild(b);
+  });
+  [["craftworld", "aeldari"], ["webway", "aeldari"], ["maiden_world", "aeldari"], ["jungle", "aeldari"],
+   ["tomb_exterior", "necrons"], ["tomb_interior", "necrons"], ["stasis_gallery", "necrons"], ["dig_site", "necrons"], ["void", "necrons"]
+  ].forEach(function (sf) {
+    var b = document.createElement("button"), node = {scene: sf[0]}, m = A.moodFor(node, {stats: {sanity: 90}}, sf[1]);
+    b.innerHTML = sf[0] + "<small>" + sf[1] + " → " + m + "</small>";
+    b.onclick = function () { A.unlock(); A.setMood(m, {force: $("force").checked, fade: +$("fade").value}); A.sfx(sf[1] === "necrons" ? "scan" : "consequence"); status(); };
+    $("scenes").appendChild(b);
   });
   $("stop").onclick = function () { A.stop({fade: 800}); status(); };
   $("mute").onclick = function () { A.unlock(); A.mute(!A.isMuted()); status(); };

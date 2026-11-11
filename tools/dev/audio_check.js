@@ -19,8 +19,11 @@ let errors = 0, warns = 0;
 const err = (m) => { errors++; console.log("  ERROR " + m); };
 const warn = (m) => { warns++; console.log("  warn  " + m); };
 
-const REQUIRED_MOODS = ["title", "calm", "holy", "tense", "battle", "boss", "warp", "tau", "happy", "death", "bad"];
-const REQUIRED_SFX = ["click", "hover", "select", "start", "type", "damage", "heal", "sanity", "corrupt", "event", "warp", "codex", "save", "death", "ending_good"];
+const REQUIRED_MOODS = ["title", "calm", "holy", "tense", "battle", "boss", "warp", "tau", "aeldari", "necron", "happy", "death", "bad"];
+const REQUIRED_SFX = ["click", "hover", "select", "start", "type", "damage", "heal", "sanity", "corrupt", "event", "warp", "codex", "save", "death", "ending_good",
+                      "consequence", "scan"];
+// v0.2 moods: tempo window + minimum share of on-beat melody notes that are chord tones (SPEC §15)
+const NEW_MOODS = {aeldari: {bpm: [64, 76], tones: 75}, necron: {bpm: [80, 96], tones: 75}};
 const API = ["unlock", "setMood", "stop", "sfx", "setMusicVolume", "setSfxVolume", "mute", "isMuted", "moodFor", "current"];
 const WAVES = new Set(["p12", "p25", "p50", "tri", "sine", "saw", "sq"]);
 
@@ -59,6 +62,13 @@ for (const id of A.moods) {
   let strong = 0, tones = 0, lo = 999, hi = 0;
   c.sections.forEach((s) => { strong += s.stat.strong; tones += s.stat.chordTone; if (s.stat.notes) { lo = Math.min(lo, s.stat.lo); hi = Math.max(hi, s.stat.hi); } });
   const pct = strong ? Math.round(100 * tones / strong) : 0;
+  const NM = NEW_MOODS[id];
+  if (NM) {
+    if (c.bpm < NM.bpm[0] || c.bpm > NM.bpm[1]) err(`${id}: ${c.bpm} bpm outside ${NM.bpm[0]}–${NM.bpm[1]}`);
+    if (pct < NM.tones) err(`${id}: ${pct}% on-beat chord tones (want ≥ ${NM.tones}%)`);
+    const order = S.order.join(",");
+    if (order !== "A,B,A2,B2") err(`${id}: order ${order} (want A,B,A2,B2)`);
+  }
   const nm = (m) => ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"][m % 12] + (Math.floor(m / 12) - 1);
   if (strong && pct < 60 && id !== "warp") warn(`${id}: only ${pct}% of on-beat melody notes are chord tones`);
   if (hi > 96 || lo < 40) warn(`${id}: melody range ${nm(lo)}–${nm(hi)} is extreme`);
@@ -86,6 +96,30 @@ const cases = [
   [{scene: "hive_hab"}, {stats: {sanity: 20}}, "imperium", "tense"],
   [{scene: "hive_hab"}, {stats: {sanity: 80}}, "imperium", "calm"],
   [null, {}, "imperium", "calm"],
+  // v0.2 — Aeldari / Necrons
+  [{scene: "craftworld"}, {}, "aeldari", "aeldari"],
+  [{scene: "webway"}, {}, "aeldari", "aeldari"],
+  [{scene: "maiden_world"}, {stats: {sanity: 90}}, "imperium", "aeldari"],
+  [{scene: "tomb_exterior"}, {}, "necrons", "necron"],
+  [{scene: "tomb_interior"}, {}, "aeldari", "necron"],
+  [{scene: "stasis_gallery"}, {}, "necrons", "necron"],
+  [{scene: "dig_site"}, {}, "necrons", "necron"],
+  [{scene: "jungle"}, {}, "aeldari", "aeldari"],
+  [{scene: "void"}, {}, {id: "necrons"}, "necron"],
+  [{scene: "void"}, {faction: "necrons"}, null, "necron"],
+  [{scene: "ruins"}, {}, "aeldari", "tense"],
+  [{scene: "ship_interior"}, {stats: {sanity: 10}}, "necrons", "tense"],
+  [{scene: "warp"}, {}, "aeldari", "warp"],
+  [{scene: "webway", foe: "drukhari_raider"}, {}, "aeldari", "battle"],
+  [{scene: "craftworld", foe: "greater_daemon_slaanesh"}, {}, "aeldari", "boss"],
+  [{scene: "craftworld", foe: "wraith_construct"}, {}, "aeldari", "boss"],
+  [{scene: "tomb_interior", foe: "necron_warrior"}, {}, "necrons", "battle"],
+  [{scene: "tomb_interior", foe: "necron_lord"}, {}, "necrons", "boss"],
+  [{scene: "dig_site", foe: "canoptek_spyder"}, {}, "necrons", "boss"],
+  [{scene: "stasis_gallery", foe: "omen_ctan"}, {}, "necrons", "boss"],
+  [{scene: "tomb_interior", ending: {kind: "death"}}, {}, "necrons", "death"],
+  [{scene: "craftworld", ending: {kind: "good"}}, {}, "aeldari", "happy"],
+  [{scene: "dig_site", music: "tense"}, {}, "necrons", "tense"],
 ];
 cases.forEach(([n, s, f, want]) => {
   const got = A.moodFor(n, s, f);

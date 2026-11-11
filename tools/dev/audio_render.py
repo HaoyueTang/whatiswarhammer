@@ -60,6 +60,14 @@ def spec_sim(x, y, n=4096):
     a, b = spec(x), spec(y)
     return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-12))
 
+def centroid(mono):
+    """spectral centroid (Hz) of the whole render — a rough 'brightness' figure per mood"""
+    n = 4096; frames = len(mono) // n
+    if not frames: return 0.0
+    f = mono[: frames * n].reshape(frames, n) * np.hanning(n)
+    mag = np.mean(np.abs(np.fft.rfft(f, axis=1)), axis=0); hz = np.fft.rfftfreq(n, 1 / SR)
+    return float(np.sum(hz * mag) / (np.sum(mag) + 1e-12))
+
 def window_rms(mono, win):
     n = len(mono) // win
     return np.sqrt(np.mean(mono[: n * win].reshape(n, win) ** 2, axis=1) + 1e-12)
@@ -124,10 +132,18 @@ with sync_playwright() as p:
         page.evaluate("Object.defineProperty(document, 'hidden', {configurable: true, get: () => false}); document.dispatchEvent(new Event('visibilitychange'))")
         page.wait_for_timeout(200)
         check("visible tab resumes audio", page.evaluate(f"{A}._ctx().state === 'running'"))
+        # v0.2 scene → mood wiring plays the new moods
+        for scene, fac, want in [("craftworld", "aeldari", "aeldari"), ("tomb_interior", "necrons", "necron")]:
+            got = page.evaluate(f"(() => {{ const m = {A}.moodFor({{scene: '{scene}'}}, {{stats: {{sanity: 90}}}}, '{fac}'); {A}.setMood(m, {{force: true}}); return m; }})()")
+            page.wait_for_timeout(500)
+            st = page.evaluate(f"(() => {{ const p = {A}._players()['{want}']; return !!(p && p.active) && {A}.current() === '{want}'; }})()")
+            check(f"moodFor({scene}) → {want} plays", got == want and st, str(got))
+        check("consequence/scan SFX play after unlock", page.evaluate(f"{A}.sfx('consequence') === true && {A}.sfx('scan') === true"))
         # real-file override falls back to synth on a missing file
         page.evaluate(f"WH.audioFiles = {{holy: 'assets/audio/does_not_exist.ogg'}}; {A}.setMood('holy', {{force: true}})")
         page.wait_for_timeout(800)
-        check("missing audio file falls back to synth", page.evaluate(f"{A}.current() === 'holy' && !!{A}._players().holy && {A}._players().holy.active"))
+        fb = page.evaluate(f"[{A}.current(), !!{A}._players().holy, !!({A}._players().holy && {A}._players().holy.active)]")
+        check("missing audio file falls back to synth", fb == ["holy", True, True], json.dumps(fb))
         page.evaluate(f"WH.audioFiles = {{}}; {A}.stop({{fade: 200}})")
         page.wait_for_timeout(500)
         check("stop() clears the mood", page.evaluate(f"{A}.current() === null"))
@@ -135,7 +151,7 @@ with sync_playwright() as p:
         check("no console errors", not errs, "; ".join(errs[:5]))
 
     print(f"\nOffline renders → {OUT}  (sr {SR} Hz, music volume 1.0)")
-    print("  mood     loop(s) exp/actual   peak dBFS  RMS dBFS  clip  longest quiet  loop-sim ")
+    print("  mood     key                         bpm  loop(s) exp/actual   peak dBFS  RMS dBFS  clip  longest quiet  loop-sim  centroid")
     for m in moods:
         if ONLY and m not in ONLY: continue
         info = page.evaluate(f"{A}.songInfo('{m}')")
@@ -161,7 +177,8 @@ with sync_playwright() as p:
             if a1 + L <= len(mono):
                 corr = spec_sim(mono[a0:a0 + L], mono[a1:a1 + L])
         actual = (loops[0] - 0.06) if loops else None
-        print(f"  {m:8s} {exp_loop:7.1f} / {('%.1f' % actual) if actual else '  -  ':>6s}   {db(peak):8.1f}  {rms:8.1f}  {clip:4d}  {quiet_s:9.1f} s   {corr:8.2f}")
+        cen = centroid(body)
+        print(f"  {m:8s} {info['key'][:26]:26s} {info['bpm']:4d}  {exp_loop:7.1f} / {('%.1f' % actual) if actual else '  -  ':>6s}   {db(peak):8.1f}  {rms:8.1f}  {clip:4d}  {quiet_s:9.1f} s   {corr:8.2f}  {cen:6.0f} Hz")
         check(f"{m}: peak < -0.5 dBFS", db(peak) < -0.5)
         check(f"{m}: no clipped samples", clip == 0)
         lo_rms = -40 if m in ("death", "bad") else -32
@@ -186,7 +203,7 @@ with sync_playwright() as p:
         length = (above[-1] / SR) if len(above) else 0
         print(f"  {s:12s}  {db(env.max()):8.1f}  {length:8.2f}")
         check(f"sfx {s}: audible and peak < -1 dBFS", -40 < db(env.max()) < -1, f"{db(env.max()):.1f}")
-        limit = {"hover": 0.15, "type": 0.15, "click": 0.3, "save": 1.5}.get(s, 3.5)
+        limit = {"hover": 0.15, "type": 0.15, "click": 0.3, "save": 1.5, "consequence": 1.5, "scan": 1.5}.get(s, 3.5)
         check(f"sfx {s}: short (< {limit} s)", length < limit, f"{length:.2f}s")
     errs = [e for e in console_errors if "does_not_exist" not in e and "ERR_FILE_NOT_FOUND" not in e]
     check("no console errors during renders", not errs, "; ".join(errs[:5]))
