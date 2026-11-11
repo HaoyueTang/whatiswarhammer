@@ -92,7 +92,7 @@
             "You crawl down and down. Underhive air is sweet—sickly sweet.\nBy day three you've eaten your bootlaces. A one-eyed scavenger offers you meat. “Don't ask what it was.”\nEnforcer whistles in the distance. They're sweeping for the quota."),
     effects: {hp: -10, set: {deserter: true}},
     choices: [
-      C("吃下去", "Eat it", "imp_109", {effects: {hp: 10, corruption: 3}, result: L("肉有股甜味，跟这里的空气一样甜。你没问，他也没说。", "The meat is sweet, like the air down here. You don't ask. He doesn't say.")}),
+      C("吃下去", "Eat it", "imp_109", {effects: {hp: 10, corruption: 3, taint: {nurgle: 15}}, result: L("肉有股甜味，跟这里的空气一样甜。你没问，他也没说。", "The meat is sweet, like the air down here. You don't ask. He doesn't say.")}),
       C("摇头，继续躲", "Shake your head and keep hiding", "imp_109", {effects: {hp: -5}, result: L("你蜷进一截废管道，胃拧成了一团。哨声越来越近。", "You curl up in a dead pipe, stomach knotted. The whistles draw closer.")})
     ]};
 
@@ -182,7 +182,7 @@
     text: L("出发前三天，哥哥在走廊里等你。他穿着一身崭新的军官制服，是为下个月的宴会订做的。\n“我会替你祈祷，”他说，“每天。”\n他把家族戒指塞进你手里，戒面上是那座塔和那柄断剑。",
             "Three days before you leave, your brother waits in the corridor. He wears a brand-new officer's uniform, tailored for next month's ball.\n“I'll pray for you,” he says. “Every day.”\nHe presses the family ring into your hand: the tower and the broken sword."),
     choices: [
-      C("收下戒指", "Take the ring", "imp_o_noble_4", {effects: {renown: 3, set: {serrinRing: true}}, result: L("戒指有点大，你把它穿在绳子上挂在脖子里。哥哥松了口气，像卸下了一笔账。", "The ring is too big; you hang it on a cord round your neck. Your brother sighs with relief, like a debt settled.")}),
+      C("收下戒指", "Take the ring", "imp_o_noble_4", {effects: {renown: 3, set: {serrinRing: true}, taint: {slaanesh: 15}}, result: L("戒指有点大，你把它穿在绳子上挂在脖子里。哥哥松了口气，像卸下了一笔账。", "The ring is too big; you hang it on a cord round your neck. Your brother sighs with relief, like a debt settled.")}),
       C("“留着还债吧。”", "“Keep it. Pay the debts.”", "imp_o_noble_4", {effects: {sanity: 5}, result: L("哥哥攥着戒指站了很久。走廊尽头，他的影子比他矮了一截。", "Your brother stands holding the ring a long time. At the end of the corridor, his shadow looks smaller than he is.")})
     ]};
 
@@ -192,7 +192,7 @@
     codex: ["imp_ecclesiarchy"],
     choices: [
       C("撕掉金边再带上", "Tear off the gilt, then take it", "imp_o_noble_5", {effects: {sanity: 5}, result: L("神父看着你撕，没有阻止。“聪明，”他叹气，“下面的人会为了金子割喉咙。”", "The confessor watches you tear it and doesn't stop you. “Wise,” he sighs. “Down there, men cut throats for gold.”")}),
-      C("原样收下，留住家族的体面", "Keep it as it is, for the house's honour", "imp_o_noble_5", {effects: {renown: 5, set: {giltBook: true}}, result: L("金边在烛光下闪闪发亮。你把书贴身收好，像揣着一小块尖塔。", "The gilt gleams in the candlelight. You tuck the book against your chest like a small piece of the spire.")})
+      C("原样收下，留住家族的体面", "Keep it as it is, for the house's honour", "imp_o_noble_5", {effects: {renown: 5, set: {giltBook: true}, taint: {slaanesh: 25}}, result: L("金边在烛光下闪闪发亮。你把书贴身收好，像揣着一小块尖塔。", "The gilt gleams in the candlelight. You tuck the book against your chest like a small piece of the spire.")})
     ]};
 
   N.imp_o_noble_5 = {chapter: 1, scene: "ship_interior", speaker: PELL, time: {d: 3},
@@ -256,20 +256,20 @@
       C("谢谢神甫", "Thank the priest", "imp_208")
     ]};
 
-  N.imp_208 = {chapter: 2, scene: "warp", speaker: null, time: {d: 30, warp: true}, eventRoll: 0.35,
+  N.imp_208 = {chapter: 2, scene: "warp", speaker: null, time: {d: 30, warp: true}, eventRoll: 0.49,
     text: L("跃迁警报响了。舷窗全部封死。\n你仍然听见有东西在外面敲船壳，很有礼貌，像在问能不能进来。\n铺位上的老兵用被子蒙住头：“别回答。千万别回答。”",
             "The warp alarm sounds. Every viewport is shuttered.\nYou still hear something tapping on the hull. Politely. As if asking to be let in.\nAn old trooper pulls the blanket over his head. “Don't answer. Whatever you do, don't answer.”"),
     effects: {sanity: -5},
     codex: ["imp_navigator", "chaos_warp"],
     choices: [
       C("握紧祈祷书", "Clutch your prayer book", "imp_209", {effects: {sanity: 5, renown: 2, taint: {all: -5}}, result: L("你一页一页地念，念到嗓子发干。敲门声没停，但你不再听得见它。", "You read page after page until your throat is dry. The knocking never stops, but you stop hearing it.")}),
-      C("把耳朵贴上船壳", "Press your ear to the hull", "imp_210", {effects: {sanity: -10, corruption: 5, taint: {tzeentch: 8}}, result: L("船壳冰得像墓碑。敲门声就在你耳朵另一边，一下，又一下，越来越近。", "The hull is cold as a gravestone. The tapping sits just past your ear. Once. Again. Closer.")})
+      C("把耳朵贴上船壳", "Press your ear to the hull", "imp_210", {effects: {sanity: -10, corruption: 5, taint: {tzeentch: 40}}, result: L("船壳冰得像墓碑。敲门声就在你耳朵另一边，一下，又一下，越来越近。", "The hull is cold as a gravestone. The tapping sits just past your ear. Once. Again. Closer.")})
     ]};
 
   N.imp_210 = {chapter: 2, scene: "warp", speaker: null, time: {h: 3, warp: true},
     text: L("敲门声停了。一个声音用你母亲的语调说：“你冷吗？”\n回过神时，佩尔正死死掐着你的胳膊。\n你的嘴唇在动。你不知道自己刚才答应了什么。",
             "The tapping stops. A voice, in your mother's tone, asks: “Are you cold?”\nWhen you come to, Pell is gripping your arm hard enough to bruise.\nYour lips are moving. You don't know what you just agreed to."),
-    effects: {set: {warpWhisper: true}},
+    effects: {set: {warpWhisper: true}, taint: {tzeentch: 20}},
     choices: [
       C("什么都别说", "Say nothing to anyone", "imp_209", {result: L("佩尔看着你，你摇了摇头。他再也没问过。", "Pell looks at you. You shake your head. He never asks again.")})
     ]};
@@ -283,7 +283,7 @@
     ]};
 
   /* ============ Chapter 3 · The Green Tide ============ */
-  N.imp_301 = {chapter: 3, scene: "trench", speaker: VOSK, time: {d: 4}, eventRoll: 0.3,
+  N.imp_301 = {chapter: 3, scene: "trench", speaker: VOSK, time: {d: 4}, eventRoll: 0.42,
     text: L("尘落星。战壕里的水没过脚踝，远处传来引擎轰鸣和走调的歌声。\n“兽人在唱歌，”沃斯克说，“说明它们心情很好。”\n她把一颗手雷放进你手里，像给小孩一块糖。",
             "Dustfall. Trench water up to your ankles. Engines roar in the distance, along with off-key singing.\n“Orks singing,” Vosk says. “Means they're in a good mood.”\nShe drops a grenade into your palm like candy for a child."),
     codex: ["xenos_ork", "xenos_waaagh", "place_dustfall"],
@@ -298,7 +298,7 @@
     effects: {hp: -10},
     choices: [
       C("瞄准头部", "Aim for the head", null, R(0.5, "hp", "imp_304", "imp_305", L("你屏住呼吸，等那颗绿脑袋冲进准星。扣扳机的那一下，手指一点没抖。", "You hold your breath until the green head fills your sights. Your trigger finger doesn't shake at all."), L("你的第一枪打掉了它一只耳朵。它笑得更开心了。", "Your first shot takes off an ear. It only laughs harder."))),
-      C("扔出手雷，趴下", "Throw the grenade and drop", "imp_304", {effects: {hp: -10, renown: 2}, result: L("手雷炸开，泥浆和碎片泼了你一背。你抬起头，还有一个绿影在往前冲。", "The grenade bursts; mud and shrapnel rain across your back. When you look up, one green shape is still coming.")})
+      C("扔出手雷，趴下", "Throw the grenade and drop", "imp_304", {effects: {hp: -10, renown: 2, taint: {khorne: 20}}, result: L("手雷炸开，泥浆和碎片泼了你一背。你抬起头，还有一个绿影在往前冲。", "The grenade bursts; mud and shrapnel rain across your back. When you look up, one green shape is still coming.")})
     ]};
 
   N.imp_304 = {chapter: 3, scene: "trench", speaker: PELL, foe: "ork", time: {h: 1},
@@ -345,7 +345,7 @@
   N.imp_307 = {chapter: 3, scene: "trench", speaker: DRAVIK, foe: "ork_boss", time: {h: 1},
     text: L("你把集束手雷塞进锅炉般的胸甲缝，然后扑倒。\n爆炸后，军阀的半个头盔落在你脚边。政委看了你一眼，在本子上记了一笔。\n这是第一次有人记住你。",
             "You jam a bundle of grenades into a gap in the boiler-plate armour and dive.\nAfter the blast, half the warboss's helmet lands at your feet. The commissar glances at you and writes something down.\nIt's the first time anyone has remembered you."),
-    effects: {renown: 10, set: {hero: true}},
+    effects: {renown: 10, set: {hero: true}, taint: {khorne: 30}},
     choices: [
       C("撑着站起来", "Haul yourself up", "imp_311")
     ]};
@@ -372,17 +372,17 @@
     effects: {hp: 25},
     choices: [
       C("好好睡一觉", "Get some real sleep", "imp_401", {effects: {sanity: 10}, result: L("你睡了整整十四个小时，没有做梦。醒来时，邻床已经换了三个人。", "You sleep fourteen hours straight, dreamless. When you wake, the next bed has had three different occupants.")}),
-      C("多要点止痛药", "Ask for extra painkillers", "imp_401", {effects: {hp: 10, sanity: -5}, result: L("阿诺多给了你两支。疼痛退得很远，远到这副身体好像不是你的。", "Arno slips you two extra. The pain drifts so far away the body no longer feels like yours.")})
+      C("多要点止痛药", "Ask for extra painkillers", "imp_401", {effects: {hp: 10, sanity: -5, taint: {nurgle: 20}}, result: L("阿诺多给了你两支。疼痛退得很远，远到这副身体好像不是你的。", "Arno slips you two extra. The pain drifts so far away the body no longer feels like yours.")})
     ]};
 
   /* ============ Chapter 4 · Whispers in the Rain ============ */
-  N.imp_401 = {chapter: 4, scene: "ruins", speaker: null, time: {y: 1}, eventRoll: 0.3,
+  N.imp_401 = {chapter: 4, scene: "ruins", speaker: null, time: {y: 1}, eventRoll: 0.42,
     text: L("一年过去了。团里换了三拨新兵，你已经能闭着眼拆枪。\n部队驻防在雨城维瑟尔。城里人很和善，太和善了。送汤的布琳婆婆每天都来，从不收钱。",
             "A year passes. Three batches of recruits come and go. You can strip your lasgun blindfolded.\nThe regiment garrisons Vessel, a city of endless rain. The locals are kind. Too kind. Old Brin brings soup every day and never takes a coin."),
     effects: {sanity: 15, hp: 10},
     codex: ["place_vessel"],
     choices: [
-      C("喝下那碗汤", "Drink the soup", "imp_402", {effects: {hp: 5, corruption: 5, taint: {nurgle: 5}}, result: L("你接过碗。布琳在你身边坐下，看着你喝，像看着自己的孩子。", "You take the bowl. Brin sits beside you and watches you drink, like a mother watching her child.")}),
+      C("喝下那碗汤", "Drink the soup", "imp_402", {effects: {hp: 5, corruption: 5, taint: {nurgle: 25}}, result: L("你接过碗。布琳在你身边坐下，看着你喝，像看着自己的孩子。", "You take the bowl. Brin sits beside you and watches you drink, like a mother watching her child.")}),
       C("趁她不注意倒掉", "Pour it out when she isn't looking", "imp_403")
     ]};
 
@@ -391,7 +391,7 @@
             "The soup is good, with a hint of rust. Brin holds your hand. “Child, your Emperor has sat on a golden chair for ten thousand years. Has he ever looked at you once?”\nShe smiles. “Our gods will.”"),
     codex: ["chaos_cult"],
     choices: [
-      C("她说得……有点道理", "She... has a point", "imp_404", {effects: {corruption: 10, taint: {nurgle: 8}, set: {cultTouched: true}}, result: L("你没有抽回手。布琳笑得更深了：“今晚来地窖，带上你的问题。”", "You don't pull your hand away. Brin's smile deepens. “Come to the cellar tonight. Bring your questions.”")}),
+      C("她说得……有点道理", "She... has a point", "imp_404", {effects: {corruption: 10, taint: {nurgle: 40}, set: {cultTouched: true}}, result: L("你没有抽回手。布琳笑得更深了：“今晚来地窖，带上你的问题。”", "You don't pull your hand away. Brin's smile deepens. “Come to the cellar tonight. Bring your questions.”")}),
       C("去报告政委", "Report this to the commissar", "imp_405", {result: L("你放下碗，径直去找政委。她听完，只点了一下头。", "You set down the bowl and go straight to the commissar. She hears you out and nods, once.")})
     ]};
 
@@ -410,7 +410,7 @@
             "You follow Brin down into a cellar. By candlelight dozens chant a name you can't parse, all in one voice.\nThe figure on the dais wears a mirrored mask. “Welcome. You've been listening, haven't you? On the ship. The knocking.”"),
     effects: {sanity: -5, corruption: 5},
     choices: [
-      C("接过他递来的匕首", "Take the dagger he offers", "imp_407", {effects: {corruption: 10, taint: {tzeentch: 10}, set: {cultist: true}}, result: L("你伸出手。念诵声戛然而止，几十双眼睛同时转向你。", "You reach out. The chanting stops dead, and dozens of eyes turn to you at once.")}),
+      C("接过他递来的匕首", "Take the dagger he offers", "imp_407", {effects: {corruption: 10, taint: {tzeentch: 40}, set: {cultist: true}}, result: L("你伸出手。念诵声戛然而止，几十双眼睛同时转向你。", "You reach out. The chanting stops dead, and dozens of eyes turn to you at once.")}),
       C("假装入会，打探消息", "Pretend to join and gather intel", "imp_408", {result: L("你学着他们的样子低下头。镜面人看了你很久，面具里映着你自己的脸。", "You bow your head like the rest. The Mirrored Man studies you a long time; his mask shows you your own face.")}),
       C("转身冲出地窖", "Turn and bolt from the cellar", "imp_405", {effects: {sanity: -5}, result: L("你撞翻蜡烛冲上台阶，没人追。他们只是一起笑了一声。", "You knock over candles and bolt up the stairs. Nobody follows. They just laugh, once, all together.")})
     ]};
@@ -418,7 +418,7 @@
   N.imp_407 = {chapter: 4, scene: "cult_shrine", speaker: S("cult_magus", "镜面人", "The Mirrored Man"), time: {h: 3},
     text: L("匕首很轻，像本来就是你的。\n“明晚换岗时，有朋友从天上来，”镜面人说，“你只需要打开城门。”\n你的旧伤不疼了。一点都不疼了。",
             "The dagger is light, as if it was always yours.\n“Tomorrow at the change of watch, friends come from the sky,” says the Mirrored Man. “You need only open the gate.”\nYour old wounds stop aching. Not even a twinge."),
-    effects: {hp: 20, corruption: 5},
+    effects: {hp: 20, corruption: 5, taint: {tzeentch: 20}},
     choices: [
       C("去开城门", "Go and open the gate", "imp_410", {result: L("换岗的钟声响了。你把匕首藏进袖子走向城门，雨水冲掉了你的脚印。", "The watch bell tolls. You tuck the dagger up your sleeve and walk to the gate. The rain washes away your footprints.")}),
       C("把匕首交给政委", "Hand the dagger to the commissar", "imp_405", {effects: {sanity: -5, set: {confessed: true}}, result: L("你把匕首放在政委桌上。它在木头上烫出了一道焦痕。", "You lay the dagger on the commissar's desk. It leaves a scorch mark in the wood.")})
@@ -427,7 +427,7 @@
   N.imp_408 = {chapter: 4, scene: "cult_shrine", speaker: null, time: {d: 5},
     text: L("你学会了他们的手势和祷词。白天擦枪，夜里念那个名字。每念一次，你就忘掉一点母亲的脸。\n第五晚，有人在你耳边说：“审判庭想见你。别回头。”",
             "You learn their signs and prayers. By day you clean your rifle; by night you chant the name. Each time, a little more of your mother's face fades.\nOn the fifth night someone whispers: “The Inquisition wants a word. Don't turn around.”"),
-    effects: {corruption: 10, sanity: -5, renown: 5},
+    effects: {corruption: 10, sanity: -5, renown: 5, taint: {tzeentch: 15}},
     choices: [
       C("不回头，跟他走", "Don't turn. Follow.", "imp_412", {effects: {set: {spy: true, inqCoin: true}}, result: L("那人往你手心塞了一枚旧硬币：“天亮前带路。”等你终于回头，巷子里只剩下雨。", "The stranger presses an old coin into your palm. “Lead the way before dawn.” When you finally turn, there's only rain.")})
     ]};
@@ -477,13 +477,13 @@
     codex: ["imp_inquisition"],
     choices: [
       C("搜查祭坛", "Search the altar", "imp_413"),
-      C("去追逃散的信徒", "Chase the scattering faithful", "imp_415", {effects: {hp: -10, renown: 3}, result: L("你在雨里追了三条街，胳膊挨了一菜刀。抓到的那个人，嘴里还在念那个名字。", "You chase them three streets through the rain and take a kitchen knife across the arm. The one you catch is still chanting that name.")})
+      C("去追逃散的信徒", "Chase the scattering faithful", "imp_415", {effects: {hp: -10, renown: 3, taint: {khorne: 25}}, result: L("你在雨里追了三条街，胳膊挨了一菜刀。抓到的那个人，嘴里还在念那个名字。", "You chase them three streets through the rain and take a kitchen knife across the arm. The one you catch is still chanting that name.")})
     ]};
 
   N.imp_413 = {chapter: 4, scene: "cult_shrine", speaker: HAAK, time: {h: 1},
     text: L("祭坛上刻着一颗八芒星，每道芒尖渗出不同的颜色：血红、腐绿、幻蓝、艳紫。\n你盯得太久，颜色开始盯着你。哈克捂住你的眼睛：“别数。数完了，你就是他们的了。”",
             "The altar bears an eight-pointed star, each ray bleeding a colour: blood red, rot green, shifting blue, lurid violet.\nYou stare too long. The colours stare back. Haak covers your eyes. “Don't count them. Finish counting and you're theirs.”"),
-    effects: {sanity: -5, corruption: 3, set: {sawAltar: true}},
+    effects: {sanity: -5, corruption: 3, set: {sawAltar: true}, taint: {all: 10}},
     codex: ["chaos_gods"],
     choices: [
       C("闭上眼，退后", "Close your eyes and step back", "imp_415", {result: L("你闭上眼往后退，差点绊倒。眼皮里，那些颜色还在一圈圈地转。", "You shut your eyes and step back, nearly stumbling. Behind your eyelids, the colours keep turning.")})
@@ -499,7 +499,7 @@
     ]};
 
   /* ============ Chapter 5 · The Shadow ============ */
-  N.imp_501 = {chapter: 5, scene: "warp", speaker: S("psyker", "领航员", "The Navigator"), time: {d: 50, warp: true}, eventRoll: 0.35,
+  N.imp_501 = {chapter: 5, scene: "warp", speaker: S("psyker", "领航员", "The Navigator"), time: {d: 50, warp: true}, eventRoll: 0.49,
     text: L("第二次跃迁。这一次亚空间很安静，静得不对劲。\n领航员从舱室里走出来，眼角淌着血，只说了一句：“有个影子挡住了光。很大，很饿。”\n然后他再也没开过口。",
             "The second jump. This time the warp is quiet. Wrongly quiet.\nThe Navigator steps out of his chamber, blood at the corners of his eyes, and says one thing: “A shadow is blocking the light. Huge. Hungry.”\nHe never speaks again."),
     effects: {sanity: -5},
@@ -608,7 +608,7 @@
             "The evac point is choked with civilians. The lander can lift once more.\nA mother shoves a bundle into your arms. “Take her.”\nThe hatch is closing. There's one seat left."),
     choices: [
       C("把婴儿送上去", "Hand the baby aboard", "imp_514", {effects: {renown: 5, set: {savedBaby: true}}, result: L("你把襁褓递进舱门，一只手接住了她。舱门在你鼻尖前合拢。", "You pass the bundle through the hatch; a hand takes her. The door seals an inch from your nose.")}),
-      C("自己挤上去", "Squeeze aboard yourself", "imp_515", {effects: {renown: -10, sanity: -10, set: {fledHesper: true}}, result: L("你把襁褓塞回母亲怀里。她没骂你，只是看着你。", "You push the bundle back into the mother's arms. She doesn't curse you. She just looks at you.")})
+      C("自己挤上去", "Squeeze aboard yourself", "imp_515", {effects: {renown: -10, sanity: -10, set: {fledHesper: true}, taint: {nurgle: 15}}, result: L("你把襁褓塞回母亲怀里。她没骂你，只是看着你。", "You push the bundle back into the mother's arms. She doesn't curse you. She just looks at you.")})
     ]};
 
   N.imp_514 = {chapter: 5, scene: "spore_sky", speaker: null, foe: "gaunt", time: {h: 4},
@@ -710,13 +710,13 @@
       C("碰杯", "Clink glasses", "imp_611", {result: L("酒难喝得要命。你们一人喝了半瓶，谁也没提回家以后的事。", "The hooch is vile. You each drink half the bottle, and neither of you mentions what comes after home.")})
     ]};
 
-  N.imp_611 = {chapter: 6, scene: "warp", speaker: null, time: {d: 20, warp: true}, eventRoll: 0.4,
+  N.imp_611 = {chapter: 6, scene: "warp", speaker: null, time: {d: 20, warp: true}, eventRoll: 0.56,
     text: L("这次跃迁颠簸得厉害。亚空间里有东西追着舰队，像鲨鱼闻到了血。\n第三天，船尾整个舱段的人都疯了。他们反锁舱门，用同一个声音唱歌。\n舰长下令抽真空。",
             "This jump is rougher than any before. Something in the warp chases the fleet like a shark scenting blood.\nOn day three, an entire aft section goes mad. They lock themselves in and sing in one voice.\nThe captain orders it vented."),
     effects: {sanity: -5},
     choices: [
       C("堵住耳朵", "Cover your ears", "imp_701", {effects: {sanity: 5}, result: L("你塞上棉絮，捂住耳朵，再蒙上被子。歌声还是渗进来一点，然后停了。", "Cotton in your ears, hands over them, blanket over that. A little of the song still seeps through. Then it stops.")}),
-      C("去听那首歌", "Go and listen to the song", "imp_701", {effects: {corruption: 15, sanity: -5, taint: {slaanesh: 12}, set: {heardSong: true}}, result: L("你贴在舱门上。歌很美，唱的是下水道、蜡烛和一扇会打开的门。然后空气抽空，歌停了。", "You press against the bulkhead. The song is beautiful: drains, candles, a door that will open. Then the air vents, and the song stops.")})
+      C("去听那首歌", "Go and listen to the song", "imp_701", {effects: {corruption: 15, sanity: -5, taint: {slaanesh: 55}, set: {heardSong: true}}, result: L("你贴在舱门上。歌很美，唱的是下水道、蜡烛和一扇会打开的门。然后空气抽空，歌停了。", "You press against the bulkhead. The song is beautiful: drains, candles, a door that will open. Then the air vents, and the song stops.")})
     ]};
 
   /* ============ Chapter 7 · The Black Crusade ============ */
@@ -753,18 +753,18 @@
   N.imp_705 = {chapter: 7, scene: "ruins", speaker: null, foe: "heretic_astartes", time: {h: 1},
     text: L("它转过身，随手一挥。你飞出去十几米，撞在墙上。\n你躺在瓦砾里，看着它走远。它甚至没确认你死没死。\n这让你莫名地愤怒。",
             "It turns and swats you aside. You fly a dozen metres into a wall.\nLying in the rubble, you watch it walk on. It doesn't even check whether you're dead.\nFor some reason, that makes you furious."),
-    effects: {hp: -25, renown: 3},
+    effects: {hp: -25, renown: 3, taint: {khorne: 30}},
     choices: [
       C("爬起来", "Get up", "imp_707")
     ]};
 
-  N.imp_707 = {chapter: 7, scene: "ruins", speaker: BRIN, time: {h: 8}, eventRoll: 0.3,
+  N.imp_707 = {chapter: 7, scene: "ruins", speaker: BRIN, time: {h: 8}, eventRoll: 0.42,
     text: L("夜里，废墟里响起一个熟悉的声音。是布琳——或者是披着布琳样子的东西。\n她捧着一碗冒热气的汤：“你的帝皇没来，孩子。来的是黑色的战帅。他会让活下来的人吃饱。”",
             "At night in the ruins, a familiar voice. Brin—or something wearing Brin.\nShe holds out a steaming bowl of soup. “Your Emperor didn't come, child. The black Warmaster did. He'll feed whoever survives.”"),
     effects: {sanity: -5, corruption: 5},
     codex: ["chaos_gods"],
     choices: [
-      C("喝下那碗汤", "Drink the soup", "imp_708", {effects: {corruption: 20, hp: 30, taint: {nurgle: 15}}, result: L("你接过碗。这一次，你没有问汤里放了什么。", "You take the bowl. This time you don't ask what's in it.")}),
+      C("喝下那碗汤", "Drink the soup", "imp_708", {effects: {corruption: 20, hp: 30, taint: {nurgle: 65}}, result: L("你接过碗。这一次，你没有问汤里放了什么。", "You take the bowl. This time you don't ask what's in it.")}),
       C("开枪", "Shoot", "imp_709", {effects: {sanity: -5}, result: L("激光穿过她的身体，打在后面的墙上。她没倒，只是叹了口气。", "The las-bolt passes through her and hits the wall behind. She doesn't fall. She only sighs.")}),
       C("念出阵亡者的名字", "Recite the names of the dead", "imp_709", {effects: {sanity: 10, renown: 3, taint: {all: -10}}, result: L("你从训练营里那个新兵念起。每念一个名字，她就淡一分。", "You begin with the recruit from training camp. With every name you say, she fades a little more.")})
     ]};
@@ -794,7 +794,7 @@
             "Dravik spreads the map across an ammo crate. “Orbital defences are gone. Relief is seven days out at best. We hold for seven days.”\nShe looks at you. “You grew up here. Suggestions?”\nIt's the first time she has asked anyone's opinion."),
     choices: [
       C("叛军会走第六工厂的下水道", "They'll come through the drains under Six", "imp_711", {require: {flag: "knowRoute"}, hideIfLocked: true, result: L("德拉维克盯着你看了三秒，然后在地图上第六工厂的位置画了个圈。", "Dravik studies you for three seconds, then circles Manufactorum Six on the map.")}),
-      C("那首歌里……提到过下水道", "That song... it mentioned the drains", "imp_711", {require: {flag: "heardSong"}, hideIfLocked: true, effects: {sanity: -5}, result: L("你哼出那首歌的一句，自己先打了个寒颤。德拉维克没说话，在第六工厂画了个圈。", "You hum one line of the song and shiver first. Dravik says nothing, and circles Manufactorum Six.")}),
+      C("那首歌里……提到过下水道", "That song... it mentioned the drains", "imp_711", {require: {flag: "heardSong"}, hideIfLocked: true, effects: {sanity: -5, taint: {slaanesh: 25}}, result: L("你哼出那首歌的一句，自己先打了个寒颤。德拉维克没说话，在第六工厂画了个圈。", "You hum one line of the song and shiver first. Dravik says nothing, and circles Manufactorum Six.")}),
       C("守住大教堂和难民", "Hold the cathedral and the refugees", "imp_712"),
       C("炸掉通往上巢的大桥", "Blow the bridge to the upper hive", "imp_713", {result: L("德拉维克只问了一句：“炸药够吗？”工兵们连夜把桥墩塞满了。", "Dravik asks one question. “Enough charges?” The sappers pack the pylons all night.")})
     ]};
@@ -823,13 +823,13 @@
       C("别去想", "Don't think about it", "imp_714", {result: L("你努力不去想。可一闭上眼，你就听见桥下有人在敲铁板。", "You try not to think about it. But whenever you close your eyes, you hear someone below the bridge banging on metal.")})
     ]};
 
-  N.imp_714 = {chapter: 7, scene: "burning_city", speaker: PELL, time: {d: 5}, eventRoll: 0.3,
+  N.imp_714 = {chapter: 7, scene: "burning_city", speaker: PELL, time: {d: 5}, eventRoll: 0.42,
     text: L("第五天。你已经不记得上次睡觉是什么时候。\n佩尔被流弹击中，倒在你怀里，把一张旧口粮券塞进你手心：“楼梯间……免费的……”\n远处，一个巨大的黑影降落在巢都尖顶。",
             "Day five. You can't remember the last time you slept.\nA stray round takes Pell. He falls into your arms and presses an old ration chit into your hand. “The stairwell... free...”\nIn the distance, a vast black shape lands atop the hive spire."),
     effects: {sanity: -5, set: {pellDead: true}},
     choices: [
       C("抱着他直到最后", "Hold him until it's over", "imp_801", {effects: {sanity: 5}, result: L("你抱着他，直到他的手变凉。那张口粮券被你攥出了汗。", "You hold him until his hand goes cold. The ration chit is damp in your fist.")}),
-      C("放下他，回到阵地", "Lay him down and go back to the line", "imp_801", {effects: {renown: 5, sanity: -5}, result: L("你合上他的眼睛，把他放在沙袋后面。回到阵地，你的枪比以前更准了。", "You close his eyes and lay him behind the sandbags. Back on the line, your aim is better than ever.")})
+      C("放下他，回到阵地", "Lay him down and go back to the line", "imp_801", {effects: {renown: 5, sanity: -5, taint: {khorne: 25}}, result: L("你合上他的眼睛，把他放在沙袋后面。回到阵地，你的枪比以前更准了。", "You close his eyes and lay him behind the sandbags. Back on the line, your aim is better than ever.")})
     ]};
 
   /* ============ Chapter 8 · Last Rites ============ */
@@ -841,7 +841,7 @@
     choices: [
       C("砸掉广播", "Smash the vox-caster", "imp_802", {result: L("你用枪托砸了三下，广播才哑掉。他的最后一个字还在走廊里回荡。", "Three blows of your rifle butt silence the vox. His last word still echoes down the corridor.")}),
       C("唱圣歌盖过他", "Sing a hymn over him", "imp_802", {effects: {renown: 5, sanity: 5, taint: {all: -5}}, result: L("你起了个头，跑调了。然后小队里每个人都跟着唱，跑得一样厉害。", "You start the hymn off-key. Then the whole squad joins in, just as off-key.")}),
-      C("在心里……数一数跪下的好处", "Quietly weigh the benefits of kneeling", "imp_802", {effects: {corruption: 20, hp: 15, taint: {tzeentch: 10}}, result: L("你没跪，只是算了算。伤口忽然不疼了，像有人替你记下了这笔账。", "You don't kneel. You only do the sums. Your wounds stop hurting, as if someone has noted the account.")})
+      C("在心里……数一数跪下的好处", "Quietly weigh the benefits of kneeling", "imp_802", {effects: {corruption: 20, hp: 15, taint: {tzeentch: 40}}, result: L("你没跪，只是算了算。伤口忽然不疼了，像有人替你记下了这笔账。", "You don't kneel. You only do the sums. Your wounds stop hurting, as if someone has noted the account.")})
     ]};
 
   N.imp_802 = {chapter: 8, scene: "hive_spire", speaker: DRAVIK, foe: "heretic_astartes", time: {h: 2},
@@ -858,7 +858,7 @@
   N.imp_804 = {chapter: 8, scene: "hive_spire", speaker: DRAVIK, foe: "heretic_astartes", time: {h: 1},
     text: L("你不知道自己是怎么活下来的。只记得政委的剑在尖叫，你的枪烫得握不住，最后一个巨人倒下时砸碎了半面墙。\n德拉维克靠墙坐下，伤得很重，还在换弹匣。",
             "You don't know how you survived. You remember the commissar's sword screaming, your gun too hot to hold, the last giant falling and smashing half a wall.\nDravik slumps against the wall, badly hurt, still changing her magazine."),
-    effects: {renown: 15, hp: -20},
+    effects: {renown: 15, hp: -20, taint: {khorne: 30}},
     choices: [
       C("扶她起来", "Help her up", "imp_806", {result: L("她甩开你的手，自己站了起来。“去塔顶，”她说，“看看我们在替谁守。”", "She shakes off your hand and stands on her own. “Go up the tower,” she says. “See who we're holding for.”")})
     ]};
@@ -921,6 +921,31 @@
             "After the victory, the Inquisition begins its audit. They use a single lamp and shine it in your eyes.\nIn its light, your shadow has an extra hand.\nThey're very polite. They even bring you a bowl of hot soup."),
     ending: {kind: "bad", title: L("光下的影子", "Shadow in the Light"), cause: L("腐化败露，被审判庭清除", "Purged by the Inquisition")}};
 
+  /* ============ Claim endings (SPEC §19): a Chaos god's claim, accepted or forced. Reached via the claim events' goto. ============ */
+  N.imp_end_claim_khorne = {scene: "trench", speaker: S("daemon_khorne", "铜色的鼓声", "The Brass Drum"), time: {y: 3},
+    text: L("你不再等口令。中士在身后喊你，你只听得见鼓声。\n多年后，有人在一片无名的战场上见过你：军服早烂成了布条，你还在冲锋，身后的头盔堆成了小山。\n血神从不问血是谁的，只要王座下的头骨更高。",
+            "You stop waiting for orders. The sergeant shouts your number behind you; all you hear is the drum.\nYears later someone glimpses you on a nameless battlefield: uniform rotted to rags, still charging, a hill of helmets at your back.\nThe Blood God never asks whose blood it was. He only wants the skulls piled higher."),
+    codex: ["god_khorne"],
+    ending: {kind: "bad", title: L("无名的冲锋", "The Endless Charge"), cause: L("被恐虐收为猎犬", "Taken as Khorne's hound")}};
+
+  N.imp_end_claim_nurgle = {scene: "ruins", speaker: S("daemon_nurgle", "慈祥的声音", "A Fond Voice"), time: {d: 40},
+    text: L("你不再怕病，也不再怕死。野战医院的伤员一个个好了，又病了，全都笑眯眯的。\n政委来查时，营地已成了一座花园：苍蝇在唱歌，伤口在开花，没人再喊疼。\n慈父爱他的每一个孩子，从不让谁孤单。",
+            "You no longer fear sickness, or death. The field hospital's wounded get better one by one, then sick one by one, all of them smiling.\nWhen the commissar comes to inspect, the camp is a garden: flies singing, wounds in bloom, no one crying out.\nGrandfather loves every one of his children, and leaves none of them alone."),
+    codex: ["god_nurgle"],
+    ending: {kind: "bad", title: L("花园营地", "The Garden Camp"), cause: L("成为纳垢的园丁", "Became Nurgle's gardener")}};
+
+  N.imp_end_claim_tzeentch = {scene: "ship_interior", speaker: S("sigil_tzeentch", "镜子里的人", "The One in the Mirror"), time: {y: 2},
+    text: L("你总能先知道命令、战局，和谁会背叛谁。你升到了上尉。\n某天你在作战图上画了一道线，整个团跟着它走进了埋伏。那道线，是镜子里的人替你画的。\n你以为自己在下棋，其实你只是一颗棋子。",
+            "You always know first: the orders, the battle, who will betray whom. You rise all the way to captain.\nOne day you draw a line on the war map, and a whole regiment follows it into an ambush. The one in the mirror drew it for you.\nYou thought you were playing. You were only a piece."),
+    codex: ["god_tzeentch"],
+    ending: {kind: "bad", title: L("一步好棋", "A Clever Move"), cause: L("沦为奸奇的棋子", "Became Tzeentch's pawn")}};
+
+  N.imp_end_claim_slaanesh = {scene: "cathedral", speaker: S("daemon_slaanesh", "甜得发苦的声音", "A Bittersweet Voice"), time: {y: 1},
+    text: L("勋章、掌声、香膏、更响的赞美诗，你都要，而且要更多。\n每一样都比上一样淡。最后你站在凯旋礼上，全舰队都在为你欢呼，你什么也感觉不到。\n她把你一次次装满，又一次次倒空，直到你只剩下想要。",
+            "Medals, applause, scented balm, louder hymns: you want them all, and more.\nEach tastes fainter than the last. At last you stand at the triumph, the whole fleet cheering your name, and feel nothing.\nShe fills you and pours you out, again and again, until nothing is left of you but wanting."),
+    codex: ["god_slaanesh"],
+    ending: {kind: "bad", title: L("掌声之后", "After the Applause"), cause: L("被色孽掏空", "Hollowed out by Slaanesh")}};
+
   /* ============ Death nodes (engine-triggered) ============ */
   N.imp_death_hp = {scene: "ruins", speaker: null,
     text: L("你倒下的地方没有墓碑，只有一个编号。\n多年后，某位执事念到这个编号，语气依旧感恩。\n帝国从不缺人。它只缺时间。",
@@ -949,6 +974,7 @@
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("信仰", "Faith"),
     renownIcon: "icon_faith",
+    taintMod: {khorne: 0.9, nurgle: 0.9, tzeentch: 0.9, slaanesh: 0.9},   // SPEC §19: multiplier on positive taint deltas (cleanses unscaled)
     renownHelp: L("信仰是帝国眼中你的价值：服从、勇敢、虔诚。守住阵线、祈祷、举报异端会让它上升；逃跑、怯战、背弃同袍会让它下降。信仰够高，才做得出英勇之举，才会被远征舰队接纳。",
                   "Faith is your worth in the Imperium's eyes: obedience, courage, piety. Holding the line, praying, and reporting heresy raise it; fleeing, cowardice and abandoning comrades lower it. High Faith opens certain daring heroic deeds, and a place in the crusade."),
     origins: [

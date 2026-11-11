@@ -278,3 +278,45 @@ Newest at the bottom. Format: `## YYYY-MM-DD · role` then short bullets (what c
 - **sample_data.** Sample `taintMod` is tzeentch ×1.5, slaanesh ×0.5. `smp_claim_khorne` now has accept (goto → claim ending), resist (taint −40, `resisted_khorne`) and a forced choice ("铜王座不再询问", `require:{flag:"resisted_khorne"}`, goto). Added `smp_end_claim_khorne`.
 - **Smoke tests.** The sample run has 11 new checks: taintMod maths, the first claim (2 choices, forced one hidden), accept → claim ending with banner, claimed card, god codex and EN verdict, resist → resumes with taint 60 and the flag, the second claim (only the forced choice) → ending with `claims=2`, and no third claim. `resolve_event` now picks only enabled buttons. Results: sample 159/159, real 71/71, 0 console errors. validate: real PASS (0 errors), sample PASS.
 - **For the writer and lead.** The band is measured on **claim endings**. With random 50/50 accept/resist, the claim-ending rate will be roughly 0.5–0.65 × the current claim-event rate. Current event rates are imp 15.1, cha 22.6, tau 7.6, eld 13.6, nec 3.9 %, which would fall under most bands once the endings land. Either raise taint further or decide that the band means "claim fired". Resist currently gives `taint −30`; SPEC says −40.
+
+## 2026-11-11 · text-claims (SPEC §19: claims become endings)
+- **taintMod** on every faction, exactly per the §19 table: imperium all ×0.9 · chaos all ×1.3 · tau all ×0.7 · aeldari slaanesh ×1.3, others ×0.9 · necrons all ×0.5.
+- **Claim events** (`data/events_taint.js`). Helpers `A`/`B`/`F` and a `CLAIM_GOTO[god][route]` map.
+  - Accept: `require:{notFlag:"resisted_<god>"}` + hideIfLocked, `goto` to the route's claim ending. It now only sets `claimed_<god>`; the old boons and corruption +25 are gone, because the run ends right there and corruption 100 would otherwise race the goto into a death node.
+  - Resist: same require. Costs corruption +15, sanity −20/−25, hp −10/−15 (tzeentch and slaanesh gained hp −10), `taint:{<god>:-40}`, and sets `resisted_<god>`.
+  - Forced: `require:{flag:"resisted_<god>"}` + hideIfLocked, same goto. Texts: 鼓声太响了。应吧 / 太累了，赶不动了 / 这一句，他也料到了 / 就尝最后一口.
+  - Every accept and forced choice has a `result` beat.
+- **28 new nodes.** 20 claim endings `<prefix>end_claim_<god>`, each unlocking `god_<god>`. Chaos also has 4 pre-ending nodes `cha_claim_<god>` and 4 `cha_end_claim_<god>_chosen` endings (kind good). Claim nodes have no chapter, because they can fire in any chapter.
+- **Chaos "chosen".** `devoted_<god>` is set by the god-path pact (cha_402–405, alongside pK/pN/pT/pS) and by passing that god's trial (cha_603/605/607/609, alongside markX). At `cha_claim_<god>`, "以他的勇士/园丁/书记 · 以她的宠儿之名回应" needs `devoted_<god>` (shown locked otherwise) and leads to `_chosen`. "任由它带走你" is always open and leads to the bad ending, so a devoted player can still refuse the honour.
+- **Feasibility calls (lore):**
+  - Imperium: all four gods can fully claim. Guardsmen are exposed and faith only slows it (×0.9). The endings use the setting (squad, field hospital, war map, fleet triumph), never a specific NPC.
+  - Chaos: all four can fully claim. A claim by your own god = dark good ending (champion / gardener / scribe / favourite). Any other claim = thrall fate (hound, seedbed, footnote, hollowed out).
+  - T'au: the T'au are warp-quiet, but their humans aren't. Claims show through how the T'au fail to perceive them: an "efficiency anomaly", a quarantined street of smiling sick, a triple agent dreaming T'au plans, a party in the human quarter. Random play: Tzeentch (dreams, Farsight, betraying Kel'ra) and Khorne (Silas's mark); Slaanesh rare; Nurgle only by deliberate play.
+  - Aeldari: Slaanesh is the natural claimant (most common). `eld_end_claim_slaanesh` is a standalone ending rather than a bridge to `eld_end_thirst`. A claim can fire before the Unsated appears (ch3–7), so it uses the dream of Valda motif (eld_702) and "no spirit stone caught it". The thirst ending stays the finale-specific version. Khorne is the war-mask without a Path, contrasted with Khaine. Nurgle is the exiled gardener, echoing Isha in the Gardener's keeping. Tzeentch plucks fate-threads behind the Farseer.
+  - Necrons: the tomb's null field means the god cannot take you inside. Khorne, Nurgle and Tzeentch take you **the moment you step outside** ("零场之外", "出墓的第一步", "星空下的答案"). Slaanesh gets a **lesser fate**: she cannot reach you, but your own wanting freezes you in stasis as a plaque reading "人类，渴望中". Random play: Tzeentch (curiosity/knowledge) and Nurgle (despair in the pit).
+- **Taint sizes** (invisible, never in text; cleanses unchanged):
+  - Shared events: primary choices +30, secondary +25 (khorne_2 hit back, nurgle_2), tzeentch_1 left +10, undivided all +12/+15.
+  - Route taint events: +30 (tear page +8). Dice and feast: +25. `evt_eld_mirror`: +30.
+  - Route node/choice deltas rose about 2–4×, and about 60 more tempting choices/nodes now carry taint. Each route now has 2–4 god threads instead of one, so gods spread.
+    - Imperium: Brin/soup → nurgle; hull voice, cult dagger, kneeling → tzeentch; battle rage → khorne; song and vanity → slaanesh.
+    - Chaos: god-path pacts 45–55, trials 30, plus offerings.
+    - T'au: Silas's mark and his god → khorne (up to 90 at the last stand); warp dreams, Farsight pact, betraying Kel'ra → tzeentch; Silas's sermon → slaanesh.
+    - Aeldari: webway, She Who Thirsts, the dream at eld_702 and the eld_803 loop → slaanesh; rune-stones and fate → tzeentch; war-mask → khorne.
+    - Necrons: glyphs, the shard's name, counting time, sealed reports → tzeentch (needed raw 70–80 because of ×0.5); the pit, the 41st plinth, Kaal → nurgle.
+  - `eventRoll` ×1.4 on all route nodes (0.25 → 0.35, 0.3 → 0.42, 0.35 → 0.49, 0.4 → 0.56). Events/run are now ≈2.9–3.1 (necrons 2.1).
+  - Tuning scripts: `/tmp/claimsim/` (`apply.js`, `endings.py`, `splice_claims.py`, `build.sh` rebuild from pristine copies).
+- **Results** (`validate.js`, 3000 runs/route; seeds 1/5/9). Claim endings, any god:
+
+  | route | claim endings (seeds 1/5/9) | band | claim fired | death |
+  |---|---|---|---|---|
+  | imperium | 13.8 / 14.6 / 14.7 % | 12–18 ✓ | 26.9 % | 30.3 % (was 28.7) |
+  | chaos | 25.2 / 24.2 / 26.2 % | 20–30 ✓ | 45 %; chosen ≈ 11 % of runs | 27.2 % |
+  | tau | 9.3 / 9.4 / 8.9 % | 6–12 ✓ | 18 % | 24.4 % |
+  | aeldari | 15.9 / 17.5 / 16.2 % | 12–18 ✓ | 29 %; slaanesh 10.4, tzeentch 4.1, khorne 1.4 | 21.5 % |
+  | necrons | 4.2 / 5.3 / 5.4 % | 3–8 ✓ | 9 %; tzeentch 3.1, nurgle 1.1 | 28.5 % |
+
+  - Before this change, claim events fired in 0 % of runs on every route.
+  - All pre-existing endings are still reached.
+  - Claim endings never reached by random play: tau nurgle, aeldari nurgle, necron khorne and slaanesh. They are reachable by feeding that god through events.
+  - Avg nodes per run fell to imp 43.4, cha 42.1, eld 44.4 (target 45–60 warns), because claim endings cut runs short mid-route.
+  - Claims mostly fire in ch4–8; Imperium has a handful in ch2–3.

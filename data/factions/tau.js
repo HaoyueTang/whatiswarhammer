@@ -44,7 +44,7 @@
             "On the docks, the water-caste envoy Vash'aun gives a speech. His smile is perfect, as if measured.\n“Every race gives the Greater Good what it does best,” he says. “Human diligence is something we treasure.”\nOn the screen behind him, the human wage column is a little shorter than the T'au one."),
     codex: ["tau_water_caste", "tau_greater_good", "place_dalnor_port"],
     choices: [
-      C("跟着鼓掌", "Applaud with the others", "tau_104", {effects: {renown: 5}, result: L("你拍着手。瓦尚的目光扫过人群，在你身上停了一瞬，满意地移开。", "You clap along. Vash'aun's gaze sweeps the crowd, rests on you a moment, and moves on, satisfied.")}),
+      C("跟着鼓掌", "Applaud with the others", "tau_104", {effects: {renown: 5, taint: {slaanesh: 15}}, result: L("你拍着手。瓦尚的目光扫过人群，在你身上停了一瞬，满意地移开。", "You clap along. Vash'aun's gaze sweeps the crowd, rests on you a moment, and moves on, satisfied.")}),
       C("举手问工钱的事", "Raise your hand about the wages", "tau_105", {result: L("掌声停了。周围的人类同时往旁边让开半步，好像你身上有病。", "The applause stops. The humans around you all shift half a step away, as if you're contagious.")})
     ]};
 
@@ -203,7 +203,7 @@
       C("叫它闭嘴", "Tell it to shut up", "tau_204", {effects: {renown: 2}, result: L("它安静了。从此你脱靶之前，再也没人提醒你。", "It goes quiet. From then on, nobody warns you before you miss.")})
     ]};
 
-  N.tau_204 = {chapter: 2, scene: "tau_outpost", speaker: GRRAK, time: {d: 5}, eventRoll: 0.25,
+  N.tau_204 = {chapter: 2, scene: "tau_outpost", speaker: GRRAK, time: {d: 5}, eventRoll: 0.35,
     text: L("克鲁特的塑形者格拉克萨正在吃一只沙蜥，连骨头一起。\n“克鲁特吃什么，就变成什么，”他咂咂嘴，“吃了沙蜥，跑得快。吃了聪明的敌人，就聪明。”\n他打量你：“人类……不好吃。太犹豫。”",
             "The Kroot shaper Grrak'tha is eating a sand-lizard, bones and all.\n“Kroot become what Kroot eat,” he says, smacking his beak. “Eat lizard, run fast. Eat clever enemy, get clever.”\nHe looks you over. “Humans... not tasty. Too much hesitation.”"),
     codex: ["tau_kroot"],
@@ -224,7 +224,7 @@
   N.tau_206 = {chapter: 2, scene: "jungle", speaker: KELRA, time: {h: 5},
     text: L("第十四个小时，凯尔拉从你身边的草丛里站起来——你根本不知道她一直在那儿。\n“合格，”她说，又补了一句，“对人类来说，很好。”\n她不知道这后半句有多伤人，或者她知道。",
             "Hour fourteen. Kel'ra rises from the grass right beside you. You never knew she was there.\n“Passed,” she says. Then, after a moment: “For a human, very good.”\nShe doesn't know how much that second part stings. Or she does."),
-    effects: {renown: 8},
+    effects: {renown: 8, taint: {slaanesh: 10}},
     choices: [
       C("站起来敬礼", "Stand and salute", "tau_208", {result: L("你的腿麻得发抖，敬礼歪了。凯尔拉还了你一个标准的礼。", "Your legs are numb and shaking; your salute comes out crooked. Kel'ra returns a perfect one.")})
     ]};
@@ -256,7 +256,7 @@
     ]};
 
   /* ============ Chapter 3 · Green Skins ============ */
-  N.tau_301 = {chapter: 3, scene: "tau_outpost", speaker: KELRA, time: {d: 40}, eventRoll: 0.3,
+  N.tau_301 = {chapter: 3, scene: "tau_outpost", speaker: KELRA, time: {d: 40}, eventRoll: 0.42,
     text: L("边境前哨。昨晚，天上掉下来一块山那么大的石头，砸进了十公里外的丛林。\n石头里在敲东西，还在唱歌。\n“兽人，”凯尔拉说，“它们把小行星当船。不，它们觉得那就是船。”",
             "A frontier outpost. Last night a rock the size of a mountain fell from the sky into the jungle ten kilometres off.\nSomething inside it is hammering. And singing.\n“Orks,” Kel'ra says. “They use asteroids as ships. No—they believe asteroids are ships.”"),
     codex: ["xenos_ork"],
@@ -271,7 +271,7 @@
     effects: {sanity: -5},
     choices: [
       C("等她的命令", "Wait for her order", "tau_304", {effects: {renown: 5}, result: L("你的手指贴着扳机，汗流进眼睛。兽人近得能数清牙齿了。", "Your finger rests on the trigger; sweat runs into your eyes. The orks are close enough to count teeth.")}),
-      C("忍不住先开火", "Fire early", "tau_305", {effects: {renown: -5}, result: L("你的手指先动了。一道蓝光孤零零地划过战场。", "Your finger moves first. A single blue bolt streaks across the field, alone.")})
+      C("忍不住先开火", "Fire early", "tau_305", {effects: {renown: -5, taint: {khorne: 20}}, result: L("你的手指先动了。一道蓝光孤零零地划过战场。", "Your finger moves first. A single blue bolt streaks across the field, alone.")})
     ]};
 
   N.tau_303 = {chapter: 3, scene: "jungle", speaker: GRRAK, foe: "ork", time: {h: 28},
@@ -352,14 +352,14 @@
     ]};
 
   /* ============ Chapter 4 · The Old Masters ============ */
-  N.tau_401 = {chapter: 4, scene: "tau_city", speaker: S("commissar", "帝国广播", "Imperial Broadcast"), time: {y: 1}, eventRoll: 0.3,
+  N.tau_401 = {chapter: 4, scene: "tau_city", speaker: S("commissar", "帝国广播", "Imperial Broadcast"), time: {y: 1}, eventRoll: 0.42,
     text: L("一年后的一个清晨，所有频道都被一个陌生的声音占领了。\n“这里是帝国远征舰队。新卡尔德的子民，帝皇没有忘记你们。”停顿。“所有与异形合作者，皆为叛徒。”\n天上出现了一排灰色的船。",
             "One morning a year later, every channel is seized by an unfamiliar voice.\n“This is the Imperial crusade fleet. People of New Calder, the Emperor has not forgotten you.” A pause. “All who collaborate with the xenos are traitors.”\nA row of grey ships appears in the sky."),
     effects: {sanity: -5},
     codex: ["imp_imperium", "imp_indomitus", "place_terra"],
     choices: [
       C("关掉广播", "Switch it off", "tau_402", {result: L("你按下开关。街上，每扇窗户里还在传出同一个声音。", "You switch it off. Out in the street, the same voice still pours from every window.")}),
-      C("把它听完", "Listen to the end", "tau_402", {effects: {sanity: -5, set: {heardBroadcast: true}}, result: L("广播最后念了一串名字：新卡尔德的“叛徒”。你听到了总督，听到了你那条街。", "The broadcast ends with a list of names: New Calder's “traitors.” You hear the governor. You hear your street.")})
+      C("把它听完", "Listen to the end", "tau_402", {effects: {sanity: -5, set: {heardBroadcast: true}, taint: {tzeentch: 15}}, result: L("广播最后念了一串名字：新卡尔德的“叛徒”。你听到了总督，听到了你那条街。", "The broadcast ends with a list of names: New Calder's “traitors.” You hear the governor. You hear your street.")})
     ]};
 
   N.tau_402 = {chapter: 4, scene: "hive_hab", speaker: RENA, time: {h: 5},
@@ -368,7 +368,7 @@
     choices: [
       C("帮她", "Help her", "tau_403", {effects: {renown: -10, set: {helpedRena: true}}, result: L("你们趁夜摸上钟楼。雷娜姨的手在抖，划了三根火柴才点着灯芯。", "You climb the bell tower under cover of night. Rena's hands shake; it takes three matches to light the wick.")}),
       C("劝她别做傻事", "Beg her not to do anything foolish", "tau_404", {result: L("“雷娜姨，他们不是来接我们的。”话一出口，你就后悔了。", "“Aunt Rena, they're not here to rescue us.” The moment it's out, you regret it.")}),
-      C("去告诉水族", "Go tell the water caste", "tau_405", {effects: {renown: 10, sanity: -15, taint: {nurgle: 6}, set: {reportedRena: true}}, result: L("你走向水族办公楼，一路没敢回头。门口的无人机认出了你，为你开了门。", "You walk to the water-caste office without looking back. The drone at the door recognises you and lets you in.")})
+      C("去告诉水族", "Go tell the water caste", "tau_405", {effects: {renown: 10, sanity: -15, taint: {nurgle: 25}, set: {reportedRena: true}}, result: L("你走向水族办公楼，一路没敢回头。门口的无人机认出了你，为你开了门。", "You walk to the water-caste office without looking back. The drone at the door recognises you and lets you in.")})
     ]};
 
   N.tau_403 = {chapter: 4, scene: "ruins", speaker: S("commissar", "帝国政委", "Imperial Commissar"), time: {h: 8},
@@ -378,7 +378,7 @@
     choices: [
       C("“我们一直是帝皇的子民！”", "“We've always been the Emperor's people!”", null, R(0.3, "sanity", "tau_406", "tau_end_collaborator", L("政委盯着你看了很久，直到远处一声爆炸打断了他。他转身跑回运输机，把你们丢在原地。", "The commissar stares at you a long time, until a distant blast interrupts him. He runs back to the lander and leaves you there."), L("你说得很急，很真诚。政委一边听，一边慢慢摘下了手套。", "You speak fast and from the heart. The commissar listens, slowly pulling off his gloves."))),
       C("拉着雷娜姨逃跑", "Grab Rena and run", null, R(0.6, "hp", "tau_406", "tau_end_collaborator", L("你拽着雷娜姨钻进小巷。激光在身后的墙上烧出一排黑洞，可你们跑掉了。", "You haul Rena into an alley. Las-fire burns a row of holes in the wall behind you, but you get away."), L("雷娜姨跑不动了。她拉住你，摇摇头。脚步声在你们身后停下。", "Rena can't run anymore. She holds your arm and shakes her head. Footsteps stop behind you."))),
-      C("朝政委开枪", "Shoot the commissar", "tau_406", {effects: {hp: -15, sanity: -10, set: {shotCommissar: true}}, result: L("脉冲光打中了他的胸口。他倒下前开了一枪，打穿了你的肩膀。雷娜姨尖叫起来。", "The pulse bolt takes him in the chest. He fires once as he falls, through your shoulder. Rena screams.")})
+      C("朝政委开枪", "Shoot the commissar", "tau_406", {effects: {hp: -15, sanity: -10, set: {shotCommissar: true}, taint: {khorne: 25}}, result: L("脉冲光打中了他的胸口。他倒下前开了一枪，打穿了你的肩膀。雷娜姨尖叫起来。", "The pulse bolt takes him in the chest. He fires once as he falls, through your shoulder. Rena screams.")})
     ]};
 
   N.tau_end_collaborator = {chapter: 4, scene: "ruins", speaker: S("commissar", "帝国政委", "Imperial Commissar"), time: {h: 1},
@@ -407,11 +407,11 @@
     effects: {sanity: -10},
     codex: ["imp_guard"],
     choices: [
-      C("开火", "Fire", "tau_407", {effects: {sanity: -5, renown: 5}, result: L("一个和你差不多大的士兵倒下了。你看见他胸前挂着一枚双头鹰。", "A soldier about your age goes down. You see a two-headed eagle hanging at his chest.")}),
+      C("开火", "Fire", "tau_407", {effects: {sanity: -5, renown: 5, taint: {khorne: 20}}, result: L("一个和你差不多大的士兵倒下了。你看见他胸前挂着一枚双头鹰。", "A soldier about your age goes down. You see a two-headed eagle hanging at his chest.")}),
       C("把枪口抬高一点", "Aim a little high", "tau_407", {effects: {renown: -5, set: {firedHigh: true}}, result: L("你的子弹全打在了他们头顶的墙上。92号把每一发都记了下来。", "Every shot you fire hits the wall above their heads. Drone 92 logs every one.")})
     ]};
 
-  N.tau_407 = {chapter: 4, scene: "burning_city", speaker: KELRA, foe: "astartes", time: {h: 6}, eventRoll: 0.3,
+  N.tau_407 = {chapter: 4, scene: "burning_city", speaker: KELRA, foe: "astartes", time: {h: 6}, eventRoll: 0.42,
     text: L("中午，蓝色的巨人到了。一台战斗服被他们徒手掀翻，驾驶员没能出来。\n凯尔拉的声音第一次变了调。然后奥林长者的声音插了进来，平静如水：“按计划撤退。让他们追。”",
             "At noon the blue giants arrive. They flip a battlesuit with their bare hands; its pilot doesn't get out.\nFor the first time, Kel'ra's voice cracks. Then Aun'el Orin's voice cuts in, calm as still water: “Withdraw as planned. Let them follow.”"),
     effects: {hp: -10},
@@ -473,7 +473,7 @@
             "“They say he learned something the Ethereals didn't want us to know. That his sword comes from a dead world.”\nShe pauses. “And that his people argue. Really argue, without first clearing up a misunderstanding.”\nShe smiles. It isn't a perfect smile."),
     codex: ["tau_farsight_enclaves"],
     choices: [
-      C("那听起来不错", "That sounds good", "tau_504", {effects: {set: {farsightCurious: true}}, result: L("凯尔拉没有回答，只是把星图往你那边推了推，让你看清那个方向。", "Kel'ra doesn't answer. She just slides the star chart toward you so you can see the direction.")}),
+      C("那听起来不错", "That sounds good", "tau_504", {effects: {set: {farsightCurious: true}, taint: {tzeentch: 25}}, result: L("凯尔拉没有回答，只是把星图往你那边推了推，让你看清那个方向。", "Kel'ra doesn't answer. She just slides the star chart toward you so you can see the direction.")}),
       C("那听起来很危险", "That sounds dangerous", "tau_504", {effects: {renown: 3}, result: L("“是的，”凯尔拉说，“很危险。”她卷起星图的动作比平时慢。", "“Yes,” Kel'ra says. “Very dangerous.” She rolls up the chart more slowly than usual.")})
     ]};
 
@@ -493,14 +493,14 @@
       C("掐自己一下，保持清醒", "Pinch yourself, stay alert", "tau_505", {effects: {sanity: -5, set: {resistedCalm: true}}, result: L("指甲陷进掌心。疼痛像一根钉子把你钉在原地，周围的人都在微笑。", "Your nails dig into your palm. The pain pins you in place like a nail, while everyone around you smiles.")})
     ]};
 
-  N.tau_505 = {chapter: 5, scene: "warp", speaker: KELRA, time: {d: 12, warp: true}, eventRoll: 0.35,
+  N.tau_505 = {chapter: 5, scene: "warp", speaker: KELRA, time: {d: 12, warp: true}, eventRoll: 0.49,
     text: L("部队乘船转移。钛人的船只在亚空间浅层“潜水”，一次跳一小段。\n钛人船员安然无恙。人类却开始做梦：一扇门、一只眼、一首走调的歌。\n“我们看不见你们看见的东西，”凯尔拉说，“我很抱歉。”",
             "The unit ships out. T'au vessels only “dive” into the shallows of the warp, a short hop at a time.\nThe T'au crew are untroubled. The humans begin to dream: a door, an eye, an out-of-tune song.\n“We cannot see what you see,” Kel'ra says. “I am sorry.”"),
     effects: {sanity: -10},
     codex: ["chaos_warp", "place_tau_transport"],
     choices: [
       C("跟92号说话", "Talk to Drone 92", "tau_506", {require: {flag: "namedDrone"}, hideIfLocked: true, effects: {sanity: 10}, result: L("你跟92号讲雷娜姨、讲码头、讲小时候。它隔一会儿哔一声，像在点头。", "You tell 92 about Aunt Rena, the docks, your childhood. Every so often it beeps, as if nodding.")}),
-      C("盯着舷窗外", "Stare out of the viewport", "tau_506", {effects: {corruption: 8, sanity: -5, taint: {tzeentch: 10}}, result: L("窗外的颜色没有名字。有一瞬间，你觉得外面有什么东西也在看你，而且认出了你。", "The colours outside have no names. For an instant you feel something out there looking back, and recognising you.")}),
+      C("盯着舷窗外", "Stare out of the viewport", "tau_506", {effects: {corruption: 8, sanity: -5, taint: {tzeentch: 70}}, result: L("窗外的颜色没有名字。有一瞬间，你觉得外面有什么东西也在看你，而且认出了你。", "The colours outside have no names. For an instant you feel something out there looking back, and recognising you.")}),
       C("闭眼熬过去", "Shut your eyes and endure", "tau_506", {result: L("你闭着眼数呼吸。那首走调的歌在你脑子里唱了一路。", "You count your breaths, eyes shut. The out-of-tune song plays in your head the whole way.")})
     ]};
 
@@ -509,7 +509,7 @@
             "In the gue'vesa barracks at the new posting, people meet in secret. Their leader, Silas, hands out smokes and sugar and asks for nothing.\n“The T'au have their Greater Good,” he says. “We humans deserve a god too. One who listens. Not that corpse.”"),
     codex: ["chaos_cult"],
     choices: [
-      C("听他说完", "Hear him out", "tau_507", {effects: {corruption: 8, sanity: -5, taint: {slaanesh: 8}}, result: L("你留了下来。西拉斯的声音很温和，比瓦尚更像是在跟你说话。", "You stay. Silas's voice is gentle; he sounds more like he's talking to you than Vash'aun ever did.")}),
+      C("听他说完", "Hear him out", "tau_507", {effects: {corruption: 8, sanity: -5, taint: {slaanesh: 70}}, result: L("你留了下来。西拉斯的声音很温和，比瓦尚更像是在跟你说话。", "You stay. Silas's voice is gentle; he sounds more like he's talking to you than Vash'aun ever did.")}),
       C("报告凯尔拉", "Report to Kel'ra", "tau_508", {effects: {renown: 5}, result: L("凯尔拉听完，只说了一句“知道了”。第二天，营房里的聚会散了，西拉斯不见了。", "Kel'ra hears you out and says only, “Understood.” Next day the meetings stop, and Silas is gone.")})
     ]};
 
@@ -517,7 +517,7 @@
     text: L("西拉斯在你手腕上画了一个符号，八道线从一个点散开。\n“你会更强，”他说，“不用等任何人批准你的贡献。”\n符号在发烫。你的伤疤全都不疼了。",
             "Silas draws a symbol on your wrist: eight lines radiating from one point.\n“You'll be stronger,” he says. “No one has to approve your contribution.”\nThe symbol grows warm. None of your scars hurt anymore."),
     choices: [
-      C("让符号留下", "Let the mark stay", "tau_508", {effects: {corruption: 20, hp: 20, taint: {khorne: 15}, set: {cultMark: true}}, result: L("你放下袖子盖住符号。夜里，它在布料下轻轻地跳，像第二颗心脏。", "You pull your sleeve over the mark. At night it pulses softly under the cloth, like a second heart.")}),
+      C("让符号留下", "Let the mark stay", "tau_508", {effects: {corruption: 20, hp: 20, taint: {khorne: 65}, set: {cultMark: true}}, result: L("你放下袖子盖住符号。夜里，它在布料下轻轻地跳，像第二颗心脏。", "You pull your sleeve over the mark. At night it pulses softly under the cloth, like a second heart.")}),
       C("用刀刮掉它", "Scrape it off with a knife", "tau_508", {effects: {hp: -10, sanity: -5, taint: {all: -5}}, result: L("你刮到见血，符号才淡下去。西拉斯没拦你，只是笑了笑：“它记住你了。”", "You scrape until it bleeds before the mark fades. Silas doesn't stop you. He only smiles. “It remembers you.”")})
     ]};
 
@@ -526,9 +526,9 @@
             "Deep in the night, a battlesuit stands in the jungle outside the outpost, painted crimson, a colour the T'au never use.\nKel'ra walks out to speak with it. When she returns, she comes straight to you.\n“They'll take anyone willing to the far side of the Gulf. Humans too. Will you come?”"),
     codex: ["tau_farsight_enclaves"],
     choices: [
-      C("答应她，等时机", "Agree, and wait for the moment", "tau_509", {effects: {set: {farsightPact: true}}, result: L("凯尔拉握了一下你的手，很快松开。“别告诉任何人，”她说，“尤其是瓦尚。”", "Kel'ra squeezes your hand and lets go fast. “Tell no one,” she says. “Especially not Vash'aun.”")}),
+      C("答应她，等时机", "Agree, and wait for the moment", "tau_509", {effects: {set: {farsightPact: true}, taint: {tzeentch: 35}}, result: L("凯尔拉握了一下你的手，很快松开。“别告诉任何人，”她说，“尤其是瓦尚。”", "Kel'ra squeezes your hand and lets go fast. “Tell no one,” she says. “Especially not Vash'aun.”")}),
       C("拒绝，但替她保密", "Refuse, but keep her secret", "tau_509", {effects: {sanity: -5}, result: L("凯尔拉点点头，不失望，也不生气。“谢谢你，”她说，“这比我预想的多。”", "Kel'ra nods, neither disappointed nor angry. “Thank you,” she says. “That is more than I expected.”")}),
-      C("告发她", "Report her", "tau_509", {effects: {renown: 15, sanity: -15, taint: {tzeentch: 8}, set: {betrayedKelra: true}}, result: L("你走进水族办公楼时，凯尔拉正从走廊另一头经过。她看见了你，什么也没问。", "As you enter the water-caste office, Kel'ra passes at the far end of the corridor. She sees you and asks nothing.")})
+      C("告发她", "Report her", "tau_509", {effects: {renown: 15, sanity: -15, taint: {tzeentch: 60}, set: {betrayedKelra: true}}, result: L("你走进水族办公楼时，凯尔拉正从走廊另一头经过。她看见了你，什么也没问。", "As you enter the water-caste office, Kel'ra passes at the far end of the corridor. She sees you and asks nothing.")})
     ]};
 
   N.tau_509 = {chapter: 5, scene: "tau_city", speaker: VASH, time: {d: 2},
@@ -536,7 +536,7 @@
             "Vash'aun invites you to dinner. The food is exquisite; he never stops smiling.\n“Lately some have developed certain... temporary misunderstandings,” he says, filling your glass. “I trust you have not.”\nYou don't know how much he knows. You only know he wants you to know that he knows."),
     effects: {renown: 2},
     choices: [
-      C("微笑", "Smile", "tau_510", {effects: {renown: 3}, result: L("你笑了，笑得很完美，像量过尺寸。瓦尚满意地举起了杯子。", "You smile, a perfect smile, as if measured. Vash'aun raises his glass, satisfied.")}),
+      C("微笑", "Smile", "tau_510", {effects: {renown: 3, taint: {slaanesh: 25}}, result: L("你笑了，笑得很完美，像量过尺寸。瓦尚满意地举起了杯子。", "You smile, a perfect smile, as if measured. Vash'aun raises his glass, satisfied.")}),
       C("沉默地吃完", "Finish the meal in silence", "tau_510", {effects: {sanity: -5}, result: L("你把每道菜都吃得干干净净，一句话也没说。瓦尚一直看着你，直到最后一口。", "You clear every plate without a word. Vash'aun watches you until the last bite.")})
     ]};
 
@@ -584,7 +584,7 @@
       C("硬拉她走", "Try to drag her along", "tau_606", {effects: {hp: -5, sanity: -5}, result: L("她比看上去有力气得多。她死死抓着讲台，指甲划破了你的手背。", "She's far stronger than she looks. She clings to the pulpit, and her nails score the back of your hand.")})
     ]};
 
-  N.tau_606 = {chapter: 6, scene: "jungle", speaker: null, foe: "genestealer", time: {d: 2}, eventRoll: 0.3,
+  N.tau_606 = {chapter: 6, scene: "jungle", speaker: null, foe: "genestealer", time: {d: 2}, eventRoll: 0.42,
     text: L("难民营里有一家人很奇怪：父亲很高，母亲很矮，三个孩子的眼睛都是淡紫色，笑起来一模一样。\n半夜你看见他们的影子在帐篷上，比人多了两条胳膊。",
             "There's an odd family in the refugee camp: a tall father, a short mother, and three children with pale violet eyes who all smile the same way.\nAt midnight you see their shadows on the tent wall. Each has two arms too many."),
     effects: {sanity: -5},
@@ -644,7 +644,7 @@
     ]};
 
   /* ============ Chapter 7 · The Devouring ============ */
-  N.tau_701 = {chapter: 7, scene: "spore_sky", speaker: KELRA, foe: "gaunt", time: {h: 8}, eventRoll: 0.3,
+  N.tau_701 = {chapter: 7, scene: "spore_sky", speaker: KELRA, foe: "gaunt", time: {h: 8}, eventRoll: 0.42,
     text: L("它们来了。不是一支军队，是一场雨——一场长着牙的雨。\n脉冲步枪的蓝光连成一片，打在虫潮上就像往海里扔石头。\n“不要数它们，”凯尔拉说，“数你的电池。”",
             "They come. Not an army: a rain, a rain with teeth.\nPulse fire merges into one blue sheet, and against the swarm it's like throwing stones into the sea.\n“Don't count them,” Kel'ra says. “Count your power cells.”"),
     effects: {hp: -10, sanity: -5},
@@ -695,7 +695,7 @@
     choices: [
       C("捡起长者的权杖，大喊集合", "Raise the Ethereal's staff and rally them", "tau_707", {effects: {renown: 15, hp: -5}, result: L("你举起权杖，用仅会的几句钛语大喊。火族战士一个接一个抬起头，跟着你的声音站了起来。", "You raise the staff and shout what T'au you know. One by one the fire warriors look up and rise to your voice.")}),
       C("拖着发呆的钛人撤退", "Drag the frozen T'au back", "tau_707", {effects: {renown: 8, hp: -10}, result: L("你揪着两个火族战士的领子往后拖。他们很轻，轻得像空壳。", "You haul two fire warriors back by their collars. They're light, light as empty shells.")}),
-      C("呼唤西拉斯的神", "Call on Silas's god", "tau_707", {require: {flag: "cultMark"}, hideIfLocked: true, effects: {corruption: 30, hp: 30, renown: 5, taint: {khorne: 20}}, result: L("手腕上的符号烧了起来。你冲上城墙，一枪比一枪准。你在笑，笑得停不下来。", "The mark on your wrist ignites. You charge the wall, every shot truer than the last. You're laughing, and you can't stop.")})
+      C("呼唤西拉斯的神", "Call on Silas's god", "tau_707", {require: {flag: "cultMark"}, hideIfLocked: true, effects: {corruption: 30, hp: 30, renown: 5, taint: {khorne: 75}}, result: L("手腕上的符号烧了起来。你冲上城墙，一枪比一枪准。你在笑，笑得停不下来。", "The mark on your wrist ignites. You charge the wall, every shot truer than the last. You're laughing, and you can't stop.")})
     ]};
 
   N.tau_707 = {chapter: 7, scene: "tau_city", speaker: JORY, time: {d: 4},
@@ -706,7 +706,7 @@
       C("“我也不知道。”", "“I don't know either.”", "tau_708", {effects: {sanity: 5, renown: 3}, result: L("乔里点点头，好像这个答案也挺好。你们一起看着紫色的天，没再说话。", "Jory nods, as if that answer is fine too. You both watch the violet sky without another word.")})
     ]};
 
-  N.tau_708 = {chapter: 7, scene: "spore_sky", speaker: null, time: {d: 3}, eventRoll: 0.3,
+  N.tau_708 = {chapter: 7, scene: "spore_sky", speaker: null, time: {d: 3}, eventRoll: 0.42,
     text: L("第七天夜里，所有人类同时流了鼻血。\n不是因为受伤，是因为一种声音——一种低到听不见、却压在每个人脑子里的嗡鸣。\n钛人什么都没感觉到。他们看着你们，第一次显得不知所措。",
             "On the seventh night, every human bleeds from the nose at once.\nNot from wounds. From a sound, too low to hear, pressing down inside every skull.\nThe T'au feel nothing. They watch you, and for the first time they look lost."),
     effects: {sanity: -10},
@@ -734,7 +734,7 @@
       C("掩护凯尔拉的战斗服", "Cover Kel'ra's battlesuit", null, R(0.4, "hp", "tau_803", "tau_804", L("你冲出掩体，把一整块电池打进它的侧脸。它转过头，看向了你。", "You break cover and empty a whole cell into the side of its head. It turns to look at you."), L("你的射击打在它的甲壳上，连一道痕都没留下。它甚至没有转头。", "Your shots strike its carapace without leaving a mark. It doesn't even turn its head."))),
       C("带平民去最后一艘船", "Lead civilians to the last ship", "tau_805", {result: L("你朝港口方向大喊，挥手让人往那边跑。乔里已经在舷梯口等你了。", "You shout toward the port and wave people on. Jory is already waiting at the ramp.")}),
       C("握住雷娜姨的吊坠", "Grip Aunt Rena's pendant", "tau_806", {require: {flag: "hasAquila"}, hideIfLocked: true, result: L("枪声和尖叫突然离你很远。你的手伸进口袋，摸到了那只小小的、冰凉的鹰。", "The gunfire and screaming suddenly seem far away. Your hand finds the small, cold eagle in your pocket.")}),
-      C("向西拉斯的神献上一切", "Offer everything to Silas's god", "tau_803", {require: {flag: "cultMark"}, hideIfLocked: true, effects: {corruption: 40, hp: 40, sanity: -10, taint: {khorne: 25}}, result: L("你说出了那个名字。有什么东西从你体内涌出来，接管了你的手，替你瞄准。", "You speak the name. Something floods out through you, takes your hands, and aims for you.")})
+      C("向西拉斯的神献上一切", "Offer everything to Silas's god", "tau_803", {require: {flag: "cultMark"}, hideIfLocked: true, effects: {corruption: 40, hp: 40, sanity: -10, taint: {khorne: 90}}, result: L("你说出了那个名字。有什么东西从你体内涌出来，接管了你的手，替你瞄准。", "You speak the name. Something floods out through you, takes your hands, and aims for you.")})
     ]};
 
   N.tau_803 = {chapter: 8, scene: "tau_city", speaker: S("tau_battlesuit", "凯尔拉的战斗服", "Kel'ra's Battlesuit"), foe: "hive_tyrant", time: {h: 1},
@@ -802,6 +802,31 @@
             "In the ruins you find the last piece of Drone 92. Its light is still on.\nSomething moves in the spore fog. Thousands of somethings.\nKroot eat to remember. Bugs eat to forget. This time, nothing will be left to remember."),
     ending: {kind: "bad", title: L("被吞噬", "Devoured"), cause: L("被虫群吞噬", "Devoured by the swarm")}};
 
+  /* ============ Claim endings (SPEC §19): a Chaos god's claim, accepted or forced. Reached via the claim events' goto. ============ */
+  N.tau_end_claim_khorne = {scene: "jungle", speaker: S("daemon_khorne", "远处的鼓", "A Distant Drum"), time: {d: 60},
+    text: L("钛人没见过这种病：一个古维萨，越打越不疼，越打越停不下。\n无人机把你记作“效率异常”，火族不再和你一起出击。某天你独自走进丛林，去找下一场仗。\n大义需要理由，血神不需要。他只要头骨。",
+            "The T'au have never seen this sickness: a gue'vesa who feels less pain with every fight, and cannot stop.\nDrones log you as an efficiency anomaly; the fire caste stop deploying with you. One day you walk into the jungle alone, looking for the next fight.\nThe Greater Good needs reasons. The Blood God needs only skulls."),
+    codex: ["god_khorne"],
+    ending: {kind: "bad", title: L("效率异常", "Efficiency Anomaly"), cause: L("被恐虐收走", "Claimed by Khorne")}};
+
+  N.tau_end_claim_nurgle = {scene: "hive_hab", speaker: S("daemon_nurgle", "慈祥的声音", "A Fond Voice"), time: {d: 20},
+    text: L("咳嗽病回到了人类街区，这次从你开始。你一点也不难受，挨家挨户给邻居送汤。\n医疗无人机封了整条街。钛人隔着能量屏，困惑地看着一群笑眯眯的病人。\n慈父不懂大义，他只知道每个孩子都该有个家。",
+            "The coughing sickness returns to the human quarter, and this time it starts with you. You feel fine, and go door to door bringing your neighbours soup.\nMedical drones seal the whole street. Behind the energy screen, the T'au stare in confusion at a crowd of smiling sick people.\nGrandfather knows nothing of the Greater Good. Only that every child deserves a home."),
+    codex: ["god_nurgle"],
+    ending: {kind: "bad", title: L("封锁的街道", "The Sealed Street"), cause: L("成为纳垢的信使", "Became Nurgle's carrier")}};
+
+  N.tau_end_claim_tzeentch = {scene: "tau_city", speaker: S("daemon_tzeentch", "挪动的字", "Shifting Letters"), time: {y: 2},
+    text: L("你在梦里看见钛人的作战计划，比以太族看得还远。\n你把它们一页页写下来，卖给水族，卖给远见的人，也卖给帝国。每一方都以为你是自己人。\n直到三方同时发现了。那一天，也写在计划里。",
+            "In dreams you see the T'au battle plans, further ahead than any Ethereal can.\nYou write them down page by page and sell them: to the water caste, to Farsight's people, to the Imperium. Each side thinks you're theirs.\nUntil all three find out at once. That day was in the plan too."),
+    codex: ["god_tzeentch"],
+    ending: {kind: "bad", title: L("三面间谍", "Triple Agent"), cause: L("沦为奸奇的棋子", "Became Tzeentch's pawn")}};
+
+  N.tau_end_claim_slaanesh = {scene: "tau_city", speaker: S("daemon_slaanesh", "甜得发苦的声音", "A Bittersweet Voice"), time: {y: 1},
+    text: L("钛人的世界太节制了：定量的口粮，定量的称赞。你要的不止这些。\n你在人类街区办了一场不散的聚会：更甜的糖，更响的音乐，更多掌声。\n客人们都很满足，第二天又来。最后被掏空的，是你自己。",
+            "The T'au world is too measured: rationed food, rationed praise. You want more than that.\nIn the human quarter you throw a party that never ends: sweeter sugar, louder music, more applause.\nEveryone leaves satisfied, and comes back the next day. The last one hollowed out is you."),
+    codex: ["god_slaanesh"],
+    ending: {kind: "bad", title: L("不散的聚会", "The Party That Never Ends"), cause: L("被色孽掏空", "Hollowed out by Slaanesh")}};
+
   /* ============ Death nodes (engine-triggered) ============ */
   N.tau_death_hp = {scene: "tau_outpost", speaker: VASH,
     text: L("瓦尚在战报上签了字。你的名字被归入一栏：“可接受的伤亡（人类）”。\n他的笑容一如既往。\n后来，有个克鲁特说他记得你。没人知道他是怎么记住的。",
@@ -830,6 +855,7 @@
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("大义", "Greater Good"),
     renownIcon: "icon_greatergood",
+    taintMod: {khorne: 0.7, nurgle: 0.7, tzeentch: 0.7, slaanesh: 0.7},   // SPEC §19: multiplier on positive taint deltas (cleanses unscaled)
     renownHelp: L("大义值是钛帝国对你“贡献”的评估。服从、耐心、为大义做艰难的选择会让它上升；质疑、违令、偏袒旧帝国会让它下降。它够高，你才会被授予荣誉，也决定你排在第几批。",
                   "Greater Good is the T'au Empire's measure of your contribution. Obeying orders, patience, and hard choices made for the Greater Good raise it; questioning, disobedience and sympathy for the old Imperium lower it. Enough of it earns honours, and decides which wave you are in."),
     origins: [

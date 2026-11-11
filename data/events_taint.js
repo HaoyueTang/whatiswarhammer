@@ -8,6 +8,16 @@
   function L(zh, en) { return {zh: zh, en: en}; }
   function S(sprite, zh, en) { return sprite ? {sprite: sprite, name: {zh: zh, en: en}} : {name: {zh: zh, en: en}}; }
   function O(zh, en, effects, rzh, ren) { return {text: {zh: zh, en: en}, effects: effects, result: {zh: rzh, en: ren}}; }
+  /* SPEC §19 claim choices. CLAIM_GOTO[god][route] = where accepting a claim leads (the route's claim ending;
+   * Chaos goes to a short pre-ending node first). A = accept, B = resist (first claim only), F = forced (second claim). */
+  var CLAIM_GOTO = {};
+  ["khorne", "nurgle", "tzeentch", "slaanesh"].forEach(function (g) {
+    CLAIM_GOTO[g] = {imperium: "imp_end_claim_" + g, chaos: "cha_claim_" + g, tau: "tau_end_claim_" + g,
+                     aeldari: "eld_end_claim_" + g, necrons: "nec_end_claim_" + g};
+  });
+  function A(c, g) { c.require = {notFlag: "resisted_" + g}; c.hideIfLocked = true; c.goto = CLAIM_GOTO[g]; return c; }
+  function B(c, g) { c.require = {notFlag: "resisted_" + g}; c.hideIfLocked = true; return c; }
+  function F(c, g) { c.require = {flag: "resisted_" + g}; c.hideIfLocked = true; c.goto = CLAIM_GOTO[g]; return c; }
 
   WH.registerEvents([
     /* ================= Imperium ================= */
@@ -17,7 +27,7 @@
              "The troopship shudders through the warp. A veteran who has gambled away his rations presses an Emperor's Tarot deck into your hands. “Take it. They keep being right. I can't stand it.”\nYou turn the first card. It shows someone you won't meet until tomorrow."),
      codex: ["god_tzeentch"],
      choices: [
-       O("再翻一张", "Turn another", {renown: 5, sanity: -3, taint: {tzeentch: 18}},
+       O("再翻一张", "Turn another", {renown: 5, sanity: -3, taint: {tzeentch: 30}},
          "第二张画的是你的手，握着一样你还没见过的东西。牌面的颜色每看一次都不太一样。",
          "The second card shows your hand, holding something you haven't seen yet. The colours are a little different every time you look."),
        O("把牌扔进焚化口", "Throw the deck into the incinerator", {sanity: -3},
@@ -34,7 +44,7 @@
              "The ork charge falls back for a moment. You count the nicks on your bayonet: eleven. You only remember striking three times.\nSomewhere a drum is beating in time with your heart. The sergeant is shouting for you to get back in cover."),
      codex: ["god_khorne"],
      choices: [
-       O("翻出战壕，追上去", "Climb out and give chase", {renown: 6, hp: -6, taint: {khorne: 20}},
+       O("翻出战壕，追上去", "Climb out and give chase", {renown: 6, hp: -6, taint: {khorne: 30}},
          "你回来时浑身是泥，刺刀上又多了几道缺口。中士没骂你，只是再也不让你站在他旁边。",
          "You come back caked in mud, with more nicks in the blade. The sergeant doesn't shout. He just never stands next to you again."),
        O("回掩体，按口令射击", "Back to cover. Fire on command", {sanity: -3},
@@ -65,7 +75,7 @@
              "It has rained for nine days. The field hospital ran out of medicine long ago, yet the patient in the corner bed grows rosier every day, smelling sweetly of rotten apples.\nHe waves you over. “Brother, that wound needs a fresh dressing. I've got some.”"),
      codex: ["god_nurgle"],
      choices: [
-       O("接过他的药膏", "Take his salve", {hp: 15, taint: {nurgle: 20}},
+       O("接过他的药膏", "Take his salve", {hp: 15, taint: {nurgle: 30}},
          "药膏是温的，伤口当晚就不疼了。第二天那张床空了，床单上落着几只不肯飞走的苍蝇。",
          "The salve is warm, and the wound stops hurting that night. Next day the bed is empty. A few flies sit on the sheet and will not leave."),
        O("去找医师", "Go and find the medicae", {hp: -5, sanity: 2},
@@ -79,7 +89,7 @@
              "The crusade fleet needs a recruit to bear the standard at the colours ceremony. You've been chosen.\nThe quartermaster hands you a small mirror and a tin of scented balm. “Perfect, mind. The whole fleet is watching.”\nIn the mirror you look better than you remember."),
      codex: ["imp_indomitus"],
      choices: [
-       O("对着镜子练一整夜", "Practise before the mirror all night", {renown: 8, sanity: 3, taint: {slaanesh: 20}},
+       O("对着镜子练一整夜", "Practise before the mirror all night", {renown: 8, sanity: 3, taint: {slaanesh: 30}},
          "仪式上你一步都没错。从那以后，你会在每一块反光的舱壁前停下，看一眼，再看一眼。",
          "At the ceremony you don't miss a step. Ever after, you stop at every polished bulkhead to look, and look again."),
        O("抹掉香膏，照常出列", "Wipe off the balm and fall in as usual", {renown: 3},
@@ -108,7 +118,7 @@
              "The second night of the uprising. A zealot you don't know thrusts a brass-hafted axe at you, its grip-wrap stiff with age.\n“It remembers every hand that's held it,” he says. “It will teach you.”\nThe axe is lighter than it looks. Light enough to feel impatient."),
      codex: ["god_khorne"],
      choices: [
-       O("握紧斧子，冲在最前面", "Grip the axe and charge at the front", {renown: 8, hp: -6, taint: {khorne: 20}},
+       O("握紧斧子，冲在最前面", "Grip the axe and charge at the front", {renown: 8, hp: -6, taint: {khorne: 30}},
          "那一夜你不记得自己喊了些什么。天亮时，大家都换了个名字叫你。",
          "You don't remember what you shouted that night. By dawn, everyone is calling you by a different name."),
        O("把斧子插进墙缝里", "Wedge the axe into a crack in the wall", {sanity: -3},
@@ -122,10 +132,10 @@
              "In the cult's book-room sits a volume with no title. You open it. The first page describes what you did this morning, word for word.\nThe last page is still blank. Ink is seeping into it, little by little."),
      codex: ["god_tzeentch"],
      choices: [
-       O("等它写完最后一页", "Wait for the last page to finish", {renown: 6, sanity: -4, taint: {tzeentch: 20}},
+       O("等它写完最后一页", "Wait for the last page to finish", {renown: 6, sanity: -4, taint: {tzeentch: 30}},
          "字出来了，是你下周会说的一句话。等你真说出口，你分不清是自己想说，还是在照着念。",
          "The words appear: something you'll say next week. When you finally say it, you can't tell if you meant it or were reading aloud."),
-       O("撕掉最后一页", "Tear out the last page", {hp: -3, taint: {tzeentch: 5}},
+       O("撕掉最后一页", "Tear out the last page", {hp: -3, taint: {tzeentch: 8}},
          "纸边划破了你的手指。第二天书又是完整的，多出来的一页上写着：“谢谢你帮我翻页。”",
          "The paper slices your finger. Next day the book is whole again, with one extra page: “Thank you for turning that for me.”"),
        O("合上书，放回原处", "Close it and put it back", {sanity: -2},
@@ -139,7 +149,7 @@
              "Below decks on the black warship, someone is singing an old Choir hymn, ten thousand times better than anyone in the Choir ever did.\nYou hum along. The singer stops and looks at you. “You could sing like this too. Just keep practising. Don't eat. Don't sleep.”"),
      codex: ["god_slaanesh"],
      choices: [
-       O("跟着他一直练下去", "Practise with him, on and on", {renown: 6, sanity: 5, hp: -6, taint: {slaanesh: 20}},
+       O("跟着他一直练下去", "Practise with him, on and on", {renown: 6, sanity: 5, hp: -6, taint: {slaanesh: 30}},
          "第三天，你唱出了那个音，完美的音。从那以后，别的声音都像噪音，包括你自己说话。",
          "On the third day you hit the note. The perfect note. Ever since, every other sound is noise, your own speaking voice included."),
        O("捂住耳朵走开", "Cover your ears and walk away", {sanity: -4},
@@ -153,7 +163,7 @@
              "On the daemon world there is a melon patch, its vines climbing over rusted armour. The fat old grower hands you a slice. The flesh is grey-green.\n“You're so tired,” he says. “Rest here a while. No one will hurry you. Not ever.”"),
      codex: ["god_nurgle"],
      choices: [
-       O("坐下，吃那块瓜", "Sit down and eat the melon", {hp: 12, sanity: 8, taint: {nurgle: 20}},
+       O("坐下，吃那块瓜", "Sit down and eat the melon", {hp: 12, sanity: 8, taint: {nurgle: 30}},
          "瓜甜得发腻。你醒来时已经过了很久，衣服上开满了细小的白花。你一点也不着急。",
          "It's cloyingly sweet. When you wake, a long time has passed and tiny white flowers bloom all over your clothes. You're in no hurry at all."),
        O("谢过他，继续赶路", "Thank him and keep walking", {hp: -4, sanity: -3},
@@ -168,7 +178,7 @@
              "A water caste envoy gives you a Greater Good primer, printed in human script.\nOn page three the letters start to shift, spelling a new sentence: “Change is the only Greater Good.”\nYou look again. It has changed back."),
      codex: ["tau_greater_good"],
      choices: [
-       O("再读一遍那一页", "Read that page again", {renown: 5, sanity: -3, taint: {tzeentch: 18}},
+       O("再读一遍那一页", "Read that page again", {renown: 5, sanity: -3, taint: {tzeentch: 30}},
          "字又动了，这次告诉你明天巡逻会遇上什么。它说对了。从此你每晚都要读一遍。",
          "The letters move again, telling you what tomorrow's patrol will meet. They're right. From then on you read it every night."),
        O("拿着手册去问使节", "Take the primer to the envoy", {renown: 2, taint: {tzeentch: -5}},
@@ -182,7 +192,7 @@
              "After the orks are driven off, the kroot gather round the fire to beat their war drums. The lead drummer hands you a bone drumstick. “Human. You fight like kroot. Come. Beat.”\nOnce the drumming starts, your hands won't stop."),
      codex: ["tau_kroot"],
      choices: [
-       O("敲到天亮", "Drum until dawn", {renown: 5, hp: 8, taint: {khorne: 18}},
+       O("敲到天亮", "Drum until dawn", {renown: 5, hp: 8, taint: {khorne: 30}},
          "掌心敲出了水泡，却一点也不疼。第二天出击，你第一个冲了出去。火族战友看你的眼神有点担心。",
          "Your palms blister, yet nothing hurts. On the next sortie you're first out. Your fire caste comrades watch you with something like worry."),
        O("敲三下就还给他", "Three beats, then hand it back", {sanity: 3},
@@ -210,7 +220,7 @@
              "The earth caste's firing simulator scores every shot. You scored ninety-nine, best in the cadre.\nLate at night you sneak back in for a perfect hundred. The cabin lights are pale violet. They never used to be.\nThe screen reads: “Again. You were so nearly perfect.”"),
      codex: ["god_slaanesh"],
      choices: [
-       O("再来一次", "Again", {renown: 8, sanity: -4, hp: -4, taint: {slaanesh: 20}},
+       O("再来一次", "Again", {renown: 8, sanity: -4, hp: -4, taint: {slaanesh: 30}},
          "你打到天亮，终于拿了满分。那一刻的快感只持续了一秒，然后你又想要下一次。",
          "You shoot until dawn and finally score a hundred. The thrill lasts one second. Then you want the next one."),
        O("拔掉电源", "Pull the power cable", {sanity: -2},
@@ -224,7 +234,7 @@
              "A coughing sickness spreads through the human quarter; medical drones seal off three alleys.\nOnly the soup shop at the end of the lane stays open. Those who drink there stop coughing. They just glow pink, and smile all the time.\nThe keeper ladles you a bowl. “While it's hot.”"),
      codex: ["god_nurgle"],
      choices: [
-       O("喝下去", "Drink it", {hp: 12, sanity: 4, taint: {nurgle: 20}},
+       O("喝下去", "Drink it", {hp: 12, sanity: 4, taint: {nurgle: 30}},
          "汤一直暖到骨头里。那天起你再没咳过，只是身边总有一只苍蝇，怎么赶也赶不走。",
          "The warmth reaches your bones. You never cough again. There's just always one fly near you, and it won't be shooed away."),
        O("去检疫站排队", "Queue at the drone quarantine post", {hp: -6, renown: 3},
@@ -239,7 +249,7 @@
              "Crossing the webway, you pick up a fallen rune-stone. It warms in your palm and fine threads surface on it: your fate-lines, more than the Aeldari ever told you.\nThe stone whispers: “The seers show you one. I'll show you them all.”"),
      codex: ["place_webway"],
      choices: [
-       O("凝视那些命运线", "Gaze into the fate-lines", {renown: 6, sanity: -6, taint: {tzeentch: 20}},
+       O("凝视那些命运线", "Gaze into the fate-lines", {renown: 6, sanity: -6, taint: {tzeentch: 30}},
          "你看见了明天、明年，十个不同的你。有几条线在你看的时候拐了弯，像在躲你。",
          "You see tomorrow, next year, ten different yous. A few threads bend as you watch, as if avoiding you."),
        O("把它交给先知", "Give it to the farseer", {renown: 3, taint: {tzeentch: -5}},
@@ -253,7 +263,7 @@
              "Aeldari musicians rehearse beneath the dome. The melody is so beautiful you forget to breathe, forget how your family died.\nA voice at your ear: “They have their Paths to hold them back. They dare not keep listening. You mon-keigh have none. You dare.”"),
      codex: ["eld_path"],
      choices: [
-       O("留下来一直听", "Stay and keep listening", {sanity: 10, taint: {slaanesh: 20}},
+       O("留下来一直听", "Stay and keep listening", {sanity: 10, taint: {slaanesh: 30}},
          "你听了三天三夜。乐师们发现你还在，吓得停了手。之后整整一周，你都在哼那段旋律。",
          "You listen for three days and nights. When the musicians notice you still there, they stop, frightened. For a week you hum that melody."),
        O("离开穹顶", "Leave the dome", {sanity: -5, renown: 3},
@@ -281,7 +291,7 @@
              "In the aspect shrine, Aeldari warriors don their masks and become someone else.\nAn empty mask hangs on the wall, ownerless. You touch it, and your ears fill with the roar of iron and fire. Something growls: “Put it on. Slaughter needs no Path.”"),
      codex: ["eld_aspect_warriors"],
      choices: [
-       O("把面具戴上", "Put the mask on", {hp: 10, renown: 5, taint: {khorne: 20}},
+       O("把面具戴上", "Put the mask on", {hp: 10, renown: 5, taint: {khorne: 30}},
          "面具里热得像铁匠炉。摘下来时，你脸上留了一道红印，好几天都没褪。你也不想让它褪。",
          "Inside it's hot as a forge. When you take it off, a red mark stays on your face for days. You don't want it to fade."),
        O("把面具挂回去", "Hang the mask back up", {sanity: -3},
@@ -295,7 +305,7 @@
              "In an orchard on the maiden world there is an old well. A woman weeps at its bottom, so gently it breaks your heart.\nHer tears can heal any hurt, she says, if you will carry some away. Fat, flowering vines smother the well's rim."),
      codex: ["god_nurgle"],
      choices: [
-       O("接一捧她的眼泪", "Catch a handful of her tears", {hp: 15, taint: {nurgle: 20}},
+       O("接一捧她的眼泪", "Catch a handful of her tears", {hp: 15, taint: {nurgle: 30}},
          "眼泪治好了你所有的旧伤。井沿的藤顺着你的手腕绕了一圈，留下一道暖暖的绿痕。",
          "The tears heal every old wound you have. A vine curls once around your wrist, leaving a warm green mark."),
        O("去找游侠", "Go and find a ranger", {sanity: -3, renown: 3},
@@ -310,7 +320,7 @@
              "You've spent days copying the glyphs on the tomb wall. Today one line is readable. It's written in your own language:\n“Go down. The answer is one level below.”\nYesterday, that line didn't exist."),
      codex: ["god_tzeentch"],
      choices: [
-       O("照着它往下走", "Go down where it says", {renown: 6, sanity: -4, taint: {tzeentch: 18}},
+       O("照着它往下走", "Go down where it says", {renown: 6, sanity: -4, taint: {tzeentch: 30}},
          "下一层真有东西：一块会发光的碎片。技师们看你的眼神多了几分兴趣。只有你知道，那行字今晚又换了一句。",
          "One level down there is something: a glowing shard. The crypteks regard you with new interest. Only you know the line changed again tonight."),
        O("烧掉这一页笔记", "Burn that page of notes", {sanity: -3},
@@ -324,7 +334,7 @@
              "One by one, the diggers held captive with you fall to fever.\nOnly the old cook grows fatter and jollier. Something simmers in a scavenged metal can, sending up sweet steam. “Have a bowl, scholar. You'll never feel the cold again.”"),
      codex: ["god_nurgle"],
      choices: [
-       O("喝一碗", "Have a bowl", {hp: 12, sanity: 5, taint: {nurgle: 20}},
+       O("喝一碗", "Have a bowl", {hp: 12, sanity: 5, taint: {nurgle: 30}},
          "汤暖洋洋地滑进胃里。第二天所有人都在咳，只有你和厨子在笑，你也说不清在笑什么。",
          "The stew slides down warm and soothing. Next day everyone else is coughing. Only you and the cook are smiling, though you couldn't say why."),
        O("只吃自己剩的干粮", "Eat only your own last rations", {hp: -6},
@@ -352,7 +362,7 @@
              "A squad of Imperial guards lies on the sand outside the tomb; necron warriors have just passed this way. You pull a chainsword from the sand.\nIt's still running, on its own. The grip is hot, and something inside growls: “Those tin husks have no souls. Not worth killing. Go find some that are.”"),
      codex: ["god_khorne"],
      choices: [
-       O("握紧它", "Grip it tight", {hp: 8, renown: 5, taint: {khorne: 20}},
+       O("握紧它", "Grip it tight", {hp: 8, renown: 5, taint: {khorne: 30}},
          "你从没用过武器，可这把剑知道怎么用。那晚你和同伴吵了一架，差点动手，事后想不起为什么。",
          "You've never used a weapon, but the sword knows how. That night you nearly come to blows with a fellow prisoner, and later can't remember why."),
        O("关掉它，扔回地上", "Switch it off and drop it", {sanity: -3},
@@ -366,7 +376,7 @@
              "In the gallery, each stasis field holds a perfect moment: a victory, an embrace, a flower that will never wilt.\nOne plinth is empty. Your name is already engraved on it. Suddenly you long to see the finest moment of your life."),
      codex: ["god_slaanesh"],
      choices: [
-       O("走近展台看看", "Step up to the plinth", {sanity: 6, renown: 4, taint: {slaanesh: 20}},
+       O("走近展台看看", "Step up to the plinth", {sanity: 6, renown: 4, taint: {slaanesh: 30}},
          "力场映出你最好的样子：年轻，自信，被所有人注视。你看了很久。离开后，你开始讨厌镜子里现在的自己。",
          "The field shows you at your finest: young, sure, every eye upon you. You stare a long time. Afterward you start to hate your face in mirrors."),
        O("转身离开收藏馆", "Turn and leave the gallery", {sanity: -3},
@@ -381,10 +391,10 @@
              "You dream of a faceless peddler whose stall sells one thing only: a four-sided die, each face a different colour.\n“No charge,” he says. “Just roll it once. Whichever face lands up, that's your gift.”"),
      codex: ["chaos_gods"],
      choices: [
-       O("许愿“让我变强”，掷出去", "Wish “make me strong” and roll", {hp: 10, taint: {khorne: 12}},
+       O("许愿“让我变强”，掷出去", "Wish “make me strong” and roll", {hp: 10, taint: {khorne: 25}},
          "骰子停在红色那面。醒来时你浑身是劲，枕头上却有股铁锈味。",
          "The die lands red. You wake brimming with strength, but your pillow smells of rust."),
-       O("许愿“让我知道答案”，掷出去", "Wish “let me know the answers” and roll", {renown: 5, taint: {tzeentch: 12}},
+       O("许愿“让我知道答案”，掷出去", "Wish “let me know the answers” and roll", {renown: 5, taint: {tzeentch: 25}},
          "骰子停在蓝色那面，又自己翻了个身。醒来后，你总能猜中别人的下一句话，这让你有点不安。",
          "The die lands blue, then turns over by itself. Since waking you can always guess what people will say next. It unsettles you."),
        O("不掷，把骰子还给他", "Don't roll. Hand it back", {sanity: -4},
@@ -398,10 +408,10 @@
              "You dream of a banquet. Two empty chairs wait for you at the long table.\nOne at the lively end, where everyone glitters and the laughter never stops. One in the quiet corner, where a stout old man ladles out hot soup.\nBoth ends beckon."),
      codex: ["chaos_gods"],
      choices: [
-       O("坐到热闹的那一头", "Sit at the lively end", {sanity: 8, renown: 3, taint: {slaanesh: 12}},
+       O("坐到热闹的那一头", "Sit at the lively end", {sanity: 8, renown: 3, taint: {slaanesh: 25}},
          "每个人都夸你，夸得恰到好处。醒来以后，现实里的人说话都显得粗糙刺耳。",
          "Everyone praises you, exactly as much as you'd like. After you wake, real voices all sound coarse and grating."),
-       O("坐到老人身边", "Sit beside the old man", {hp: 10, taint: {nurgle: 12}},
+       O("坐到老人身边", "Sit beside the old man", {hp: 10, taint: {nurgle: 25}},
          "汤很稠，很暖。醒来时病痛轻了许多，嘴里却残留着一股甜腻的、放久了的味道。",
          "The soup is thick and warm. You wake with your aches much eased, and a sweet, stale taste lingering in your mouth."),
        O("哪边都不坐", "Sit at neither", {sanity: -4},
@@ -423,19 +433,26 @@
          "The paper weighs nothing, but it's warm against your chest. That night you dream of home. The real one, not one someone made up for you.")
      ]},
 
-    /* ================= Claim events (trigger:"claim") ================= */
+    /* ================= Claim events (trigger:"claim") — SPEC §18/§19 =================
+     * Fire when a god's hidden taint reaches 100 (at most twice per run).
+     * First time: accept → goto that route's claim ending; resist → heavy cost, taint −40, resisted_<god>.
+     * Second time (resisted_<god> set): only the forced choice is shown, and it also goes to the claim ending.
+     * Chaos route goes to a short pre-ending node (cha_claim_<god>) that can branch to a "chosen" ending. */
     {id: "evt_claim_khorne", god: "khorne", trigger: "claim", factions: ["*"], minChapter: 1,
      scene: "daemon_world", speaker: S("sigil_khorne", "点名的声音", "The Roll Call"), foe: null,
      text: L("某天早上醒来，你手背上多了一个铜锈色的记号，摸上去是热的。\n你听见的每一声心跳都成了鼓点。远处有个声音，不是在命令，而是在点名：\n“你的名字，已经刻在王座底下了。”",
              "One morning you wake to find a verdigris mark on the back of your hand, warm to the touch.\nEvery heartbeat you hear is a drumbeat now. Far off, a voice is not giving orders. It is calling the roll:\n“Your name is carved beneath the throne.”"),
      codex: ["god_khorne"],
      choices: [
-       O("应下这一声点名", "Answer the roll call", {corruption: 25, sanity: -15, hp: 15, renown: 5, set: {claimed_khorne: true}},
-         "你应了。从那以后你不再怕疼，也忘了害怕是什么感觉。只是每次闭上眼，都能闻到铜味。",
-         "You answer. You never fear pain again, and forget what fear felt like. Only, whenever you close your eyes, you smell brass."),
-       O("咬紧牙关，一声不吭", "Clench your jaw. Say nothing", {corruption: 15, sanity: -25, hp: -10, taint: {khorne: -30}, set: {claimed_khorne: true, resisted_khorne: true}},
+       A(O("应下这一声点名", "Answer the roll call", {set: {claimed_khorne: true}},
+         "你应了。从那一刻起你不再怕疼，也忘了害怕是什么感觉。鼓声替你决定了接下来的一切。",
+         "You answer. From that moment you fear no pain, and forget what fear felt like. The drum decides everything after."), "khorne"),
+       B(O("咬紧牙关，一声不吭", "Clench your jaw. Say nothing", {corruption: 15, sanity: -25, hp: -10, taint: {khorne: -40}, set: {claimed_khorne: true, resisted_khorne: true}},
          "点名声停了，记号却没褪。它不急。它会等你下一次握紧拳头。",
-         "The roll call falls silent, but the mark stays. It's in no hurry. It will wait for the next time you clench your fist.")
+         "The roll call falls silent, but the mark stays. It's in no hurry. It will wait for the next time you clench your fist."), "khorne"),
+       F(O("鼓声太响了。应吧", "The drum is too loud. Answer", {set: {claimed_khorne: true}},
+         "你张开嘴，喊出来的不是你的名字，是他的。",
+         "You open your mouth. The name you shout is not yours. It is His."), "khorne")
      ]},
 
     {id: "evt_claim_nurgle", god: "nurgle", trigger: "claim", factions: ["*"], minChapter: 1,
@@ -444,12 +461,15 @@
              "You haven't felt cold in a long time. Your wounds no longer heal, nor hurt; they simply stay, quietly.\nThis morning the flies finally settle on your shoulder and stay. A fond voice says:\n“Welcome home, child. There's a place for you in the garden.”"),
      codex: ["god_nurgle"],
      choices: [
-       O("“谢谢您，祖父。”", "“Thank you, Grandfather.”", {corruption: 25, sanity: -10, hp: 20, set: {claimed_nurgle: true}},
-         "你再也不怕死了，因为你已经不太分得清活着和不活着有什么区别。肩上的苍蝇在为你哼歌。",
-         "You no longer fear death; you can't quite tell what separates living from not. The flies on your shoulder hum for you."),
-       O("把苍蝇一只一只赶走", "Brush the flies away, one by one", {corruption: 15, sanity: -20, hp: -15, taint: {nurgle: -30}, set: {claimed_nurgle: true, resisted_nurgle: true}},
+       A(O("“谢谢您，祖父。”", "“Thank you, Grandfather.”", {set: {claimed_nurgle: true}},
+         "你再也不怕死了，因为你已经分不太清活着和不活着有什么区别。肩上的苍蝇在为你哼歌。",
+         "You no longer fear death; you can't quite tell what separates living from not. The flies on your shoulder hum for you."), "nurgle"),
+       B(O("把苍蝇一只一只赶走", "Brush the flies away, one by one", {corruption: 15, sanity: -20, hp: -15, taint: {nurgle: -40}, set: {claimed_nurgle: true, resisted_nurgle: true}},
          "赶走一只，又来一只。你赶了一整夜，天亮时它们终于散了。可你知道，园丁很有耐心。",
-         "Brush one away and another comes. You keep at it all night; by dawn they've scattered. But you know the gardener is patient.")
+         "Brush one away and another comes. You keep at it all night; by dawn they've scattered. But you know the gardener is patient."), "nurgle"),
+       F(O("太累了，赶不动了", "Too tired to brush them away", {set: {claimed_nurgle: true}},
+         "你垂下手。苍蝇们落回你肩上，像一群终于回家的孩子。",
+         "Your hand drops. The flies settle back on your shoulder like children finally home."), "nurgle")
      ]},
 
     {id: "evt_claim_tzeentch", god: "tzeentch", trigger: "claim", factions: ["*"], minChapter: 1,
@@ -458,12 +478,15 @@
              "You look in a mirror, and the one inside speaks first.\nHe says every word you were about to say, exactly. Then he smiles:\n“Don't worry. From now on, every choice has already been thought through for you.”"),
      codex: ["god_tzeentch"],
      choices: [
-       O("让他继续说下去", "Let him keep talking", {corruption: 25, sanity: -15, renown: 10, set: {claimed_tzeentch: true}},
-         "他说得很好，比你自己想的还好。你的日子忽然顺利了起来，只是常常想不起哪些话是你自己说的。",
-         "He speaks well, better than you'd have managed. Life goes suddenly smoothly. You just often can't recall which words were yours."),
-       O("说一句他没料到的话", "Say something he didn't foresee", {corruption: 15, sanity: -25, taint: {tzeentch: -30}, set: {claimed_tzeentch: true, resisted_tzeentch: true}},
+       A(O("让他继续说下去", "Let him keep talking", {set: {claimed_tzeentch: true}},
+         "他说得很好，比你自己想的还好。从那以后，你常常想不起哪些话是你自己说的。",
+         "He speaks well, better than you'd have managed. From then on, you often can't recall which words were yours."), "tzeentch"),
+       B(O("说一句他没料到的话", "Say something he didn't foresee", {corruption: 15, sanity: -25, hp: -10, taint: {tzeentch: -40}, set: {claimed_tzeentch: true, resisted_tzeentch: true}},
          "你说了一句连自己都没想到的话。他愣了一下，然后大笑：“妙极了。这也在计划之中。”",
-         "You say something even you didn't expect. He blinks, then laughs aloud. “Marvellous. That was part of the plan too.”")
+         "You say something even you didn't expect. He blinks, then laughs aloud. “Marvellous. That was part of the plan too.”"), "tzeentch"),
+       F(O("这一句，他也料到了", "He foresaw this one too", {set: {claimed_tzeentch: true}},
+         "你刚张开嘴，他已经替你说完了后半句。从此每一句都是。",
+         "You open your mouth, and he has already finished the sentence for you. Every sentence, from now on."), "tzeentch")
      ]},
 
     {id: "evt_claim_slaanesh", god: "slaanesh", trigger: "claim", factions: ["*"], minChapter: 1,
@@ -472,12 +495,16 @@
              "One ordinary morning the world has lost its colour: food has no taste, music no rise and fall, even pain feels dull.\nOnly one voice remains, sweet enough to ache:\n“You've tasted the finest already. Nothing else is worthy of you. Come.”"),
      codex: ["god_slaanesh"],
      choices: [
-       O("朝那个声音走过去", "Walk toward the voice", {corruption: 25, sanity: -15, renown: 8, set: {claimed_slaanesh: true}},
+       A(O("朝那个声音走过去", "Walk toward the voice", {set: {claimed_slaanesh: true}},
          "你的每个动作都变得优雅，每句话都让人着迷。而你自己，再也尝不到满足的滋味。",
-         "Your every gesture turns graceful, your every word enthralling. And you yourself never again know what it is to be satisfied."),
-       O("去做一件最无聊的活", "Go and do the dullest chore you can", {corruption: 15, sanity: -20, taint: {slaanesh: -30}, set: {claimed_slaanesh: true, resisted_slaanesh: true}},
+         "Your every gesture turns graceful, your every word enthralling. And you yourself never again know what it is to be satisfied."), "slaanesh"),
+       B(O("去做一件最无聊的活", "Go and do the dullest chore you can", {corruption: 15, sanity: -20, hp: -10, taint: {slaanesh: -40}, set: {claimed_slaanesh: true, resisted_slaanesh: true}},
          "你擦了一整天地板，一遍又一遍，无聊得想哭。到了晚上，那个声音终于小了一点。",
-         "You scrub floors all day, over and over, bored to tears. By evening the voice is, at last, a little quieter.")
+         "You scrub floors all day, over and over, bored to tears. By evening the voice is, at last, a little quieter."), "slaanesh"),
+       F(O("就尝最后一口", "Just one last taste", {set: {claimed_slaanesh: true}},
+         "最后一口之后，还有最后一口。你再也没有停下。",
+         "After the last taste there is one more last taste. You never stop again."), "slaanesh")
      ]}
+
   ]);
 })();

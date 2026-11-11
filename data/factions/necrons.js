@@ -54,7 +54,7 @@
     text: L("玛罗教授把一块黑石板推到你面前，符文泛着淡绿。\n“前帝国时代，也许比人类还早。”她眼睛发亮，“这一铲下去，我的名字会进学院大典。”\n她顿了顿：“你的名字会进脚注。”",
             "Professor Marrow slides a black slab toward you. Its glyphs glow faintly green.\n“Pre-Imperial. Maybe pre-human.” Her eyes shine. “This dig puts my name in the Scholastic Annals.”\nA pause. “Yours goes in a footnote.”"),
     choices: [
-      C("申请负责翻译符文", "Volunteer to translate the glyphs", "nec_103", X({renown: 5, set: {translator: true}},
+      C("申请负责翻译符文", "Volunteer to translate the glyphs", "nec_103", X({renown: 5, set: {translator: true}, taint: {tzeentch: 15}},
         "她把石板拍进你怀里。“三天。翻不出来就去筛沙子。”石板凉得像井水。",
         "She drops the slab into your arms. “Three days. Fail, and you sift sand.” It is cold as well water.")),
       C("去看看机仆挖出了什么", "Go see what the servitors found", "nec_103")
@@ -68,7 +68,7 @@
       C("再划一道试试", "Scratch it again", "nec_105", X({sanity: -5},
         "这次划痕合拢前，墙里传来一声轻轻的咔哒，像有人在里面翻了个身。",
         "This time, before the scratch heals, something inside clicks softly. Like someone turning over in bed.")),
-      C("请他让你抄下墙上的纹路", "Ask to copy the wall's markings", "nec_105", X({renown: 3, set: {translator: true}},
+      C("请他让你抄下墙上的纹路", "Ask to copy the wall's markings", "nec_105", X({renown: 3, set: {translator: true}, taint: {tzeentch: 10}},
         "贤者借你一支数据笔。纹路在灯下微微挪动，你抄得很慢，抄得很准。",
         "The magos lends you a data-quill. The patterns shift under your lamp. You copy slowly, and exactly."))
     ]};
@@ -90,7 +90,7 @@
             "At night a pyramid's tip breaks the sand, black enough to swallow starlight.\nA hum rises from below. Very low. Like breathing in an enormous chest.\nYour lamp flickers and turns green."),
     codex: ["place_thessa_tomb"],
     choices: [
-      C("通宵临摹塔尖上的符文", "Sketch the spire glyphs all night", "nec_106", X({sanity: -5, renown: 5, set: {sketched: true}},
+      C("通宵临摹塔尖上的符文", "Sketch the spire glyphs all night", "nec_106", X({sanity: -5, renown: 5, set: {sketched: true}, taint: {tzeentch: 35}},
         "天亮时手指冻僵了。最后一行符文里，你认出了一个词：“勿扰”。",
         "By dawn your fingers are numb. In the last line you recognise one word: DO NOT DISTURB.")),
       C("回帐篷睡觉", "Go back and sleep", "nec_106", X({sanity: 5},
@@ -117,7 +117,7 @@
     effects: {sanity: -5},
     choices: [
       C("后退", "Step back", "nec_201"),
-      C("凑近去看", "Lean in for a look", "nec_201", X({sanity: -5, renown: 3, taint: {tzeentch: 5}},
+      C("凑近去看", "Lean in for a look", "nec_201", X({sanity: -5, renown: 3, taint: {tzeentch: 40}},
         "黑暗深处亮起两点绿光，又是两点，一排又一排，一直亮到看不见的地方。",
         "Two green points light in the dark. Then two more. Row after row, as far as you can see."))
     ]};
@@ -191,7 +191,7 @@
             "The servitors bare a black wall whose scratches heal themselves. The magos orders you to load its patterns into your implant.\n“Your brain is a fine cache,” he says. “Small, but cheap.”"),
     codex: ["nec_living_metal"],
     choices: [
-      C("导入纹路", "Load the patterns", "nec_o_lexmech_3", X({sanity: -5, renown: 3, set: {translator: true}},
+      C("导入纹路", "Load the patterns", "nec_o_lexmech_3", X({sanity: -5, renown: 3, set: {translator: true}, taint: {tzeentch: 20}},
         "纹路流进你的脑子，冷得像薄荷。有几个符号，你突然懂了它们的意思。",
         "The patterns flow in, cold as mint. A few symbols suddenly make sense.")),
       C("假装导入，偷偷断开", "Fake the upload, unplug quietly", "nec_o_lexmech_3", X({renown: -2},
@@ -216,7 +216,7 @@
             "At night the spire breaks the sand. Your implant picks up a signal from below: very old, very polite.\nIt is requesting a handshake:\n“Please identify yourself.”"),
     codex: ["place_thessa_tomb"],
     choices: [
-      C("回传你的序列号", "Transmit your serial number", "nec_106", X({renown: 5, corruption: 5, set: {handshake: true}, taint: {tzeentch: 5}},
+      C("回传你的序列号", "Transmit your serial number", "nec_106", X({renown: 5, corruption: 5, set: {handshake: true}, taint: {tzeentch: 40}},
         "信号停了一秒，回了一个字：“已登记。”你耳后的接口烫了一整夜。",
         "The signal pauses, then replies with one word: REGISTERED. The socket behind your ear burns all night.")),
       C("拔掉数据线", "Pull out the cable", "nec_106", X({hp: -5, sanity: 5},
@@ -261,7 +261,7 @@
       C("抱紧笔记，去找卡尔", "Clutch the notes and find Kaal", "nec_205")
     ]};
 
-  N.nec_205 = {chapter: 2, scene: "dig_site", speaker: KAAL, foe: "necron_warrior", time: {h: 1}, eventRoll: 0.25,
+  N.nec_205 = {chapter: 2, scene: "dig_site", speaker: KAAL, foe: "necron_warrior", time: {h: 1}, eventRoll: 0.35,
     text: L("沙地里站起一排排金属骷髅，步伐一致，像在阅兵。\n激光打穿它们的胸口，它们倒下，又站起来，伤口像那面墙一样合拢。\n“它们不死！”卡尔吼道，“那就别让它们走过来！”",
             "Rows of metal skeletons rise from the sand in perfect step, like a parade.\nLasfire punches through their chests. They fall, then stand again, wounds closing like that wall.\n“They don't die!” Kaal roars. “Then don't let them reach us!”"),
     effects: {sanity: -5},
@@ -335,7 +335,7 @@
       C("教大家省力的挖法", "Teach the others an easier dig", "nec_209", O(Q({flag: "origin_convict"}, true), X({renown: 8, sanity: 5},
         "矿坑的进度翻了一倍。技师来查原因，查到了你。“效率，”他说，“值得保留。”",
         "The pit's progress doubles. A cryptek investigates and finds you. “Efficiency,” it says. “Worth keeping.”"))),
-      C("继续挖，保存体力", "Keep digging, save your strength", "nec_301", X({hp: -10, set: {pit: true}, taint: {nurgle: 5}},
+      C("继续挖，保存体力", "Keep digging, save your strength", "nec_301", X({hp: -10, set: {pit: true}, taint: {nurgle: 65}},
         "你挖了很久很久。后来，一位披电缆斗篷的大人物路过矿坑，想要一个会说话的玩具。",
         "You dig for a long, long time. Then a great figure in a cable cloak passes the pits, wanting a toy that talks."))
     ]};
@@ -368,7 +368,7 @@
             "The banquet is magnificent. Silver, candelabra, twelve courses, every plate empty.\nThe courtiers raise empty cups in perfect unison. The overlord toasts you: “To taste. None of us remember what it was.”\nOnly you are actually hungry."),
     effects: {set: {banquet: true}},
     choices: [
-      C("假装吃得很香", "Pretend to savour it", "nec_302", X({renown: 5, hp: -5, taint: {slaanesh: 5}},
+      C("假装吃得很香", "Pretend to savour it", "nec_302", X({renown: 5, hp: -5, taint: {slaanesh: 35}},
         "你对着空盘子咀嚼、点头、赞叹。霸主看得入了迷。",
         "You chew at nothing, nod, sigh with pleasure. The overlord watches, enthralled.")),
       C("掏出口袋里的口粮吃", "Eat the ration bar in your pocket", "nec_302", X({hp: 10, renown: -3},
@@ -389,7 +389,7 @@
             "Nefer the cryptek gives you the lesson.\n“The star gods gave us undying bodies. In exchange they took our souls and ate them on the spot.”\nHe taps his chestplate. “Biotransference. We are still auditing that transaction.”"),
     codex: ["nec_biotransference", "nec_ctan", "nec_crypteks"],
     choices: [
-      C("“你还记得活着的感觉吗？”", "“Do you remember being alive?”", "nec_306", X({sanity: -5, taint: {nurgle: 5}},
+      C("“你还记得活着的感觉吗？”", "“Do you remember being alive?”", "nec_306", X({sanity: -5, taint: {nurgle: 65}},
         "技师沉默了很久。他头上的指示灯闪了几下，像在找一份不存在的文件。",
         "The cryptek is silent a long time. Lights flicker on his head, like searching for a file that isn't there.")),
       C("“星神后来怎么了？”", "“What became of the star gods?”", "nec_307")
@@ -412,12 +412,12 @@
       C("背后一凉", "Feel a chill down your spine", "nec_308", X({sanity: -5},
         "地板深处传来一阵震动，很轻，像什么东西在梦里翻了个身。",
         "A faint tremor rises from deep beneath the floor, like something turning over in its sleep.")),
-      C("“带我去看看。”", "“Show me.”", "nec_308", X({corruption: 5, set: {askedShard: true}},
+      C("“带我去看看。”", "“Show me.”", "nec_308", X({corruption: 5, set: {askedShard: true}, taint: {tzeentch: 40}},
         "技师盯着你看了很久。“不。但你的好奇心，我会记一笔。”",
         "The cryptek studies you a long time. “No. But I will note your curiosity.”"))
     ]};
 
-  N.nec_308 = {chapter: 3, scene: "tomb_interior", speaker: null, foe: "flayed_one", time: {h: 6}, eventRoll: 0.3,
+  N.nec_308 = {chapter: 3, scene: "tomb_interior", speaker: null, foe: "flayed_one", time: {h: 6}, eventRoll: 0.42,
     text: L("夜里你迷了路。走廊尽头蹲着一个死灵，身上挂着破布一样的东西，你不愿细看那是什么。\n它用爪子刮着墙，一遍又一遍。\n“好冷，”它说，“你看起来很暖和。”",
             "At night you get lost. At a corridor's end crouches a necron draped in rags of something you'd rather not examine.\nIt scrapes the wall with its claws, over and over.\n“So cold,” it says. “You look warm.”"),
     codex: ["nec_flayer_curse"],
@@ -474,7 +474,7 @@
       C("建议他臣服", "Suggest he submits", "nec_401", X({renown: -3, sanity: 5},
         "霸主沉默片刻。“明智，也庸俗。”他还是派出了使者，带着一份不情不愿的礼物。",
         "A pause. “Wise. And vulgar.” He sends an envoy anyway, with a grudging gift.")),
-      C("建议他开战", "Suggest war", "nec_401", X({renown: 3, hp: -10, taint: {khorne: 5}},
+      C("建议他开战", "Suggest war", "nec_401", X({renown: 3, hp: -10, taint: {khorne: 40}},
         "霸主大笑。当晚雷暴劈中金字塔一角，你被震下了台阶。",
         "The overlord laughs. That night lightning strikes a corner of the pyramid and throws you down the steps."))
     ]};
@@ -544,13 +544,13 @@
   N.nec_407 = {chapter: 4, scene: "tomb_interior", speaker: SHARD, time: {h: 3},
     text: L("通道尽头悬着一座笼子，由不断折叠的光编成。笼子里有一片暗金色的碎星，在缓慢地呼吸。\n它注意到了你。\n“小东西，”声音直接响在你骨头里，“你身上有恐惧的味道。我很想念它。”",
             "The duct ends at a floating cage woven from endlessly folding light. Inside, a shard of dark-gold star breathes slowly.\nIt notices you.\n“Little thing,” says a voice straight into your bones. “You smell of fear. I have missed it.”"),
-    effects: {sanity: -10, corruption: 5, set: {sawShard: true}},
+    effects: {sanity: -10, corruption: 5, set: {sawShard: true}, taint: {tzeentch: 35}},
     codex: ["nec_tesseract", "place_tesseract_vault"],
     choices: [
       C("后退，直到撞上什么", "Back away until you hit something", "nec_409", X({hp: -5},
         "你撞上的是一只蜘蛛构造体。它很温柔地把你夹起来，送了回去。",
         "What you hit is a spyder construct. It picks you up very gently and carries you back.")),
-      C("问它的名字", "Ask its name", "nec_409", X({corruption: 10, set: {shardName: true}, taint: {tzeentch: 10}},
+      C("问它的名字", "Ask its name", "nec_409", X({corruption: 10, set: {shardName: true}, taint: {tzeentch: 70}},
         "它告诉了你。那个名字没有音节，只有一种感觉：所有活物死前的最后一秒。",
         "It tells you. The name has no syllables, only a feeling: the last second of every living thing."))
     ]};
@@ -612,7 +612,7 @@
         "You open your sketchbook. The ink on the last page is still wet. Three hundred and eighty years, and it hasn't dried."))
     ]};
 
-  N.nec_504 = {chapter: 5, scene: "stasis_gallery", speaker: IMHET, foe: "aeldari_seer", time: {h: 2}, eventRoll: 0.25,
+  N.nec_504 = {chapter: 5, scene: "stasis_gallery", speaker: IMHET, foe: "aeldari_seer", time: {h: 2}, eventRoll: 0.35,
     text: L("第一位访客是一位远道而来的死灵贵族。伊姆赫特把你推到先知的展位前：“讲。”\n贵族的目光像一盏冷灯。\n你清了清嗓子。你已经三百八十年没说过话了。",
             "The first visitor is a necron noble from afar. Imhet pushes you before the seer's display. “Speak.”\nThe noble's gaze is a cold lamp.\nYou clear your throat. You haven't spoken in three hundred and eighty years."),
     choices: [
@@ -635,7 +635,7 @@
       C("“我会更努力的。”", "“I'll try harder.”", "nec_505", X({renown: 3},
         "伊姆赫特满意地点头，在第四十一号展位的铭牌上，暂时没有刻字。",
         "Imhet nods, satisfied. The plaque on display forty-one stays blank, for now.")),
-      C("盯着第四十一个展位", "Stare at the forty-first display", "nec_505", X({sanity: -5, taint: {nurgle: 5}},
+      C("盯着第四十一个展位", "Stare at the forty-first display", "nec_505", X({sanity: -5, taint: {nurgle: 65}},
         "第四十一个展位的铭牌已经刻好了。是你的名字，拼写完全正确。",
         "The plaque on the forty-first display is already engraved. Your name, spelled perfectly."))
     ]};
@@ -667,7 +667,7 @@
       C("向他保证你会回来", "Promise him you'll come back", "nec_509", X({sanity: 5, set: {promiseKaal: true}},
         "你把手贴在停滞场上，冷得像墓碑。你说了三遍，好让自己记住。",
         "You press your palm to the field, cold as a headstone. You say it three times so you'll remember.")),
-      C("别过脸去", "Look away", "nec_509", X({sanity: -5, taint: {nurgle: 5}},
+      C("别过脸去", "Look away", "nec_509", X({sanity: -5, taint: {nurgle: 65}},
         "你走开了。身后，那一毫米一直跟着你。",
         "You walk on. Behind you, that millimetre follows."))
     ]};
@@ -794,12 +794,12 @@
       C("停止计数", "Stop counting", "nec_606", X({sanity: 5},
         "你闭上眼。隧道慢慢松开了，像一只放开猎物的手。",
         "You close your eyes. The tunnel slowly unclenches, like a hand releasing its prey.")),
-      C("继续数下去", "Keep counting", "nec_606", X({sanity: -10, corruption: 5, set: {counted: true}, taint: {tzeentch: 5}},
+      C("继续数下去", "Keep counting", "nec_606", X({sanity: -10, corruption: 5, set: {counted: true}, taint: {tzeentch: 80}},
         "你数到了一个不存在的数字。伊姆赫特叹了口气，像一台风扇。",
         "You count to a number that does not exist. Imhet sighs like a cooling fan."))
     ]};
 
-  N.nec_606 = {chapter: 6, scene: "tomb_exterior", speaker: IMHET, time: {y: 700, warp: true}, eventRoll: 0.3,
+  N.nec_606 = {chapter: 6, scene: "tomb_exterior", speaker: IMHET, time: {y: 700, warp: true}, eventRoll: 0.42,
     text: L("出口打开时，伊姆赫特看了看读数，沉默了一会儿。\n“我们迟到了。迟到多少，我不太想说。”\n忒萨零号的沙丘上，立着一座帝国要塞大教堂，钟楼比金字塔还高。",
             "When the exit opens, Imhet checks a readout and goes quiet a while.\n“We are late. By how much, I'd rather not say.”\nOn Thessa Null's dunes stands an Imperial fortress-cathedral, its bell tower taller than the pyramid."),
     codex: ["place_thessa_cathedral", "imp_imperium"],
@@ -809,7 +809,7 @@
     ]};
 
   /* ============ Chapter 7 · Return to the Tomb ============ */
-  N.nec_701 = {chapter: 7, scene: "dig_site", speaker: VEKTRIX, time: {d: 1}, eventRoll: 0.25,
+  N.nec_701 = {chapter: 7, scene: "dig_site", speaker: VEKTRIX, time: {d: 1}, eventRoll: 0.35,
     text: L("你穿着过时几百年的外套走进营地。没人拦你，你太像档案照片了。\n一个几乎全是机械的贤者转过来，镜头对焦。\n“考察队员，失踪于113.M42，”维克崔斯-9说，“你没有变老。有意思。”",
             "You walk into the camp in an expedition coat centuries out of fashion. No one stops you; you look too much like the archive picts.\nAn almost entirely mechanical magos turns, lenses focusing.\n“Expedition member, lost 113.M42,” says Vektrix-9. “You have not aged. Interesting.”"),
     codex: ["imp_mechanicus"],
@@ -865,7 +865,7 @@
       C("“让我去劝他们撤离。”", "“Let me persuade them to leave.”", "nec_707", O(Q({stat: "renown", min: 40}), X({set: {truce: true}},
         "霸主想了很久。“一个太阳日。之后，礼数就结束了。”",
         "The overlord thinks a long time. “One solar day. After that, etiquette ends.”"))),
-      C("告诉他营地的防御弱点", "Tell him the camp's weak points", "nec_707", X({renown: 8, sanity: -10, set: {betrayed: true}, taint: {khorne: 5}},
+      C("告诉他营地的防御弱点", "Tell him the camp's weak points", "nec_707", X({renown: 8, sanity: -10, set: {betrayed: true}, taint: {khorne: 40}},
         "你在沙盘上点了三个地方。霸主满意地嗡了一声。你的手指在抖。",
         "You point to three places on the sand-table. The overlord hums contentedly. Your finger trembles.")),
       C("“碎片比人类危险得多。”", "“The shard is far more dangerous.”", "nec_707", X({renown: 3},
@@ -887,12 +887,12 @@
         "Mordane glances at the cage. Her face doesn't change, but her hand finds her pistol. “Tomorrow,” she says. “Tonight I'll do some reading.”"))
     ]};
 
-  N.nec_708 = {chapter: 7, scene: "cathedral", speaker: null, time: {h: 5}, eventRoll: 0.3,
+  N.nec_708 = {chapter: 7, scene: "cathedral", speaker: null, time: {h: 5}, eventRoll: 0.42,
     text: L("夜里你溜进要塞的档案库。玛罗教授的书摆在最显眼处：《忒萨零号：一座空墓》。\n书里没有活的金属，没有醒来的死者，只有她的名字。\n你的名字在脚注里，拼错了。",
             "At night you slip into the fortress archive. Professor Marrow's book sits in pride of place: Thessa Null: An Empty Tomb.\nNo living metal. No waking dead. Just her name.\nYours is in a footnote, misspelled."),
     codex: ["place_thessa_cathedral"],
     choices: [
-      C("抄下被封存的真实勘测报告", "Copy the sealed true survey report", "nec_706", X({sanity: -5, set: {records: true}},
+      C("抄下被封存的真实勘测报告", "Copy the sealed true survey report", "nec_706", X({sanity: -5, set: {records: true}, taint: {tzeentch: 40}},
         "封条后是第一支勘测队的报告：他们看见了站着睡觉的人。页边写着“焚毁”，没人执行。",
         "Behind the seals: the first survey team's report. They saw people sleeping on their feet. BURN is written in the margin. Nobody did.")),
       C("改正脚注里你的名字", "Correct your name in the footnote", "nec_706", X({sanity: 10},
@@ -1093,6 +1093,31 @@
             "Item 77: Primitive Scholar, Mid-Discovery. Pose: astonished.\nFor thousands of years visitors pause at this display. They say the human's expression is so vivid, as if about to blink.\nYou never blink once."),
     ending: {kind: "bad", title: L("第七十七号藏品", "Item 77"), cause: L("永远凝固在停滞场里", "Frozen in stasis forever")}};
 
+  /* ============ Claim endings (SPEC §19): a Chaos god's claim, accepted or forced. Reached via the claim events' goto. ============ */
+  N.nec_end_claim_khorne = {scene: "tomb_exterior", speaker: S("sigil_khorne", "远处的鼓", "A Distant Drum"), time: {d: 3},
+    text: L("墓里的怒气无处可去。死灵没有灵魂，不值得杀，它只在你胸口打转。\n直到某天，一扇门向外打开了。零场之外，鼓声一下子涌了进来。\n你扑向第一个活人时，血神接住了你，像接住一把等了很久的刀。",
+            "In the tomb your rage has nowhere to go. The necrons have no souls, not worth killing, so it burns in circles in your chest.\nUntil one day a door opens outward. Beyond the null field, the drumming floods in.\nAs you lunge at the first living person, the Blood God catches you, like a blade he has waited a long time for."),
+    codex: ["god_khorne"],
+    ending: {kind: "bad", title: L("零场之外", "Beyond the Null Field"), cause: L("出墓即被恐虐收走", "Taken by Khorne outside the tomb")}};
+
+  N.nec_end_claim_nurgle = {scene: "dig_site", speaker: S("sigil_nurgle", "慈祥的声音", "A Fond Voice"), time: {d: 7},
+    text: L("零场像一层冰，压住了你身上那点温吞吞的东西。它不急，它在等。\n后来你被带出墓穴。脚踩上沙地的第一步，所有的病一起醒了，暖得像回家。\n慈父很有耐心。一座六千万年的墓，也关不住他的孩子。",
+            "The tomb's null field lies on you like ice, pressing down the lukewarm thing inside you. It's in no hurry. It waits.\nLater you are brought out. At your first step on the sand, every sickness wakes at once, warm as coming home.\nGrandfather is patient. Not even a sixty-million-year tomb can keep his children from him."),
+    codex: ["god_nurgle"],
+    ending: {kind: "bad", title: L("出墓的第一步", "The First Step Outside"), cause: L("出墓即被纳垢收走", "Taken by Nurgle outside the tomb")}};
+
+  N.nec_end_claim_tzeentch = {scene: "tomb_exterior", speaker: S("daemon_tzeentch", "多出来的一行", "The Extra Line"), time: {d: 2},
+    text: L("墓墙上会变的字越来越多。在零场里，它们只能沉默。\n你爬出墓穴看见星空的那一刻，它们一齐开口：“你终于出来了。答案都备好了。”\n你想知道的，从此都知道了。只是每个答案都通向下一个计划。",
+            "The shifting lines on the tomb wall multiply. Inside the null field they can only keep silent.\nThe moment you climb out and see the stars, they all speak at once: “At last. We've prepared every answer for you.”\nEverything you ever wanted to know, you now know. Only every answer leads to another plan."),
+    codex: ["god_tzeentch"],
+    ending: {kind: "bad", title: L("星空下的答案", "Answers Under the Stars"), cause: L("出墓即被奸奇收走", "Taken by Tzeentch outside the tomb")}};
+
+  N.nec_end_claim_slaanesh = {scene: "stasis_gallery", speaker: S("sigil_slaanesh", "空着的展台", "The Empty Plinth"), time: {y: 500},
+    text: L("你总想让那一刻再完美一点：姿势，表情，光线。\n零场挡住了她，挡不住你自己的渴望。技师把你冻进停滞场时，你还在调整姿势。\n铭牌上写着：“人类，渴望中。”你会这样想要下去，直到群星熄灭。",
+            "You always want that moment a little more perfect: the pose, the expression, the light.\nThe null field keeps Her hand away, but not your own wanting. When a cryptek freezes you in stasis, you are still adjusting your pose.\nThe plaque reads: “Human, wanting.” You will go on wanting until the stars go out."),
+    codex: ["god_slaanesh"],
+    ending: {kind: "bad", title: L("渴望中", "Wanting"), cause: L("冻结在渴望之中", "Frozen mid-longing")}};
+
   /* ============ Death nodes (engine-triggered) ============ */
   N.nec_death_hp = {scene: "tomb_interior", speaker: null,
     text: L("你倒在冰冷的金属地板上。几只甲虫赶来，绕你转了一圈，判定你已经没有用了。\n它们收走你的灯、你的笔、你的眼镜框，码得整整齐齐。\n你成了又一座整齐的沙丘。",
@@ -1152,6 +1177,7 @@
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("价值", "Worth"),
     renownIcon: "icon_worth",
+    taintMod: {khorne: 0.5, nurgle: 0.5, tzeentch: 0.5, slaanesh: 0.5},   // SPEC §19: multiplier on positive taint deltas (cleanses unscaled)
     renownHelp: L("价值是你在死灵眼中作为“藏品”的分量。读懂符文、守住礼数、讲好故事让它上升；失礼、无趣、逃跑会让它下降。价值够高，霸主和收藏家才肯听你开口，更好的结局才会敞开。",
                   "Worth is how much you matter to the necrons, as a specimen. Reading their glyphs, keeping their etiquette and telling a good story raise it; rudeness, dullness and escape attempts lower it. High Worth makes the overlord and the Collector listen, and opens better endings."),
     deathNodes: {hp: "nec_death_hp", sanity: "nec_death_sanity", corruption: "nec_death_corruption"},
