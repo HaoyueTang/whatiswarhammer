@@ -1,7 +1,7 @@
 """Regenerate every PNG in assets/, assets/manifest.js and tools/art/contact_sheet.png.
 
     python3 tools/art/build_all.py            # everything
-    python3 tools/art/build_all.py --check    # only verify the key list against SPEC §7 + §14
+    python3 tools/art/build_all.py --check    # only verify the key list against SPEC §7 + §14 + §26
 """
 import os
 import sys
@@ -15,7 +15,8 @@ from PIL import Image  # noqa: E402
 from reg import SPRITES, SCENES, UI  # noqa: E402
 
 MODULES = ["chars_imperium", "chars_chaos", "chars_tau", "chars_xenos", "chars_players", "chars_aeldari", "chars_necrons",
-           "omens", "sigils", "icons", "scenes"]
+           "omens", "sigils", "icons", "scenes",
+           "chars_orks", "chars_gsc", "chars_mechanicus", "omens_v3", "scenes_v3", "icons_v3"]
 for _m in MODULES:
     if os.path.exists(os.path.join(HERE, _m + ".py")):
         __import__(_m)
@@ -57,6 +58,22 @@ SPEC14_UI = ["icon_fate", "icon_worth"]
 SPEC_SPRITES.update(SPEC14_SPRITES)
 SPEC_SCENES += SPEC14_SCENES
 SPEC_UI += SPEC14_UI
+
+# SPEC §26 (v0.3) new keys — Orks · Genestealer Cult · Adeptus Mechanicus; appended again
+SPEC26_SPRITES = {
+    "player_orks": 48, "player_gsc": 48, "player_mechanicus": 48,
+    "ork_mek": 48, "ork_weirdboy": 48, "ork_nob": 64, "gretchin": 32, "squig": 32,
+    "gsc_neophyte": 48, "gsc_acolyte": 48, "gsc_magus": 48, "gsc_primus": 64, "gsc_patriarch": 96,
+    "skitarius": 48, "magos": 64, "electro_priest": 48, "kastelan_robot": 64, "dark_mechanicus": 64,
+    "daemon_engine": 96,
+    "omen_waaagh": 96, "omen_gork_mork": 96, "omen_star_children": 96, "omen_four_armed": 96,
+    "omen_mars": 96, "omen_cawl": 96, "omen_omnissiah": 96,
+}
+SPEC26_SCENES = ["ork_scrapyard", "ork_fort", "mine_shaft", "gsc_chapel", "forge_floor", "mars_vista", "tech_vault"]
+SPEC26_UI = ["icon_teef", "icon_kinship", "icon_grace"]
+SPEC_SPRITES.update(SPEC26_SPRITES)
+SPEC_SCENES += SPEC26_SCENES
+SPEC_UI += SPEC26_UI
 
 
 def check():
@@ -175,7 +192,7 @@ def contact_sheet(rendered, path=None):
 if __name__ == "__main__":
     if "--check" in sys.argv:
         p = check()
-        print("\n".join(p) if p else "OK: all SPEC §7 + §14 keys present")
+        print("\n".join(p) if p else "OK: all SPEC §7 + §14 + §26 keys present")
         sys.exit(1 if p else 0)
     r = build()
     print("sprites %d  scenes %d  ui %d" % (len(r["sprites"]), len(r["scenes"]), len(r["ui"])))

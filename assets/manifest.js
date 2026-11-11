@@ -76,7 +76,33 @@ WH.registerSprites({
   omen_silent_king: {"src": "assets/sprites/omen_silent_king.png", "w": 96, "h": 96, "name": {"zh": "寂静之王（异象）", "en": "The Silent King (omen)"}},
   omen_ctan: {"src": "assets/sprites/omen_ctan.png", "w": 96, "h": 96, "name": {"zh": "太空死神（异象）", "en": "The C'tan (omen)"}},
   omen_stormlord: {"src": "assets/sprites/omen_stormlord.png", "w": 96, "h": 96, "name": {"zh": "风暴领主（异象）", "en": "The Stormlord (omen)"}},
-  omen_collector: {"src": "assets/sprites/omen_collector.png", "w": 96, "h": 96, "name": {"zh": "收藏家（异象）", "en": "The Collector (omen)"}}
+  omen_collector: {"src": "assets/sprites/omen_collector.png", "w": 96, "h": 96, "name": {"zh": "收藏家（异象）", "en": "The Collector (omen)"}},
+  player_orks: {"src": "assets/sprites/player_orks.png", "w": 48, "h": 48, "name": {"zh": "你（废品贩子）", "en": "You (Scrap-Trader)"}},
+  player_gsc: {"src": "assets/sprites/player_gsc.png", "w": 48, "h": 48, "name": {"zh": "你（矿工）", "en": "You (Miner)"}},
+  player_mechanicus: {"src": "assets/sprites/player_mechanicus.png", "w": 48, "h": 48, "name": {"zh": "你（工役）", "en": "You (Forge Menial)"}},
+  ork_mek: {"src": "assets/sprites/ork_mek.png", "w": 48, "h": 48, "name": {"zh": "兽人机械佬", "en": "Ork Mek"}},
+  ork_weirdboy: {"src": "assets/sprites/ork_weirdboy.png", "w": 48, "h": 48, "name": {"zh": "兽人怪小子", "en": "Ork Weirdboy"}},
+  ork_nob: {"src": "assets/sprites/ork_nob.png", "w": 64, "h": 64, "name": {"zh": "兽人头头", "en": "Ork Nob"}},
+  gretchin: {"src": "assets/sprites/gretchin.png", "w": 32, "h": 32, "name": {"zh": "地精", "en": "Gretchin"}},
+  squig: {"src": "assets/sprites/squig.png", "w": 32, "h": 32, "name": {"zh": "史奎格", "en": "Squig"}},
+  gsc_neophyte: {"src": "assets/sprites/gsc_neophyte.png", "w": 48, "h": 48, "name": {"zh": "新信徒", "en": "Neophyte Hybrid"}},
+  gsc_acolyte: {"src": "assets/sprites/gsc_acolyte.png", "w": 48, "h": 48, "name": {"zh": "侍僧混种", "en": "Acolyte Hybrid"}},
+  gsc_magus: {"src": "assets/sprites/gsc_magus.png", "w": 48, "h": 48, "name": {"zh": "教派术士", "en": "Cult Magus (Hybrid)"}},
+  gsc_primus: {"src": "assets/sprites/gsc_primus.png", "w": 64, "h": 64, "name": {"zh": "教派统领", "en": "Cult Primus"}},
+  gsc_patriarch: {"src": "assets/sprites/gsc_patriarch.png", "w": 96, "h": 96, "name": {"zh": "教派始祖", "en": "Patriarch"}},
+  skitarius: {"src": "assets/sprites/skitarius.png", "w": 48, "h": 48, "name": {"zh": "护教军", "en": "Skitarius"}},
+  magos: {"src": "assets/sprites/magos.png", "w": 64, "h": 64, "name": {"zh": "贤者", "en": "Magos"}},
+  electro_priest: {"src": "assets/sprites/electro_priest.png", "w": 48, "h": 48, "name": {"zh": "电祭司", "en": "Electro-Priest"}},
+  kastelan_robot: {"src": "assets/sprites/kastelan_robot.png", "w": 64, "h": 64, "name": {"zh": "卡斯特兰机器人", "en": "Kastelan Robot"}},
+  dark_mechanicus: {"src": "assets/sprites/dark_mechanicus.png", "w": 64, "h": 64, "name": {"zh": "黑暗机械教", "en": "Dark Mechanicum Magos"}},
+  daemon_engine: {"src": "assets/sprites/daemon_engine.png", "w": 96, "h": 96, "name": {"zh": "恶魔引擎", "en": "Daemon Engine"}},
+  omen_waaagh: {"src": "assets/sprites/omen_waaagh.png", "w": 96, "h": 96, "name": {"zh": "大机灵（异象）", "en": "The Waaagh! (omen)"}},
+  omen_gork_mork: {"src": "assets/sprites/omen_gork_mork.png", "w": 96, "h": 96, "name": {"zh": "戈克与莫克（异象）", "en": "Gork & Mork (omen)"}},
+  omen_star_children: {"src": "assets/sprites/omen_star_children.png", "w": 96, "h": 96, "name": {"zh": "星之子（异象）", "en": "The Star Children (omen)"}},
+  omen_four_armed: {"src": "assets/sprites/omen_four_armed.png", "w": 96, "h": 96, "name": {"zh": "四臂帝皇圣像（异象）", "en": "The Four-Armed Icon (omen)"}},
+  omen_mars: {"src": "assets/sprites/omen_mars.png", "w": 96, "h": 96, "name": {"zh": "火星（异象）", "en": "Mars (omen)"}},
+  omen_cawl: {"src": "assets/sprites/omen_cawl.png", "w": 96, "h": 96, "name": {"zh": "考尔的工坊（异象）", "en": "Cawl's Workshop (omen)"}},
+  omen_omnissiah: {"src": "assets/sprites/omen_omnissiah.png", "w": 96, "h": 96, "name": {"zh": "万机之神（异象）", "en": "The Omnissiah (omen)"}}
 });
 
 WH.registerScenes({
@@ -106,7 +132,14 @@ WH.registerScenes({
   dig_site: {"src": "assets/scenes/dig_site.png", "w": 192, "h": 108, "name": {"zh": "发掘现场", "en": "Excavation Site"}},
   tomb_exterior: {"src": "assets/scenes/tomb_exterior.png", "w": 192, "h": 108, "name": {"zh": "墓穴世界：金字塔", "en": "Tomb World Pyramid"}},
   tomb_interior: {"src": "assets/scenes/tomb_interior.png", "w": 192, "h": 108, "name": {"zh": "墓穴内部", "en": "Tomb Halls"}},
-  stasis_gallery: {"src": "assets/scenes/stasis_gallery.png", "w": 192, "h": 108, "name": {"zh": "静滞画廊", "en": "Stasis Gallery"}}
+  stasis_gallery: {"src": "assets/scenes/stasis_gallery.png", "w": 192, "h": 108, "name": {"zh": "静滞画廊", "en": "Stasis Gallery"}},
+  ork_scrapyard: {"src": "assets/scenes/ork_scrapyard.png", "w": 192, "h": 108, "name": {"zh": "兽人废料场", "en": "Ork Scrapyard"}},
+  ork_fort: {"src": "assets/scenes/ork_fort.png", "w": 192, "h": 108, "name": {"zh": "兽人堡垒", "en": "Ork Fort"}},
+  mine_shaft: {"src": "assets/scenes/mine_shaft.png", "w": 192, "h": 108, "name": {"zh": "矿井", "en": "Mine Shaft"}},
+  gsc_chapel: {"src": "assets/scenes/gsc_chapel.png", "w": 192, "h": 108, "name": {"zh": "地下礼拜堂", "en": "Underground Chapel"}},
+  forge_floor: {"src": "assets/scenes/forge_floor.png", "w": 192, "h": 108, "name": {"zh": "锻造车间", "en": "Forge Floor"}},
+  mars_vista: {"src": "assets/scenes/mars_vista.png", "w": 192, "h": 108, "name": {"zh": "火星远景", "en": "Mars Vista"}},
+  tech_vault: {"src": "assets/scenes/tech_vault.png", "w": 192, "h": 108, "name": {"zh": "科技宝库", "en": "Archeotech Vault"}}
 });
 
 WH.registerUI({
@@ -121,5 +154,8 @@ WH.registerUI({
   icon_save: {"src": "assets/ui/icon_save.png", "w": 16, "h": 16},
   icon_lang: {"src": "assets/ui/icon_lang.png", "w": 16, "h": 16},
   icon_fate: {"src": "assets/ui/icon_fate.png", "w": 16, "h": 16},
-  icon_worth: {"src": "assets/ui/icon_worth.png", "w": 16, "h": 16}
+  icon_worth: {"src": "assets/ui/icon_worth.png", "w": 16, "h": 16},
+  icon_teef: {"src": "assets/ui/icon_teef.png", "w": 16, "h": 16},
+  icon_kinship: {"src": "assets/ui/icon_kinship.png", "w": 16, "h": 16},
+  icon_grace: {"src": "assets/ui/icon_grace.png", "w": 16, "h": 16}
 });
