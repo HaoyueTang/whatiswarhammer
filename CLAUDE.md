@@ -22,7 +22,8 @@ Read this first in every session on this project. Keep it short and current; his
 ## Decisions
 - Factions: v0.1 Imperium/Chaos/T'au, v0.2 + Aeldari (boss: Keeper of Secrets) & Necrons (boss: Nightbringer shard); each has 3 origins (§16).
 - 3 factions v0.1: Imperium (boss: Abaddon's Black Crusade), Chaos (boss: Grey Knights + Inquisitor), T'au (boss: Swarmlord).
-- Stats 0–100: hp, sanity, corruption, renown (faction-labelled). Death at hp 0 / sanity 0 / corruption 100.
+- Stats 0–100: hp, sanity, corruption, renown (faction-labelled). Death at hp 0 / sanity 0 / corruption 100. Origins set per-run hp/sanity caps (70–130) as trade-offs (§23).
+- Death rates are NOT equalised across routes — lore decides (Howie: Imperium dying more is normal; a Guardsman's life is cheap). Balance only within a route (origins ±6 pts of route avg).
 - Lore shown through NPC behaviour; node text ≤ 90 zh chars; codex entries ≤ 45 zh chars.
 - IP: original prose; original pixel archetypes; no likeness of named canon characters (use `omen_*` images); no GW logos/icons. Fan-made, non-commercial; disclaimer in footer.
 - Saves: localStorage, 3 slots + autosave + JSON export/import, schema-versioned.
