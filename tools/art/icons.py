@@ -128,3 +128,42 @@ def icon_lang():
     s.stamp(1, 3, wen, {"#": hx("#f0ece0")})
     s.stamp(10, 5, a, {"#": hx("#ffd060")})
     return s.render(max_colors=8)
+
+
+# ------------------------------------------------------------------ v0.2 (SPEC §14)
+@ui("icon_fate")
+def icon_fate():
+    """Aeldari route: a wraithbone rune-stone with a glowing teal rune."""
+    s = _s()
+    s.add(ramp("#2f9a86", light=0.2), s.E(7.5, 7.5, 7, 7), mode="glow")
+    stone = s.P((7.5, 0.5), (12.5, 3), (13.5, 9), (9.5, 14.5), (5.5, 14.5), (1.5, 9), (2.5, 3))
+    s.add(ramp("#e4d8b6", light=0.07, dark=0.2), stone, mode="sphere", lt=0.32, st=0.68)
+    rune = [(7, 3), (7, 4), (7, 5), (7, 6), (7, 7), (7, 8), (7, 9), (7, 10), (6, 4), (5, 5), (8, 4), (9, 5),
+            (6, 8), (5, 9), (8, 8), (9, 9), (7, 11)]
+    s.pxs(rune, hx("#1e8a80"))
+    return s.render(max_colors=8)
+
+
+@ui("icon_worth")
+def icon_worth():
+    """Necron route: a green specimen-gem held in a silver collector's bracket."""
+    s = _s()
+    sil = ramp("#a8b0b8", light=0.14, dark=0.22)
+    s.add(sil, s.G(1, 1, ["####......####",
+                          "#............#",
+                          "#............#",
+                          "#............#",
+                          "..............",
+                          "..............",
+                          "..............",
+                          "..............",
+                          "..............",
+                          "#............#",
+                          "#............#",
+                          "#............#",
+                          "####......####"]), mode="sphere", lt=0.3)
+    gem = s.P((7.5, 2.5), (12, 7.5), (7.5, 12.5), (3, 7.5))
+    s.add(ramp("#4fd16b", light=0.3), gem, mode="sphere", lt=0.36, st=0.66, sep="line")
+    s.pxs([(6, 5), (7, 4)], hx("#d8ffe0"))
+    s.pxs([(7, 7), (8, 7), (7, 8), (8, 8)], hx("#1e6a34"))
+    return s.render(max_colors=8)

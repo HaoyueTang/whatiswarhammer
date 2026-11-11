@@ -883,3 +883,389 @@ def throne_light():
     hband(c, 92, 107, ["#5a3e14", "#2a1a0a", "#140c04"], seed=3)
     calm_lower(c, 92, "#2a1a0a", 0.2)
     return c.image()
+
+
+# ------------------------------------------------------------------ v0.2 scenes (SPEC §14)
+def _eld_tower(c, x, base, h, w, body, lite, shade_c, glowc=None):
+    """slender Aeldari spire: tapering shaft, bulb, needle tip."""
+    for y in range(base - h, base + 1):
+        t = (y - (base - h)) / max(1, h)
+        half = 0.6 + w * (0.25 + 1.1 * t ** 2.4)
+        for xx in range(int(x - half), int(x + half) + 1):
+            u = (xx - (x - half)) / max(1, 2 * half)
+            c.set(xx, y, lite if u < 0.35 else (body if u < 0.75 else shade_c))
+    by = base - int(h * 0.62)
+    c.ellipse(x, by, w * 1.3 + 1, w + 1, shade_c)
+    c.ellipse(x - 0.5, by - 0.5, w * 1.3, w, body)
+    c.ellipse(x - 1, by - 1, max(1, w * 0.6), max(1, w * 0.45), lite)
+    c.line([(x, base - h), (x, base - h - max(3, h // 6))], lite)
+    for s_ in (-1, 1):                      # curved fins sweeping off the bulb
+        c.poly([(x + s_ * w, by - 1), (x + s_ * (w + 3), by + 1), (x + s_ * (w + 4), by + 5), (x + s_ * (w + 1), by + 2)],
+               shade_c if s_ > 0 else lite)
+    if glowc:
+        c.set(x, by, glowc)
+
+
+@scene("craftworld", "方舟世界", "Craftworld")
+def craftworld():
+    c = Canvas(192, 108)
+    # starfield seen through the dome
+    sky(c, ["#05061a", "#0e1236", "#1a2050", "#2a3a6a", "#3a6a7a"], 0, 70)
+    stars(c, 61, 140, 0, 50, cols=("#6a7ab8", "#c8d8ff", "#ffffff"))
+    glow(c, 140, 18, 18, ["#1a2050", "#3a3a7a", "#8a6ab8"], strength=0.5)       # distant nebula
+    # dome lattice: curved wraithbone ribs
+    for k in range(-5, 6):
+        pts = []
+        for i in range(0, 41):
+            t = i / 40
+            ang = math.pi * (1 - t)
+            x = 96 + math.cos(ang) * 100 * (0.25 + 0.75 * abs(k) / 5) * (1 if k >= 0 else -1) * abs(math.cos(ang)) ** 0.2 * (1 if math.cos(ang) >= 0 else -1) * (1 if k >= 0 else -1)
+            pts.append((96 + (x - 96), 72 - math.sin(ang) * 70))
+        if k != 0:
+            xs = 96 + k * 19
+            c.line([(xs, 72), (96 + k * 15, 40), (96 + k * 8, 10), (96, 0)], "#5a6a7a")
+    for r in (40, 64):
+        pts = [(96 + math.cos(a / 40 * math.pi) * r * 1.6, 72 - math.sin(a / 40 * math.pi) * r) for a in range(41)]
+        c.line(pts, "#4a5a6a")
+    # forest canopy under the dome
+    n = Noise(17)
+    for y in range(44, 86):
+        for x in range(192):
+            v = n.fbm(x * 0.06, y * 0.09, 4)
+            top = 58 + 8 * math.sin(x * 0.05) + (v - 0.5) * 16
+            if y > top:
+                t = clamp((y - top) / 22)
+                c.set(x, y, ramp_pick(["#5ab88a", "#2f9a86", "#1e6a5e", "#123e3a"], t + (v - 0.5) * 0.6, x, y))
+    # slender ivory spires rising out of the trees
+    for (x, h, w) in [(40, 44, 3), (62, 28, 2), (120, 52, 4), (146, 34, 2), (84, 20, 2), (100, 30, 2)]:
+        _eld_tower(c, x, 74, h, w, "#c8bc9a", "#efe6cc", "#8a8070", glowc="#e23a4e")
+    clouds(c, 19, ["#6ab8a8", "#9ad8c8"], 50, 70, scale=0.05, thresh=0.66)
+    # organic wraithbone arches framing the terrace: thick curved ribs, lit top-left
+    for side in (-1, 1):
+        for (off, w, tmax) in [(0, 6, 1.0), (16, 3, 0.8)]:
+            pts = []
+            for i in range(0, 121):
+                t = i / 120 * tmax
+                x = 96 + side * (92 - off - 34 * math.sin(t * math.pi * 0.5) ** 1.6)
+                y = 110 - t * 112
+                pts.append((x, y, w * (1 - 0.45 * t)))
+            for (x, y, r) in pts:
+                c.ellipse(x, y, r + 1, r + 1, "#3a3428")
+            for (x, y, r) in pts:
+                c.ellipse(x, y, r, r, "#a89c80")
+            for (x, y, r) in pts:
+                c.ellipse(x - r * 0.35, y - r * 0.2, max(1, r * 0.55), max(1, r * 0.55), "#d8ccaa")
+            for (x, y, r) in pts[::2]:
+                c.set(x - r * 0.5, y - r * 0.4, "#f4ecd4")
+    # terrace floor
+    hband(c, 86, 107, ["#b8ae90", "#8a826c", "#5a5446"], seed=12, rough=0.2)
+    for x in range(0, 192, 12):
+        c.line([(96 + (x - 96) * 0.4, 86), (x, 107)], "#9a9078")
+    c.rect(0, 86, 191, 86, "#efe6cc")
+    calm_lower(c, 88, "#6a6252", 0.3)
+    vignette(c, "#04040e", 0.45)
+    return c.image()
+
+
+@scene("webway", "网道", "The Webway")
+def webway():
+    c = Canvas(192, 108)
+    vx, vy = 96, 46
+    pal = [("#1a0a3a", "#3a1a7a", "#7a4ae0"), ("#0a2a3a", "#1a6a8a", "#4ae0e0"),
+           ("#0a3a1a", "#1a7a4a", "#6ae0a0"), ("#3a2a0a", "#8a6a1a", "#f0d06a"),
+           ("#3a0a2a", "#8a1a6a", "#f06ad0")]
+    for y in range(108):
+        for x in range(192):
+            dx, dy = (x - vx) / 1.6, (y - vy)
+            r = math.hypot(dx, dy) + 0.01
+            z = 60.0 / r
+            a = math.atan2(dy, dx)
+            band = (z * 1.2 + a * 0.32) % len(pal)
+            p = pal[int(band)]
+            shine = 0.5 + 0.5 * math.sin(a * 6 + z * 2)
+            t = clamp(0.15 + shine * 0.5 + (1 - min(1, z / 6)) * 0.35)
+            col = ramp_pick(list(p), t, x, y)
+            ph = (z * 2.2) % 1.0                 # bright rib rings
+            if ph < 0.10 and z < 12:
+                col = C("#e8f8ff") if bayer(x, y) < 0.6 else C(p[2])
+            c.set(x, y, col)
+    glow(c, vx, vy, 30, ["#6ae0e0", "#c8ffff", "#ffffff"], power=1.8, strength=1.0, ry=20)
+    # a pale path running into the light
+    for y in range(vy + 6, 108):
+        t = (y - vy) / (108 - vy)
+        hw = 2 + t * 46
+        for x in range(int(vx - hw), int(vx + hw) + 1):
+            c.set(x, y, ramp_pick(["#2a2a4a", "#4a4a6a", "#8a8aaa"], 1 - t * 0.9 + (bayer(x, y) - 0.5) * 0.05, x, y))
+        c.set(vx - hw, y, "#c8ffff"); c.set(vx + hw, y, "#c8ffff")
+    calm_lower(c, 84, "#1a1430", 0.35)
+    vignette(c, "#04020a", 0.6)
+    return c.image()
+
+
+@scene("maiden_world", "处女世界", "Maiden World")
+def maiden_world():
+    c = Canvas(192, 108)
+    sky(c, ["#3a7ac8", "#6aa8e0", "#a8d4ee", "#e8f4f0"], 0, 60)
+    clouds(c, 71, ["#c8e0f0", "#f0f8ff"], 2, 36, scale=0.03, thresh=0.56, stretch=4)
+    # distant blue mountains
+    n = Noise(8)
+    for x in range(192):
+        top = 44 + int(10 * n.fbm(x * 0.02, 1.0, 3)) - int(8 * math.sin(x * 0.03))
+        for y in range(top, 70):
+            c.set(x, y, ramp_pick(["#8ab0d0", "#6a90b8", "#5a7aa0"], (y - top) / 20, x, y))
+    # rolling green hills
+    for layer, (base, amp, cols) in enumerate([(62, 6, ["#7ac06a", "#5aa05a", "#3a8048"]),
+                                              (72, 8, ["#6ab858", "#4a9a48", "#2e7a3a"]),
+                                              (84, 6, ["#5aaa4a", "#3a8a3a", "#226a2e"])]):
+        for x in range(192):
+            top = base + int(amp * math.sin(x * 0.025 + layer * 1.7) + 3 * n.value(x * 0.05, layer + 3))
+            for y in range(top, 108):
+                t = clamp((y - top) / 16)
+                c.set(x, y, ramp_pick(cols, t, x, y))
+    # ancient smooth ruins: half-buried ivory dome, curved arch, broken spire
+    ivory = ["#6a6250", "#a89c80", "#d8ccaa", "#f4ecd4"]
+    cx, cy, r = 52, 74, 16
+    for y in range(cy - r, cy + 1):
+        for x in range(cx - r, cx + r + 1):
+            if ((x - cx) / r) ** 2 + ((y - cy) / r) ** 2 <= 1:
+                lum = clamp(1 - (x - cx + r) / (2 * r) * 0.9 + (cy - y) / (3 * r))
+                c.set(x, y, ramp_pick(ivory, lum, x, y))
+    c.poly([(46, 62), (52, 58), (58, 64), (54, 70)], "#3a8048")            # crack overgrown
+    for i in range(0, 50):
+        t = i / 50 * math.pi
+        x = 132 + math.cos(t) * 22
+        y = 76 - math.sin(t) * 30
+        c.rect(x - 2, y - 1, x + 2, y + 1, "#d8ccaa")
+        c.set(x - 2, y, "#f4ecd4")
+    for x in (108, 152):
+        c.rect(x, 74, x + 4, 80, "#a89c80")
+    _eld_tower(c, 170, 76, 34, 3, "#c8bc9a", "#efe6cc", "#8a8070")
+    c.poly([(166, 44), (174, 40), (176, 46), (168, 48)], "#5aaa4a")          # broken top, moss
+    # vines and flowers
+    rnd = random.Random(15)
+    for _ in range(10):
+        x = rnd.randint(110, 154)
+        for y in range(rnd.randint(46, 60), 74):
+            if rnd.random() < 0.7:
+                c.set(x + int(math.sin(y * 0.4)), y, "#2e7a3a")
+    for _ in range(60):
+        x, y = rnd.randint(0, 191), rnd.randint(80, 104)
+        c.set(x, y, rnd.choice(["#f0e070", "#f0a0c0", "#ffffff", "#c8a0f0"]))
+    calm_lower(c, 86, "#2e6a34", 0.25)
+    return c.image()
+
+
+@scene("dig_site", "发掘现场", "Excavation Site")
+def dig_site():
+    c = Canvas(192, 108)
+    sky(c, ["#c8a878", "#e0c090", "#f0d8a8", "#f8e8c8"], 0, 58)
+    glow(c, 40, 16, 16, ["#f0d8a8", "#fff4d8", "#ffffff"], power=1.8, strength=1.0)
+    clouds(c, 81, ["#d8b888", "#e8cca0"], 20, 50, scale=0.04, thresh=0.64, stretch=6)
+    n = Noise(4)
+    for x in range(192):
+        top = 56 + int(4 * math.sin(x * 0.04) + 3 * n.value(x * 0.06, 2))
+        for y in range(top, 108):
+            c.set(x, y, ramp_pick(["#d8b47a", "#c09a62", "#9a7a4a"], clamp((y - top) / 40 + (n.fbm(x * 0.05, y * 0.1) - 0.5) * 0.4), x, y))
+    # excavation pit with a grid of strings and stakes
+    c.poly([(40, 70), (160, 70), (176, 86), (24, 86)], "#7a5a34")
+    c.poly([(46, 72), (154, 72), (166, 84), (34, 84)], "#5a4024")
+    for i in range(0, 7):
+        x = 46 + i * 18
+        c.line([(x, 72), (34 + i * 22, 84)], "#e8dcc0")
+    for y in (75, 79):
+        c.line([(44 - (y - 72), y), (156 + (y - 72), y)], "#e8dcc0")
+    for i in range(0, 8):
+        x = 40 + i * 17
+        c.rect(x, 66, x, 70, "#4a3020")
+        c.set(x, 66, "#c83a2a")
+    # the black edge protruding from the sand (angular, faint green seam)
+    c.poly([(108, 82), (118, 50), (126, 46), (134, 80)], "#0a0c0e")
+    c.poly([(118, 50), (126, 46), (128, 56)], "#1e2428")
+    c.line([(118, 51), (110, 80)], "#2a3036")
+    for y in range(54, 80):
+        if bayer(124, y) < 0.6:
+            c.set(124 + (y - 54) // 8, y, "#4fd16b")
+    glow(c, 124, 66, 6, ["#1a2a1e", "#2a6a3a"], strength=0.4)
+    # cranes: lattice gantries with hooks
+    for (bx, h, arm_) in [(20, 52, 36), (170, 46, -30)]:
+        top = 70 - h
+        c.rect(bx - 2, top, bx + 2, 70, "#3a2a1a")
+        for y in range(top, 70, 4):
+            c.line([(bx - 2, y), (bx + 2, y + 4)], "#6a5030")
+        c.line([(bx, top), (bx + arm_, top + 2)], "#3a2a1a", 2)
+        c.line([(bx, top - 6), (bx + arm_, top + 2)], "#5a4028")
+        c.line([(bx, top), (bx, top - 6)], "#3a2a1a")
+        hx_ = bx + int(arm_ * 0.85)
+        c.line([(hx_, top + 2), (hx_, top + 22)], "#2a2018")
+        c.rect(hx_ - 1, top + 22, hx_ + 1, top + 24, "#6a5030")
+    # tents
+    for (x, w) in [(150, 14), (166, 10)]:
+        c.poly([(x, 66), (x + w // 2, 58), (x + w, 66)], "#e8dcc0")
+        c.poly([(x + w // 2, 58), (x + w, 66), (x + w // 2 + 2, 66)], "#b8a888")
+    calm_lower(c, 86, "#9a7a4a", 0.28)
+    vignette(c, "#3a2a18", 0.35)
+    return c.image()
+
+
+@scene("tomb_exterior", "墓穴世界：金字塔", "Tomb World Pyramid")
+def tomb_exterior():
+    c = Canvas(192, 108)
+    sky(c, ["#141618", "#24282a", "#3a3e3c", "#565a52", "#6a6c5e"], 0, 66)
+    clouds(c, 91, ["#2a2e2e", "#3a3e3c"], 0, 40, scale=0.03, thresh=0.52, stretch=5)
+    planet(c, 156, 16, 7, ["#5a5a54", "#7a7a70", "#9a9a8a"], seed=5)       # dead pale sun/moon
+    # barren plain
+    hband(c, 66, 107, ["#2e302c", "#1e201e", "#121412"], seed=6, rough=0.5)
+    # small pyramids/obelisks far off
+    for (x, w, h) in [(30, 14, 10), (162, 18, 12), (14, 8, 6)]:
+        c.poly([(x - w, 68), (x, 68 - h), (x + w, 68)], "#0e100e")
+        c.line([(x, 68 - h), (x + w, 68)], "#1e2a22")
+    # the great black pyramid
+    ax, ay, base, hw = 96, 10, 80, 66
+    c.poly([(ax - hw, base), (ax, ay), (ax + hw, base)], "#0a0c0c")
+    c.poly([(ax, ay), (ax + hw, base), (ax + 12, base)], "#121614")
+    for k in range(1, 9):                      # tiers
+        y = ay + (base - ay) * k / 9
+        half = hw * k / 9
+        c.line([(ax - half, y), (ax + half, y)], "#151a18")
+    # green light: apex, edge conduits, glowing gate
+    for (x0, y0, x1, y1) in [(ax, ay, ax - hw, base), (ax, ay, ax + hw, base), (ax, ay, ax + 12, base)]:
+        for i in range(0, 100):
+            t = i / 100
+            x, y = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
+            if bayer(int(x), int(y)) < 0.5:
+                c.set(x, y, "#2a8a4a")
+    glow(c, ax, ay, 10, ["#1a4a2a", "#4fd16b", "#d8ffe0"], power=1.6, strength=1.0)
+    c.rect(ax - 6, base - 12, ax + 6, base, "#04140a")
+    glow(c, ax, base - 4, 22, ["#0e2a16", "#1e6a34", "#4fd16b", "#c8ffd0"], power=1.6, strength=0.95, ry=10)
+    c.rect(ax - 3, base - 10, ax + 3, base, "#8affa0")
+    # green light pooling on the ground
+    for y in range(base, base + 14):
+        for x in range(ax - 50, ax + 51):
+            d = ((x - ax) / 50) ** 2 + ((y - base) / 14) ** 2
+            if d < 1 and bayer(x, y) < (1 - d) * 0.5:
+                c.set(x, y, "#1e5a30")
+    calm_lower(c, 86, "#101410", 0.35)
+    vignette(c, "#040604", 0.5)
+    return c.image()
+
+
+@scene("tomb_interior", "墓穴内部", "Tomb Halls")
+def tomb_interior():
+    c = Canvas(192, 108)
+    vx, vy, bw, bh = 96, 48, 14, 12
+    corridor(c, vx, vy, bw, bh, ["#0a0c0c", "#14181a", "#1e2426", "#2a3234"],
+             ["#0a0c0c", "#121616", "#1a2020"], ["#060808", "#0c0e10", "#121618"],
+             ["#04140a", "#0a2a14"], rib=["#14181a", "#2a3a32", "#3a5a48"], rib_k=2.4, rib_w=0.08)
+    glow(c, vx, vy, 16, ["#0a2a14", "#1e6a34", "#4fd16b"], strength=0.8, ry=14)
+    # stasis alcoves along both walls
+    zs = [0.95, 0.62, 0.44, 0.33, 0.26, 0.21]
+    for side in (-1, 1):
+        for i in range(len(zs) - 1):
+            z1, z2 = zs[i], zs[i + 1]
+            xa = vx + side * bw / z1
+            xb = vx + side * bw / z2
+            inset = (xb - xa) * 0.18
+            x1_, x2_ = xa + inset, xb - inset
+            top1, bot1 = vy - bh / z1 * 0.75, vy + bh / z1 * 0.85
+            top2, bot2 = vy - bh / z2 * 0.75, vy + bh / z2 * 0.85
+            k1, k2 = (x1_ - vx) / (xa - vx), (x2_ - vx) / (xa - vx) * (z1 / z2) * (xa - vx) / (xb - vx) if xb != vx else 1
+            p = [(x1_, vy - (vy - top1) * (x1_ - vx) / (xa - vx)), (x2_, vy - (vy - top2) * (x2_ - vx) / (xb - vx)),
+                 (x2_, vy + (bot2 - vy) * (x2_ - vx) / (xb - vx)), (x1_, vy + (bot1 - vy) * (x1_ - vx) / (xa - vx))]
+            c.poly(p, "#04100a")
+            # green field fill
+            ys = min(q[1] for q in p); ye = max(q[1] for q in p)
+            xs_, xe = min(x1_, x2_), max(x1_, x2_)
+            for y in range(int(ys), int(ye) + 1):
+                for x in range(int(xs_), int(xe) + 1):
+                    if c.get(x, y) == C("#04100a"):
+                        t = (y - ys) / max(1, ye - ys)
+                        c.set(x, y, ramp_pick(["#0a2a14", "#1e6a34", "#3aa858"], 0.2 + 0.6 * (1 - abs(t - 0.5) * 2), x, y))
+            # dormant warrior silhouette
+            mx = (x1_ + x2_) / 2
+            hgt = (ye - ys) * 0.8
+            wd = max(1, abs(x2_ - x1_) * 0.22)
+            sil = "#041008"
+            c.rect(mx - wd, ye - hgt * 0.78, mx + wd, ye - 1, sil)
+            c.ellipse(mx, ye - hgt * 0.85, wd * 0.9, max(1, hgt * 0.08), sil)
+            c.set(mx + side * 0, ye - hgt * 0.86, "#8affa0")
+            c.line([(x1_, ys), (x2_, ys)], "#6af0a0")
+    calm_lower(c, 84, "#060a08", 0.35)
+    vignette(c, "#000302", 0.55)
+    return c.image()
+
+
+@scene("stasis_gallery", "静滞画廊", "Stasis Gallery")
+def stasis_gallery():
+    c = Canvas(192, 108)
+    vy = 40
+    sky(c, ["#030505", "#060a0a", "#0a1210", "#0e1a16"], 0, vy)
+    # high vaulted ceiling ribs converging
+    for k in range(-8, 9):
+        c.line([(96 + k * 3, vy - 4), (96 + k * 26, -2)], "#0e1614")
+    # vast floor with perspective tiles
+    for y in range(vy, 108):
+        t = (y - vy) / (107 - vy)
+        for x in range(192):
+            c.set(x, y, ramp_pick(["#0a100e", "#121c18", "#1a2622"], t, x, y))
+    for k in range(-10, 11):
+        c.line([(96 + k * 2, vy), (96 + k * 24, 107)], "#0c1412")
+    for d in (1.5, 2.5, 4.5, 9):
+        y = vy + int(67 / d)
+        c.line([(0, y), (191, y)], "#0c1412")
+    # rows of pedestals with stasis fields holding frozen dioramas
+    rnd = random.Random(21)
+    kinds = ["walker", "tank", "tree", "figures", "beast", "ship", "spire"]
+    items = []
+    for row, z in enumerate([0.22, 0.32, 0.48, 0.75]):
+        y = vy + int(60 * z)
+        spread = 0.5 + z * 0.9
+        for col in range(-3, 4):
+            if row == 3 and col == 0:
+                continue
+            x = 96 + int(col * 34 * spread) + rnd.randint(-2, 2)
+            items.append((z, x, y))
+    for (z, x, y) in sorted(items):
+        w, h = int(26 * z), int(30 * z)
+        x0, y0 = x - w // 2, y - h
+        c.rect(x0 - 1, y, x0 + w + 1, y + max(2, int(5 * z)), "#2a3430")       # pedestal
+        c.rect(x0 - 1, y, x0 + w + 1, y, "#4a5a54")
+        for yy in range(y0, y):
+            for xx in range(x0, x0 + w + 1):
+                c.set(xx, yy, ramp_pick(["#0a2214", "#16502c", "#2a8a46"], 0.25 + 0.55 * (yy - y0) / max(1, h), xx, yy))
+        sil = "#041a0c"
+        k = kinds[rnd.randrange(len(kinds))]
+        mx, b = x, y - 1
+        if k == "walker":
+            c.rect(mx - int(4 * z), b - int(18 * z), mx + int(4 * z), b - int(10 * z), sil)
+            c.line([(mx - int(3 * z), b - int(10 * z)), (mx - int(6 * z), b)], sil)
+            c.line([(mx + int(3 * z), b - int(10 * z)), (mx + int(6 * z), b)], sil)
+        elif k == "tank":
+            c.rect(mx - int(9 * z), b - int(7 * z), mx + int(9 * z), b, sil)
+            c.rect(mx - int(4 * z), b - int(12 * z), mx + int(4 * z), b - int(7 * z), sil)
+            c.line([(mx + int(4 * z), b - int(10 * z)), (mx + int(12 * z), b - int(11 * z))], sil)
+        elif k == "tree":
+            c.line([(mx, b), (mx, b - int(14 * z))], sil)
+            c.ellipse(mx, b - int(18 * z), max(1, int(7 * z)), max(1, int(6 * z)), sil)
+        elif k == "figures":
+            for dx in (-5, 0, 5):
+                c.rect(mx + int(dx * z) - 1, b - int(14 * z), mx + int(dx * z), b, sil)
+                c.set(mx + int(dx * z), b - int(16 * z), sil)
+        elif k == "beast":
+            c.ellipse(mx, b - int(6 * z), max(1, int(8 * z)), max(1, int(5 * z)), sil)
+            c.poly([(mx + int(6 * z), b - int(8 * z)), (mx + int(11 * z), b - int(16 * z)), (mx + int(9 * z), b - int(5 * z))], sil)
+        elif k == "ship":
+            c.poly([(mx - int(10 * z), b - int(12 * z)), (mx + int(10 * z), b - int(16 * z)), (mx + int(6 * z), b - int(10 * z))], sil)
+            c.line([(mx, b - int(12 * z)), (mx, b)], sil)
+        else:
+            c.poly([(mx - int(4 * z), b), (mx + int(4 * z), b), (mx, b - int(26 * z))], sil)
+        c.line([(x0, y0), (x0 + w, y0)], "#8affa0")
+        c.line([(x0, y0), (x0, y - 1)], "#3aa858")
+        glow(c, x, y + 2, max(3, int(14 * z)), ["#0e1a16", "#143a24"], strength=0.5, ry=max(1, int(3 * z)))
+    # far end: a bright archway
+    glow(c, 96, vy - 6, 18, ["#0a2214", "#1e6a34", "#2a8a46"], strength=0.7, ry=12)
+    c.rect(92, vy - 12, 100, vy - 1, "#6af0a0")
+    c.rect(94, vy - 10, 98, vy - 1, "#d8ffe0")
+    c.poly([(91, vy - 12), (96, vy - 17), (101, vy - 12)], "#6af0a0")
+    calm_lower(c, 84, "#08100c", 0.35)
+    vignette(c, "#000202", 0.5)
+    return c.image()

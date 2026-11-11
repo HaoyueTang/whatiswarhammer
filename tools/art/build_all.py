@@ -1,7 +1,7 @@
 """Regenerate every PNG in assets/, assets/manifest.js and tools/art/contact_sheet.png.
 
     python3 tools/art/build_all.py            # everything
-    python3 tools/art/build_all.py --check    # only verify the key list against SPEC §7
+    python3 tools/art/build_all.py --check    # only verify the key list against SPEC §7 + §14
 """
 import os
 import sys
@@ -14,7 +14,7 @@ sys.path.insert(0, HERE)
 from PIL import Image  # noqa: E402
 from reg import SPRITES, SCENES, UI  # noqa: E402
 
-MODULES = ["chars_imperium", "chars_chaos", "chars_tau", "chars_xenos", "chars_players",
+MODULES = ["chars_imperium", "chars_chaos", "chars_tau", "chars_xenos", "chars_players", "chars_aeldari", "chars_necrons",
            "omens", "sigils", "icons", "scenes"]
 for _m in MODULES:
     if os.path.exists(os.path.join(HERE, _m + ".py")):
@@ -41,6 +41,22 @@ SPEC_SCENES = ["title", "hive_hab", "hive_spire", "underhive", "manufactorum", "
                "tau_city", "tau_outpost", "spore_sky", "burning_city", "throne_light"]
 SPEC_UI = ["icon_hp", "icon_sanity", "icon_corruption", "icon_faith", "icon_favor", "icon_greatergood",
            "icon_clock", "icon_codex", "icon_save", "icon_lang"]
+
+# SPEC §14 (v0.2) new keys — appended to the lists above so ordering stays stable
+SPEC14_SPRITES = {
+    "player_aeldari": 48, "player_necrons": 48,
+    "aeldari_guardian": 48, "aeldari_seer": 48, "aeldari_ranger": 48, "aeldari_bonesinger": 48,
+    "aeldari_masked": 48, "drukhari_raider": 48, "wraith_construct": 64, "greater_daemon_slaanesh": 96,
+    "necron_warrior": 48, "necron_lord": 64, "cryptek": 48, "flayed_one": 48, "canoptek_scarab": 32,
+    "canoptek_spyder": 64, "dig_leader": 48, "explorator": 48,
+    "omen_farseer": 96, "omen_ynnead": 96, "omen_khaine": 96, "omen_silent_king": 96, "omen_ctan": 96,
+    "omen_stormlord": 96, "omen_collector": 96,
+}
+SPEC14_SCENES = ["craftworld", "webway", "maiden_world", "dig_site", "tomb_exterior", "tomb_interior", "stasis_gallery"]
+SPEC14_UI = ["icon_fate", "icon_worth"]
+SPEC_SPRITES.update(SPEC14_SPRITES)
+SPEC_SCENES += SPEC14_SCENES
+SPEC_UI += SPEC14_UI
 
 
 def check():
@@ -159,7 +175,7 @@ def contact_sheet(rendered, path=None):
 if __name__ == "__main__":
     if "--check" in sys.argv:
         p = check()
-        print("\n".join(p) if p else "OK: all SPEC §7 keys present")
+        print("\n".join(p) if p else "OK: all SPEC §7 + §14 keys present")
         sys.exit(1 if p else 0)
     r = build()
     print("sprites %d  scenes %d  ui %d" % (len(r["sprites"]), len(r["scenes"]), len(r["ui"])))

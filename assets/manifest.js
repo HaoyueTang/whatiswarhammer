@@ -51,7 +51,32 @@ WH.registerSprites({
   sigil_nurgle: {"src": "assets/sprites/sigil_nurgle.png", "w": 32, "h": 32, "name": {"zh": "纳垢印记", "en": "Sigil of the Plague Father"}},
   sigil_tzeentch: {"src": "assets/sprites/sigil_tzeentch.png", "w": 32, "h": 32, "name": {"zh": "奸奇印记", "en": "Sigil of the Changer"}},
   sigil_slaanesh: {"src": "assets/sprites/sigil_slaanesh.png", "w": 32, "h": 32, "name": {"zh": "色孽印记", "en": "Sigil of the Prince of Excess"}},
-  sigil_undivided: {"src": "assets/sprites/sigil_undivided.png", "w": 32, "h": 32, "name": {"zh": "混沌全能印记", "en": "Sigil of Chaos Undivided"}}
+  sigil_undivided: {"src": "assets/sprites/sigil_undivided.png", "w": 32, "h": 32, "name": {"zh": "混沌全能印记", "en": "Sigil of Chaos Undivided"}},
+  player_aeldari: {"src": "assets/sprites/player_aeldari.png", "w": 48, "h": 48, "name": {"zh": "你（幸存的农夫）", "en": "You (Agri-World Survivor)"}},
+  player_necrons: {"src": "assets/sprites/player_necrons.png", "w": 48, "h": 48, "name": {"zh": "你（考古学者）", "en": "You (Archaeologist)"}},
+  aeldari_guardian: {"src": "assets/sprites/aeldari_guardian.png", "w": 48, "h": 48, "name": {"zh": "灵族守护者", "en": "Aeldari Guardian"}},
+  aeldari_seer: {"src": "assets/sprites/aeldari_seer.png", "w": 48, "h": 48, "name": {"zh": "灵族先知", "en": "Aeldari Seer"}},
+  aeldari_ranger: {"src": "assets/sprites/aeldari_ranger.png", "w": 48, "h": 48, "name": {"zh": "灵族游侠", "en": "Aeldari Ranger"}},
+  aeldari_bonesinger: {"src": "assets/sprites/aeldari_bonesinger.png", "w": 48, "h": 48, "name": {"zh": "灵族骨歌者", "en": "Aeldari Bonesinger"}},
+  aeldari_masked: {"src": "assets/sprites/aeldari_masked.png", "w": 48, "h": 48, "name": {"zh": "假面戏者", "en": "Masked Troupe Performer"}},
+  drukhari_raider: {"src": "assets/sprites/drukhari_raider.png", "w": 48, "h": 48, "name": {"zh": "黑暗灵族掠袭者", "en": "Drukhari Raider"}},
+  wraith_construct: {"src": "assets/sprites/wraith_construct.png", "w": 64, "h": 64, "name": {"zh": "灵骸构装体", "en": "Wraith Construct"}},
+  greater_daemon_slaanesh: {"src": "assets/sprites/greater_daemon_slaanesh.png", "w": 96, "h": 96, "name": {"zh": "色孽大魔", "en": "Greater Daemon of Slaanesh"}},
+  necron_warrior: {"src": "assets/sprites/necron_warrior.png", "w": 48, "h": 48, "name": {"zh": "死灵战士", "en": "Necron Warrior"}},
+  necron_lord: {"src": "assets/sprites/necron_lord.png", "w": 64, "h": 64, "name": {"zh": "死灵领主", "en": "Necron Lord"}},
+  cryptek: {"src": "assets/sprites/cryptek.png", "w": 48, "h": 48, "name": {"zh": "技术术士", "en": "Cryptek"}},
+  flayed_one: {"src": "assets/sprites/flayed_one.png", "w": 48, "h": 48, "name": {"zh": "剥皮者", "en": "Flayed One"}},
+  canoptek_scarab: {"src": "assets/sprites/canoptek_scarab.png", "w": 32, "h": 32, "name": {"zh": "冥工圣甲虫", "en": "Canoptek Scarab"}},
+  canoptek_spyder: {"src": "assets/sprites/canoptek_spyder.png", "w": 64, "h": 64, "name": {"zh": "冥工蛛", "en": "Canoptek Spyder"}},
+  dig_leader: {"src": "assets/sprites/dig_leader.png", "w": 48, "h": 48, "name": {"zh": "发掘队长", "en": "Expedition Leader"}},
+  explorator: {"src": "assets/sprites/explorator.png", "w": 48, "h": 48, "name": {"zh": "机械教探索者", "en": "Explorator Magos"}},
+  omen_farseer: {"src": "assets/sprites/omen_farseer.png", "w": 96, "h": 96, "name": {"zh": "先知（异象）", "en": "The Farseer (omen)"}},
+  omen_ynnead: {"src": "assets/sprites/omen_ynnead.png", "w": 96, "h": 96, "name": {"zh": "恩灵（异象）", "en": "Ynnead (omen)"}},
+  omen_khaine: {"src": "assets/sprites/omen_khaine.png", "w": 96, "h": 96, "name": {"zh": "凯恩（异象）", "en": "Khaine (omen)"}},
+  omen_silent_king: {"src": "assets/sprites/omen_silent_king.png", "w": 96, "h": 96, "name": {"zh": "寂静之王（异象）", "en": "The Silent King (omen)"}},
+  omen_ctan: {"src": "assets/sprites/omen_ctan.png", "w": 96, "h": 96, "name": {"zh": "太空死神（异象）", "en": "The C'tan (omen)"}},
+  omen_stormlord: {"src": "assets/sprites/omen_stormlord.png", "w": 96, "h": 96, "name": {"zh": "风暴领主（异象）", "en": "The Stormlord (omen)"}},
+  omen_collector: {"src": "assets/sprites/omen_collector.png", "w": 96, "h": 96, "name": {"zh": "收藏家（异象）", "en": "The Collector (omen)"}}
 });
 
 WH.registerScenes({
@@ -74,7 +99,14 @@ WH.registerScenes({
   tau_outpost: {"src": "assets/scenes/tau_outpost.png", "w": 192, "h": 108, "name": {"zh": "钛帝国前哨", "en": "T'au Outpost"}},
   spore_sky: {"src": "assets/scenes/spore_sky.png", "w": 192, "h": 108, "name": {"zh": "孢子天空", "en": "Spore-Choked Sky"}},
   burning_city: {"src": "assets/scenes/burning_city.png", "w": 192, "h": 108, "name": {"zh": "燃烧的城市", "en": "Burning City"}},
-  throne_light: {"src": "assets/scenes/throne_light.png", "w": 192, "h": 108, "name": {"zh": "王座之光", "en": "The Throne's Light"}}
+  throne_light: {"src": "assets/scenes/throne_light.png", "w": 192, "h": 108, "name": {"zh": "王座之光", "en": "The Throne's Light"}},
+  craftworld: {"src": "assets/scenes/craftworld.png", "w": 192, "h": 108, "name": {"zh": "方舟世界", "en": "Craftworld"}},
+  webway: {"src": "assets/scenes/webway.png", "w": 192, "h": 108, "name": {"zh": "网道", "en": "The Webway"}},
+  maiden_world: {"src": "assets/scenes/maiden_world.png", "w": 192, "h": 108, "name": {"zh": "处女世界", "en": "Maiden World"}},
+  dig_site: {"src": "assets/scenes/dig_site.png", "w": 192, "h": 108, "name": {"zh": "发掘现场", "en": "Excavation Site"}},
+  tomb_exterior: {"src": "assets/scenes/tomb_exterior.png", "w": 192, "h": 108, "name": {"zh": "墓穴世界：金字塔", "en": "Tomb World Pyramid"}},
+  tomb_interior: {"src": "assets/scenes/tomb_interior.png", "w": 192, "h": 108, "name": {"zh": "墓穴内部", "en": "Tomb Halls"}},
+  stasis_gallery: {"src": "assets/scenes/stasis_gallery.png", "w": 192, "h": 108, "name": {"zh": "静滞画廊", "en": "Stasis Gallery"}}
 });
 
 WH.registerUI({
@@ -87,5 +119,7 @@ WH.registerUI({
   icon_clock: {"src": "assets/ui/icon_clock.png", "w": 16, "h": 16},
   icon_codex: {"src": "assets/ui/icon_codex.png", "w": 16, "h": 16},
   icon_save: {"src": "assets/ui/icon_save.png", "w": 16, "h": 16},
-  icon_lang: {"src": "assets/ui/icon_lang.png", "w": 16, "h": 16}
+  icon_lang: {"src": "assets/ui/icon_lang.png", "w": 16, "h": 16},
+  icon_fate: {"src": "assets/ui/icon_fate.png", "w": 16, "h": 16},
+  icon_worth: {"src": "assets/ui/icon_worth.png", "w": 16, "h": 16}
 });
