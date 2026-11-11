@@ -68,6 +68,19 @@ def centroid(mono):
     mag = np.mean(np.abs(np.fft.rfft(f, axis=1)), axis=0); hz = np.fft.rfftfreq(n, 1 / SR)
     return float(np.sum(hz * mag) / (np.sum(mag) + 1e-12))
 
+def low_share(mono, cut=200):
+    """share (%) of spectral magnitude below `cut` Hz — how bass/drum-heavy ('stompy') a mood is"""
+    n = 4096; frames = len(mono) // n
+    if not frames: return 0.0
+    f = mono[: frames * n].reshape(frames, n) * np.hanning(n)
+    mag = np.mean(np.abs(np.fft.rfft(f, axis=1)), axis=0); hz = np.fft.rfftfreq(n, 1 / SR)
+    return float(100 * np.sum(mag[hz < cut]) / (np.sum(mag) + 1e-12))
+
+def onset_rate(mono):
+    """rough onsets per second (positive jumps of the 10 ms energy envelope) — a busy-ness figure"""
+    e = window_rms(mono, int(SR * 0.01)); d = np.diff(np.log(e + 1e-6))
+    return float(np.sum((d[1:] > 0.5) & (d[:-1] <= 0.5)) / (len(mono) / SR))
+
 def window_rms(mono, win):
     n = len(mono) // win
     return np.sqrt(np.mean(mono[: n * win].reshape(n, win) ** 2, axis=1) + 1e-12)
@@ -132,8 +145,9 @@ with sync_playwright() as p:
         page.evaluate("Object.defineProperty(document, 'hidden', {configurable: true, get: () => false}); document.dispatchEvent(new Event('visibilitychange'))")
         page.wait_for_timeout(200)
         check("visible tab resumes audio", page.evaluate(f"{A}._ctx().state === 'running'"))
-        # v0.2 scene → mood wiring plays the new moods
-        for scene, fac, want in [("craftworld", "aeldari", "aeldari"), ("tomb_interior", "necrons", "necron")]:
+        # v0.2 / v0.3 scene → mood wiring plays the new moods
+        for scene, fac, want in [("craftworld", "aeldari", "aeldari"), ("tomb_interior", "necrons", "necron"),
+                                 ("ork_scrapyard", "orks", "orks"), ("gsc_chapel", "gsc", "gsc"), ("forge_floor", "mechanicus", "mechanicus")]:
             got = page.evaluate(f"(() => {{ const m = {A}.moodFor({{scene: '{scene}'}}, {{stats: {{sanity: 90}}}}, '{fac}'); {A}.setMood(m, {{force: true}}); return m; }})()")
             page.wait_for_timeout(500)
             st = page.evaluate(f"(() => {{ const p = {A}._players()['{want}']; return !!(p && p.active) && {A}.current() === '{want}'; }})()")
@@ -151,7 +165,7 @@ with sync_playwright() as p:
         check("no console errors", not errs, "; ".join(errs[:5]))
 
     print(f"\nOffline renders → {OUT}  (sr {SR} Hz, music volume 1.0)")
-    print("  mood     key                         bpm  loop(s) exp/actual   peak dBFS  RMS dBFS  clip  longest quiet  loop-sim  centroid")
+    print("  mood       key                        bpm  loop(s) exp/actual   peak dBFS  RMS dBFS  clip  longest quiet  loop-sim  centroid  <200Hz  onsets/s")
     for m in moods:
         if ONLY and m not in ONLY: continue
         info = page.evaluate(f"{A}.songInfo('{m}')")
@@ -177,8 +191,8 @@ with sync_playwright() as p:
             if a1 + L <= len(mono):
                 corr = spec_sim(mono[a0:a0 + L], mono[a1:a1 + L])
         actual = (loops[0] - 0.06) if loops else None
-        cen = centroid(body)
-        print(f"  {m:8s} {info['key'][:26]:26s} {info['bpm']:4d}  {exp_loop:7.1f} / {('%.1f' % actual) if actual else '  -  ':>6s}   {db(peak):8.1f}  {rms:8.1f}  {clip:4d}  {quiet_s:9.1f} s   {corr:8.2f}  {cen:6.0f} Hz")
+        cen, low, ons = centroid(body), low_share(body), onset_rate(body)
+        print(f"  {m:10s} {info['key'][:24]:24s} {info['bpm']:4d}  {exp_loop:7.1f} / {('%.1f' % actual) if actual else '  -  ':>6s}   {db(peak):8.1f}  {rms:8.1f}  {clip:4d}  {quiet_s:9.1f} s   {corr:8.2f}  {cen:6.0f} Hz  {low:5.1f}%  {ons:6.1f}")
         check(f"{m}: peak < -0.5 dBFS", db(peak) < -0.5)
         check(f"{m}: no clipped samples", clip == 0)
         lo_rms = -40 if m in ("death", "bad") else -32

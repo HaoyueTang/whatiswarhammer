@@ -19,11 +19,16 @@ let errors = 0, warns = 0;
 const err = (m) => { errors++; console.log("  ERROR " + m); };
 const warn = (m) => { warns++; console.log("  warn  " + m); };
 
-const REQUIRED_MOODS = ["title", "calm", "holy", "tense", "battle", "boss", "warp", "tau", "aeldari", "necron", "happy", "death", "bad"];
+const REQUIRED_MOODS = ["title", "calm", "holy", "tense", "battle", "boss", "warp", "tau", "aeldari", "necron", "orks", "gsc", "mechanicus",
+                        "happy", "death", "bad"];
 const REQUIRED_SFX = ["click", "hover", "select", "start", "type", "damage", "heal", "sanity", "corrupt", "event", "warp", "codex", "save", "death", "ending_good",
                       "consequence", "scan"];
-// v0.2 moods: tempo window + minimum share of on-beat melody notes that are chord tones (SPEC §15)
-const NEW_MOODS = {aeldari: {bpm: [64, 76], tones: 75}, necron: {bpm: [80, 96], tones: 75}};
+// v0.2/v0.3 moods: tempo window + minimum share of on-beat melody notes that are chord tones (SPEC §15, §26);
+// drums = drum voices the mood's character relies on (orks big toms, gsc insect clicks, mechanicus anvil hits)
+const NEW_MOODS = {aeldari: {bpm: [64, 76], tones: 75}, necron: {bpm: [80, 96], tones: 75},
+                   orks: {bpm: [130, 150], tones: 75, drums: ["T", "k", "s"]},
+                   gsc: {bpm: [60, 72], tones: 75, drums: ["i"], stacks: [11, -6]},
+                   mechanicus: {bpm: [90, 104], tones: 75, drums: ["a", "m"], stacks: [7]}};
 const API = ["unlock", "setMood", "stop", "sfx", "setMusicVolume", "setSfxVolume", "mute", "isMuted", "moodFor", "current"];
 const WAVES = new Set(["p12", "p25", "p50", "tri", "sine", "saw", "sq"]);
 
@@ -35,7 +40,7 @@ REQUIRED_SFX.forEach((s) => { if (typeof A._sfx[s] !== "function") err("sfx '" +
 A.sfxNames.forEach((s) => { if (!REQUIRED_SFX.includes(s)) warn("extra sfx name " + s); });
 
 console.log("\nSongs");
-console.log("  mood     key                          bpm  intro loop(bars)  loop(s)  lead chord-tones on beats  range");
+console.log("  mood       key                        bpm  intro loop(bars)  loop(s)  lead chord-tones on beats  range");
 for (const id of A.moods) {
   const S = A._songs[id], c = A._compile(id);
   c.errors.forEach((e) => err(e));
@@ -68,11 +73,17 @@ for (const id of A.moods) {
     if (pct < NM.tones) err(`${id}: ${pct}% on-beat chord tones (want ≥ ${NM.tones}%)`);
     const order = S.order.join(",");
     if (order !== "A,B,A2,B2") err(`${id}: order ${order} (want A,B,A2,B2)`);
+    if (c.loopBars !== 32) err(`${id}: loop is ${c.loopBars} bars (want 32)`);
+    const hits = new Set();
+    c.sections.forEach((s) => s.ev.forEach((evs) => (evs || []).forEach((e) => e.k && hits.add(e.k))));
+    (NM.drums || []).forEach((k) => { if (!hits.has(k)) err(`${id}: never plays drum voice '${k}'`); });
+    const stacks = new Set([].concat(...Object.values(S.ch).map((I) => I.stack || [])));
+    (NM.stacks || []).forEach((st) => { if (!stacks.has(st)) err(`${id}: no instrument stacks interval ${st}`); });
   }
   const nm = (m) => ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"][m % 12] + (Math.floor(m / 12) - 1);
   if (strong && pct < 60 && id !== "warp") warn(`${id}: only ${pct}% of on-beat melody notes are chord tones`);
   if (hi > 96 || lo < 40) warn(`${id}: melody range ${nm(lo)}–${nm(hi)} is extreme`);
-  console.log("  " + id.padEnd(8) + " " + String(c.key).padEnd(28) + " " + String(c.bpm).padStart(3) + "  " +
+  console.log("  " + id.padEnd(10) + " " + String(c.key).padEnd(26) + " " + String(c.bpm).padStart(3) + "  " +
     String(c.introBars).padStart(5) + " " + String(c.loopBars).padStart(10) + " " + c.loopSec.toFixed(1).padStart(8) + "  " +
     (strong ? (pct + "% (" + tones + "/" + strong + ")") : "-").padStart(26) + "  " + (strong ? nm(lo) + "–" + nm(hi) : "-") +
     "   [" + names.join(",") + "]");
@@ -120,6 +131,38 @@ const cases = [
   [{scene: "tomb_interior", ending: {kind: "death"}}, {}, "necrons", "death"],
   [{scene: "craftworld", ending: {kind: "good"}}, {}, "aeldari", "happy"],
   [{scene: "dig_site", music: "tense"}, {}, "necrons", "tense"],
+  // v0.3 — Orks / Genestealer Cult / Adeptus Mechanicus (SPEC §26)
+  [{scene: "ork_scrapyard"}, {}, "orks", "orks"],
+  [{scene: "ork_fort"}, {}, "orks", "orks"],
+  [{scene: "ork_fort"}, {stats: {sanity: 10}}, "imperium", "orks"],
+  [{scene: "mine_shaft"}, {}, "gsc", "gsc"],
+  [{scene: "gsc_chapel"}, {}, "gsc", "gsc"],
+  [{scene: "mine_shaft"}, {stats: {sanity: 5}}, "mechanicus", "gsc"],
+  [{scene: "forge_floor"}, {}, "mechanicus", "mechanicus"],
+  [{scene: "mars_vista"}, {}, "mechanicus", "mechanicus"],
+  [{scene: "tech_vault"}, {}, "orks", "mechanicus"],
+  [{scene: "hive_hab"}, {stats: {sanity: 80}}, "orks", "orks"],
+  [{scene: "hive_hab"}, {}, {id: "gsc"}, "gsc"],
+  [{scene: "void"}, {faction: "mechanicus"}, null, "mechanicus"],
+  [{scene: "ruins"}, {}, "orks", "tense"],
+  [{scene: "hive_hab"}, {stats: {sanity: 20}}, "gsc", "tense"],
+  [{scene: "warp"}, {}, "mechanicus", "warp"],
+  [{scene: "cathedral"}, {}, "gsc", "holy"],
+  [{scene: "ork_scrapyard", foe: "gretchin"}, {}, "orks", "battle"],
+  [{scene: "ork_fort", foe: "ork_nob"}, {}, "orks", "boss"],
+  [{scene: "ork_fort", foe: "omen_waaagh"}, {}, "orks", "boss"],
+  [{scene: "mine_shaft", foe: "gsc_neophyte"}, {}, "gsc", "battle"],
+  [{scene: "gsc_chapel", foe: "gsc_patriarch"}, {}, "gsc", "boss"],
+  [{scene: "mine_shaft", foe: "gsc_primus"}, {}, "gsc", "boss"],
+  [{scene: "mine_shaft", foe: "hive_tyrant"}, {}, "gsc", "boss"],
+  [{scene: "forge_floor", foe: "skitarius"}, {}, "mechanicus", "battle"],
+  [{scene: "forge_floor", foe: "daemon_engine"}, {}, "mechanicus", "boss"],
+  [{scene: "tech_vault", foe: "kastelan_robot"}, {}, "mechanicus", "boss"],
+  [{scene: "mars_vista", foe: "dark_mechanicus"}, {}, "mechanicus", "boss"],
+  [{scene: "gsc_chapel", ending: {kind: "bad"}}, {}, "gsc", "bad"],
+  [{scene: "forge_floor", ending: {kind: "death"}}, {}, "mechanicus", "death"],
+  [{scene: "ork_fort", ending: {kind: "good"}}, {}, "orks", "happy"],
+  [{scene: "gsc_chapel", music: "warp"}, {}, "gsc", "warp"],
 ];
 cases.forEach(([n, s, f, want]) => {
   const got = A.moodFor(n, s, f);
@@ -133,7 +176,10 @@ try {
   data.globalThis = data; vm.createContext(data);
   vm.runInContext(fs.readFileSync(path.join(ROOT, "src/js/registry.js"), "utf8"), data);
   const fdir = path.join(ROOT, "data/factions");
-  for (const f of fs.readdirSync(fdir)) if (f.endsWith(".js")) vm.runInContext(fs.readFileSync(path.join(fdir, f), "utf8"), data);
+  for (const f of fs.readdirSync(fdir)) if (f.endsWith(".js")) {
+    try { vm.runInContext(fs.readFileSync(path.join(fdir, f), "utf8"), data); }      // one broken / in-progress file
+    catch (e) { warn(`mood tally skips data/factions/${f}: ${e.message}`); }          // must not hide the others
+  }
   const tally = {};
   for (const fac of Object.values(data.WH.factions)) for (const n of Object.values(fac.nodes || {})) {
     const m = A.moodFor(n, {stats: {sanity: 100}}, fac.id);

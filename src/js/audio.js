@@ -31,7 +31,8 @@
    *   chord pattern {p:"0-1-2-1-", o:octave, r:stepsPerChar}: digits = chord tones upward from the root (0 root, 1 3rd,
    *   2 5th, 3 7th or octave …), R = bass (slash note), O = bass+12, c = whole chord (voice-led), - hold, . rest.
    *   drums: one pattern name per bar (tiled), "-" = none. from:"A" inherits a section; tr:{ch:semis}; inst:{ch:{w}}; vol
-   * Drum pattern: {k kick, s snare, h hat, H open hat, t tom, c crash, m metal, w whoosh, z glitch scan}: strings of meter chars,
+   * Drum pattern: {k kick, s snare, h hat, H open hat, t tom, T big floor tom, c crash, m metal, w whoosh, z glitch scan,
+ *   a anvil clang (inharmonic), i insect chitter}: strings of meter chars,
    *   X accent, x normal, o ghost, . rest.
    * ===================================================================================== */
   var SONGS = {
@@ -285,6 +286,107 @@
       order: ["A", "B", "A2", "B2"]
     },
 
+    /* Orks — "Scrap-Heap Stomp". G minor with blues colour (Db = the b5 chord, a Gm/F#/F line-cliché), 140 bpm. Brassy 50 %
+     * square lead doubled an octave down, offbeat horn stabs on the claps, a "grot" kazoo (12.5 % pulse, wide fast vibrato)
+     * heckling in the repeats, stomp-stomp-clap drums, big floor toms (T) and scrap-metal clanks. Comic but menacing. */
+    orks: {
+      key: "G minor / blues b5", bpm: 140, meter: 16, dly: [0.5, 0.22],
+      ch: {
+        lead: {w: "p50", v: 0.10, env: [0.015, 0.12, 0.75, 0.08], vib: [6, 16, 0.18], stack: [-12], lp: 2600, echo: 0.12, rev: 0.12},
+        horn: {w: "p25", v: 0.05, env: [0.008, 0.1, 0.55, 0.06], lp: 2200, uni: 6, pan: 0.3},
+        grot: {w: "p12", v: 0.035, env: [0.003, 0.08, 0.5, 0.05], vib: [11, 45, 0], echo: 0.2, pan: -0.35},
+        bass: {w: "p50", v: 0.12, env: [0.003, 0.09, 0.7, 0.05], lp: 620}
+      },
+      drums: {v: 0.62, pats: {
+        O1:  {k: "X.X.....X.X.....", s: "....X.......X...", h: "..x...x...x...x.", m: "......o.......o."},
+        O1C: {k: "X.X.....X.X.....", s: "....X.......X...", h: "..x...x...x...x.", c: "X..............."},
+        OT:  {k: "X.......X.......", T: "....X.X.X.X.XxXx", s: "..............X."},
+        O2:  {k: "X......xX.......", T: "....X.......X.x.", s: "........X.......", h: "x.x.x.x.x.x.x.x."},
+        O2C: {k: "X......xX.......", T: "....X.......X.x.", s: "........X.......", c: "X..............."}
+      }},
+      sections: {
+        A: {chords: "Gm | Gm/F# | Gm/F | C/E | Eb | Db | D | D7",
+            lead: "G4:2 G4:2 .:2 Bb4:2 D5:4 G5:4 | D5:4 .:2 D5:2 Bb4:4 G4:4 | G5:6 F5:2 D5:4 Bb4:4 | E5:4 C5:2 E5:2 G5:4 E5:4 | Eb5:2 Eb5:2 .:2 G5:2 Bb5:4 G5:4 | Ab5:2 Ab5:2 .:2 F5:2 Db5:4 F5:4 | A5:4 F#5:4 D5:4 A4:4 | C5:2 D5:2 .:2 C5:2 A4:4 F#4:4",
+            horn: {p: "....c.......c...", o: 4}, bass: {p: "R-R---O-R-R---O-", o: 2}, drums: "O1C O1 O1 O1 O1 O1 O1 OT"},
+        B: {chords: "Cm | Bb | Ab | G | Cm | Bb | Db:8 C:8 | D",
+            lead: "C5:6 Eb5:2 G5:8 | F5:4 D5:4 Bb4:8 | Eb5:6 C5:2 Ab4:8 | B4:4 D5:4 G5:8 | G5:2 G5:2 .:2 G5:2 Eb5:4 C5:4 | F5:2 F5:2 .:2 F5:2 D5:4 Bb4:4 | Ab5:4 F5:4 G5:4 E5:4 | D6:6 C6:2 A5:4 F#5:4",
+            horn: {p: "c-------c-.c-...", o: 4}, bass: {p: "R-------R--R--O-", o: 2}, drums: "O2C O2 O2 O2 O2 O2 O2 OT"},
+        A2: {from: "A", grot: {p: "..0.2...1.0.2...", o: 4}, inst: {lead: {w: ["p50", "p25"]}}},
+        B2: {from: "B", grot: {p: "0-.0-.2-....1.0.", o: 4}, drums: "O2C O2 O2 O2 O2 O2 OT OT"}
+      },
+      order: ["A", "B", "A2", "B2"]
+    },
+
+    /* Genestealer Cult — "Hymn Under the Mine". An F major hymn that keeps going wrong: iv minor (Bbm), bII (Gb) instead of
+     * V before the "amen", bVI (Db); 66 bpm. Slow organ chords, a flute-organ hymn voice, a funeral toll whose octave is
+     * flattened a semitone (stack 11), insect-like chitter clicks (i). On the repeat the hymn voice gains a quiet tritone
+     * shadow beneath it (organum at the "wrong" interval) and the organ turns thin and nasal. */
+    gsc: {
+      key: "F major hymn, flattened", bpm: 66, meter: 16,
+      ch: {
+        lead:  {w: "p50", v: 0.085, env: [0.08, 0.4, 0.8, 0.6], vib: [4.5, 10, 0.4], lp: 2000, stack: [12], rev: 0.5, echo: 0.15},
+        lead2: {w: "p50", v: 0.085, env: [0.1, 0.4, 0.8, 0.7], vib: [3.8, 18, 0.3], lp: 1900, uni: 5, stack: [-6], rev: 0.55, echo: 0.2},
+        organ: {w: "p25", v: 0.045, env: [0.25, 0.5, 0.9, 0.8], lp: 1500, stack: [12], rev: 0.55, gate: 1},
+        toll:  {w: "sine", v: 0.06, env: [0.002, 1.4, 0, 1.6], stack: [11], rev: 0.6, echo: 0.25, pan: 0.3},
+        bass:  {w: "tri", v: 0.24, env: [0.2, 0.5, 0.9, 0.8], rev: 0.2, gate: 1}
+      },
+      drums: {v: 0.6, pats: {
+        C1: {i: "........o......."},
+        C2: {i: "..o.....o...o.o.", t: "o..............."},
+        C3: {i: "o.o.x...o..ox.o.", t: "o.......o......."}
+      }},
+      sections: {
+        A: {chords: "F | Bb | Dm | C | F | Bbm | Gb | F",
+            lead: "A4:4 C5:4 F5:4 E5:4 | D5:8 Bb4:8 | A4:4 D5:4 F5:4 E5:4 | E5:4 G5:4 C5:8 | F5:4 A5:4 C6:6 Bb5:2 | Db6:8 Bb5:4 F5:4 | Gb5:6 F5:2 Db5:8 | C5:4 A4:4 F4:8",
+            organ: {p: "c---------------", o: 3}, bass: {p: "R---------------", o: 2}, drums: "- - - C1 - - - C1"},
+        B: {chords: "Bbm | F | Db | Ab | Bbm | F/A | Gb | C7",
+            lead: "F5:4 Db5:4 Bb4:8 | C5:4 A4:4 C5:4 F5:4 | Ab5:8 F5:4 Db5:4 | Eb5:8 C5:8 | Db5:4 F5:4 Bb5:8 | A5:4 C6:4 A5:4 F5:4 | Bb5:4 Gb5:4 Db5:8 | G5:4 E5:4 C5:4 Bb4:4",
+            toll: "F5:16 | .:16 | Db5:16 | .:16 | Bb4:16 | .:16 | Gb5:16 | .:16",
+            organ: {p: "c---------------", o: 3}, bass: {p: "R-------R-------", o: 2}, drums: "C1 - C2 - C1 - C2 -"},
+        A2: {from: "A", lead: null,
+            lead2: "A4:4 C5:4 F5:4 E5:4 | D5:8 Bb4:8 | A4:4 D5:4 F5:4 E5:4 | E5:4 G5:4 C5:8 | F5:4 A5:4 C6:6 Bb5:2 | Db6:8 Bb5:4 F5:4 | Gb5:6 F5:2 Db5:8 | C5:4 A4:4 F4:8",
+            toll: "F4:16 | .:16 | .:16 | .:16 | F4:16 | .:16 | Gb4:16 | .:16", drums: "C2 C1 C2 C3", inst: {organ: {w: "p12"}}},
+        B2: {from: "B", lead: null,
+            lead2: "F5:4 Db5:4 Bb4:8 | C5:4 A4:4 C5:4 F5:4 | Ab5:8 F5:4 Db5:4 | Eb5:8 C5:8 | Db5:4 F5:4 Bb5:8 | A5:4 C6:4 A5:4 F5:4 | Bb5:4 Gb5:4 Db5:8 | G5:4 E5:4 C5:4 Bb4:4",
+            drums: "C2 C3 C2 C3 C2 C3 C3 C3", inst: {organ: {w: "p12"}}}
+      },
+      order: ["A", "B", "A2", "B2"]
+    },
+
+    /* Adeptus Mechanicus — "Canticle of the Cogitator". F# minor (aeolian) with a C# major turn, 100 bpm. A choir-like
+     * detuned pulse chant sung in parallel fifths (stack 7, organum) on a reciting tone in even syllables, a 12.5 % "data"
+     * ostinato whose root/octave pattern spells a binary word (a new word in each section), a slow choir pad, machine
+     * kick, metal ticks, forge-anvil clangs (a) and a glitch scan (z) in the repeats. */
+    mechanicus: {
+      key: "F# aeolian, organum 5ths", bpm: 100, meter: 16, dly: [0.75, 0.25],
+      ch: {
+        chant: {w: "p50", v: 0.075, env: [0.03, 0.2, 0.8, 0.2], vib: [5, 8, 0.3], lp: 1500, uni: 8, stack: [7], rev: 0.35, echo: 0.12},
+        data:  {w: "p12", v: 0.05, env: [0.002, 0.05, 0.2, 0.03], lp: 2600, pan: -0.3},
+        choir: {w: "p25", v: 0.045, env: [0.6, 0.6, 0.85, 1.0], lp: 1100, uni: 12, vib: [4, 9, 0], rev: 0.55, gate: 1, pan: 0.2},
+        bass:  {w: "tri", v: 0.28, env: [0.005, 0.2, 0.7, 0.1]}
+      },
+      drums: {v: 0.5, pats: {
+        M0: {k: "x.......x.......", m: "..o...o...o...o."},
+        M1: {k: "x.......x.......", m: "o.o.o.o.o.o.o.o.", a: "....X.......X..."},
+        M2: {k: "x.......x.x.....", m: "ooxo.oxoo.xoo.xo", a: "....X.......X..x"},
+        MZ: {k: "x.......x.......", m: "o.o.o.o.........", a: "....X...........", z: "........x......."},
+        MF: {k: "x...x...x...x...", a: "X..x..X..x..X.XX"}
+      }},
+      sections: {
+        A: {chords: "F#m | F#m | D | E | F#m | Bm | D | C#",
+            chant: "C#5:2 C#5:2 C#5:4 C#5:2 C#5:2 A4:4 | C#5:2 C#5:2 C#5:2 E5:2 C#5:4 A4:4 | A4:2 A4:2 A4:2 B4:2 A4:4 F#4:4 | B4:4 B4:2 C#5:2 B4:4 G#4:4 | F#5:2 F#5:2 F#5:2 E5:2 F#5:4 C#5:4 | D5:2 D5:2 D5:2 E5:2 D5:4 B4:4 | A4:2 A4:2 A4:2 B4:2 A4:4 F#4:4 | G#4:4 C#5:4 G#4:8",
+            data: {p: "R.RO.RO.RRO.R.OR", o: 3}, choir: {p: "c---------------", o: 3}, bass: {p: "R-------R-----R-", o: 2},
+            drums: "M0 M0 M0 M0 M1 M1 M1 MF"},
+        B: {chords: "Bm | Bm | G | G | D | E | F#m | C#",
+            chant: "F#5:8 D5:8 | B4:4 D5:4 F#5:8 | G5:8 D5:8 | D5:6 E5:2 D5:4 B4:4 | A5:8 F#5:8 | G#5:8 E5:4 B4:4 | A5:4 C#6:4 A5:4 F#5:4 | G#5:8 E#5:4 C#5:4",
+            data: {p: "ROR.ROO.R.ORRO.O", o: 3}, choir: {p: "c---------------", o: 3}, bass: {p: "R-.R-.R-R-.R-.R-", o: 2},
+            drums: "M1 M1 M1 M1 M1 M1 M1 MF"},
+        A2: {from: "A", data: {p: "RORRO.ORR.OROROO", o: 3}, drums: "M2 M2 M2 MZ M2 M2 M2 MF", inst: {chant: {w: "p25"}}},
+        B2: {from: "B", data: {p: "OROR.RRO.OROO.RO", o: 3}, drums: "M2 M2 M2 MZ M2 M2 MZ MF", inst: {chant: {w: ["p25", "p50"]}}}
+      },
+      order: ["A", "B", "A2", "B2"]
+    },
+
     /* Happy — "Dawn After the Siege". C major, 132 bpm. Bouncy oom-pah bass, offbeat stabs, dotted-rhythm B section. */
     happy: {
       key: "C major", bpm: 132, meter: 16,
@@ -371,7 +473,7 @@
               "7": [0, 4, 7, 10], m7: [0, 3, 7, 10], maj7: [0, 4, 7, 11], dim7: [0, 3, 6, 9], m7b5: [0, 3, 6, 10],
               "6": [0, 4, 7, 9], m6: [0, 3, 7, 9], "5": [0, 7]};
   var RESERVED = {chords: 1, drums: 1, from: 1, tr: 1, inst: 1, vol: 1};
-  var DRUM_KEYS = {k: 1, s: 1, h: 1, H: 1, t: 1, c: 1, m: 1, w: 1, z: 1};
+  var DRUM_KEYS = {k: 1, s: 1, h: 1, H: 1, t: 1, T: 1, c: 1, m: 1, w: 1, z: 1, a: 1, i: 1};
   var VEL = {X: 1, x: 0.75, o: 0.4};
 
   function pcOf(s) {
@@ -738,16 +840,45 @@
     };
   };
   Player.prototype.drumHit = function (k, t, vel) {
-    var P = this, E = P.E, ctx = E.ctx, end = t + (k === "c" ? 1.5 : k === "w" ? 2.6 : k === "z" ? 0.6 : 0.4);
+    var P = this, E = P.E, ctx = E.ctx;
+    var end = t + (k === "c" ? 1.5 : k === "w" ? 2.6 : k === "z" ? 0.6 : k === "a" ? 0.8 : k === "T" ? 0.6 : 0.4);
     if (!E.voiceOk("drum", t, end)) return;
     var g = ctx.createGain(), src, o, extra = null;
     var env = function (peak, decay) { g.gain.setValueAtTime(peak, t); g.gain.exponentialRampToValueAtTime(0.0008, t + decay); };
-    if (k === "k" || k === "t") {
+    if (k === "k" || k === "t" || k === "T") {
       o = ctx.createOscillator(); o.type = "sine";
-      var f0 = k === "k" ? 150 : 140, f1 = k === "k" ? 42 : 72, dec = k === "k" ? 0.28 : 0.38;
+      var big = k === "T";               // T: big floor tom — lower, longer, with a skin "thwack"
+      var f0 = k === "k" ? 150 : big ? 118 : 140, f1 = k === "k" ? 42 : big ? 50 : 72, dec = k === "k" ? 0.28 : big ? 0.55 : 0.38;
       o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dec * 0.4);
-      env(vel * (k === "k" ? 0.95 : 0.6), dec); o.connect(g); g.connect(P.drum); o.start(t); o.stop(t + dec + 0.02); src = o;
-      if (k === "k") { var ck = E.noiseSrc(), cg = ctx.createGain(); cg.gain.setValueAtTime(vel * 0.25, t); cg.gain.exponentialRampToValueAtTime(0.001, t + 0.012); ck.connect(cg); cg.connect(P.f.h); ck.start(t, P.rand()); ck.stop(t + 0.02); }
+      env(vel * (k === "k" ? 0.95 : big ? 0.85 : 0.6), dec); o.connect(g); g.connect(P.drum); o.start(t); o.stop(t + dec + 0.02); src = o;
+      if (k === "k" || big) {
+        var ck = E.noiseSrc(), cg = ctx.createGain(), cd = big ? 0.045 : 0.012;
+        cg.gain.setValueAtTime(vel * (big ? 0.35 : 0.25), t); cg.gain.exponentialRampToValueAtTime(0.001, t + cd);
+        ck.connect(cg); cg.connect(big ? P.f.s : P.f.h); ck.start(t, P.rand()); ck.stop(t + cd + 0.01);
+      }
+    } else if (k === "a") {             // anvil / forge clang: inharmonic free-bar partials + a metallic transient
+      var base = 430 * (0.98 + P.rand() * 0.04), parts = [];
+      g.gain.value = vel * 0.1;
+      [[1, 1, 0.7], [2.76, 0.55, 0.4], [5.4, 0.35, 0.22], [8.93, 0.2, 0.12]].forEach(function (pr, j) {
+        var po = ctx.createOscillator(), pg = ctx.createGain(); po.type = "sine"; po.frequency.value = base * pr[0];
+        pg.gain.setValueAtTime(pr[1], t); pg.gain.exponentialRampToValueAtTime(0.001, t + pr[2]);
+        po.connect(pg); pg.connect(g); po.start(t); po.stop(t + pr[2] + 0.02); parts.push(pg);
+        if (j === 0) src = po; else parts.push(po);
+      });
+      g.connect(P.drum);
+      var an = E.noiseSrc(E.metal), ag = ctx.createGain();
+      ag.gain.setValueAtTime(vel * 0.3, t); ag.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+      an.connect(ag); ag.connect(P.f.m); an.start(t, P.rand()); an.stop(t + 0.04);
+      parts.push(an, ag); extra = parts;
+    } else if (k === "i") {             // insect chitter: 3–5 tiny band-passed clicks at irregular spacing
+      src = E.noiseSrc(); var bpi = ctx.createBiquadFilter(); bpi.type = "bandpass"; bpi.Q.value = 4; bpi.frequency.value = 4200 + P.rand() * 2000;
+      var nc = 3 + Math.floor(P.rand() * 3), tc = t, lvl = vel * 0.9;
+      g.gain.setValueAtTime(0.0001, t);
+      for (var ci = 0; ci < nc; ci++) {
+        g.gain.setValueAtTime(lvl, tc); g.gain.exponentialRampToValueAtTime(0.0001, tc + 0.005);
+        tc += 0.012 + P.rand() * 0.016; lvl *= 0.8;
+      }
+      src.connect(bpi); bpi.connect(g); g.connect(P.drum); src.start(t, P.rand()); src.stop(tc + 0.02); extra = bpi;
     } else if (k === "s") {
       src = E.noiseSrc(); env(vel * 0.7, 0.17); src.connect(g); g.connect(P.f.s); src.start(t, P.rand()); src.stop(t + 0.2);
       o = ctx.createOscillator(); o.type = "triangle"; o.frequency.setValueAtTime(200, t); o.frequency.exponentialRampToValueAtTime(140, t + 0.06);
@@ -776,7 +907,9 @@
       var zl = ctx.createBiquadFilter(); zl.type = "lowpass"; zl.frequency.value = 3800;
       o.connect(g); g.connect(zl); zl.connect(P.drum); zl.connect(P.wet); o.start(t); o.stop(t + dz + 0.06); src = o; extra = zl;
     }
-    if (src) src.onended = function () { try { g.disconnect(); src.disconnect(); if (extra) extra.disconnect(); } catch (e) {} };
+    if (src) src.onended = function () {
+      try { g.disconnect(); src.disconnect(); if (extra) [].concat(extra).forEach(function (n) { n.disconnect(); }); } catch (e) {}
+    };
   };
 
   /* =====================================================================================
@@ -1088,14 +1221,18 @@
 
   /* ---------- mood rules ---------- */
   var BOSS_FOES = {hive_tyrant: 1, daemon_prince: 1, grey_knight: 1, tyranid_warrior: 1, ork_boss: 1, heretic_astartes: 1, chaos_sorcerer: 1,
-                   greater_daemon_slaanesh: 1, wraith_construct: 1, necron_lord: 1, canoptek_spyder: 1, omen_ctan: 1};
+                   greater_daemon_slaanesh: 1, wraith_construct: 1, necron_lord: 1, canoptek_spyder: 1, omen_ctan: 1,
+                   ork_nob: 1, gsc_patriarch: 1, gsc_primus: 1, daemon_engine: 1, kastelan_robot: 1, dark_mechanicus: 1};
   var WARP_SCENES = {warp: 1, daemon_world: 1, cult_shrine: 1};
   var HOLY_SCENES = {cathedral: 1, throne_light: 1};
   var TAU_SCENES = {tau_city: 1, tau_outpost: 1};
   var AELDARI_SCENES = {craftworld: 1, webway: 1, maiden_world: 1};
   var NECRON_SCENES = {tomb_exterior: 1, tomb_interior: 1, stasis_gallery: 1, dig_site: 1};
+  var ROUTE_SCENES = {ork_scrapyard: "orks", ork_fort: "orks", mine_shaft: "gsc", gsc_chapel: "gsc",            // v0.3
+                      forge_floor: "mechanicus", mars_vista: "mechanicus", tech_vault: "mechanicus"};
   var TENSE_SCENES = {trench: 1, burning_city: 1, ruins: 1, spore_sky: 1};
-  var FACTION_MOOD = {tau: "tau", aeldari: "aeldari", necrons: "necron", necron: "necron"};   // route default instead of calm
+  var FACTION_MOOD = {tau: "tau", aeldari: "aeldari", necrons: "necron", necron: "necron",   // route default instead of calm
+                      orks: "orks", gsc: "gsc", mechanicus: "mechanicus"};
   function moodFor(node, state, faction) {
     if (!node) return "calm";
     if (node.music && SONGS[node.music]) return node.music;
@@ -1108,6 +1245,7 @@
     if (TAU_SCENES[sc]) return "tau";
     if (AELDARI_SCENES[sc]) return "aeldari";
     if (NECRON_SCENES[sc]) return "necron";
+    if (ROUTE_SCENES.hasOwnProperty(sc)) return ROUTE_SCENES[sc];
     var san = state && state.stats ? state.stats.sanity : null;
     if (TENSE_SCENES[sc] || (typeof san === "number" && san < 30)) return "tense";
     var fid = typeof faction === "string" ? faction : (faction && faction.id) || (state && state.faction);
