@@ -250,3 +250,18 @@ Each faction gets `renownHelp:{zh,en}` (≤80 zh / ≤55 en words): what the fac
 - Reveal: the ending screen's "你遇到的邪神" section shows the final taint per god as bars with a verdict line (e.g. "恐虐在注视你" ≥30, "你已被打上恐虐的烙印" ≥70). Run records store taint.
 - Content: every route has **3–5 route-flavoured taint events** (at least 2 polluting different gods, at least 1 cleansing — e.g. Imperium confession / Ecclesiarch blessing, T'au Ethereal's calm, Aeldari spirit-stone ward, Necron null-field / soulless calm, Chaos route: a rival god's purge or a moment of human kindness), in `data/events_taint.js` with `factions:[route]`, plus **4 claim events** (one per god, `factions:["*"]`) and 2–4 shared taint events. Existing shared chaos events in data/events.js may gain `taint` deltas on their choices.
 Load order: … data/events.js → data/events_taint.js → data/factions/*.
+
+## 19. Claims become endings (v0.2.1) — user decision: raise taint, gods separate, lore-based
+- Each god's taint is computed and resolved independently (already true). Gains are scaled per route by `faction.taintMod:{khorne,nurgle,tzeentch,slaanesh}` (multiplier on POSITIVE deltas only; cleanses unscaled). Lore guide:
+  | route | taintMod | why | target claim rate (random play, any god) |
+  |---|---|---|---|
+  | imperium | all 0.9 | faith and the Ecclesiarchy give some protection; humans are still exposed | 12–18% |
+  | chaos | all 1.3 | living inside a cult, offerings everywhere | 20–30% |
+  | tau | all 0.7 | T'au space is warp-quiet; its humans are not | 6–12% |
+  | aeldari | slaanesh 1.3, others 0.9 | proximity to Aeldari souls, webway, She Who Thirsts hunting | 12–18% (Slaanesh most common) |
+  | necrons | all 0.5 | tomb pylons and soulless hosts suppress the warp | 3–8% |
+- Base deltas go up so the targets are met: polluting event choices ~+25–30, node/choice deltas ~1.5–2× current; cleanses keep their size.
+- Claim event choices may carry `goto:"node"` or `goto:{imperium:"imp_end_claim_khorne", …}` — the engine jumps there instead of resuming the pending node (ending nodes allowed).
+- Flow: god hits 100 → claim event (accept / resist). Accept → `goto` that route's claim ending. Resist → heavy cost, that god's taint −40, flag `resisted_<god>`. If the same god reaches 100 again, the claim event fires a second time and only the accept/forced choice is available (`require:{flag:"resisted_<god>"}` choices); claim events may fire at most twice per run.
+- Endings: one per route × god = 20 nodes `<prefix>end_claim_<god>` (e.g. `imp_end_claim_khorne`), `ending.kind` "bad" — except on the Chaos route, where a claim by the god you devoted yourself to (flags from the god-path choices) may branch to a dark "good" variant via a short pre-ending node. Every claim ending has `ending.cause`, a scene fitting the god, sigil/daemon speaker, ≤90 zh text, and says something true about how that god treats its own in-lore (Khorne: endless war, skulls for the throne; Nurgle: loving rot, the garden; Tzeentch: plans within plans, change, betrayal; Slaanesh: excess that empties you). If a combination is lore-implausible as a full claim (e.g. deep in a Necron tomb), write the ending as the god taking you the moment you leave the null field, or as a lesser fate — explain choices in DEVLOG.
+- Ending screen keeps the taint reveal; claim endings also unlock the god's codex entry `more`.
