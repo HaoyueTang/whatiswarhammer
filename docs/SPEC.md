@@ -300,5 +300,5 @@ User: origins must trade off, not just lose — e.g. a labourer has more HP but 
 - Origin cards show the trade-off clearly (e.g. "生命上限 120 ▲ · 理智上限 85 ▼").
 
 ## 24. Difficulty icons (难易图标)
-- Difficulty is **measured, not hand-set**: `node tools/dev/validate.js --write-difficulty` runs the fixed-seed simulation (seeds 1/5/9, 3000 runs) and writes the generated file `data/difficulty.js`: `WH.difficulty = { imperium:{level, death}, "imperium/hive":{level, death}, … }` where `death` = random-play death rate (incl. claim endings counted separately as `claim`), `level` = 1 易 (<24%), 2 中 (24–29%), 3 难 (≥29%). Re-run it whenever balance changes; the release checklist includes it.
-- UI: race cards and origin cards show 1–3 small pixel skulls (drawn in code like the slime, faction-tinted, empty skulls for the remainder) + label 易/中/难 (Easy/Normal/Hard); tooltip: "随机游玩死亡率约 30% · 邪神占有约 14%". Missing file → no icons.
+- Race cards and origin cards show **only** 1–3 small pixel skulls (drawn in code like the slime, faction-tinted, empty skulls for the remainder). No text label, no tooltip, no numbers (aria-label "难度 n/3" for screen readers only).
+- Levels live in `data/difficulty.js` (`WH.difficulty = {imperium:3, "imperium/hive":3, …}`); `node tools/dev/validate.js --write-difficulty` may regenerate them from the fixed-seed simulation. Missing file → no skulls.
