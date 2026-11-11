@@ -417,7 +417,9 @@ function checkFaction(f) {
       if (n.ending.kind !== "bad" && !(f.id === "chaos" && n.ending.kind === "good")) warn(`${f.id}/${id}: claim ending kind "${n.ending.kind}" (SPEC §19: bad; chaos may be good)`);
       if (!n.ending.cause) warn(`${f.id}/${id}: claim ending without cause`);
     }
-    if (!eventGotoTargets(f.id).includes(id)) warn(`${f.id}/${id}: no claim-event goto leads here`);
+    // goto may land on a short pre-ending node (SPEC §19 chaos "chosen" branch): follow its choices one hop
+    const gt = eventGotoTargets(f.id), viaPre = gt.some((t) => nodes[t] && (nodes[t].choices || []).some((c) => [c.next, c.roll && c.roll.success, c.roll && c.roll.fail].includes(id)));
+    if (!gt.includes(id) && !viaPre) warn(`${f.id}/${id}: no claim-event goto leads here`);
   }
   for (const id of ids) {
     if (!nodes[id].ending) continue;
@@ -453,7 +455,7 @@ function checkFaction(f) {
   WH.events.forEach((e) => { if ((e.factions || ["*"]).some((x) => x === "*" || x === f.id)) { [].concat(e.codex || []).forEach((c) => codexUnlockable.add(c)); (e.choices || []).forEach((c) => [].concat(c.codex || []).forEach((x) => codexUnlockable.add(x))); } });
   for (const id of ids) {
     const n = nodes[id], nw = `${f.id}/${id}`;
-    if (typeof n.chapter !== "number" && !(n.ending && n.ending.kind === "death")) warn(`${nw}: no chapter`);
+    if (typeof n.chapter !== "number" && !(n.ending && n.ending.kind === "death") && !/_claim_/.test(nw)) warn(`${nw}: no chapter`);  // claim nodes fire in any chapter
     if (typeof n.chapter === "number" && f.chapters && !f.chapters[n.chapter]) err(`${nw}: chapter ${n.chapter} has no title`);
     scene(n.scene, nw);
     if (n.speaker) { sprite(n.speaker.sprite, nw + ".speaker"); checkL(n.speaker.name, nw + ".speaker.name"); }
