@@ -290,3 +290,11 @@ Goal: newcomers aren't burdened, but people who know the setting spot named wars
 - **Full backup**: Settings → 数据 / Data: "导出全部进度" exports every `whatiswh.*` key as one JSON (game version + timestamp); "导入全部进度" merges it back (records union by run id, codex union, endings max, saves only into empty slots unless the player confirms overwrite). Inside sandboxed pages where downloads are blocked, offer "复制到剪贴板" and a paste box instead.
 - Note for players (README): progress belongs to the browser and the address it was opened from (local file vs. GitHub Pages vs. artifact are separate) — use the full backup to move it.
 - Repo/local folder: files players may customise (`assets/audio/files.js`, any `*.local.*`, `saves/`, `user/`, `logs/`, user audio files) are never overwritten by the local sync (`.sync/apply.py`).
+
+## 23. Origin trade-offs (出身：有得有失)
+User: origins must trade off, not just lose — e.g. a labourer has more HP but less Sanity; overall balanced.
+- Stat caps become per run: an origin may set `max:{hp, sanity}` (default 100 each; allowed 70–130). Start values default to the caps (`stats.hp/sanity` may be lower than max but rarely). The engine clamps hp/sanity to the run's caps (`state.max`), corruption and renown stay 0–100. HUD bars scale to the cap and show e.g. "118/120". Saves store `max` (migration: missing → 100/100).
+- Budget rule (validator): for each origin, (maxHp − 100) + (maxSanity − 100) + (renown − 10) − 1.5 × corruption must be within ±5 of 0 — every bonus is paid for. Each non-default origin should have at least one stat above default and one below.
+- Every origin (including the default one) should get a distinct, lore-fitting profile; the default origin may stay 100/100/0/10.
+- Balance target (random play): per-origin death rate within ±6 points of the route average, and every origin still reaches all of its route's endings.
+- Origin cards show the trade-off clearly (e.g. "生命上限 120 ▲ · 理智上限 85 ▼").
