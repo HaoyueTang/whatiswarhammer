@@ -3,6 +3,13 @@
 Format follows Keep a Changelog; versions follow SemVer.
 
 ## [Unreleased]
+
+## [0.2.0] — 2026-11-11
+### Added
+- Story: 2 new routes — Aeldari (97 nodes, 13 endings) and Necrons (95 nodes, 11 endings); race → origin selection with 3 origins per race (prologues + origin-only choices); consequence beats after choices on all routes; faction-stat help (`renownHelp`); hidden chaos-god taint on choices; 32 taint events (5 per route incl. cleanses, 4 claim events, 3 shared); codex taxonomy v2 (`race` × `type`), 156 entries.
+- Art: 18 sprites, 7 omens, 7 scenes, 2 icons for Aeldari & Necrons.
+- Release: public `main` built from `dev` via `release/build_public.py`; gameplay-only public README.
+- Audio: 2 new original moods — `aeldari` (D dorian 70 bpm, harp arps + long echo) and `necron` (A minor/locrian 88 bpm, drones, narrow pulses, metallic ticks, glitch scans); `moodFor` maps the new route scenes/factions and new boss foes; new SFX `consequence` (consequence panel) and `scan`.
 - Polish: toasts moved off the codex header (max 3); locked place tiles darkened.
 
 ## [0.1.0] — 2026-11-11

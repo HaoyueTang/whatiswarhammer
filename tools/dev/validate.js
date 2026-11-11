@@ -37,11 +37,23 @@ const SPEC_SPRITES = ("player_imperium player_chaos player_tau hive_foreman prea
 const SPEC_SCENES = ("title hive_hab hive_spire underhive manufactorum cathedral barracks trench ship_interior warp void ruins " +
   "jungle cult_shrine daemon_world tau_city tau_outpost spore_sky burning_city throne_light").split(" ");
 const SPEC_UI = "icon_hp icon_sanity icon_corruption icon_faith icon_favor icon_greatergood icon_clock icon_codex icon_save icon_lang".split(" ");
+/* SPEC §14 (v0.2) keys — referenced data is accepted before the art lands (warning "art pending", UI shows a placeholder) */
+const SPEC2_SPRITES = ("player_aeldari player_necrons aeldari_guardian aeldari_seer aeldari_ranger aeldari_bonesinger aeldari_masked " +
+  "drukhari_raider wraith_construct greater_daemon_slaanesh necron_warrior necron_lord cryptek flayed_one canoptek_scarab canoptek_spyder " +
+  "dig_leader explorator omen_farseer omen_ynnead omen_khaine omen_silent_king omen_ctan omen_stormlord omen_collector").split(" ");
+const SPEC2_SCENES = "craftworld webway maiden_world dig_site tomb_exterior tomb_interior stasis_gallery".split(" ");
+const SPEC2_UI = ["icon_fate", "icon_worth"];
+const RACES = ["imperium", "chaos", "tau", "aeldari", "necrons", "orks", "tyranids", "other"];
+const TYPES = ["figure", "deity", "organization", "unit", "place", "concept"];
+const CODEX_FILES = ["data/codex.js", "data/codex_aeldari.js", "data/codex_necrons.js"];
+const FACTION_FILES = ["imperium", "chaos", "tau", "aeldari", "necrons"];
 const GODS = ["khorne", "nurgle", "tzeentch", "slaanesh", "undivided", "other"];
+const TAINT_GODS = ["khorne", "nurgle", "tzeentch", "slaanesh"];   // SPEC §18
 const CODEX_CATS = ["leader", "enemy", "boss", "god", "lore", "place"];
-const CODEX_FACTIONS = ["imperium", "chaos", "tau", "xenos", "any"];
+const CODEX_FACTIONS = ["imperium", "chaos", "tau", "aeldari", "necrons", "xenos", "any"];
 const STATS = ["hp", "sanity", "corruption", "renown"];
-const PREFIX = {imperium: "imp_", chaos: "cha_", tau: "tau_"};
+const PREFIX = {imperium: "imp_", chaos: "cha_", tau: "tau_", aeldari: "eld_", necrons: "nec_"};
+const RESULT_ZH = 50, RESULT_EN = 35;   // SPEC §11 consequence text limits (warn)
 
 /* ---------- load into vm ---------- */
 const ctx = vm.createContext({console: {log() {}, warn() {}, error() {}}, Math, Date, JSON, Object, Array});
@@ -56,12 +68,40 @@ load("src/js/registry.js", true);
 const hasManifest = load("assets/manifest.js", false);
 if (SAMPLE) load("tools/dev/sample_data.js", true);
 else {
-  load("data/codex.js", true);
+  // codex files in SPEC §13 load order; detect ids that a later file silently overwrites
+  const codexOwner = {};
+  CODEX_FILES.forEach((rel, i) => {
+    const before = ctx.WH ? Object.assign({}, ctx.WH.codex) : {};
+    const snap = ctx.WH ? JSON.stringify(Object.keys(ctx.WH.codex)) : "[]";
+    // capture registrations of this file
+    let ids = [];
+    if (ctx.WH) {
+      const orig = ctx.WH.registerCodex;
+      ctx.WH.registerCodex = (obj) => { ids = ids.concat(Object.keys(obj)); orig(obj); };
+      if (load(rel, i === 0)) ids.forEach((id) => { if (codexOwner[id] && codexOwner[id] !== rel) err(`codex id "${id}" in ${rel} overwrites the one in ${codexOwner[id]}`); else codexOwner[id] = rel; });
+      ctx.WH.registerCodex = orig;
+    }
+    void before; void snap;
+  });
+  ctx.__codexOwner = codexOwner;
   load("data/events.js", true);
+  load("data/events_taint.js", false);
   const fdir = path.join(ROOT, "data", "factions");
-  const files = fs.existsSync(fdir) ? fs.readdirSync(fdir).filter((f) => f.endsWith(".js")).sort() : [];
-  for (const id of ["imperium", "chaos", "tau"]) if (!files.includes(id + ".js")) warn(`data/factions/${id}.js missing (index.html loads it)`);
+  const files = fs.existsSync(fdir) ? fs.readdirSync(fdir).filter((f) => f.endsWith(".js")).sort((a, b) => {
+    const ia = FACTION_FILES.indexOf(a.slice(0, -3)), ib = FACTION_FILES.indexOf(b.slice(0, -3));
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || (a < b ? -1 : 1);
+  }) : [];
+  for (const id of FACTION_FILES) if (!files.includes(id + ".js")) warn(`data/factions/${id}.js missing (index.html loads it)`);
   for (const f of files) load("data/factions/" + f, false);
+  // index.html must load every data file that exists (plain <script> tags, no fetch)
+  const html = fs.existsSync(path.join(ROOT, "index.html")) ? fs.readFileSync(path.join(ROOT, "index.html"), "utf8") : "";
+  const tags = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((m) => m[1]);
+  const onDisk = CODEX_FILES.concat(["data/events.js", "data/events_taint.js"], files.map((f) => "data/factions/" + f)).filter((r) => fs.existsSync(path.join(ROOT, r)));
+  for (const r of onDisk) if (!tags.includes(r)) err(`index.html does not load ${r}`);
+  const order = tags.filter((x) => x.startsWith("data/"));
+  const want = CODEX_FILES.concat(["data/events.js", "data/events_taint.js"]);
+  let last = -1;
+  for (const r of want) { const i = order.indexOf(r); if (i < 0) continue; if (i < last) err(`index.html: ${r} loads out of SPEC §13 order`); last = i; }
 }
 load("src/js/engine.js", true);
 const WH = ctx.WH;
@@ -81,8 +121,14 @@ const spriteKeys = new Set(hasManifest && Object.keys(WH.sprites).length ? Objec
 const sceneKeys = new Set(hasManifest && Object.keys(WH.scenes).length ? Object.keys(WH.scenes) : SPEC_SCENES);
 const uiKeys = new Set(hasManifest && Object.keys(WH.ui).length ? Object.keys(WH.ui) : SPEC_UI);
 if (!hasManifest) note("assets/manifest.js not found — asset keys checked against the SPEC §7 key list instead");
-const sprite = (k, where) => { if (k && !spriteKeys.has(k)) err(`${where}: unknown sprite "${k}"`); };
-const scene = (k, where) => { if (!k) err(`${where}: missing scene`); else if (!sceneKeys.has(k)) err(`${where}: unknown scene "${k}"`); };
+const pending = new Map();   // SPEC §14 keys used before the art registered them: key -> count
+const pend = (k) => pending.set(k, (pending.get(k) || 0) + 1);
+const sprite = (k, where) => { if (k && !spriteKeys.has(k)) { if (SPEC2_SPRITES.includes(k)) pend("sprite " + k); else err(`${where}: unknown sprite "${k}"`); } };
+const scene = (k, where) => {
+  if (!k) err(`${where}: missing scene`);
+  else if (!sceneKeys.has(k)) { if (SPEC2_SCENES.includes(k)) pend("scene " + k); else err(`${where}: unknown scene "${k}"`); }
+};
+const uiIcon = (k, where) => { if (!uiKeys.has(k)) { if (SPEC2_UI.includes(k)) pend("ui " + k); else err(`${where}: unknown icon "${k}"`); } };
 const unknownCodex = new Map();   // id -> [where] (reported once per id at the end)
 const codexRef = (ids, where) => { for (const id of [].concat(ids || [])) if (!WH.codex[id]) { if (!unknownCodex.has(id)) unknownCodex.set(id, []); unknownCodex.get(id).push(where); } };
 function flushUnknownCodex() {
@@ -95,6 +141,14 @@ function checkEffects(e, where) {
     if (STATS.includes(k)) { if (typeof e[k] !== "number") err(`${where}: effect ${k} not a number`); }
     else if (k === "set") { if (typeof e.set !== "object") err(`${where}: effects.set must be an object`); }
     else if (k === "unset") { if (!Array.isArray(e.unset)) err(`${where}: effects.unset must be an array`); }
+    else if (k === "taint") {
+      if (!e.taint || typeof e.taint !== "object" || Array.isArray(e.taint)) { err(`${where}: effects.taint must be {god:±n} or {all:±n}`); continue; }
+      for (const g of Object.keys(e.taint)) {
+        if (!TAINT_GODS.includes(g) && g !== "all") err(`${where}: taint key "${g}" (khorne|nurgle|tzeentch|slaanesh|all)`);
+        if (typeof e.taint[g] !== "number" || !isFinite(e.taint[g])) err(`${where}: taint.${g} not a number`);
+        else if (Math.abs(e.taint[g]) > 100) warn(`${where}: taint.${g} ${e.taint[g]} (|n| > 100)`);
+      }
+    }
     else warn(`${where}: unknown effect key "${k}"`);
   }
 }
@@ -103,7 +157,12 @@ function checkRequire(r, where, flagsSet) {
   for (const q of [].concat(r)) {
     const keys = Object.keys(q);
     if (!keys.length) err(`${where}: empty require`);
-    for (const k of keys) if (!["flag", "notFlag", "stat", "min", "max"].includes(k)) err(`${where}: unknown require key "${k}"`);
+    for (const k of keys) if (!["flag", "notFlag", "stat", "min", "max", "taint"].includes(k)) err(`${where}: unknown require key "${k}"`);
+    if (q.taint !== undefined) {
+      if (!TAINT_GODS.includes(q.taint)) err(`${where}: require.taint "${q.taint}" invalid`);
+      if (q.min === undefined && q.max === undefined) err(`${where}: require.taint without min/max`);
+      if (q.stat) err(`${where}: require has both stat and taint (split into two requires)`);
+    }
     if (q.stat && !STATS.includes(q.stat)) err(`${where}: require.stat "${q.stat}" invalid`);
     if (q.stat && q.min === undefined && q.max === undefined) err(`${where}: require.stat without min/max`);
     for (const f of [q.flag, q.notFlag]) if (f && !flagsSet.has(f)) warn(`${where}: flag "${f}" is never set by any effect`);
@@ -113,10 +172,10 @@ function checkRequire(r, where, flagsSet) {
 /* ---------- manifest ---------- */
 function checkManifest() {
   if (!hasManifest) return;
-  const groups = [["sprites", WH.sprites, SPEC_SPRITES], ["scenes", WH.scenes, SPEC_SCENES], ["ui", WH.ui, SPEC_UI]];
+  const groups = [["sprites", WH.sprites, SPEC_SPRITES.concat(SPEC2_SPRITES)], ["scenes", WH.scenes, SPEC_SCENES.concat(SPEC2_SCENES)], ["ui", WH.ui, SPEC_UI.concat(SPEC2_UI)]];
   for (const [g, reg, spec] of groups) {
     const missing = spec.filter((k) => !reg[k]);
-    if (missing.length) warn(`manifest: ${missing.length} SPEC §7 ${g} key(s) not registered: ${missing.join(", ")}`);
+    if (missing.length) warn(`manifest: ${missing.length} SPEC §7/§14 ${g} key(s) not registered: ${missing.join(", ")}`);
     for (const k of Object.keys(reg)) {
       const a = reg[k];
       if (!a || !a.src) { err(`manifest ${g}.${k}: missing src`); continue; }
@@ -130,8 +189,12 @@ function checkManifest() {
 function checkCodex() {
   const ids = Object.keys(WH.codex);
   if (!ids.length) err("codex: no entries registered");
+  const noRace = [], noType = [];
   for (const id of ids) {
     const c = WH.codex[id], w = `codex.${id}`;
+    if (c.race === undefined) noRace.push(id); else if (!RACES.includes(c.race)) err(`${w}: bad race "${c.race}" (${RACES.join("|")})`);
+    if (c.type === undefined) noType.push(id); else if (!TYPES.includes(c.type)) err(`${w}: bad type "${c.type}" (${TYPES.join("|")})`);
+    if (c.type === "place" && c.cat !== undefined && c.cat !== "place") warn(`${w}: type "place" but cat "${c.cat}" (places view uses type)`);
     if (!CODEX_CATS.includes(c.cat)) err(`${w}: bad cat "${c.cat}"`);
     if (!CODEX_FACTIONS.includes(c.faction)) err(`${w}: bad faction "${c.faction}"`);
     sprite(c.sprite, w);
@@ -153,9 +216,28 @@ function checkCodex() {
       }
     }
   }
+  const short = (a) => a.slice(0, 6).join(", ") + (a.length > 6 ? `, … (+${a.length - 6})` : "");
+  if (noRace.length) warn(`codex: ${noRace.length} entr${noRace.length > 1 ? "ies" : "y"} without race (SPEC §13; UI derives one): ${short(noRace)}`);
+  if (noType.length) warn(`codex: ${noType.length} entr${noType.length > 1 ? "ies" : "y"} without type (SPEC §13; UI derives one from cat): ${short(noType)}`);
+}
+/* race × type table, using the same fallback as the UI for entries that lack the fields */
+const CAT_TYPE = {leader: "figure", boss: "figure", enemy: "unit", god: "deity", lore: "concept", place: "place"};
+function codexTable() {
+  const tab = {}, tot = {};
+  for (const id of Object.keys(WH.codex)) {
+    const c = WH.codex[id];
+    const r = RACES.includes(c.race) ? c.race : "(none)";
+    const t = TYPES.includes(c.type) ? c.type : "(" + (CAT_TYPE[c.cat] || "?") + ")";
+    tab[r] = tab[r] || {}; tab[r][t] = (tab[r][t] || 0) + 1; tot[r] = (tot[r] || 0) + 1;
+  }
+  const cols = TYPES.concat([...new Set(Object.values(tab).flatMap((o) => Object.keys(o)).filter((t) => !TYPES.includes(t)))]);
+  const rows = RACES.concat(Object.keys(tab).filter((r) => !RACES.includes(r))).filter((r) => tab[r]);
+  console.log("codex race × type:");
+  console.log("  " + "race".padEnd(10) + cols.map((c) => c.slice(0, 9).padStart(10)).join("") + "     total");
+  for (const r of rows) console.log("  " + r.padEnd(10) + cols.map((c) => String(tab[r][c] || "·").padStart(10)).join("") + String(tot[r]).padStart(10));
 }
 function checkEvents() {
-  const seen = new Set(), perGod = {};
+  const seen = new Set(), perGod = {}, claims = {};
   if (!WH.events.length) warn("events: none registered");
   for (const e of WH.events) {
     const w = `event.${e.id}`;
@@ -164,6 +246,13 @@ function checkEvents() {
     seen.add(e.id);
     if (!GODS.includes(e.god)) err(`${w}: bad god "${e.god}"`);
     perGod[e.god] = (perGod[e.god] || 0) + 1;
+    if (e.trigger !== undefined && e.trigger !== "claim") err(`${w}: unknown trigger "${e.trigger}"`);
+    if (e.trigger === "claim") {
+      if (!TAINT_GODS.includes(e.god)) err(`${w}: claim event needs god khorne|nurgle|tzeentch|slaanesh`);
+      claims[e.god] = (claims[e.god] || 0) + 1;
+      if (e.cleanse) warn(`${w}: claim event marked cleanse`);
+    }
+    if (e.cleanse !== undefined && typeof e.cleanse !== "boolean") err(`${w}: cleanse must be true/false`);
     for (const f of e.factions || []) if (f !== "*" && !WH.factions[f]) warn(`${w}: faction "${f}" not loaded`);
     scene(e.scene, w);
     if (e.speaker) { sprite(e.speaker.sprite, w + ".speaker"); checkL(e.speaker.name, w + ".speaker.name"); }
@@ -179,10 +268,49 @@ function checkEvents() {
     });
   }
   if (!SAMPLE) {
+    for (const g of TAINT_GODS) if (!claims[g]) warn(`events: no claim event (trigger:"claim") for ${g} — taint 100 does nothing (SPEC §18)`);
+    for (const g of Object.keys(claims)) if (claims[g] > 1) warn(`events: ${claims[g]} claim events for ${g} (first eligible fires)`);
+  }
+  if (!SAMPLE) {
     if (WH.events.length && WH.events.length < 10) warn(`events: ${WH.events.length} registered (spec ~12)`);
     for (const g of ["khorne", "nurgle", "tzeentch", "slaanesh"]) if ((perGod[g] || 0) < 2) warn(`events: god ${g} has ${perGod[g] || 0} events (spec ≥2)`);
   }
   return perGod;
+}
+
+/* ---------- origins (SPEC §16) ---------- */
+function checkOrigins(f, origins, nodes, flagsSet) {
+  const w = `faction.${f.id}.origins`;
+  if (f.origins === undefined) { if (!SAMPLE && ["imperium", "chaos", "tau", "aeldari", "necrons"].includes(f.id)) note(`${f.id}: no origins yet — engine uses one default origin built from the faction fields`); return; }
+  if (!Array.isArray(f.origins) || !f.origins.length) { err(`${w}: must be a non-empty array`); return; }
+  if (!SAMPLE && f.origins.length !== 3) warn(`${w}: ${f.origins.length} origins (spec 3)`);
+  const seen = new Set();
+  const base = f.startStats || f.origins[0].stats || {};
+  const total = (st) => STATS.reduce((a, k) => a + (st[k] || 0), 0);
+  f.origins.forEach((o, i) => {
+    const ow = `${w}[${i}]${o && o.id ? "." + o.id : ""}`;
+    if (!o || typeof o !== "object") { err(`${ow}: not an object`); return; }
+    if (!o.id || typeof o.id !== "string") err(`${ow}: missing id`);
+    else if (seen.has(o.id)) err(`${ow}: duplicate origin id`);
+    seen.add(o.id);
+    checkL(o.name, ow + ".name");
+    checkL(o.desc, ow + ".desc", 40, 25, true);
+    if (!o.sprite) warn(`${ow}: no sprite (falls back to playerSprite)`); else sprite(o.sprite, ow + ".sprite");
+    if (!o.startNode || !nodes[o.startNode]) err(`${ow}: startNode "${o.startNode}" does not exist`);
+    if (!o.stats || typeof o.stats !== "object") err(`${ow}: stats missing`);
+    else {
+      for (const k of STATS) {
+        const v = o.stats[k];
+        if (typeof v !== "number" || v < 0 || v > 100) err(`${ow}.stats.${k}: ${v} (need a number 0–100)`);
+      }
+      for (const k of Object.keys(o.stats)) if (!STATS.includes(k)) warn(`${ow}.stats: unknown stat "${k}"`);
+      if (Math.abs(total(o.stats) - total(base)) > 15) warn(`${ow}: stat total ${total(o.stats)} vs default ${total(base)} (spec ±15)`);
+    }
+    if (o.set !== undefined && (typeof o.set !== "object" || Array.isArray(o.set))) err(`${ow}.set: must be an object of flags`);
+    if (o.id && (!o.set || !o.set["origin_" + o.id])) warn(`${ow}: does not set flag "origin_${o.id}" (SPEC §16)`);
+    if (o.startNode && nodes[o.startNode] && nodes[o.startNode].chapter !== 1 && i > 0) warn(`${ow}: prologue start "${o.startNode}" is not in chapter 1`);
+  });
+  void flagsSet;
 }
 
 /* ---------- faction static checks ---------- */
@@ -193,19 +321,26 @@ function checkFaction(f) {
   const collect = (e) => { if (e && e.set) Object.keys(e.set).forEach((k) => flagsSet.add(k)); };
   for (const id of ids) { collect(nodes[id].effects); (nodes[id].choices || []).forEach((c) => collect(c.effects)); }
   WH.events.forEach((e) => (e.choices || []).forEach((c) => collect(c.effects)));
+  const origins = WH.Game.origins(f);
+  origins.forEach((o) => collect(o));                 // origin.set flags (SPEC §16)
 
   checkL(f.name, w + ".name"); checkL(f.tagline, w + ".tagline", 20, 12); checkL(f.role, w + ".role");
   checkL(f.renownLabel, w + ".renownLabel");
+  if (f.renownHelp === undefined) { if (!SAMPLE) warn(`${w}: no renownHelp (SPEC §17 tip after first death)`); }
+  else checkL(f.renownHelp, w + ".renownHelp", 80, 55);
   sprite(f.playerSprite, w + ".playerSprite");
-  if (!uiKeys.has(f.renownIcon)) err(`${w}: unknown renownIcon "${f.renownIcon}"`);
+  uiIcon(f.renownIcon, w + ".renownIcon");
   if (!/^#[0-9a-f]{3,8}$/i.test(f.color || "")) warn(`${w}: color "${f.color}" is not a hex color`);
   if (!f.startDate || typeof f.startDate.year !== "number" || typeof f.startDate.mill !== "number") err(`${w}: startDate {year,mill} missing`);
   if (!nodes[f.startNode]) err(`${w}: startNode "${f.startNode}" missing`);
+  checkOrigins(f, origins, nodes, flagsSet);
   for (const k of STATS) if (!f.startStats || typeof f.startStats[k] !== "number") warn(`${w}: startStats.${k} missing`);
   const chapterIds = Object.keys(f.chapters || {}).map(Number);
   if (!SAMPLE && (chapterIds.length < 6 || chapterIds.length > 8)) warn(`${w}: ${chapterIds.length} chapters (spec 6–8)`);
   for (const c of chapterIds) checkL(f.chapters[c], `${w}.chapters.${c}`);
-  if (!SAMPLE && (ids.length < 70 || ids.length > 95)) warn(`${w}: ${ids.length} nodes (spec 70–95)`);
+  const pro = PREFIX[f.id] ? ids.filter((id) => id.startsWith(PREFIX[f.id] + "o_")).length : 0;   // SPEC §16 prologue nodes
+  const lo = ["aeldari", "necrons"].includes(f.id) ? 75 : 70, hi = ["aeldari", "necrons"].includes(f.id) ? 90 : 95;
+  if (!SAMPLE && (ids.length - pro < lo || ids.length - pro > hi)) warn(`${w}: ${ids.length - pro} spine nodes + ${pro} prologue (spec ${lo}–${hi} + prologues)`);
   if (PREFIX[f.id]) for (const id of ids) if (!id.startsWith(PREFIX[f.id])) warn(`${w}: node id "${id}" lacks prefix ${PREFIX[f.id]}`);
 
   // death nodes
@@ -223,6 +358,7 @@ function checkFaction(f) {
   }
   // nodes
   const endings = {good: [], bad: [], death: []};
+  const cons = {choices: 0, withResult: 0, eff: 0, effWithResult: 0, rolls: 0, rollsWithResult: 0, missing: []};
   const codexUnlockable = new Set();
   WH.events.forEach((e) => { if ((e.factions || ["*"]).some((x) => x === "*" || x === f.id)) { [].concat(e.codex || []).forEach((c) => codexUnlockable.add(c)); (e.choices || []).forEach((c) => [].concat(c.codex || []).forEach((x) => codexUnlockable.add(x))); } });
   for (const id of ids) {
@@ -258,6 +394,24 @@ function checkFaction(f) {
     cs.forEach((c, i) => {
       const cw = `${nw}.choice${i + 1}`;
       checkL(c.text, cw + ".text", 24, 14);
+      // SPEC §11 consequences
+      const hasEff = !!(c.effects && Object.keys(c.effects).some((k) => (STATS.includes(k) && c.effects[k]) || k === "set" || k === "unset"));
+      const hasRes = c.result !== undefined || c.rollResult !== undefined;
+      cons.choices++; if (hasRes) cons.withResult++;
+      if (hasEff) { cons.eff++; if (hasRes) cons.effWithResult++; else cons.missing.push(`${id}#${i + 1}`); }
+      if (c.roll) { cons.rolls++; if (c.rollResult) cons.rollsWithResult++; }
+      if (c.result !== undefined) checkL(c.result, cw + ".result", RESULT_ZH, RESULT_EN);
+      if (c.rollResult !== undefined) {
+        if (!c.roll) warn(`${cw}: rollResult on a choice without roll (use result)`);
+        if (!c.rollResult || typeof c.rollResult !== "object") err(`${cw}.rollResult: expected {success:{zh,en}, fail:{zh,en}}`);
+        else {
+          for (const k of Object.keys(c.rollResult)) if (!["success", "fail"].includes(k)) warn(`${cw}.rollResult: unknown key "${k}"`);
+          for (const k of ["success", "fail"]) {
+            if (c.rollResult[k] === undefined) { if (c.result === undefined) warn(`${cw}.rollResult.${k} missing (no result fallback)`); }
+            else checkL(c.rollResult[k], `${cw}.rollResult.${k}`, RESULT_ZH, RESULT_EN);
+          }
+        }
+      }
       checkEffects(c.effects, cw);
       codexRef(c.codex, cw);
       checkRequire(c.require, cw, flagsSet);
@@ -276,13 +430,33 @@ function checkFaction(f) {
   // learn ids must be unlockable somewhere in this route
   for (const g of ["leaders", "enemies", "boss"]) for (const c of (f.learn && f.learn[g]) || []) if (WH.codex[c] && !codexUnlockable.has(c)) warn(`${w}.learn.${g}: "${c}" is never unlocked by any node/event of this faction`);
 
-  // static reachability
-  const reach = new Set([f.startNode]), queue = [f.startNode];
-  Object.values(f.deathNodes || {}).forEach((d) => { if (nodes[d] && !reach.has(d)) { reach.add(d); queue.push(d); } });
-  while (queue.length) {
-    const n = nodes[queue.shift()];
-    if (!n) continue;
-    for (const c of n.choices || []) for (const t of targetsOf(c)) if (t && nodes[t] && !reach.has(t)) { reach.add(t); queue.push(t); }
+  // static reachability (from every origin's start node + the death nodes)
+  const reachFrom = (starts) => {
+    const r = new Set(), q = [];
+    starts.forEach((x) => { if (nodes[x] && !r.has(x)) { r.add(x); q.push(x); } });
+    while (q.length) {
+      const n = nodes[q.shift()];
+      if (!n) continue;
+      for (const c of n.choices || []) for (const t of targetsOf(c)) if (t && nodes[t] && !r.has(t)) { r.add(t); q.push(t); }
+    }
+    return r;
+  };
+  const reach = reachFrom([f.startNode].concat(origins.map((o) => o.startNode), Object.values(f.deathNodes || {})));
+  // every origin's prologue must merge into the spine of the first (default) origin
+  if (origins.length > 1) {
+    const deathIds = new Set(Object.values(f.deathNodes || {}));
+    const spine = reachFrom([origins[0].startNode]);
+    for (const o of origins.slice(1)) {
+      if (!nodes[o.startNode]) continue;
+      const mine = reachFrom([o.startNode]);
+      const merge = [...mine].filter((x) => spine.has(x) && !nodes[x].ending && !deathIds.has(x));
+      if (!merge.length) err(`${w}.origin.${o.id}: prologue from "${o.startNode}" never merges into the spine of origin "${origins[0].id}"`);
+      else {
+        const prologue = [...mine].filter((x) => !spine.has(x));
+        if (!SAMPLE && prologue.some((x) => !nodes[x].ending) && (prologue.filter((x) => !nodes[x].ending).length < 3 || prologue.filter((x) => !nodes[x].ending).length > 6))
+          warn(`${w}.origin.${o.id}: prologue has ${prologue.filter((x) => !nodes[x].ending).length} own node(s) (spec 3–6)`);
+      }
+    }
   }
   const unreachable = ids.filter((id) => !reach.has(id));
   if (unreachable.length) err(`${w}: ${unreachable.length} unreachable node(s): ${unreachable.join(", ")}`);
@@ -295,19 +469,27 @@ function checkFaction(f) {
   }
   const trapped = ids.filter((id) => reach.has(id) && !canEnd.has(id));
   if (trapped.length) err(`${w}: ${trapped.length} node(s) can never reach an ending (closed loop): ${trapped.join(", ")}`);
-  return {endings, nodeCount: ids.length, chapters: chapterIds.length};
+  if (!SAMPLE && cons.eff && cons.effWithResult < cons.eff && ["aeldari", "necrons"].includes(f.id))
+    warn(`${w}: ${cons.eff - cons.effWithResult} effect/set choice(s) without result (SPEC §11): ${cons.missing.slice(0, 8).join(", ")}${cons.missing.length > 8 ? ", …" : ""}`);
+  return {endings, nodeCount: ids.length, chapters: chapterIds.length, cons};
 }
 
 /* ---------- Monte-Carlo ---------- */
 function simulate(f) {
+  const origins = WH.Game.origins(f);
   const res = {runs: RUNS, visits: [], endings: {}, kinds: {good: 0, bad: 0, death: 0}, deathCause: {}, loops: 0, crashes: 0,
-               softlocks: new Map(), events: {}, eventsPerRun: [], years: [], visited: new Set(), firstCrash: null, maxRevisit: 0, maxRevisitNode: null};
+               softlocks: new Map(), events: {}, eventsPerRun: [], years: [], visited: new Set(), firstCrash: null, maxRevisit: 0, maxRevisitNode: null,
+               perOrigin: {}};
+  origins.forEach((o) => { res.perOrigin[o.id] = {runs: 0, visits: [], kinds: {good: 0, bad: 0, death: 0}}; });
+  res.taint = {khorne: [], nurgle: [], tzeentch: [], slaanesh: []}; res.claims = {}; res.cleanses = 0;
   for (let r = 0; r < RUNS; r++) {
     const rng = WH.RNG(SEED * 100003 + r);
+    const origin = origins[r % origins.length], po = res.perOrigin[origin.id];
+    po.runs++;
     let g, steps = 0, evCount = 0;
     try {
       g = new WH.Game(f.id, {rng, data: WH});
-      let step = g.start();
+      let step = g.start(origin.id);
       const counts = {};
       while (!g.state.ended && steps < STEP_LIMIT) {
         steps++;
@@ -315,6 +497,8 @@ function simulate(f) {
         if (step && step.kind === "event") {
           const e = step.event; evCount++;
           res.events[e.id] = (res.events[e.id] || 0) + 1;
+          if (e.trigger === "claim") res.claims[e.god] = (res.claims[e.god] || 0) + 1;
+          if (e.cleanse) res.cleanses++;
           g.eventChoose(Math.floor(rng() * e.choices.length));
           step = g.eventContinue();
           continue;
@@ -334,6 +518,8 @@ function simulate(f) {
       res.visits.push(g.state.visits);
       res.endings[g.state.nodeId] = (res.endings[g.state.nodeId] || 0) + 1;
       res.kinds[n.ending.kind] = (res.kinds[n.ending.kind] || 0) + 1;
+      po.visits.push(g.state.visits); po.kinds[n.ending.kind]++;
+      for (const gd of TAINT_GODS) res.taint[gd].push((g.state.taint && g.state.taint[gd]) || 0);
       res.eventsPerRun.push(evCount);
       res.years.push((g.state.hours - WH.Rules.startHours(f)) / 8760);
     } catch (e) {
@@ -365,6 +551,12 @@ console.log(`events per god: ${JSON.stringify(perGod)}`);
   for (const id of Object.keys(WH.codex)) cats[WH.codex[id].cat] = (cats[WH.codex[id].cat] || 0) + 1;
   console.log(`codex per category: ${JSON.stringify(cats)}`);
   console.log(`places per faction: ${JSON.stringify(pc)}`);
+  if (ctx.__codexOwner) {
+    const pf = {};
+    for (const id of Object.keys(ctx.__codexOwner)) pf[ctx.__codexOwner[id]] = (pf[ctx.__codexOwner[id]] || 0) + 1;
+    console.log(`codex per file: ${JSON.stringify(pf)}`);
+  }
+  codexTable();
 }
 
 const reports = [];
@@ -391,10 +583,14 @@ for (const id of factionIds) {
 }
 
 flushUnknownCodex();
+if (pending.size) warn(`art pending (SPEC §14 keys referenced but not in the manifest yet; UI shows placeholders): ${[...pending.keys()].join(", ")}`);
 for (const r of reports) {
   const f = WH.factions[r.id];
   console.log(`\n--- ${r.id}: ${f.name && f.name.en} / ${f.name && f.name.zh} ---`);
   console.log(`nodes ${r.st.nodeCount} · chapters ${r.st.chapters} · endings good ${r.st.endings.good.length} / bad ${r.st.endings.bad.length} / death ${r.st.endings.death.length}`);
+  const cn = r.st.cons;
+  console.log(`consequences (SPEC §11): effect/set choices with result ${cn.effWithResult}/${cn.eff} (${pct(cn.effWithResult, cn.eff)}) · ` +
+    `all choices ${cn.withResult}/${cn.choices} (${pct(cn.withResult, cn.choices)}) · rolls with rollResult ${cn.rollsWithResult}/${cn.rolls}`);
   const s = r.sim;
   if (!s) { console.log("simulation: skipped"); continue; }
   const v = s.visits;
@@ -409,9 +605,21 @@ for (const r of reports) {
       const n = f.nodes[id] || {ending: {kind: "death", title: {en: "(synthetic)"}}};
       console.log(`  ${pct(c, v.length).padStart(6)}  ${n.ending.kind.padEnd(5)} ${id}  ${n.ending.title ? n.ending.title.en : ""}`);
     });
+    const fin = v.length;
+    console.log(`hidden taint (avg final): ${TAINT_GODS.map((gd) => `${gd} ${avg(s.taint[gd]).toFixed(1)}`).join(" · ")} · ` +
+      `≥50: ${TAINT_GODS.map((gd) => `${gd} ${pct(s.taint[gd].filter((x) => x >= 50).length, fin)}`).join(" ")}`);
+    console.log(`claim events: ${TAINT_GODS.map((gd) => `${gd} ${pct(s.claims[gd] || 0, RUNS)}`).join(" · ")} · cleansing events fired ${s.cleanses}`);
     const evs = Object.entries(s.events);
     if (evs.length) console.log(`events fired: ${evs.map(([k, c]) => `${k}×${c}`).join(", ")}`);
     console.log(`max visits of one node in a run: ${s.maxRevisit} (${s.maxRevisitNode})`);
+    const po = Object.entries(s.perOrigin);
+    if (po.length > 1 || (f.origins && f.origins.length)) {
+      console.log("per origin:");
+      for (const [oid, o] of po) {
+        const n = o.visits.length;
+        console.log(`  ${oid.padEnd(12)} runs ${String(o.runs).padStart(5)} · avg nodes ${avg(o.visits).toFixed(1).padStart(5)} · good ${pct(o.kinds.good, n).padStart(6)} · bad ${pct(o.kinds.bad, n).padStart(6)} · death ${pct(o.kinds.death, n).padStart(6)}`);
+      }
+    }
   }
 }
 

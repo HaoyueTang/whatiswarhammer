@@ -20,6 +20,7 @@ Read this first in every session on this project. Keep it short and current; his
 - `src/js/audio.js`, `assets/audio/**`, `tools/dev/audio_test.html` music + SFX (audio role)
 
 ## Decisions
+- Factions: v0.1 Imperium/Chaos/T'au, v0.2 + Aeldari (boss: Keeper of Secrets) & Necrons (boss: Nightbringer shard); each has 3 origins (§16).
 - 3 factions v0.1: Imperium (boss: Abaddon's Black Crusade), Chaos (boss: Grey Knights + Inquisitor), T'au (boss: Swarmlord).
 - Stats 0–100: hp, sanity, corruption, renown (faction-labelled). Death at hp 0 / sanity 0 / corruption 100.
 - Lore shown through NPC behaviour; node text ≤ 90 zh chars; codex entries ≤ 45 zh chars.
@@ -35,11 +36,12 @@ Read this first in every session on this project. Keep it short and current; his
 - Audition music/SFX: open `tools/dev/audio_test.html`.
 
 ## Status
-- v0.1.0 released 2026-11-11 — all 3 routes playable end to end, codex (entries/places/endings/records), saves, music.
+- v0.2.0 released 2026-11-11 — 5 routes (Imperium, Chaos, T'au, Aeldari, Necrons) × 3 origins, consequence panel, codex v2 (race × type, search, NEW), hidden chaos-god taint, lore-card modes, Home button, faction-stat tips. v0.1.0 same day.
 - Repo: https://github.com/HaoyueTang/whatiswarhammer — `dev` = full project (work here); `main` = public build (game files + `release/README.public.md` as README only). Release: commit on dev → `python3 release/build_public.py HEAD /tmp/pub` → copy over a `main` checkout (keep .git) → commit "release: public build from dev@<sha>" → push both. Local copy F:\whatiswarhammer is synced from the build workspace.
 - Playable artifact (claude.ai, private until shared): https://claude.ai/artifact/7942AX8AQExvMP1m2GHLFF (slug 31b6a4af-a17b-40de-ac8a-760f81d565f6) — republish runtime files (index.html, src/, data/, assets/) on each release; JSON export download is blocked inside artifacts.
 - Quality gates: `node tools/dev/validate.js` (0 errors), `python3 tools/dev/smoke_test.py [--real]`, `node tools/dev/audio_check.js`.
 - Known: music verified only by automated checks — needs a human listen (`tools/dev/audio_test.html`).
 
 ## Next ideas
-- More factions (Aeldari, Necrons, Adeptus Mechanicus), sound, achievements.
+- Orks, Genestealer Cult, Adeptus Mechanicus routes; achievements.
+- Artifact link is publicly shared → republishing needs the user's explicit OK each time.

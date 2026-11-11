@@ -1,9 +1,13 @@
 /* save.js — save system (SPEC §9). Owned by: web.
- * localStorage (try/catch) with in-memory fallback. Keys: whatiswh.slot1..3, whatiswh.auto, whatiswh.settings, whatiswh.codexGlobal.
+ * localStorage (try/catch) with in-memory fallback. Keys: whatiswh.slot1..3, whatiswh.auto, whatiswh.settings, whatiswh.codexGlobal,
+ * whatiswh.codexSeen (codex NEW badges), whatiswh.runs / runStats / endingStats / runsSeen (records).
  */
 (function (root) {
   var WH = root.WH = root.WH || {};
   var PREFIX = "whatiswh.";
+  /* schema 2 (v0.2): records carry `origin` (SPEC §16) and hidden `taint` (SPEC §18). registry.js (lead-owned) still says 1,
+   * so the bump lives here; engine.toRecord reads WH.SAVE_SCHEMA. */
+  WH.SAVE_SCHEMA = Math.max(WH.SAVE_SCHEMA || 1, 2);
   var SLOTS = ["slot1", "slot2", "slot3", "auto"];
   var mem = {};
   var persistent = true;
@@ -35,13 +39,18 @@
 
   /* schema migrations: MIGRATE[n] upgrades a record from schema n to n+1 */
   var MIGRATE = {
-    // 1: function (rec) { rec.newField = default; rec.schema = 2; return rec; }
+    1: function (rec) {               // v0.1 → v0.2: no taint yet, origin = faction default
+      rec.taint = rec.taint || {khorne: 0, nurgle: 0, tzeentch: 0, slaanesh: 0};
+      if (rec.origin === undefined) rec.origin = null;
+      rec.schema = 2;
+      return rec;
+    }
   };
   function migrate(rec) {
     var cur = WH.SAVE_SCHEMA || 1;
     while (rec.schema < cur) {
       var fn = MIGRATE[rec.schema];
-      if (!fn) { rec.schema = cur; break; }
+      if (!fn) { rec.schema = cur; break; }        // no migration needed for this step
       rec = fn(rec);
     }
     return rec;
@@ -94,12 +103,14 @@
     /* settings */
     defaultSettings: function () {
       var nav = (root.navigator && (root.navigator.language || "")) || "";
-      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "auto"};
+      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true};
     },
     loadSettings: function () {
       var d = Save.defaultSettings(), s = getJSON("settings") || {};
       for (var k in d) if (s[k] === undefined) s[k] = d[k];
       if (s.lang !== "zh" && s.lang !== "en") s.lang = d.lang;
+      if (s.loreCards === "auto" || ["new", "all", "codex"].indexOf(s.loreCards) < 0) s.loreCards = "new";   // v0.1 "auto" → "new"
+      if (s.knownHint !== "silent") s.knownHint = "toast";
       return s;
     },
     saveSettings: function (s) { set("settings", JSON.stringify(s)); },
@@ -115,6 +126,32 @@
       if (changed) set("codexGlobal", JSON.stringify(a));
       return a;
     },
+
+    /* codex "NEW" badges: ids already seen in the codex window (whatiswh.codexSeen). If the key does not exist yet
+     * (first boot of v0.2), it is initialised from codexGlobal so upgrading players don't get 90 NEW badges. */
+    codexSeen: function () {
+      var a = getJSON("codexSeen");
+      if (Array.isArray(a)) return a;
+      a = Save.codexGlobal().slice();
+      set("codexSeen", JSON.stringify(a));
+      return a;
+    },
+    markCodexSeen: function (ids) {
+      var a = Save.codexSeen(), changed = false;
+      (ids || []).forEach(function (id) { if (a.indexOf(id) < 0) { a.push(id); changed = true; } });
+      if (changed) set("codexSeen", JSON.stringify(a));
+      return a;
+    },
+    /* unlocked (globally) but not yet seen in the codex window */
+    codexUnseen: function () {
+      var seen = {};
+      Save.codexSeen().forEach(function (id) { seen[id] = 1; });
+      return Save.codexGlobal().filter(function (id) { return !seen[id]; });
+    },
+
+    /* SPEC §17: faction-stat tip shown once per faction (whatiswh.tipsSeen = {faction: ISO date}) */
+    tipSeen: function (fid) { var o = getJSON("tipsSeen"); return !!(o && o[fid]); },
+    markTipSeen: function (fid) { var o = getJSON("tipsSeen") || {}; o[fid] = new Date().toISOString(); set("tipsSeen", JSON.stringify(o)); },
 
     /* finished-run records ("往生录"): whatiswh.runs (newest first, max 50), whatiswh.runStats (totals),
      * whatiswh.endingStats ({"faction:node": {count, first, best, firstAt}}), whatiswh.runsSeen (dedupe keys) */
