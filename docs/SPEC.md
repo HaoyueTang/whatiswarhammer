@@ -170,3 +170,51 @@ Language switch re-renders current node instantly, persists in settings.
 
 ## 10. Quality gates
 `node tools/dev/validate.js` must pass: all referenced node ids / sprites / scenes / codex ids / icons exist; every faction has its death nodes, ≥2 good and ≥3 bad endings; no unreachable nodes; no node without choices unless it's an ending; all strings have zh+en; text length limits (warn). Monte-Carlo 3000 random runs per faction: report avg nodes visited, ending distribution, % deaths, no infinite loops.
+
+---
+
+# v0.2 additions (2026-11-11)
+
+## 11. Choice consequences (过场后果)
+Every choice that changes stats, flags or direction should show a short consequence beat after the click, before the next node.
+```js
+{ text:{…}, next:"imp_015", effects:{hp:-10},
+  result:{zh:"你扑进弹坑，碎石擦过脸颊。", en:"You dive into the crater; gravel tears your cheek."} }   // ≤ 50 zh / ≤ 35 en words
+// roll choices: per outcome
+{ text:{…}, roll:{p:.5, stat:"hp", success:"x", fail:"y"},
+  rollResult:{success:{zh,en}, fail:{zh,en}} }
+```
+UI: after click → consequence panel (typewriter, stat deltas animate, time-skip ticker if the next node has `time`) → 继续 (Enter/Space/click) → next node. Choices without `result` but with effects get an automatic one-line summary (e.g. "生命 −10 · 理智 −5") instead of a silent jump. Setting: 过场提示 on/off (default on).
+Writers: give `result` to every choice that has `effects`, `set`, or where the outcome is not obvious from the next node's first line. Show the consequence in action/sensation, not as a stat report.
+
+## 12. New routes
+| | Aeldari 灵族 | Necrons 死灵 |
+|---|---|---|
+| id / prefix | `aeldari` / `eld_` | `necrons` / `nec_` |
+| You | human survivor of an agri-world the farseers chose to sacrifice; spared as a "thread of fate", taken through the webway to a craftworld as a mon-keigh guest | human archaeologist on an Imperial dig on a "dead world" that is really a tomb world; becomes a living specimen |
+| renownLabel / icon | 命运 Fate / `icon_fate` | 价值 Worth / `icon_worth` |
+| color | `#5fb3a1` (wraithbone teal) | `#4fd16b` (necron green) |
+| Leaders | 先知 Farseers (艾德拉德 Eldrad as distant presence), 伊芙蕾恩与恩灵 Yvraine & the Ynnari, Path system, fallen gods (凯恩 Khaine) | 寂静之王 the Silent King, 风暴领主 Imotekh, 无尽者特拉赞 Trazyn (collector), Necrontyr history & biotransference |
+| Main enemies | 色孽 Slaanesh (She Who Thirsts), 死灵 Necrons, 人类帝国 (mon-keigh); lore: Drukhari, Harlequins | 太空死神 C'tan (天堂之战 War in Heaven), 灵族 Aeldari, 泰伦虫族 Tyranids, 人类帝国 |
+| Final boss | a Greater Daemon of Slaanesh (色孽大魔) hunting Aeldari souls | an awakened C'tan shard (夜幕使者碎片 Nightbringer shard) breaking its tesseract prison |
+
+Each new route: 8 chapters, 75–90 nodes, ≥2 good, ≥3 bad, 3 death nodes, `ending.cause` on all endings, `result` on choices (§11), eventRoll on 6–8 nodes (shared chaos events apply), may add 1–2 route-specific events via `WH.registerEvents` in its own faction file. Named canon figures appear only via omen_* sprites.
+
+## 13. Codex taxonomy v2
+Every codex entry gets two new required fields (old `cat` kept for compatibility; UI uses these):
+- `race`: who it belongs to — `imperium | chaos | tau | aeldari | necrons | orks | tyranids | other`
+- `type`: what it is — `figure` 人物 (named people/characters) · `deity` 神祇 (Chaos gods, C'tan, Aeldari gods, Gork & Mork, the Emperor as worshipped) · `organization` 组织 (Inquisition, Black Legion, castes, craftworlds, dynasties) · `unit` 兵种/生物 (troop types, creatures, war machines) · `place` 地点 · `concept` 设定 (warp, tech, events, history, ideas)
+Route-relative roles (leader / main enemy / final boss) stay in each faction's `learn` lists.
+Codex UI: race filter chips (with counts, progress per race) × type tabs, plus 地点 / 结局 / 生涯 views, search box, "NEW" badge on entries unlocked since last opened, sort (discovered / A–Z / race). Lore-card badge shows `type · race`.
+Codex files: `data/codex.js` (shared + v0.1 routes), `data/codex_aeldari.js`, `data/codex_necrons.js` (new routes). Load order: codex.js → codex_aeldari.js → codex_necrons.js → events.js → factions/*.
+
+## 14. New asset keys (art) — fixed list
+Sprites (48 unless noted): `player_aeldari` (human survivor in a borrowed alien shawl), `player_necrons` (human archaeologist, goggles, lamp) ·
+`aeldari_guardian`, `aeldari_seer`, `aeldari_ranger`, `aeldari_bonesinger`, `aeldari_masked` (masked troupe performer, original design), `drukhari_raider`, `wraith_construct`(64), `greater_daemon_slaanesh`(96) ·
+`necron_warrior`, `necron_lord`(64), `cryptek`, `flayed_one`, `canoptek_scarab`(32), `canoptek_spyder`(64), `dig_leader` (human expedition leader), `explorator` (Mechanicus explorer, distinct from tech_priest)
+Omens (96): `omen_farseer` (rune stones orbiting light), `omen_ynnead` (pale soul-light rising from the dead), `omen_khaine` (burning heart in an iron chamber), `omen_silent_king` (vast cold throne in darkness, no figure), `omen_ctan` (star-shard of dark gold in a lattice prison), `omen_stormlord` (green lightning over a city), `omen_collector` (gallery of stasis-frozen scenes)
+Scenes (192×108): `craftworld`, `webway`, `maiden_world`, `dig_site`, `tomb_exterior`, `tomb_interior`, `stasis_gallery`
+UI (16): `icon_fate`, `icon_worth`
+
+## 15. Audio
+New moods: `aeldari` (ethereal, harp-like arps, slow, modal) and `necron` (cold, mechanical, low drones, sparse metallic percussion). moodFor: aeldari route scenes craftworld/webway/maiden_world → `aeldari`; tomb_exterior/tomb_interior/stasis_gallery/dig_site → `necron` (battle/boss/ending rules still take priority).
