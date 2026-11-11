@@ -1117,9 +1117,13 @@
       showEventResult(e.choices[g.state.eventChoice], UI.eventLast && UI.eventLast.e === e.id ? UI.eventLast.r : null, true);
       return;
     }
-    e.choices.forEach(function (c, i) {
-      chEl.appendChild(h("button", {class: "btn choice px", type: "button", onclick: function () { eventChoose(i); }},
-        h("span", {class: "num"}, String(i + 1)), h("span", {class: "ct"}, L(c.text))));
+    // SPEC §19: event choices honour `require` / hideIfLocked (e.g. a claim's forced second-time choice)
+    (g.eventChoices ? g.eventChoices() : e.choices.map(function (c, i) { return {index: i, choice: c, locked: false}; })).forEach(function (v, pos) {
+      var ct = h("span", {class: "ct"}, L(v.choice.text));
+      if (v.locked) ct.appendChild(h("span", {class: "hint"}, reqHint(v.choice.require) || t("locked")));
+      chEl.appendChild(h("button", {class: "btn choice px" + (v.locked ? " locked" : ""), type: "button", disabled: v.locked, "data-i": v.index,
+        onclick: function () { eventChoose(v.index); }},
+        h("span", {class: "num"}, v.locked ? "🔒" : String(pos + 1)), ct));
     });
     UI.evTyper.run(L(e.text), UI.settings.textSpeed, function () {
       flushLore();
@@ -1327,8 +1331,20 @@
   function taintVerdict(god, v) {
     var claimed = UI.game && (UI.game.state.flags["claimed_" + god] ||
       UI.game.state.seenEvents.some(function (id) { var e = UI.game.event(id); return e && e.trigger === "claim" && e.god === god; }));
-    var k = claimed || v >= 100 ? "tv_claimed" : v >= 70 ? "tv_brand" : v >= 30 ? "tv_watch" : v > 0 ? "tv_glance" : "tv_none";
+    var owned = UI.game && UI.game.state.ended && claimGod() === god;      // SPEC §19 claim ending
+    var k = owned ? "tv_owned" : claimed || v >= 100 ? "tv_claimed" : v >= 70 ? "tv_brand" : v >= 30 ? "tv_watch" : v > 0 ? "tv_glance" : "tv_none";
     return t(k, {g: godName(god)});
+  }
+  /* SPEC §19: the god whose claim ending this run reached (node id contains "_end_claim_<god>"), else null */
+  function claimGod() { var g = UI.game; return g && g.state.ended && WH.Rules.claimGodOf ? WH.Rules.claimGodOf(g.state.nodeId) : null; }
+  /* claim ending: big sigil + bar + "你已归属于<神>" at the top of the ending's scroll area */
+  function claimBanner(god, v) {
+    return h("div", {class: "claim-banner god-" + god, role: "note", "data-god": god},
+      h("div", {class: "cb-sigil"}, art("sprite", "sigil_" + god, "fit", "#8a4fd0")),
+      h("div", {class: "cb-body"},
+        h("div", {class: "cb-k"}, t("claim_tag") + " · " + godName(god)),
+        h("div", {class: "cb-verdict"}, t("tv_owned", {g: godName(god)})),
+        taintReveal(god, v)));
   }
   function taintReveal(god, v) {
     return h("div", {class: "taint-rev" + (v >= 70 ? " hi" : v >= 30 ? " mid" : ""), "data-god": god},
@@ -1411,6 +1427,7 @@
     stopWhispers();
     var cs = codexStats();
     var rr = recordRun();
+    var cgod = claimGod();
     var surv = survivedHours(g);
     var met = h("div", {class: "met"});
     [["leaders", "learn_leaders"], ["enemies", "learn_enemies"], ["boss", "learn_boss"]].forEach(function (grp) {
@@ -1440,18 +1457,19 @@
           h("div", null, h("div", {class: "k"}, t("nodes_visited")), h("div", {class: "v"}, String(g.state.visits))),
           h("div", null, h("div", {class: "k"}, t("codex_completion")), h("div", {class: "v"}, cs.pct + "%  (" + cs.n + "/" + cs.t + ")"))),
         h("div", {class: "ending-scroll"},
+          cgod ? claimBanner(cgod, Math.round((g.state.taint && g.state.taint[cgod]) || 0)) : null,
           tipCard(f, end, g),
           h("h3", {class: "met-title"}, t("you_met")),
           met,
           h("h3", {class: "met-title"}, t("gods_met_title")),
           h("div", {class: "gods"}, GODS.map(function (god) {
             var tv = Math.round((g.state.taint && g.state.taint[god]) || 0);
-            var met_ = godsMet().indexOf(god) >= 0 || tv > 0, c = godCodex(god);
+            var met_ = godsMet().indexOf(god) >= 0 || tv > 0 || god === cgod, c = godCodex(god);
             var pic = h("div", {class: "pic"}, art("sprite", "sigil_" + god, "fit", "#8a4fd0"));
             var bar = taintReveal(god, tv);
             if (!met_) return h("div", {class: "centry god-card locked god-" + god}, pic,
               h("div", {class: "cbody"}, h("div", {class: "nm"}, t("codex_locked")), h("div", {class: "tx"}, t("god_not_met")), bar));
-            return h("div", {class: "centry god-card god-" + god}, pic, h("div", {class: "cbody"},
+            return h("div", {class: "centry god-card god-" + god + (god === cgod ? " claimed" : "")}, pic, h("div", {class: "cbody"},
               h("div", {class: "nm"}, godName(god)),
               bar,
               c ? h("div", {class: "tx"}, L(c.text)) : null,

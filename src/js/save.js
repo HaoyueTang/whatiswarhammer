@@ -6,7 +6,7 @@
   var WH = root.WH = root.WH || {};
   var PREFIX = "whatiswh.";
   /* schema 2 (v0.2): records carry `origin` (SPEC §16) and hidden `taint` (SPEC §18). registry.js (lead-owned) still says 1,
-   * so the bump lives here; engine.toRecord reads WH.SAVE_SCHEMA. */
+   * so the bump lives here; engine.toRecord reads WH.SAVE_SCHEMA. v0.2.1 adds optional `claims:{god:n}` (SPEC §19) without a bump. */
   WH.SAVE_SCHEMA = Math.max(WH.SAVE_SCHEMA || 1, 2);
   var SLOTS = ["slot1", "slot2", "slot3", "auto"];
   var mem = {};
@@ -72,6 +72,8 @@
     if (rec.seenEvents && !Array.isArray(rec.seenEvents)) return {ok: false, error: "err_schema"};
     if (rec.history && !Array.isArray(rec.history)) return {ok: false, error: "err_schema"};
     if (rec.flags && typeof rec.flags !== "object") return {ok: false, error: "err_schema"};
+    // SPEC §19 (additive, no schema bump): per-god claim-event counts; absent in older saves (engine derives them)
+    if (rec.claims !== undefined && (!rec.claims || typeof rec.claims !== "object" || Array.isArray(rec.claims))) return {ok: false, error: "err_schema"};
     return {ok: true, rec: rec};
   }
 

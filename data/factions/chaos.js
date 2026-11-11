@@ -153,7 +153,7 @@
             "The scriptorium of the spire cathedral. Eleven years copying scripture; the ink on your fingers will never wash out.\nToday a nameless old book arrives, its cover warm. The deacon's order: copy it for the archive, burn the original.\nYou never read what you copy. Today, you open it."),
     codex: ["imp_hive", "place_carcharos", "imp_ecclesiarchy"],
     choices: [
-      C("一行一行读下去", "Read on, line by line", "cha_o_scribe_2", {effects: {corruption: 4, sanity: -5, taint: {tzeentch: 10}, set: {readBook: true}}, result: L("字句像温水，从眼睛流进喉咙。读到第三页，你发现自己在跟着念。", "The words flow like warm water from your eyes into your throat. By page three you're mouthing along.")}),
+      C("一行一行读下去", "Read on, line by line", "cha_o_scribe_2", {effects: {corruption: 4, sanity: -5, taint: {tzeentch: 15}, set: {readBook: true}}, result: L("字句像温水，从眼睛流进喉咙。读到第三页，你发现自己在跟着念。", "The words flow like warm water from your eyes into your throat. By page three you're mouthing along.")}),
       C("只描字形，不读意思", "Copy the shapes, not the meaning", "cha_o_scribe_2", {effects: {sanity: 5}, result: L("你把每个字都当成图案来描。可抄到最后，那些图案排成了一首歌。", "You trace each word as a mere shape. But by the end, the shapes have arranged themselves into a song.")})
     ]};
 
@@ -214,8 +214,8 @@
     text: L("入会之夜。每个新人都要献上一样东西。有人割破手掌，有人说出从没告诉过别人的秘密。\n维勒姆耐心地等着你：“诸神不要贵重的，只要真的。”",
             "Initiation night. Each newcomer must offer something. Some cut their palms. Some speak a secret they've never told a soul.\nVellum waits for you, patient. “The gods don't want what's valuable. Only what's true.”"),
     choices: [
-      C("献上一滴血", "Offer a drop of blood", "cha_205", {effects: {hp: -5, corruption: 4, renown: 5, set: {bloodGift: true}}, result: L("血滴进碗里，没有散开，而是缓缓转了一圈。维勒姆满意地点头。", "The drop falls into the bowl and doesn't spread. It turns, slowly, one full circle. Vellum nods, satisfied.")}),
-      C("说出一个秘密", "Speak a secret", "cha_205", {effects: {sanity: -10, corruption: 4, renown: 5, set: {secretGift: true}}, result: L("话一出口，你就忘了它是什么。只记得说完很轻松，轻松得可怕。", "The moment it leaves your mouth, you forget what it was. You only remember the relief. Frighteningly light.")}),
+      C("献上一滴血", "Offer a drop of blood", "cha_205", {effects: {hp: -5, corruption: 4, renown: 5, set: {bloodGift: true}, taint: {khorne: 10}}, result: L("血滴进碗里，没有散开，而是缓缓转了一圈。维勒姆满意地点头。", "The drop falls into the bowl and doesn't spread. It turns, slowly, one full circle. Vellum nods, satisfied.")}),
+      C("说出一个秘密", "Speak a secret", "cha_205", {effects: {sanity: -10, corruption: 4, renown: 5, set: {secretGift: true}, taint: {tzeentch: 10}}, result: L("话一出口，你就忘了它是什么。只记得说完很轻松，轻松得可怕。", "The moment it leaves your mouth, you forget what it was. You only remember the relief. Frighteningly light.")}),
       C("什么都不献", "Offer nothing", "cha_206")
     ]};
 
@@ -241,13 +241,13 @@
       C("跟她回去", "Go back with her", "cha_205")
     ]};
 
-  N.cha_205 = {chapter: 2, scene: "cult_shrine", speaker: null, time: {d: 30}, eventRoll: 0.3,
+  N.cha_205 = {chapter: 2, scene: "cult_shrine", speaker: null, time: {d: 30}, eventRoll: 0.42,
     text: L("你手腕上多了个烙印，八道细线从一点散开。不疼，只是偶尔发烫，像有人在远处想你。\n一个月里你总做同一个梦：一扇门，门后四个声音在争论谁先开门。",
             "A brand appears on your wrist: eight thin lines from a single point. It doesn't hurt. Now and then it grows warm, as if someone far away is thinking of you.\nFor a month you dream the same dream: a door, and four voices behind it arguing over who opens it first."),
     effects: {corruption: 3, renown: 5},
     codex: ["chaos_warp"],
     choices: [
-      C("在梦里推开那扇门", "Push the door open in the dream", "cha_208", {effects: {corruption: 7, renown: 5, sanity: -5}, result: L("门开了一条缝。四个声音同时安静，又同时叫出你的名字。你醒来时，烙印烫得发亮。", "The door opens a crack. The four voices hush, then all speak your name at once. You wake with the brand glowing hot.")}),
+      C("在梦里推开那扇门", "Push the door open in the dream", "cha_208", {effects: {corruption: 7, renown: 5, sanity: -5, taint: {all: 5}}, result: L("门开了一条缝。四个声音同时安静，又同时叫出你的名字。你醒来时，烙印烫得发亮。", "The door opens a crack. The four voices hush, then all speak your name at once. You wake with the brand glowing hot.")}),
       C("醒来，用冷水洗脸", "Wake up and splash cold water on your face", "cha_208", {effects: {sanity: 5, corruption: -5}, result: L("冷水刺得你一哆嗦。镜子里只有你自己，烙印也暗了下去。暂时。", "The cold water makes you gasp. The mirror shows only you, and the brand dims. For now.")})
     ]};
 
@@ -255,9 +255,9 @@
     text: L("维勒姆召集了所有人。“什一税之夜，上巢守卫要下来征兵。那时我们起事。”\n他分派任务：炸水厂，开监狱，烧大教堂。\n“你呢，”他问，“你想要什么？”",
             "Vellum gathers everyone. “On Tithe Night the spire guard comes down for conscripts. That's when we rise.”\nHe hands out tasks: blow the water plant, open the prisons, burn the cathedral.\n“And you,” he asks. “What do you want?”"),
     choices: [
-      C("我要上巢付出代价", "I want the spire to pay", "cha_209", {effects: {renown: 5, set: {wantRevenge: true}}, result: L("维勒姆拍拍你的肩：“好。愤怒是最诚实的祷告。”角落里，有人开始磨刀。", "Vellum claps your shoulder. “Good. Anger is the most honest prayer.” In a corner, someone starts sharpening a blade.")}),
-      C("我只想大家都吃饱", "I just want everyone fed", "cha_209", {effects: {sanity: 5, set: {wantBread: true}}, result: L("维勒姆沉默了一会儿：“会的。”那一刻，你相信他是真心的。", "Vellum is quiet a moment. “They will be.” Right then, you believe he means it.")}),
-      C("我想看看会发生什么", "I want to see what happens", "cha_209", {effects: {corruption: 4, set: {wantChange: true}}, result: L("维勒姆眼里闪过一道光，不像是他自己的。“诚实，”他说，“有一位会很喜欢你。”", "Something flickers in Vellum's eyes, a light not quite his own. “Honest,” he says. “One of them will like you very much.”")})
+      C("我要上巢付出代价", "I want the spire to pay", "cha_209", {effects: {renown: 5, set: {wantRevenge: true}, taint: {khorne: 5}}, result: L("维勒姆拍拍你的肩：“好。愤怒是最诚实的祷告。”角落里，有人开始磨刀。", "Vellum claps your shoulder. “Good. Anger is the most honest prayer.” In a corner, someone starts sharpening a blade.")}),
+      C("我只想大家都吃饱", "I just want everyone fed", "cha_209", {effects: {sanity: 5, set: {wantBread: true}, taint: {nurgle: 5}}, result: L("维勒姆沉默了一会儿：“会的。”那一刻，你相信他是真心的。", "Vellum is quiet a moment. “They will be.” Right then, you believe he means it.")}),
+      C("我想看看会发生什么", "I want to see what happens", "cha_209", {effects: {corruption: 4, set: {wantChange: true}, taint: {tzeentch: 5}}, result: L("维勒姆眼里闪过一道光，不像是他自己的。“诚实，”他说，“有一位会很喜欢你。”", "Something flickers in Vellum's eyes, a light not quite his own. “Honest,” he says. “One of them will like you very much.”")})
     ]};
 
   N.cha_209 = {chapter: 2, scene: "cult_shrine", speaker: TIKKA, time: {d: 3},
@@ -265,13 +265,13 @@
             "Three days before the rising, the bread starts costing something. Everyone must hand in a name: a neighbour who won't sing.\nTikka has already given three. “They'll be invited to the chapel,” she says. “Then they'll sing.”\nShe says it lightly, like discussing dinner."),
     effects: {sanity: -5},
     choices: [
-      C("交一个名字", "Hand in a name", "cha_301", {effects: {corruption: 4, renown: 5, sanity: -5}, result: L("你说出隔壁老鞋匠的名字。第二天他不见了。第三天，礼拜堂里多了一个唱得很响的声音。", "You give the old cobbler next door. Next day he's gone. The day after, the chapel has one more very loud voice.")}),
+      C("交一个名字", "Hand in a name", "cha_301", {effects: {corruption: 4, renown: 5, sanity: -5, taint: {tzeentch: 5}}, result: L("你说出隔壁老鞋匠的名字。第二天他不见了。第三天，礼拜堂里多了一个唱得很响的声音。", "You give the old cobbler next door. Next day he's gone. The day after, the chapel has one more very loud voice.")}),
       C("交上凯德的名字", "Hand in Kade's name", "cha_301", {require: {flag: "kadeKnows"}, hideIfLocked: true, effects: {renown: 8}, result: L("维勒姆把这个名字念了两遍，笑出了声：“执法官？好孩子，太好了。”", "Vellum reads the name twice and laughs aloud. “An enforcer? Good child. Very good.”")}),
       C("编一个不存在的人", "Make up someone who doesn't exist", "cha_301", {effects: {sanity: 5, set: {fakeName: true}}, result: L("你编了个名字：“老锈”。蒂卡认真记下。后来好几天，诗班的人都在污池里找老锈。", "You invent one: “Old Rust.” Tikka writes it down carefully. For days afterward, the Choir combs the Sump for him.")})
     ]};
 
   /* ============ Chapter 3 · Uprising ============ */
-  N.cha_301 = {chapter: 3, scene: "burning_city", speaker: TIKKA, time: {d: 9}, eventRoll: 0.3,
+  N.cha_301 = {chapter: 3, scene: "burning_city", speaker: TIKKA, time: {d: 9}, eventRoll: 0.42,
     text: L("什一税之夜。水厂炸了，中巢的灯同时熄灭。黑暗里，几万人一起唱起诗班的歌。\n你从没见过这么多人笑着冲向火光。\n蒂卡塞给你一根撬棍：“走！”",
             "Tithe Night. The water plant blows and every light in the mid-hive dies. In the dark, tens of thousands sing the Choir's hymn together.\nYou've never seen so many people run toward fire, laughing.\nTikka shoves a crowbar into your hands. “Come on!”"),
     effects: {corruption: 3},
@@ -306,7 +306,7 @@
             "The noble's mansion is empty, the perfume still lingering. You stop before a gilt mirror.\nThe you inside is clean, beautiful, confident, dressed in silk. Mirror-you winks.\n“This is who you were meant to be,” it says. “You need only want it.”"),
     codex: ["god_slaanesh"],
     choices: [
-      C("伸手去摸镜子", "Reach out and touch the glass", "cha_305", {effects: {corruption: 7, renown: 5, sanity: -5, taint: {slaanesh: 10}, set: {mirrorTouched: true}}, result: L("镜面软得像水。镜中的你握住你的指尖，轻轻一吻。你抽回手，指尖还留着香水味。", "The glass is soft as water. Mirror-you takes your fingertips and kisses them lightly. When you pull back, they smell of perfume.")}),
+      C("伸手去摸镜子", "Reach out and touch the glass", "cha_305", {effects: {corruption: 7, renown: 5, sanity: -5, taint: {slaanesh: 30}, set: {mirrorTouched: true}}, result: L("镜面软得像水。镜中的你握住你的指尖，轻轻一吻。你抽回手，指尖还留着香水味。", "The glass is soft as water. Mirror-you takes your fingertips and kisses them lightly. When you pull back, they smell of perfume.")}),
       C("砸碎镜子", "Smash the mirror", "cha_305", {effects: {sanity: -5, hp: -5}, result: L("玻璃碎了一地。每一块碎片里，都有一个你在冲你笑。你的手在流血。", "Glass everywhere. In every shard, a you is smiling at you. Your hand is bleeding.")}),
       C("撬下金框拿去换钱", "Pry off the gold frame to sell", "cha_305", {effects: {hp: 5, renown: 2}, result: L("金框比看上去沉。镜子里的你翻了个白眼。它换来了满满一袋干粮。", "The frame is heavier than it looks. Mirror-you rolls its eyes. It buys you a whole sack of rations.")})
     ]};
@@ -317,9 +317,9 @@
     effects: {sanity: -10},
     codex: ["god_khorne", "chaos_daemon_khorne"],
     choices: [
-      C("跪下", "Kneel", "cha_307", {effects: {corruption: 4, renown: 5}, result: L("你额头贴地。红色的东西从你身边走过，剑尖在你耳边擦出火星。它没有停。", "Forehead to the floor. The red thing walks past, its blade striking sparks beside your ear. It doesn't stop.")}),
+      C("跪下", "Kneel", "cha_307", {effects: {corruption: 4, renown: 5, taint: {khorne: 5}}, result: L("你额头贴地。红色的东西从你身边走过，剑尖在你耳边擦出火星。它没有停。", "Forehead to the floor. The red thing walks past, its blade striking sparks beside your ear. It doesn't stop.")}),
       C("拖着蒂卡往外跑", "Drag Tikka out", "cha_307", {effects: {hp: -10, sanity: 5}, result: L("热浪舔着你的后背。你把蒂卡推出大门，自己一头撞上门框，眼冒金星。", "Heat licks your back. You shove Tikka through the doors and slam into the frame, seeing stars.")}),
-      C("冲它吼回去", "Roar right back at it", "cha_307", {effects: {renown: 10, hp: -15, taint: {khorne: 10}, set: {roaredKhorne: true}}, result: L("它一剑扫来，你飞出去撞上石柱。它歪着头看你，然后，像是笑了。", "One swing hurls you into a pillar. It tilts its head at you, and then, somehow, it grins.")})
+      C("冲它吼回去", "Roar right back at it", "cha_307", {effects: {renown: 10, hp: -15, taint: {khorne: 20}, set: {roaredKhorne: true}}, result: L("它一剑扫来，你飞出去撞上石柱。它歪着头看你，然后，像是笑了。", "One swing hurls you into a pillar. It tilts its head at you, and then, somehow, it grins.")})
     ]};
 
   N.cha_306 = {chapter: 3, scene: "burning_city", speaker: KADE, time: {h: 8},
@@ -398,7 +398,7 @@
             "The red thing from the cathedral squats atop a heap of helmets, waiting.\n“You,” it says, voice like an anvil. “Don't run. I like ones who don't run.”\nIt drives the glowing blade into the ground before you. “Pick it up. Kill for Him. Never ask why.”"),
     codex: ["god_khorne", "chaos_daemon_khorne"],
     choices: [
-      C("握住剑柄", "Grip the hilt", "cha_406", {effects: {hp: 10, corruption: 10, renown: 10, taint: {khorne: 20}, set: {pK: true, patron: true}}, result: L("剑柄烫穿你的掌心，你却握得更紧。你的心跳第一次有了节拍：杀，杀，杀。", "The hilt sears your palm and you grip harder. For the first time, your heartbeat keeps a rhythm: kill, kill, kill.")}),
+      C("握住剑柄", "Grip the hilt", "cha_406", {effects: {hp: 10, corruption: 10, renown: 10, taint: {khorne: 45}, set: {pK: true, patron: true, devoted_khorne: true}}, result: L("剑柄烫穿你的掌心，你却握得更紧。你的心跳第一次有了节拍：杀，杀，杀。", "The hilt sears your palm and you grip harder. For the first time, your heartbeat keeps a rhythm: kill, kill, kill.")}),
       C("转身离开", "Turn and walk away", "cha_406", {effects: {sanity: -5}, result: L("背后传来一声嗤笑，像铁砧落地。“下次，”它说，“你会跑回来的。”", "Behind you, a snort like an anvil dropping. “Next time,” it says, “you'll come running.”")})
     ]};
 
@@ -407,7 +407,7 @@
             "Tikka sits by a warm, bubbling pool among chubby little things humming songs. She's grown very round, and smiles, content.\n“Grandfather says pain is a gift too,” she says, offering you an apple buzzing with flies. “Eat it, and you'll never fear hurting again.”"),
     codex: ["god_nurgle", "chaos_daemon_nurgle"],
     choices: [
-      C("咬一口苹果", "Take a bite", "cha_406", {effects: {hp: 25, sanity: 10, corruption: 10, renown: 10, taint: {nurgle: 20}, set: {pN: true, patron: true}}, result: L("苹果又甜又软，带一点泥土味。你身上所有的伤，同时不疼了。小东西们为你鼓起了掌。", "The apple is sweet and soft, with a hint of soil. Every wound you have stops hurting at once. The little things applaud.")}),
+      C("咬一口苹果", "Take a bite", "cha_406", {effects: {hp: 25, sanity: 10, corruption: 10, renown: 10, taint: {nurgle: 55}, set: {pN: true, patron: true, devoted_nurgle: true}}, result: L("苹果又甜又软，带一点泥土味。你身上所有的伤，同时不疼了。小东西们为你鼓起了掌。", "The apple is sweet and soft, with a hint of soil. Every wound you have stops hurting at once. The little things applaud.")}),
       C("抱抱蒂卡，然后离开", "Hug Tikka, then leave", "cha_406", {effects: {sanity: -10, set: {leftTikka: true}}, result: L("她抱得很紧，身上又暖又潮。“你会回来的，”她说，“大家都会回来的。”", "She holds you tight, warm and damp. “You'll come back,” she says. “Everyone comes back.”")})
     ]};
 
@@ -416,7 +416,7 @@
             "A man in a feathered cloak waits for you. His shadow has three more arms than he does.\n“Ixaril. I serve the Changer of Ways,” he says. “I know every word you're about to say. Please, say it anyway. I enjoy confirmation.”"),
     codex: ["god_tzeentch", "chaos_daemon_tzeentch", "chaos_sorcerer"],
     choices: [
-      C("教我看见未来", "Teach me to see the future", "cha_406", {effects: {sanity: -15, corruption: 7, renown: 10, taint: {tzeentch: 20}, set: {pT: true, patron: true}}, result: L("他用一根羽毛点了点你的眼皮。你看见一千个明天，每一个都在冲你眨眼。", "He touches your eyelids with a feather. You see a thousand tomorrows, and every one of them winks at you.")}),
+      C("教我看见未来", "Teach me to see the future", "cha_406", {effects: {sanity: -15, corruption: 7, renown: 10, taint: {tzeentch: 45}, set: {pT: true, patron: true, devoted_tzeentch: true}}, result: L("他用一根羽毛点了点你的眼皮。你看见一千个明天，每一个都在冲你眨眼。", "He touches your eyelids with a feather. You see a thousand tomorrows, and every one of them winks at you.")}),
       C("那你猜我会怎么选？", "Then guess what I'll choose", "cha_406", {effects: {sanity: -5, set: {mockedIxaril: true}}, result: L("伊克萨里尔愣了半秒，然后大笑：“这个！我就知道你会问这个！”他的影子没笑。", "Ixaril freezes for half a second, then laughs. “This! I knew you'd ask exactly this!” His shadow doesn't laugh.")})
     ]};
 
@@ -425,11 +425,11 @@
             "The scent leads to a cellar draped in silk. The you from the mirror steps out, more beautiful and more at ease than you have ever been.\n“All those years below and no one ever truly looked at you,” it murmurs. “Let me look at you. Forever.”"),
     codex: ["god_slaanesh", "chaos_daemon_slaanesh"],
     choices: [
-      C("让它看着你", "Let it look at you", "cha_406", {effects: {sanity: 10, corruption: 10, renown: 10, taint: {slaanesh: 20}, set: {pS: true, patron: true}}, result: L("它的目光像温水，从头到脚把你洗了一遍。你第一次觉得，自己值得被看见。", "Its gaze moves over you like warm water. For the first time, you feel worth looking at.")}),
+      C("让它看着你", "Let it look at you", "cha_406", {effects: {sanity: 10, corruption: 10, renown: 10, taint: {slaanesh: 55}, set: {pS: true, patron: true, devoted_slaanesh: true}}, result: L("它的目光像温水，从头到脚把你洗了一遍。你第一次觉得，自己值得被看见。", "Its gaze moves over you like warm water. For the first time, you feel worth looking at.")}),
       C("用布盖上镜子", "Drape a cloth over the mirror", "cha_406", {effects: {sanity: -10}, result: L("布下传来一声叹息，很轻，很失望。之后好几天，你一闭眼，它就在那儿等着。", "A sigh from under the cloth, soft and disappointed. For days after, whenever you close your eyes, it's waiting.")})
     ]};
 
-  N.cha_406 = {chapter: 4, scene: "underhive", speaker: KADE, foe: "astartes", time: {d: 4}, eventRoll: 0.3,
+  N.cha_406 = {chapter: 4, scene: "underhive", speaker: KADE, foe: "astartes", time: {d: 4}, eventRoll: 0.42,
     text: L("第四天，执法官和蓝甲巨人开始逐层清剿污池。火焰喷射器的嘶嘶声越来越近。\n凯德的声音在管道里回荡：“我记得你的脸！”",
             "Day four. Enforcers and the blue giants begin purging the Sump level by level. The hiss of flamers draws closer.\nKade's voice echoes through the pipes: “I remember your face!”"),
     effects: {hp: -10},
@@ -445,7 +445,7 @@
             "Kade raises the flamer, and you're already on him.\nIt's quick. He slumps against a pipe and pulls off his helmet. His face is younger than you imagined.\n“The spire... won't remember me,” he says. “Or you.”"),
     effects: {renown: 10, corruption: 4, set: {kadeDead: true}},
     choices: [
-      C("拿走他的头盔", "Take his helmet", "cha_411", {effects: {renown: 5, corruption: 4}, result: L("头盔还带着他的体温。你戴上它。透过护目镜，污池看起来小多了。", "The helmet is still warm. You put it on. Through the visor, the Sump looks much smaller.")}),
+      C("拿走他的头盔", "Take his helmet", "cha_411", {effects: {renown: 5, corruption: 4, taint: {khorne: 10}}, result: L("头盔还带着他的体温。你戴上它。透过护目镜，污池看起来小多了。", "The helmet is still warm. You put it on. Through the visor, the Sump looks much smaller.")}),
       C("替他合上眼睛", "Close his eyes", "cha_411", {effects: {sanity: 5}, result: L("你的指尖碰到他的眼皮，他已经不动了。你在他身边坐了一会儿。谁也不欠谁了。", "Your fingers brush his eyelids; he's already still. You sit beside him a while. Nobody owes anybody now.")})
     ]};
 
@@ -460,7 +460,7 @@
   N.cha_408 = {chapter: 4, scene: "underhive", speaker: null, time: {d: 1},
     text: L("你沉进废水，用一根管子呼吸。头顶的火光亮了又暗，暗了又亮。\n一天一夜。浮上来时，你的皮肤发绿，指缝间长出了蹼。\n你还活着。这在污池就叫好运。",
             "You sink into the waste-water and breathe through a pipe. Above, firelight flares and fades, flares and fades.\nA day and a night. When you surface, your skin is tinged green and webbing has grown between your fingers.\nYou're alive. In the Sump, that's called luck."),
-    effects: {corruption: 7, hp: -5},
+    effects: {corruption: 7, hp: -5, taint: {nurgle: 15}},
     choices: [
       C("甩甩手上的水", "Shake the water off your hands", "cha_411")
     ]};
@@ -529,13 +529,13 @@
       C("看看自己的影子", "Look at your shadow", "cha_508", {effects: {corruption: 4, sanity: -5}, result: L("你低下头。影子慢了半拍，才跟着你低头。独眼老人叹了口气，挪远了一点。", "You look down. Your shadow follows half a beat late. The one-eyed thrall sighs and shifts away.")})
     ]};
 
-  N.cha_506 = {chapter: 5, scene: "warp", speaker: null, time: {d: 60, warp: true}, eventRoll: 0.4,
+  N.cha_506 = {chapter: 5, scene: "warp", speaker: null, time: {d: 60, warp: true}, eventRoll: 0.56,
     text: L("跃迁开始了。舷窗没封，黑色军团不怕看。\n外面是颜色，是尖叫，是一座用眼睛砌成的城。你的影子站了起来，比你高一头，朝你鞠了一躬。\n你手腕上的日历在倒着走。",
             "The jump begins. The viewports stay open; the Black Legion isn't afraid to look.\nOutside is colour, is screaming, is a city built of eyes. Your shadow stands up, a head taller than you, and bows.\nThe calendar on your wrist runs backward."),
     effects: {sanity: -10},
     codex: ["chaos_warp"],
     choices: [
-      C("向影子回礼", "Bow back to your shadow", "cha_507", {effects: {corruption: 7, renown: 5}, result: L("影子满意地直起身，回到你脚下。从此，它偶尔会比你先动。", "Satisfied, the shadow straightens and returns to your feet. From now on, it sometimes moves first.")}),
+      C("向影子回礼", "Bow back to your shadow", "cha_507", {effects: {corruption: 7, renown: 5, taint: {tzeentch: 5}}, result: L("影子满意地直起身，回到你脚下。从此，它偶尔会比你先动。", "Satisfied, the shadow straightens and returns to your feet. From now on, it sometimes moves first.")}),
       C("闭上眼数心跳", "Shut your eyes and count heartbeats", "cha_507", {effects: {sanity: 5, corruption: -5}, result: L("一，二，三……数到四千七百下时，船身一震，尖叫声停了。", "One, two, three... At four thousand seven hundred, the hull shudders and the screaming stops.")})
     ]};
 
@@ -561,13 +561,13 @@
             "In the markets of the Eye, everything is for sale: armour, names, yesterdays, tomorrows.\nA beaked trader blocks your path. “Fine armour. Costs only your mother's face. You barely remember it anyway, don't you?”"),
     codex: ["place_bazaar_eye"],
     choices: [
-      C("成交", "Deal", "cha_601", {effects: {hp: 20, sanity: -15, corruption: 4}, result: L("鸟嘴在你额头上轻轻一啄。盔甲很合身。你努力回想母亲的样子，只想起一团模糊的暖光。", "The beak taps your brow once. The armour fits perfectly. You try to picture your mother and find only a warm blur.")}),
+      C("成交", "Deal", "cha_601", {effects: {hp: 20, sanity: -15, corruption: 4, taint: {khorne: 5}}, result: L("鸟嘴在你额头上轻轻一啄。盔甲很合身。你努力回想母亲的样子，只想起一团模糊的暖光。", "The beak taps your brow once. The armour fits perfectly. You try to picture your mother and find only a warm blur.")}),
       C("用一年寿命换", "Pay with a year of your life", "cha_601", {effects: {hp: 10, renown: 5}, result: L("商人从你腕上抽出一根灰线，缠上线团，递来一件旧皮甲。你忽然觉得有点累。", "The trader draws a grey thread from your wrist, spools it, and hands you an old leather jerkin. You feel suddenly tired.")}),
       C("走开", "Walk away", "cha_601", {effects: {sanity: 5}, result: L("商人在你身后喊：“明天还在这儿！或者昨天！”你没回头。", "The trader calls after you: “Here tomorrow! Or yesterday!” You don't look back.")})
     ]};
 
   /* ============ Chapter 6 · The Eye ============ */
-  N.cha_601 = {chapter: 6, scene: "daemon_world", speaker: VORGATH, time: {y: 3, warp: true}, eventRoll: 0.35,
+  N.cha_601 = {chapter: 6, scene: "daemon_world", speaker: VORGATH, time: {y: 3, warp: true}, eventRoll: 0.49,
     text: L("在恐惧之眼里，时间是一种口味。你觉得过了三年，镜子说三十年，你的头发说三天。\n沃加斯说战团要选新的勇士：“去吧。每位神都有一扇试炼之门。找那个愿意听你说话的。”",
             "In the Eye, time is a flavour. You feel three years have passed; the mirror says thirty; your hair says three days.\nVorgath says the warband needs a new champion. “Go. Each god keeps a door of trial. Find the one who listens to you.”"),
     effects: {sanity: 10, hp: 15},
@@ -584,15 +584,15 @@
             "Behind the brass door is an arena. The stands are packed with headless spectators, yet the cheering is deafening.\nYour opponent is another slave, a boy about your age. His hands are shaking.\nA voice crashes down: “Blood is blood. He does not care whose.”"),
     effects: {hp: -5},
     choices: [
-      C("战斗", "Fight", "cha_603", {effects: {hp: -15, renown: 10, corruption: 7, sanity: -5, taint: {khorne: 15}}, result: L("男孩闭上了眼睛。你没有。", "The boy shuts his eyes. You don't.")}),
-      C("把剑扔给男孩，赤手上", "Toss the boy your sword, fight barehanded", "cha_603", {require: {flag: "pK"}, effects: {hp: -20, renown: 15, corruption: 4}, result: L("男孩握着你的剑，抖得更厉害了。你笑着迎上去。看台上的欢呼翻了一倍。", "The boy grips your sword and shakes harder. You walk in smiling. The roar from the stands doubles.")}),
+      C("战斗", "Fight", "cha_603", {effects: {hp: -15, renown: 10, corruption: 7, sanity: -5, taint: {khorne: 30}}, result: L("男孩闭上了眼睛。你没有。", "The boy shuts his eyes. You don't.")}),
+      C("把剑扔给男孩，赤手上", "Toss the boy your sword, fight barehanded", "cha_603", {require: {flag: "pK"}, effects: {hp: -20, renown: 15, corruption: 4, taint: {khorne: 15}}, result: L("男孩握着你的剑，抖得更厉害了。你笑着迎上去。看台上的欢呼翻了一倍。", "The boy grips your sword and shakes harder. You walk in smiling. The roar from the stands doubles.")}),
       C("拒绝战斗", "Refuse to fight", "cha_610", {effects: {renown: -10, sanity: 5, hp: -10}, result: L("你扔下剑。天上的声音沉默了。一只铜手把你扔出门外，像扔一袋垃圾。", "You drop the sword. The voice above falls silent. A brass hand flings you out the door like a sack of refuse.")})
     ]};
 
   N.cha_603 = {chapter: 6, scene: "daemon_world", speaker: null, foe: "daemon_khorne", time: {h: 1},
     text: L("结束时，看台上那些没有头的观众同时站了起来。\n你手腕上的烙印烧成了红铜色。一个声音在你的心跳里低吼：再来。再来。再来。\n你发现自己在笑，停不下来。",
             "When it's over, every headless spectator rises at once.\nThe brand on your wrist burns brass-red. A growl speaks inside your heartbeat: again. Again. Again.\nYou realise you're laughing, and can't stop."),
-    effects: {sanity: -10, set: {markK: true, champion: true}},
+    effects: {sanity: -10, set: {markK: true, champion: true, devoted_khorne: true}, taint: {khorne: 10}},
     codex: ["chaos_daemon_prince"],
     choices: [
       C("走出斗技场", "Leave the arena", "cha_610")
@@ -602,15 +602,15 @@
     text: L("腐木门后是一座花园，花在溃烂，苍蝇唱着摇篮曲。园丁是个大肚子恶魔，正在给一颗肿瘤浇水。\n“试炼很简单，”它和蔼地说，“染上园子里所有的病，然后告诉我，你感觉好极了。”",
             "Behind the rotten door lies a garden of weeping blossoms where flies hum lullabies. The gardener, a pot-bellied daemon, is watering a tumour.\n“The trial is simple,” it says kindly. “Catch every illness in the garden. Then tell me you feel wonderful.”"),
     choices: [
-      C("深吸一口气", "Take a deep breath", "cha_605", {effects: {hp: -20, corruption: 7, renown: 10, taint: {nurgle: 15}}, result: L("空气又甜又稠，像灌了一口糖浆。你开始咳嗽，园丁慈爱地拍着你的背。", "The air is sweet and thick as syrup. You start coughing; the gardener pats your back, fondly.")}),
-      C("我有老爷爷的祝福", "Grandfather already blessed me", "cha_605", {require: {flag: "pN"}, effects: {hp: 10, renown: 15, corruption: 4}, result: L("园丁凑近闻了闻，高兴得肚子直颤：“自家孩子！”苍蝇们换了一首更欢快的歌。", "The gardener leans in, sniffs, and its belly wobbles with delight. “One of the family!” The flies switch to a merrier tune.")}),
+      C("深吸一口气", "Take a deep breath", "cha_605", {effects: {hp: -20, corruption: 7, renown: 10, taint: {nurgle: 30}}, result: L("空气又甜又稠，像灌了一口糖浆。你开始咳嗽，园丁慈爱地拍着你的背。", "The air is sweet and thick as syrup. You start coughing; the gardener pats your back, fondly.")}),
+      C("我有老爷爷的祝福", "Grandfather already blessed me", "cha_605", {require: {flag: "pN"}, effects: {hp: 10, renown: 15, corruption: 4, taint: {nurgle: 15}}, result: L("园丁凑近闻了闻，高兴得肚子直颤：“自家孩子！”苍蝇们换了一首更欢快的歌。", "The gardener leans in, sniffs, and its belly wobbles with delight. “One of the family!” The flies switch to a merrier tune.")}),
       C("退出花园", "Back out of the garden", "cha_610", {effects: {renown: -10, sanity: -5}, result: L("你捂着嘴退出门外。园丁没拦，只是挥挥手：“下次吧，我们会再见的。”", "You back out with a hand over your mouth. The gardener only waves. “Another time. We'll meet again.”")})
     ]};
 
   N.cha_605 = {chapter: 6, scene: "daemon_world", speaker: S("daemon_nurgle", "园丁", "The Gardener"), time: {d: 7},
     text: L("你得了七种病，又好了七次。最后一次醒来，你感觉不到疼，也不觉得冷，只有一种温吞吞的满足。\n园丁拍拍你的头：“好孩子。老爷爷会照顾你的，永远。”\n你的烙印上长出了一圈小绿芽。",
             "You catch seven illnesses and recover seven times. The last time you wake, you feel no pain and no cold, only a warm, sluggish contentment.\nThe gardener pats your head. “Good child. Grandfather will look after you. Forever.”\nYour brand sprouts a ring of tiny green buds."),
-    effects: {sanity: 10, set: {markN: true, champion: true}},
+    effects: {sanity: 10, set: {markN: true, champion: true, devoted_nurgle: true}, taint: {nurgle: 10}},
     codex: ["chaos_daemon_prince"],
     choices: [
       C("谢过园丁", "Thank the gardener", "cha_610")
@@ -620,16 +620,16 @@
     text: L("水晶门后是一座无尽的图书馆。每本书写的都是你，每本的结局都不一样。\n伊克萨里尔坐在书堆上：“试炼是：挑一本，然后让它成真。”\n你注意到，有一本是空白的。",
             "Behind the crystal door is an endless library. Every book is about you, and every ending is different.\nIxaril sits atop a stack. “The trial: choose one, then make it true.”\nYou notice that one book is blank."),
     choices: [
-      C("挑最辉煌的那本", "Pick the most glorious one", "cha_607", {effects: {sanity: -15, renown: 15, corruption: 7, taint: {tzeentch: 15}}, result: L("书很厚，每一页都是你的胜利。读到一半你才发现，结尾那几页被撕掉了。", "It's thick, every page a victory of yours. Halfway through, you notice the last few pages have been torn out.")}),
+      C("挑最辉煌的那本", "Pick the most glorious one", "cha_607", {effects: {sanity: -15, renown: 15, corruption: 7, taint: {tzeentch: 30}}, result: L("书很厚，每一页都是你的胜利。读到一半你才发现，结尾那几页被撕掉了。", "It's thick, every page a victory of yours. Halfway through, you notice the last few pages have been torn out.")}),
       C("拿起那本空白的", "Take the blank one", "cha_607", {effects: {sanity: -5, renown: 5, set: {blankBook: true}}, result: L("伊克萨里尔的笑容僵了半秒。你翻开第一页，上面慢慢浮出一行字：你翻开了第一页。", "Ixaril's smile stiffens for half a second. You open to the first page. Slowly, words surface: You open to the first page.")}),
-      C("看穿伊克萨里尔的布局", "See through Ixaril's scheme", "cha_607", {require: {flag: "pT"}, effects: {renown: 15, sanity: -10, set: {sawPlan: true}}, result: L("你看见了：每本书的书脊里都藏着他的名字。他叹气，像被拆穿的魔术师：“好吧，算你一本。”", "You see it: his name hidden in the spine of every book. He sighs like an exposed conjurer. “Fine. One for you.”")}),
-      C("认出书上的字迹", "Recognise the handwriting", "cha_607", {require: {flag: "origin_scribe"}, hideIfLocked: true, effects: {renown: 10, sanity: -10, taint: {tzeentch: 10}, set: {scribeLibrary: true}}, result: L("每一本都是你的笔迹。原来你抄过的，不止那一本。伊克萨里尔鼓掌：“老同事！”", "Every book is in your hand. That wasn't the only one you copied. Ixaril applauds. “An old colleague!”")})
+      C("看穿伊克萨里尔的布局", "See through Ixaril's scheme", "cha_607", {require: {flag: "pT"}, effects: {renown: 15, sanity: -10, set: {sawPlan: true}, taint: {tzeentch: 15}}, result: L("你看见了：每本书的书脊里都藏着他的名字。他叹气，像被拆穿的魔术师：“好吧，算你一本。”", "You see it: his name hidden in the spine of every book. He sighs like an exposed conjurer. “Fine. One for you.”")}),
+      C("认出书上的字迹", "Recognise the handwriting", "cha_607", {require: {flag: "origin_scribe"}, hideIfLocked: true, effects: {renown: 10, sanity: -10, taint: {tzeentch: 15}, set: {scribeLibrary: true}}, result: L("每一本都是你的笔迹。原来你抄过的，不止那一本。伊克萨里尔鼓掌：“老同事！”", "Every book is in your hand. That wasn't the only one you copied. Ixaril applauds. “An old colleague!”")})
     ]};
 
   N.cha_607 = {chapter: 6, scene: "daemon_world", speaker: IXARIL, time: {h: 9, warp: true},
     text: L("你读完最后一页，书上的字全飞了起来，钻进你的眼睛。\n从此你偶尔能看见一秒后的事。代价是，你偶尔会忘掉一秒前的事。\n伊克萨里尔鼓掌：“精彩。正是我预料中的意外。”",
             "You finish the last page and every letter lifts off and burrows into your eyes.\nNow and then you see one second ahead. The price: now and then you forget the second before.\nIxaril applauds. “Marvellous. Precisely the surprise I foresaw.”"),
-    effects: {set: {markT: true, champion: true}},
+    effects: {set: {markT: true, champion: true, devoted_tzeentch: true}, taint: {tzeentch: 10}},
     codex: ["chaos_daemon_prince"],
     choices: [
       C("合上书", "Close the book", "cha_610")
@@ -641,7 +641,7 @@
     choices: [
       C("再吃一道就走", "One more dish, then go", null, R(0.4, "sanity", "cha_609", "cha_end_feast", RR(L("这道菜美得让你想哭。你放下叉子，用尽全身力气站了起来。", "The dish is so good you could weep. You set down your fork and stand with everything you've got."), L("这道菜美得让你想哭。下一道已经端上来了，冒着热气。", "The dish is so good you could weep. The next one is already arriving, steaming.")))),
       C("立刻起身离开", "Stand up and leave at once", "cha_609", {effects: {sanity: -10, renown: 10}, result: L("离开桌子的每一步，都像从身上撕下一块。主人在你身后轻轻鼓掌。", "Every step from the table feels like tearing off a piece of yourself. Behind you, the host applauds softly.")}),
-      C("我只想被看见", "I only want to be seen", "cha_609", {require: {flag: "pS"}, effects: {renown: 15, corruption: 7, sanity: 5}, result: L("所有客人同时放下刀叉，转头看你。你在他们的目光里站起来，轻飘飘地出了门。", "Every guest sets down their cutlery and turns to look at you. Bathed in their gaze, you rise and all but float out the door.")})
+      C("我只想被看见", "I only want to be seen", "cha_609", {require: {flag: "pS"}, effects: {renown: 15, corruption: 7, sanity: 5, taint: {slaanesh: 25}}, result: L("所有客人同时放下刀叉，转头看你。你在他们的目光里站起来，轻飘飘地出了门。", "Every guest sets down their cutlery and turns to look at you. Bathed in their gaze, you rise and all but float out the door.")})
     ]};
 
   N.cha_end_feast = {chapter: 6, scene: "daemon_world", speaker: S("daemon_slaanesh", "完美的主人", "The Flawless Host"), time: {y: 1000},
@@ -652,7 +652,7 @@
   N.cha_609 = {chapter: 6, scene: "daemon_world", speaker: null, time: {h: 2, warp: true},
     text: L("走出丝绸门时，你回头看了一眼。宴会上每个客人都长着你的脸，都在冲你举杯。\n你变得很美，美得连沃加斯都多看了一眼。\n但从此，什么味道都比不上那道你没吃的菜。",
             "Stepping out, you glance back. Every guest at the feast wears your face, and all of them raise a glass to you.\nYou've become beautiful, enough that even Vorgath looks twice.\nBut nothing will ever taste as good as the dish you left behind."),
-    effects: {set: {markS: true, champion: true}},
+    effects: {set: {markS: true, champion: true, devoted_slaanesh: true}, taint: {slaanesh: 15}},
     codex: ["chaos_daemon_prince"],
     choices: [
       C("不再回头", "Don't look back again", "cha_610")
@@ -663,7 +663,7 @@
             "Vorgath waits outside, glancing at your wrist.\n“The Warmaster returns to realspace. Target: the shrine world Aldrin. Its cathedral keeps a saint's bone.”\n“We want the bone?”\n“No. We want them to watch it burn.”"),
     choices: [
       C("准备出发", "Make ready", "cha_611"),
-      C("向诸神要更多的恩赐", "Ask the gods for more gifts", "cha_611", {effects: {corruption: 15, renown: 15, hp: 20}, result: L("你跪下，烙印像炉口一样张开。有什么涌进你的血管，太多了，多得发疼。沃加斯后退了半步。", "You kneel and the brand opens like a furnace mouth. Something floods your veins, too much, enough to hurt. Vorgath steps back half a pace.")})
+      C("向诸神要更多的恩赐", "Ask the gods for more gifts", "cha_611", {effects: {corruption: 15, renown: 15, hp: 20, taint: {all: 5}}, result: L("你跪下，烙印像炉口一样张开。有什么涌进你的血管，太多了，多得发疼。沃加斯后退了半步。", "You kneel and the brand opens like a furnace mouth. Something floods your veins, too much, enough to hurt. Vorgath steps back half a pace.")})
     ]};
 
   N.cha_611 = {chapter: 6, scene: "ship_interior", speaker: S("omen_black_crusade", "战帅的影像", "The Warmaster's Image"), time: {d: 5},
@@ -672,7 +672,7 @@
     codex: ["chaos_abaddon"],
     choices: [
       C("向战帅宣誓", "Swear to the Warmaster", "cha_612", {effects: {renown: 10, set: {swornAbaddon: true}}, result: L("你念完誓词。剪影一动不动，但大厅里每一盏灯都暗了一瞬。", "You finish the oath. The silhouette doesn't move, but every lamp in the hall dims for an instant.")}),
-      C("向你的神宣誓", "Swear to your god", "cha_612", {effects: {renown: 10, corruption: 7}, result: L("誓词是战帅的，念出的名字却是另一个。烙印烫得发白。剪影的利爪，似乎轻轻动了一下。", "The words are the Warmaster's; the name you speak is another. The brand burns white. The silhouette's talon twitches, perhaps.")}),
+      C("向你的神宣誓", "Swear to your god", "cha_612", {effects: {renown: 10, corruption: 7, taint: {all: 5}}, result: L("誓词是战帅的，念出的名字却是另一个。烙印烫得发白。剪影的利爪，似乎轻轻动了一下。", "The words are the Warmaster's; the name you speak is another. The brand burns white. The silhouette's talon twitches, perhaps.")}),
       C("嘴上宣誓，心里不算", "Swear with your lips, not your heart", "cha_612", {effects: {sanity: 5, set: {falseOath: true}}, result: L("誓词一字不差。走下台阶时，你听见身后有人轻轻笑了一声，分不清是谁。", "You speak every word perfectly. Walking down the steps, you hear a soft laugh behind you, and can't tell whose.")})
     ]};
 
@@ -680,12 +680,12 @@
     text: L("伊克萨里尔递给你一把匕首，刀刃里关着什么东西，隔着金属在轻轻敲门。\n“一个小恶魔，”他说，“不太聪明，但很忠诚。你喂它，它就替你挡刀。”\n敲门声很有礼貌。",
             "Ixaril hands you a dagger. Something is shut inside the blade, tapping gently at the metal.\n“A minor daemon,” he says. “Not clever, but loyal. Feed it, and it will take blows meant for you.”\nThe tapping is very polite."),
     choices: [
-      C("收下匕首", "Accept the dagger", "cha_701", {effects: {corruption: 10, hp: 20, set: {daemonBlade: true}}, result: L("匕首一入手，敲门声就停了，像小狗找到了主人。刀柄微微发热，舔了舔你的掌心。", "The moment it's in your hand the tapping stops, like a puppy finding its owner. The hilt warms and licks your palm.")}),
+      C("收下匕首", "Accept the dagger", "cha_701", {effects: {corruption: 10, hp: 20, set: {daemonBlade: true}, taint: {khorne: 10}}, result: L("匕首一入手，敲门声就停了，像小狗找到了主人。刀柄微微发热，舔了舔你的掌心。", "The moment it's in your hand the tapping stops, like a puppy finding its owner. The hilt warms and licks your palm.")}),
       C("还给他", "Hand it back", "cha_701", {effects: {sanity: 5}, result: L("伊克萨里尔耸耸肩，把匕首收回袖子。“它会难过的，”他说，“它很少被拒绝。”", "Ixaril shrugs and tucks it back into his sleeve. “It'll sulk,” he says. “It isn't used to rejection.”")})
     ]};
 
   /* ============ Chapter 7 · The Raid ============ */
-  N.cha_701 = {chapter: 7, scene: "burning_city", speaker: null, time: {d: 30, warp: true}, eventRoll: 0.3,
+  N.cha_701 = {chapter: 7, scene: "burning_city", speaker: null, time: {d: 30, warp: true}, eventRoll: 0.42,
     text: L("阿尔德林，一颗遍地教堂的星球，连路灯都雕成了圣人。\n黑色军团的登陆艇像雨一样落下。城墙上，星界军的探照灯乱成一团。\n你跟着沃加斯冲进城，满街钟声，越敲越乱。",
             "Aldrin, a world of cathedrals; even the streetlamps are carved like saints.\nBlack Legion landers fall like rain. On the walls, the Astra Militarum's searchlights swing in panic.\nYou charge into the city behind Vorgath. Bells ring in every street, faster and faster, out of time."),
     codex: ["imp_guard", "place_aldrin"],
@@ -700,7 +700,7 @@
     effects: {sanity: -10},
     codex: ["imp_ecclesiarchy"],
     choices: [
-      C("冲上台阶", "Storm the steps", "cha_704", {effects: {hp: -15, renown: 10, corruption: 4}, result: L("链锯剑咬上你的肩甲，火星四溅。台阶上的歌声，一句一句地少了下去。", "The chainsword bites your shoulder guard in a spray of sparks. On the steps, the hymn loses a voice, then another.")}),
+      C("冲上台阶", "Storm the steps", "cha_704", {effects: {hp: -15, renown: 10, corruption: 4, taint: {khorne: 5}}, result: L("链锯剑咬上你的肩甲，火星四溅。台阶上的歌声，一句一句地少了下去。", "The chainsword bites your shoulder guard in a spray of sparks. On the steps, the hymn loses a voice, then another.")}),
       C("跟着他们唱", "Sing along with them", "cha_705", {effects: {sanity: 10, corruption: -10, renown: -10, taint: {all: -10}, set: {sangHymn: true}}, result: L("你一张嘴，词全回来了。老牧师看了你一眼，放低了链锯剑。你的烙印凉得像冰。", "You open your mouth and every word comes back. The old priest looks at you and lowers his chainsword. Your brand turns cold as ice.")}),
       C("念出他漏掉的那句经文", "Speak the verse he skipped", "cha_705", {require: {flag: "origin_scribe"}, hideIfLocked: true, effects: {sanity: 10, corruption: -5, renown: -5, taint: {all: -10}, set: {sangHymn: true}}, result: L("这段经文你抄过一百遍。老牧师漏了一句，你替他念了出来。他愣住，放低了链锯剑。", "You copied this litany a hundred times. The old priest skips a line; you speak it for him. He stares, and lowers his chainsword.")})
     ]};
@@ -710,7 +710,7 @@
             "Outside the armoury, a young Guardsman lies pinned beneath a collapsed barricade, his rifle out of reach.\nHe looks at you. No hatred, only exhaustion. “Go on. Mum said heretics have horns,” he says. “You don't.”"),
     codex: ["imp_lasgun"],
     choices: [
-      C("动手", "Do it", "cha_704", {effects: {corruption: 7, renown: 10, sanity: -10, taint: {khorne: 10}}, result: L("你动手了。他最后说的是“妈”。", "You do it. His last word is “Mum.”")}),
+      C("动手", "Do it", "cha_704", {effects: {corruption: 7, renown: 10, sanity: -10, taint: {khorne: 20}}, result: L("你动手了。他最后说的是“妈”。", "You do it. His last word is “Mum.”")}),
       C("把他从掩体下拖出来", "Drag him out from under the barricade", "cha_705", {effects: {sanity: 5, renown: -5, set: {sparedGuard: true}}, result: L("他比看上去轻。他一瘸一拐地跑开，跑出几步又回头：“你真的没有角。”", "He's lighter than he looks. He limps off, then turns back after a few steps. “You really don't have horns.”")}),
       C("拿走他的枪，走开", "Take his rifle and walk away", "cha_704", {effects: {renown: 3}, result: L("你捡起枪就走。身后，他在哭，也可能是在笑。", "You pick up the rifle and go. Behind you he's crying, or maybe laughing.")}),
       C("把旧团臂章塞给他", "Press your old regiment patch on him", "cha_705", {require: {flag: "origin_deserter"}, hideIfLocked: true, effects: {sanity: 10, renown: -5, set: {sparedGuard: true}}, result: L("你把他拖出来，撕下藏在衣里的旧臂章：“跟你们团说，我死了。”他攥着臂章跑了。", "You drag him free and tear out the patch hidden in your coat. “Tell your regiment I'm dead.” He runs, clutching it.")})
@@ -750,11 +750,11 @@
             "A bolt-round bursts beside you. Lying in the rubble, you hear the landers roar away. Nobody comes back.\nA pair of plump hands drags you into the sewers. Tikka. She's as big as an ox now, and she hums like a hive.\n“Grandfather never leaves anyone behind,” she says."),
     effects: {hp: -20, sanity: 5, corruption: 4},
     choices: [
-      C("靠在她身上", "Lean against her", "cha_708", {effects: {hp: 10, corruption: 4}, result: L("她很软，很暖，嗡嗡声像摇篮曲。你的伤口发痒，然后开始愈合。愈合得太快了。", "She's soft and warm; her humming is a lullaby. Your wounds itch, then start to close. Too fast.")}),
+      C("靠在她身上", "Lean against her", "cha_708", {effects: {hp: 10, corruption: 4, taint: {nurgle: 15}}, result: L("她很软，很暖，嗡嗡声像摇篮曲。你的伤口发痒，然后开始愈合。愈合得太快了。", "She's soft and warm; her humming is a lullaby. Your wounds itch, then start to close. Too fast.")}),
       C("挣扎着自己走", "Struggle on by yourself", "cha_708", {effects: {hp: -5}, result: L("你推开她的手，扶着墙一步一步挪。蒂卡跟在后面，不说话，也不走远。", "You push her hands away and inch along the wall. Tikka follows, silent, never far.")})
     ]};
 
-  N.cha_708 = {chapter: 7, scene: "ruins", speaker: IXARIL, time: {d: 3}, eventRoll: 0.3,
+  N.cha_708 = {chapter: 7, scene: "ruins", speaker: IXARIL, time: {d: 3}, eventRoll: 0.42,
     text: L("三天后，城市烧成了白灰。圣人的骨头没了，钟声也没了。\n伊克萨里尔的笑容突然消失，他盯着天空：“有东西要来了。我看不见它的未来。”\n这是你第一次见他害怕。",
             "Three days later the city is white ash. The saint's bone is gone, and so are the bells.\nIxaril's smile vanishes. He stares at the sky. “Something is coming. I cannot see its future.”\nIt's the first time you've seen him afraid."),
     choices: [
@@ -777,7 +777,7 @@
     choices: [
       C("我留下", "I'm staying", "cha_711", {effects: {renown: 10}, result: L("沃加斯哼了一声，把磨刀石扔给你。这大概是他表示敬意的方式。", "Vorgath grunts and tosses you the whetstone. That's probably his idea of respect.")}),
       C("溜走", "Slip away", "cha_711", {effects: {renown: -10, set: {fled: true}}, result: L("你点点头，往后退。沃加斯没抬头：“聪明。”听不出是夸你还是骂你。", "You nod and back away. Vorgath doesn't look up. “Smart.” You can't tell if it's praise or insult.")}),
-      C("向诸神祈求更多力量", "Pray to the gods for more power", "cha_711", {effects: {corruption: 15, renown: 15, hp: 15}, result: L("祈祷还没说完，回答就来了。指甲变黑，牙齿变尖。沃加斯挑了挑眉。", "Before you finish praying, the answer arrives. Your nails blacken, your teeth sharpen. Vorgath raises an eyebrow.")})
+      C("向诸神祈求更多力量", "Pray to the gods for more power", "cha_711", {effects: {corruption: 15, renown: 15, hp: 15, taint: {all: 5}}, result: L("祈祷还没说完，回答就来了。指甲变黑，牙齿变尖。沃加斯挑了挑眉。", "Before you finish praying, the answer arrives. Your nails blacken, your teeth sharpen. Vorgath raises an eyebrow.")})
     ]};
 
   N.cha_711 = {chapter: 7, scene: "ruins", speaker: TIKKA, foe: "daemon_nurgle", time: {h: 2},
@@ -785,7 +785,7 @@
             "Tikka isn't leaving with the ships. She sits among Aldrin's ruins while the little things around her hum.\n“The people here are so sick and sad,” she says. “Grandfather wants me to stay and look after them.”\nShe can't remember what you looked like as a child. She remembers which bread you liked."),
     effects: {sanity: -5},
     choices: [
-      C("抱抱她", "Hug her", "cha_801", {effects: {sanity: 5, corruption: 3}, result: L("她身上有泥土、草药和腐烂的甜味。“记得吃饭，”她说，像小时候那样。", "She smells of soil, herbs and sweet rot. “Remember to eat,” she says, just like when you were small.")}),
+      C("抱抱她", "Hug her", "cha_801", {effects: {sanity: 5, corruption: 3, taint: {nurgle: 10}}, result: L("她身上有泥土、草药和腐烂的甜味。“记得吃饭，”她说，像小时候那样。", "She smells of soil, herbs and sweet rot. “Remember to eat,” she says, just like when you were small.")}),
       C("劝她一起走", "Beg her to come", "cha_801", {effects: {sanity: -5}, result: L("她笑着摇头，把一块面包塞进你手里。还是你爱吃的那种。", "She smiles, shakes her head, and presses a bread roll into your hand. Your favourite kind.")})
     ]};
 
@@ -816,7 +816,7 @@
     effects: {sanity: -5},
     choices: [
       C("握紧武器", "Grip your weapon", "cha_809", {effects: {renown: 3}, result: L("你握紧武器，手心全是汗。沃加斯瞥了你一眼，点了点头。", "You grip your weapon, palms slick. Vorgath glances over and nods once.")}),
-      C("在烙印上默念神的名字", "Whisper your god's name over the brand", "cha_809", {effects: {corruption: 4, hp: 10}, result: L("烙印回应了。暖意顺着手臂爬上来，伤口不再流血。远处，那口钟又响了一声。", "The brand answers. Warmth crawls up your arm and your wounds stop bleeding. Far off, the bell rings once more.")})
+      C("在烙印上默念神的名字", "Whisper your god's name over the brand", "cha_809", {effects: {corruption: 4, hp: 10, taint: {all: 5}}, result: L("烙印回应了。暖意顺着手臂爬上来，伤口不再流血。远处，那口钟又响了一声。", "The brand answers. Warmth crawls up your arm and your wounds stop bleeding. Far off, the bell rings once more.")})
     ]};
 
   N.cha_809 = {chapter: 8, scene: "ruins", speaker: STRAND, time: {h: 1},
@@ -893,6 +893,91 @@
             "You pray. Clumsily, like when you were small, not knowing what to say.\nThe light answers. Not with forgiveness. With fire.\nStrand later writes in her report: “Heretic was praying at time of death. Note: irrelevant.”"),
     ending: {kind: "bad", title: L("迟来的祷告", "A Prayer Too Late"), cause: L("死于帝皇之光", "Burned in the Emperor's light")}};
 
+  /* ============ Claim endings (SPEC §19): a Chaos god's claim, accepted or forced. Reached via the claim events' goto. ============ */
+  N.cha_claim_khorne = {scene: "burning_city", speaker: S("daemon_khorne", "铁砧般的声音", "A Voice Like an Anvil"),
+    text: L("你手腕上的烙印烧成了红铜色，心跳变成了鼓点。\n“你，”那个声音像铁砧，“跑够了。现在，冲。”\n门后的另外三个声音，同时闭上了嘴。",
+            "The brand on your wrist burns copper-red; your heartbeat has become a drum.\n“You,” says a voice like an anvil. “Enough running. Now, charge.”\nBehind the door, the other three voices fall silent at once."),
+    codex: ["god_khorne"],
+    choices: [
+      C("以他的勇士之名回应", "Answer as His champion", "cha_end_claim_khorne_chosen", {require: {flag: "devoted_khorne"}, result: L("你举起烙印。鼓声停了一拍，像是认出了你。", "You raise the brand. The drum skips a beat, as if it knows you.")}),
+      C("任由它带走你", "Let it take you", "cha_end_claim_khorne", {result: L("你松开手里的一切。鼓声把你卷了进去。", "You let go of everything you hold. The drum sweeps you in.")})
+    ]};
+
+  N.cha_end_claim_khorne = {scene: "burning_city", speaker: S("daemon_khorne", "嗜血者", "Bloodletter"), time: {y: 5},
+    text: L("你成了血神的猎犬：没有名字，没有诗班，只有下一场仗。\n多年后，污池的孩子还用你的故事吓唬人：一个拾荒者爬出了下巢，从此再没停下。\n头骨一颗颗堆向王座，永远堆不满。",
+            "You become a hound of the Blood God: no name, no Choir, only the next battle.\nYears later, children in the Sump still scare each other with your story: a scavenger who climbed out of the underhive and never stopped.\nSkull after skull piles toward the throne. It is never enough."),
+    codex: ["god_khorne"],
+    ending: {kind: "bad", title: L("血神的猎犬", "Hound of the Blood God"), cause: L("沦为恐虐的猎犬", "Became a hound of Khorne")}};
+
+  N.cha_end_claim_khorne_chosen = {scene: "daemon_world", speaker: S("daemon_prince", "血神的勇士", "Champion of the Blood God"), time: {y: 30, warp: true},
+    text: L("血神承认了你。你的盔甲换成黄铜，名字刻进斧刃，每一场仗都比上一场更大。\n你在一千个世界上冲锋，从不回头，也从不休息。\n恐虐从不赏赐安宁，只赏赐下一个对手。对你来说，这就够了。",
+            "The Blood God acknowledges you. Your armour turns to brass, your name is etched into the axe-blade, every war bigger than the last.\nYou charge across a thousand worlds, never looking back, never resting.\nKhorne grants no peace, only the next foe. For you, that is enough."),
+    codex: ["god_khorne"],
+    ending: {kind: "good", title: L("血神的勇士", "Champion of the Blood God"), cause: L("成为恐虐的勇士", "Became Khorne's champion")}};
+
+  N.cha_claim_nurgle = {scene: "underhive", speaker: S("daemon_nurgle", "老爷爷的声音", "Grandfather's Voice"),
+    text: L("苍蝇落满了你的肩膀，你一点也不觉得痒。\n“孩子，”那个声音又暖又稠，“你在外面跑得太累了。回家吧。花园里的活儿，总得有人干。”",
+            "Flies settle all over your shoulders, and you don't itch at all.\n“Child,” says a voice warm and thick as broth, “you've run yourself ragged out there. Come home. The garden needs tending, and someone must do it.”"),
+    codex: ["god_nurgle"],
+    choices: [
+      C("以他的园丁之名回应", "Answer as His gardener", "cha_end_claim_nurgle_chosen", {require: {flag: "devoted_nurgle"}, result: L("你伸出手。苍蝇们欢快地嗡了一声，像在鼓掌。", "You hold out your hand. The flies hum happily, as if applauding.")}),
+      C("躺下，歇一歇", "Lie down and rest", "cha_end_claim_nurgle", {result: L("地面又软又暖。你闭上眼睛，再也不想睁开。", "The ground is soft and warm. You close your eyes and never want to open them.")})
+    ]};
+
+  N.cha_end_claim_nurgle = {scene: "underhive", speaker: S("daemon_nurgle", "老爷爷的声音", "Grandfather's Voice"), time: {y: 3},
+    text: L("你在污池最深处躺下，再也不想起来。苍蝇在你身上安了家，菌菇从指缝里长出来。\n拾荒的人都爱在你身边歇脚，说你身上暖洋洋的，像个炉子。\n慈父的花园里没有谁是多余的，也没有谁能离开。",
+            "You lie down at the very bottom of the Sump and never want to get up. Flies make a home of you; mushrooms sprout between your fingers.\nScavengers like to rest beside you. You're warm, they say, like a stove.\nIn Grandfather's garden no one is unwanted, and no one ever leaves."),
+    codex: ["god_nurgle"],
+    ending: {kind: "bad", title: L("污池里的暖炉", "The Warm Stove in the Sump"), cause: L("沦为纳垢的苗床", "Became a seedbed for Nurgle")}};
+
+  N.cha_end_claim_nurgle_chosen = {scene: "daemon_world", speaker: S("daemon_prince", "慈父的园丁", "Grandfather's Gardener"), time: {y: 30, warp: true},
+    text: L("老爷爷亲手给你系上了围裙。你成了花园的园丁，替他照看一种又一种新生的瘟疫。\n你身上烂了七处，处处都开着花。小东西们说你笑起来最好看。\n你从没这么快乐过，也永远不会再孤单。",
+            "Grandfather ties an apron on you himself. You become a gardener, tending one newborn plague after another for him.\nYou are rotten in seven places, and every one of them is in bloom. The little ones say your smile is the loveliest.\nYou have never been so happy, and you will never be alone again."),
+    codex: ["god_nurgle"],
+    ending: {kind: "good", title: L("慈父的园丁", "Grandfather's Gardener"), cause: L("成为纳垢的宠儿", "Became Nurgle's beloved")}};
+
+  N.cha_claim_tzeentch = {scene: "warp", speaker: S("daemon_tzeentch", "镜子里的人", "The One in the Mirror"),
+    text: L("所有的镜子同时映出了你，每一个你都在做不同的事。\n“选一个吧，”镜子里的人笑着说，“反正每一个都是我替你写好的。”",
+            "Every mirror shows you at once, each you doing something different.\n“Pick one,” says the one in the mirror, smiling. “I wrote them all for you anyway.”"),
+    codex: ["god_tzeentch"],
+    choices: [
+      C("以他的书记之名回应", "Answer as His scribe", "cha_end_claim_tzeentch_chosen", {require: {flag: "devoted_tzeentch"}, result: L("你拿起笔。墨水是蓝色的，自己就开始写了。", "You pick up the pen. The ink is blue, and it starts writing on its own.")}),
+      C("随便指一个", "Point at any one", "cha_end_claim_tzeentch", {result: L("你指了一个。镜子全碎了，每块碎片里都是同一个笑容。", "You point. Every mirror shatters, and each shard holds the same smile.")})
+    ]};
+
+  N.cha_end_claim_tzeentch = {scene: "warp", speaker: S("daemon_tzeentch", "镜子里的人", "The One in the Mirror"), time: {y: 2, warp: true},
+    text: L("你开始照着脑子里的剧本过日子。每一步都很顺，顺得可疑。\n剧本最后一页写着：你死于一场你亲手策划的背叛。读到这一行时，已经来不及改了。\n万变之主的计划里，你只是一行注脚。",
+            "You start living by a script in your head. Every step goes smoothly. Suspiciously smoothly.\nThe last page reads: you die in a betrayal you plotted yourself. By the time you read that line, it's too late to change it.\nIn the Changer of Ways' plan, you were a footnote."),
+    codex: ["god_tzeentch"],
+    ending: {kind: "bad", title: L("剧本的最后一页", "The Last Page"), cause: L("死于奸奇的计划", "Undone by Tzeentch's plan")}};
+
+  N.cha_end_claim_tzeentch_chosen = {scene: "warp", speaker: S("daemon_prince", "命运的书记", "Scribe of Fate"), time: {y: 30, warp: true},
+    text: L("你成了改变之主的书记，替他写下一千个未来，再一个个划掉。\n你的身体每天都不一样：今天长羽毛，明天长眼睛。你喜欢这种不确定。\n你也知道，总有一天他会把你写死。那也在计划之中。",
+            "You become the Changer's scribe, writing a thousand futures for him and crossing them out one by one.\nYour body is different every day: feathers today, eyes tomorrow. You like not knowing.\nYou know he'll write you out one day. That, too, is part of the plan."),
+    codex: ["god_tzeentch"],
+    ending: {kind: "good", title: L("命运的书记", "Scribe of Fate"), cause: L("成为奸奇的书记", "Became Tzeentch's scribe")}};
+
+  N.cha_claim_slaanesh = {scene: "daemon_world", speaker: S("daemon_slaanesh", "甜得发苦的声音", "A Bittersweet Voice"),
+    text: L("香水味从四面八方漫过来，所有的声音都在夸你。\n“从来没人好好看过你一眼，”那个声音说，“现在，全宇宙都在看你。你还想要什么？”\n你想要更多。",
+            "Perfume washes in from every side, and every voice is praising you.\n“No one ever truly looked at you,” the voice says. “Now the whole universe is watching. What more could you want?”\nMore. You want more."),
+    codex: ["god_slaanesh"],
+    choices: [
+      C("以她的宠儿之名回应", "Answer as Her favourite", "cha_end_claim_slaanesh_chosen", {require: {flag: "devoted_slaanesh"}, result: L("你抬起下巴。所有的目光同时落在你身上，烫得像光。", "You lift your chin. Every gaze lands on you at once, hot as light.")}),
+      C("再要一点", "Just a little more", "cha_end_claim_slaanesh", {result: L("你又要了一点，然后又一点，然后忘了自己原本想要什么。", "You take a little more, then more, then forget what you wanted in the first place.")})
+    ]};
+
+  N.cha_end_claim_slaanesh = {scene: "daemon_world", speaker: S("daemon_slaanesh", "甜得发苦的声音", "A Bittersweet Voice"), time: {y: 3, warp: true},
+    text: L("你追逐每一种滋味：更甜的酒，更高的音，更多的目光。\n每尝一次，世界就淡一点。最后你坐在一场永不散场的宴席上，盘子总是满的，你却什么都尝不到。\n她给你一切，直到你什么都不是。",
+            "You chase every taste: sweeter wine, higher notes, more eyes upon you.\nEach taste leaves the world a little paler. At last you sit at a banquet that never ends, plate always full, tasting nothing.\nShe gives you everything, until you are nothing."),
+    codex: ["god_slaanesh"],
+    ending: {kind: "bad", title: L("尝不出的滋味", "The Taste of Nothing"), cause: L("被色孽掏空", "Hollowed out by Slaanesh")}};
+
+  N.cha_end_claim_slaanesh_chosen = {scene: "throne_light", speaker: S("daemon_prince", "完美的主人", "The Perfect Host"), time: {y: 30, warp: true},
+    text: L("你成了宴会的主人。宾客为你而来，为你着迷，为你倾尽所有。\n你是完美的，每一面镜子都这么说。\n可你只想要下一个更完美的瞬间，永远想要。在她的国度里，这就叫恩宠。",
+            "You become the host of the feast. Guests come for you, are enthralled by you, give you everything they have.\nYou are perfect; every mirror says so.\nYet all you want is the next, more perfect moment, forever. In Her realm, that is called favour."),
+    codex: ["god_slaanesh"],
+    ending: {kind: "good", title: L("完美的主人", "The Perfect Host"), cause: L("成为色孽的宠儿", "Became Slaanesh's favourite")}};
+
   /* ============ Death nodes (engine-triggered) ============ */
   N.cha_death_hp = {scene: "underhive", speaker: TIKKA,
     text: L("污池的规矩：人死了，东西归活人。\n有人拿走了你的靴子，有人拿走了你的撬棍。蒂卡拿走了你手腕上的烙印——她说，留着念想。\n四位神没有一个回头看。",
@@ -922,6 +1007,7 @@
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("神恩", "Favor"),
     renownIcon: "icon_favor",
+    taintMod: {khorne: 1.3, nurgle: 1.3, tzeentch: 1.3, slaanesh: 1.3},   // SPEC §19: multiplier on positive taint deltas (cleanses unscaled)
     renownHelp: L("神恩是诸神对你的注目。献祭、杀戮、敢于索取、不在门后的声音前退缩，会让它上升；心软、退缩、背弃同伴会让它下降。神恩够高，诸神才可能亲自回应你。",
                   "Favor is how closely the gods are watching you. Offerings, killing, daring to take, and standing firm before the voices behind the door raise it; mercy, retreat and abandoning your own lower it. Enough Favor, and the gods may answer you in person."),
     origins: [

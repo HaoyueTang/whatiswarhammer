@@ -170,7 +170,7 @@
     codex: ["chaos_warp", "place_valda_tomb"],
     choices: [
       C("记住那个词", "Memorise the word", "eld_o_pilgrim_4",
-        E({renown: 5, set: {heardWord: true}}, "你在泥地上写了一百遍，还是写不对。但它在你舌头底下，像一颗种子。",
+        E({renown: 5, set: {heardWord: true}, taint: {tzeentch: 15}}, "你在泥地上写了一百遍，还是写不对。但它在你舌头底下，像一颗种子。",
           "You write it in the mud a hundred times and never get it right. But it sits under your tongue like a seed.")),
       C("擦掉血，回谷仓", "Wipe the blood away and go back", "eld_o_pilgrim_4")
     ]};
@@ -234,7 +234,7 @@
     codex: ["eld_rangers"],
     choices: [
       C("拔出手枪还击", "Draw your sidearm and return fire", "eld_o_trooper_4",
-        E({hp: -10, renown: 2}, "你打空了一个弹匣。第二声轻响，你的手枪也断了，虎口震裂。山脊上已经没人了。",
+        E({hp: -10, renown: 2, taint: {khorne: 15}}, "你打空了一个弹匣。第二声轻响，你的手枪也断了，虎口震裂。山脊上已经没人了。",
           "You empty a magazine. A second soft crack: your pistol breaks too, splitting the web of your hand. The ridge is empty.")),
       C("放下枪，举起手", "Lower your weapon, raise your hands", "eld_o_trooper_4",
         E({sanity: -5, renown: 3}, "影子停了一下，像有点意外，然后消失在麦田里。埃达说你疯了。你觉得自己刚刚活了下来。",
@@ -266,7 +266,7 @@
     ]};
 
   /* ============ Chapter 2 · The Harvest ============ */
-  N.eld_201 = {chapter: 2, scene: "burning_city", speaker: null, foe: "necron_lord", time: {h: 5}, eventRoll: 0.25,
+  N.eld_201 = {chapter: 2, scene: "burning_city", speaker: null, foe: "necron_lord", time: {h: 5}, eventRoll: 0.35,
     text: L("天亮时，瓦尔达在燃烧。没有抢劫，没有喊杀声，只有绿光一片片扫过农庄。\n山丘上站着一个挂满金饰的骷髅领主，像在检阅一块收回的地产。\n妮尔把脸埋在你脖子里：“帝皇什么时候来？”",
             "By dawn Valda is burning. No looting, no war cries—just green light sweeping farm after farm.\nOn a hill stands a skeletal lord hung with gold, surveying the land like reclaimed property.\nNell buries her face in your neck. “When is the Emperor coming?”"),
     codex: ["nec_necrons", "imp_imperium"],
@@ -361,7 +361,7 @@
         E({renown: 5}, "你迈进光里，带着那两个数字。它们比你带走的任何东西都重。",
           "You step into the light carrying those two numbers. They weigh more than anything else you take.")),
       C("朝她脚边啐一口，然后跟上", "Spit at her feet, then follow", "eld_301",
-        E({sanity: 5, renown: -3}, "守护者们同时举起了枪。先知抬手制止，看都没看地上一眼，转身走进光里。",
+        E({sanity: 5, renown: -3, taint: {khorne: 10}}, "守护者们同时举起了枪。先知抬手制止，看都没看地上一眼，转身走进光里。",
           "Every Guardian raises a rifle. The Farseer stays them with one hand, never glancing at the ground, and turns into the light.")),
       C("“那我留下，和他们一起。”", "“Then I stay with them.”", "eld_210")
     ]};
@@ -399,14 +399,14 @@
     ending: {kind: "bad", title: L("最后一季", "The Last Harvest"), cause: L("与瓦尔达一同被收割", "Harvested with Valda")}};
 
   /* ============ Chapter 3 · The Webway ============ */
-  N.eld_301 = {chapter: 3, scene: "webway", speaker: null, time: {d: 2, warp: true}, eventRoll: 0.3,
+  N.eld_301 = {chapter: 3, scene: "webway", speaker: null, time: {d: 2, warp: true}, eventRoll: 0.42,
     text: L("网道里没有上下。光做的走廊向四面八方弯曲，脚步声落下去，很久才传回来。\n你数不清走了多久。也许一小时，也许三天。\n守护者们走得很快。没人回头看你有没有跟上。",
             "There is no up or down in the webway. Corridors of light curve every way; footsteps fall away and return much later.\nYou lose count of how long you walk. An hour, perhaps. Perhaps three days.\nThe Guardians walk fast. No one looks back to see if you're keeping up."),
     codex: ["place_webway"],
     choices: [
       C("紧跟着那个女孩", "Stay close to the girl", "eld_302"),
       C("伸手摸一摸光墙", "Touch the wall of light", "eld_302",
-        E({sanity: -8, renown: 3, taint: {tzeentch: 5}}, "墙是暖的，像活物。墙后无数声音同时转向你，像满屋子人突然安静下来。",
+        E({sanity: -8, renown: 3, taint: {tzeentch: 20}}, "墙是暖的，像活物。墙后无数声音同时转向你，像满屋子人突然安静下来。",
           "The wall is warm, like something alive. Behind it, countless voices turn toward you at once, like a crowded room falling silent."))
     ]};
 
@@ -426,7 +426,7 @@
     choices: [
       C("离那道封印远一点", "Step away from the seal", "eld_304"),
       C("把耳朵贴上去听", "Press your ear to it", "eld_304",
-        E({sanity: -8, corruption: 8, taint: {slaanesh: 10}}, "挠声停了。一个温柔的声音说：“你闻起来不一样。没有石头。真干净。”米瑞丝一把把你拽开。",
+        E({sanity: -8, corruption: 8, taint: {slaanesh: 25}}, "挠声停了。一个温柔的声音说：“你闻起来不一样。没有石头。真干净。”米瑞丝一把把你拽开。",
           "The scratching stops. A tender voice says, “You smell different. No stone. So clean.” Mireth yanks you away."))
     ]};
 
@@ -482,7 +482,7 @@
           "笑声忽远忽近，最后停了。你走进一条没有光的走廊，有人在那里等你。",
           "The laughter drifts near and far, then stops. You walk into an unlit corridor. Someone is waiting there.")),
       C("回应那个声音", "Answer the voice", "eld_309",
-        E({corruption: 5, taint: {slaanesh: 10}}, "你应了一声。那声音很高兴。前面的走廊变暗、变窄，变得很香。",
+        E({corruption: 5, taint: {slaanesh: 25}}, "你应了一声。那声音很高兴。前面的走廊变暗、变窄，变得很香。",
           "You answer. The voice is delighted. The corridor ahead grows darker, narrower, sweeter-smelling.")),
       C("掏出那块白石头", "Take out the white stone", "eld_307", M(ONLY("runeStone"),
         E({renown: 5}, "石头在你掌心亮起来，像一盏小灯。没过多久，一个披斗篷的身影从光里走出来，叹了口气。",
@@ -594,10 +594,10 @@
         E({renown: 5}, "“我没有救你，”她纠正道，“我保留了你。很多种未来里，都有个猿人站在一扇门前。我还不知道是哪扇门。”",
           "“I did not save you,” she corrects. “I kept you. In many futures a mon-keigh stands before a door. I do not yet know which door.”")),
       C("把梦讲给她听", "Tell her your dreams", "eld_406",
-        E({sanity: -5, renown: 3, set: {toldDreams: true}}, "你讲了那条发光的路，和一只很大、很香的手。先知的符文石同时停了一下。",
+        E({sanity: -5, renown: 3, set: {toldDreams: true}, taint: {tzeentch: 20}}, "你讲了那条发光的路，和一只很大、很香的手。先知的符文石同时停了一下。",
           "You tell her of the road of light, and of a vast, sweet-smelling hand. All her rune-stones falter at once.")),
       C("“这十年的梦，是你送来的。”", "“Ten years of dreams. You sent them.”", "eld_406", M(ONLY("origin_pilgrim"),
-        E({renown: 10, sanity: -5, set: {toldDreams: true}}, "“线要先拉直，才能穿针。”她平静地说，“你每一次流鼻血，我都看见了。按你们的说法：我很抱歉。”",
+        E({renown: 10, sanity: -5, set: {toldDreams: true}, taint: {tzeentch: 20}}, "“线要先拉直，才能穿针。”她平静地说，“你每一次流鼻血，我都看见了。按你们的说法：我很抱歉。”",
           "“A thread must be drawn straight before it can be threaded,” she says calmly. “I saw every nosebleed. I am sorry, as your kind would say.”")))
     ]};
 
@@ -642,17 +642,17 @@
         E({renown: 5}, "你把面具摘下来，手在发抖。督军点头：“摘下来了。比大多数头一回的孩子强。”",
           "You pull the mask off, hands shaking. The Exarch nods. “You took it off. Better than most children their first time.”")),
       C("再戴一会儿", "Keep it on a little longer", "eld_409",
-        E({hp: -10, corruption: 10, renown: 3, taint: {khorne: 15}}, "督军不得不掰开你的手指才拿走面具。指甲在掌心掐出了血，你却觉得很好。",
+        E({hp: -10, corruption: 10, renown: 3, taint: {khorne: 60}}, "督军不得不掰开你的手指才拿走面具。指甲在掌心掐出了血，你却觉得很好。",
           "The Exarch has to pry your fingers loose to take the mask. Your nails have drawn blood from your palms. You feel wonderful."))
     ]};
 
-  N.eld_409 = {chapter: 4, scene: "craftworld", speaker: null, time: {h: 10}, eventRoll: 0.35,
+  N.eld_409 = {chapter: 4, scene: "craftworld", speaker: null, time: {h: 10}, eventRoll: 0.49,
     text: L("夜里，方舟的灯一层层暗下去。你梦见瓦尔达的麦田，妮尔在田埂上跑，越跑越远。\n醒来时，枕头是湿的。窗外，一个灵骨巨人静静站着，像在守夜。\n你分不清它是在保护你，还是在看着你。",
             "At night the craftworld's lights dim, tier by tier. You dream of Valda's fields, Nell running along a ridge, farther and farther.\nYou wake with a damp pillow. Outside, a wraithbone giant stands silent, as if keeping watch.\nYou can't tell whether it's guarding you or watching you."),
     choices: [
       C("起身去找米瑞丝", "Get up and find Mireth", "eld_411"),
       C("躺着，数墙里的声音", "Lie still and count the voices in the wall", "eld_411",
-        E({sanity: -5, renown: 3, taint: {tzeentch: 5}}, "数到第三百个，有个声音很客气地叫出了你的名字。你不再数了。",
+        E({sanity: -5, renown: 3, taint: {tzeentch: 25}}, "数到第三百个，有个声音很客气地叫出了你的名字。你不再数了。",
           "At three hundred, one voice says your name, very politely. You stop counting."))
     ]};
 
@@ -669,7 +669,7 @@
     ]};
 
   /* ============ Chapter 5 · The Masque of the Fall ============ */
-  N.eld_501 = {chapter: 5, scene: "craftworld", speaker: MIRETH, time: {y: 1}, eventRoll: 0.3,
+  N.eld_501 = {chapter: 5, scene: "craftworld", speaker: MIRETH, time: {y: 1}, eventRoll: 0.42,
     effects: {sanity: 5, hp: 5},
     text: L("一年过去了。灵族终于开始叫你的名字，只是后面仍要加上“猿人”，像加一个敬称。\n米瑞丝教会了你三百个词，你教会了她吹口哨。\n今天，丑角剧团来了。整座方舟都在说悄悄话。",
             "A year passes. The Aeldari finally use your name, though they still add “mon-keigh” after it, like an honorific.\nMireth has taught you three hundred words. You've taught her to whistle.\nToday the Harlequins have arrived. The whole craftworld is whispering."),
@@ -686,7 +686,7 @@
     codex: ["eld_harlequins", "eld_the_fall"],
     choices: [
       C("看到最后", "Watch to the end", "eld_503",
-        E({sanity: -8, set: {sawMasque: true}, taint: {slaanesh: 5}}, "你移不开眼睛。你知道接下来会发生什么，就像知道一个梦的结局，却醒不过来。",
+        E({sanity: -8, set: {sawMasque: true}, taint: {slaanesh: 10}}, "你移不开眼睛。你知道接下来会发生什么，就像知道一个梦的结局，却醒不过来。",
           "You can't look away. You know what's coming the way you know a dream's ending, yet cannot wake.")),
       C("转头看观众", "Turn and watch the audience", "eld_504")
     ]};
@@ -736,7 +736,7 @@
     codex: ["eld_rangers"],
     choices: [
       C("一拳打过去", "Punch him", "eld_507",
-        E({hp: -5, renown: 3, taint: {khorne: 5}}, "他没躲。你的指节撞在他颧骨上，疼的却是你。他擦擦嘴角：“这一拳，该挨。”",
+        E({hp: -5, renown: 3, taint: {khorne: 35}}, "他没躲。你的指节撞在他颧骨上，疼的却是你。他擦擦嘴角：“这一拳，该挨。”",
           "He doesn't dodge. Your knuckles crack against his cheekbone, and it's you who hurts. He wipes his mouth. “That one was owed.”")),
       C("“那架穿梭机呢？”", "“What about the shuttle?”", "eld_509", ONLY("nellLander")),
       C("“你也是奉命行事。”", "“You were following orders too.”", "eld_508",
@@ -785,7 +785,7 @@
     ]};
 
   /* ============ Chapter 6 · The Maiden World ============ */
-  N.eld_601 = {chapter: 6, scene: "maiden_world", speaker: null, time: {d: 9, warp: true}, eventRoll: 0.3,
+  N.eld_601 = {chapter: 6, scene: "maiden_world", speaker: null, time: {d: 9, warp: true}, eventRoll: 0.42,
     effects: {sanity: 10},
     text: L("伊尔达涅斯。天空干净得发蓝，森林一直长到海边。巨大的蜥兽在河边饮水，背上骑着灵族的孩子。\n这里没有方舟，没有城市。流亡者住在树下，种地，放牧。\n空气里有麦子的味道。你差点没站稳。",
             "Ildaneth. A sky scrubbed blue, forests running down to the sea. Huge reptiles drink at the river, Aeldari children on their backs.\nNo craftworld here, no cities. The Exodites live beneath the trees, farming, herding.\nThe air smells of wheat. You almost lose your footing."),
@@ -853,7 +853,7 @@
   N.eld_607 = {chapter: 6, scene: "maiden_world", speaker: S("omen_farseer", "幻象", "Vision"), time: {h: 1},
     text: L("你握住符文石，看见一个身影站在无数命运之线中间，像拨琴弦一样拨弄它们。\n“艾德拉德·乌斯兰，”塔艾丝拉说，“他拨动过整个银河，最后也被拨动了，跟着重生者走了。”\n“再粗的线，也会松。”",
             "The Farseer has you hold a rune-stone. You see a figure amid countless threads of fate, plucking them like harp strings.\n“Eldrad Ulthran,” says Taethra. “He played the whole galaxy. In the end he was played too, and followed the Reborn.”\n“Even the thickest thread can be pulled loose.”"),
-    effects: {sanity: -5, renown: 5, taint: {tzeentch: 8}},
+    effects: {sanity: -5, renown: 5, taint: {tzeentch: 35}},
     codex: ["eld_eldrad"],
     choices: [
       C("放下符文石", "Set down the rune-stone", "eld_608")
@@ -875,7 +875,7 @@
         E({hp: -10, renown: 5}, "你找了块石头当掩体，一枪一枪地打，像在瓦尔达的路口。这一次，你守住了。",
           "You take cover behind a stone and fire shot by shot, as at Valda's crossroads. This time, you hold."))),
       C("躲进树洞", "Hide in a hollow tree", "eld_610",
-        E({sanity: -8, taint: {nurgle: 5}}, "你在黑暗里捂着嘴，听着外面的一切。你听见米瑞丝在喊你，没有回答。",
+        E({sanity: -8, taint: {nurgle: 10}}, "你在黑暗里捂着嘴，听着外面的一切。你听见米瑞丝在喊你，没有回答。",
           "In the dark you cover your mouth and listen to everything outside. You hear Mireth calling you. You don't answer."))
     ]};
 
@@ -931,13 +931,13 @@
           "“Our ancestors,” Ellaris says. “And our futures.” He lays a hand on the wall. It trembles beneath his palm."))
     ]};
 
-  N.eld_702 = {chapter: 7, scene: "jungle", speaker: S("sigil_slaanesh", "完美的声音", "A Perfect Voice"), time: {h: 9}, eventRoll: 0.35,
+  N.eld_702 = {chapter: 7, scene: "jungle", speaker: S("sigil_slaanesh", "完美的声音", "A Perfect Voice"), time: {h: 9}, eventRoll: 0.49,
     text: L("那晚你梦见瓦尔达。麦子金黄，没有墓穴，妮尔长大了，在门口喊你吃饭。\n一切都刚刚好，好得让人想哭。\n一个声音轻轻地说：“这是可以的。只要你把那扇门打开一点点。”",
             "That night you dream of Valda. The wheat is gold, there is no tomb, and Nell, grown, calls you in to supper from the door.\nEverything is exactly right, right enough to make you weep.\nA voice says softly, “This can be. If you'll open the door, just a little.”"),
     codex: ["eld_she_who_thirsts", "god_slaanesh"],
     choices: [
       C("走进家门", "Walk through the door", "eld_703",
-        E({corruption: 20, sanity: 10, set: {tasted: true}, taint: {slaanesh: 20}}, "饭菜的香味完美无缺。你吃了一口，醒来时嘴里还有那个味道。之后的每一顿饭，都像嚼灰。",
+        E({corruption: 20, sanity: 10, set: {tasted: true}, taint: {slaanesh: 45}}, "饭菜的香味完美无缺。你吃了一口，醒来时嘴里还有那个味道。之后的每一顿饭，都像嚼灰。",
           "The supper smells flawless. You take one bite and wake with the taste still in your mouth. Every meal afterward tastes of ash.")),
       C("咬破手背，逼自己醒来", "Bite your hand to wake yourself", "eld_703",
         E({hp: -5, sanity: -8, renown: 5}, "你在黑暗里醒来，手背上一圈牙印。窗外的灵骨巨人转过头，看了你很久。",
@@ -982,7 +982,7 @@
           "Sylvaen shuts off the engines. “I guessed,” he says. “I'll wait for you at the webway gate.”"))
     ]};
 
-  N.eld_705 = {chapter: 7, scene: "craftworld", speaker: S("omen_khaine", "凯恩的化身", "Avatar of Khaine"), time: {d: 2}, eventRoll: 0.3,
+  N.eld_705 = {chapter: 7, scene: "craftworld", speaker: S("omen_khaine", "凯恩的化身", "Avatar of Khaine"), time: {d: 2}, eventRoll: 0.42,
     text: L("出发前夜，方舟深处传来心跳。一位年轻的灵族走进铁铸的密室，再没出来。\n然后铁门熔化，一个燃烧的巨人走出来，手淌熔铁。整座方舟鸦雀无声。\n“凯恩的化身醒了，”艾拉瑞斯说，“这是战争。”",
             "The night before you leave, a heartbeat sounds deep in the craftworld. A young Aeldari walks into an iron chamber and does not come out.\nThen the iron door melts. A burning giant strides out, molten metal running from its hands, and the craftworld falls silent.\n“The Avatar of Khaine wakes,” says Ellaris. “This is war.”"),
     effects: {sanity: -5},
@@ -1044,11 +1044,11 @@
   N.eld_803 = {chapter: 8, scene: "jungle", speaker: DAEMON, foe: "greater_daemon_slaanesh", time: {h: 1},
     text: L("它让你看：瓦尔达的麦田完好无损，妮尔长大了在门口等你，四千一百万人都活着。\n“只要你点头，”它温柔地说，“你就永远在那里。完美的，永远的。”\n你的心跳得很快。你从没这么想要过一样东西。",
             "It shows you: Valda's fields untouched; Nell grown, waiting at the door; forty-one million alive.\n“Only nod,” it says tenderly, “and you'll be there forever. Perfect. Forever.”\nYour heart races. You have never wanted anything so much."),
-    effects: {corruption: 15, taint: {slaanesh: 15}},
+    effects: {corruption: 15, taint: {slaanesh: 25}},
     choices: [
       C("点头", "Nod", "eld_end_thirst"),
       C("“先让我尝一口。”", "“Just let me taste it first.”", "eld_803",
-        E({corruption: 15, sanity: 10, taint: {slaanesh: 10}}, "一口就好。味道完美得让你发抖。它微笑着，又把盘子推近了一点。",
+        E({corruption: 15, sanity: 10, taint: {slaanesh: 25}}, "一口就好。味道完美得让你发抖。它微笑着，又把盘子推近了一点。",
           "Just one bite. It tastes so perfect you tremble. Smiling, it nudges the plate a little closer.")),
       C("把灵魂石按在心口", "Press the spirit stone to your heart", "eld_804", M(ONLY("carryStone"),
         E({corruption: -15, sanity: 5, taint: {slaanesh: -15}}, "石头烫得像火。你听见米瑞丝在里面喊你的真名。麦田碎了，像一面镜子。",
@@ -1141,6 +1141,31 @@
             "The gate closes. On the other side the Farseer lowers her eyes and strikes a thread from her runes.\nYou are sealed in the webway with the daemon. It's in no hurry; it has all the time there is, and you will grow less clean.\nOn the craftworld no one sings for a mon-keigh. Only a sliver of wraithbone sometimes hums an off-key harvest song."),
     ending: {kind: "bad", title: L("封印之内", "Behind the Seal"), cause: L("为先知的幻象献祭", "Sacrificed for a vision")}};
 
+  /* ============ Claim endings (SPEC §19): a Chaos god's claim, accepted or forced. Reached via the claim events' goto. ============ */
+  N.eld_end_claim_khorne = {scene: "webway", speaker: S("daemon_khorne", "铁与火的轰鸣", "Roar of Iron and Fire"), time: {d: 30, warp: true},
+    text: L("你心里那张战面再也摘不下来了。灵族有道途约束杀意，你没有。\n守护者把你送出了网道。你一路杀进黑暗，没回过头。\n凯恩的怒火属于灵族。你的，被另一位神接住了。他不讲道途，只要头骨。",
+            "The war-mask in your heart will not come off. The Aeldari have their Paths to cage the urge to kill. You have none.\nThe guardians see you out of the webway. You fight your way into the dark and never look back.\nKhaine's rage belongs to the Aeldari. Yours was caught by another god. He keeps no Paths. He wants skulls."),
+    codex: ["god_khorne"],
+    ending: {kind: "bad", title: L("摘不下的战面", "The Mask That Stays"), cause: L("被恐虐收走", "Claimed by Khorne")}};
+
+  N.eld_end_claim_nurgle = {scene: "maiden_world", speaker: S("daemon_nurgle", "园丁", "The Gardener"), time: {y: 3},
+    text: L("你的伤口不再愈合，却开出了花。灵骨歌者的歌，在你身边一首首走了调。\n灵族把你送到一颗无人的星球，留下一袋种子，走得远远的。\n你在那里种出一座园子。苍蝇来了，园丁也来了。他说你种得真好。",
+            "Your wounds no longer heal; they bloom. Near you, the bonesingers' songs go out of tune one by one.\nThe Aeldari leave you on an empty world with a bag of seeds, and keep far away.\nThere you grow a garden. The flies come, and then the Gardener. He says you've done beautifully."),
+    codex: ["god_nurgle"],
+    ending: {kind: "bad", title: L("被流放的园丁", "The Exiled Gardener"), cause: L("成为纳垢的园丁", "Became Nurgle's gardener")}};
+
+  N.eld_end_claim_tzeentch = {scene: "webway", speaker: S("daemon_tzeentch", "多出来的命运线", "The Extra Thread"), time: {d: 90, warp: true},
+    text: L("你看见的命运线越来越多，比先知还多。你开始悄悄拨动其中几根。\n先知发现时，已有三条线因你而断。她第一次在你面前失了态。\n你笑了。拨线的从来不是你，是一个比所有先知都更爱计划的东西。",
+            "You see more fate-threads every day, more than the seers. You begin quietly plucking a few.\nBy the time the Farseer notices, three threads have snapped because of you. For the first time she loses her composure before you.\nYou laugh. It was never you plucking them. It was something that loves plans more than any seer."),
+    codex: ["god_tzeentch"],
+    ending: {kind: "bad", title: L("拨线的手", "The Hand on the Threads"), cause: L("沦为奸奇的棋子", "Became Tzeentch's pawn")}};
+
+  N.eld_end_claim_slaanesh = {scene: "craftworld", speaker: S("greater_daemon_slaanesh", "渴求者", "She Who Thirsts"),
+    text: L("那个梦再也不醒了：瓦尔达的麦田，妮尔在门口喊你吃饭，一切都刚刚好。\n灵族发现你时，你坐着微笑，灵魂早已不在，没有灵魂石接住它。\n渴求者饿了一万年。一个猿人的灵魂，只是饭前的甜点。",
+            "The dream never ends now: Valda's wheat, Nell calling you in to eat, everything just right.\nWhen the Aeldari find you, you are sitting still and smiling, your soul long gone. No spirit stone caught it.\nShe Who Thirsts has hungered for Aeldari souls for ten thousand years. A mon-keigh soul is a sweet before the meal."),
+    codex: ["god_slaanesh"],
+    ending: {kind: "bad", title: L("饭前的甜点", "A Sweet Before the Meal"), cause: L("灵魂被色孽吞噬", "Soul devoured by Slaanesh")}};
+
   /* ============ Death nodes (engine-triggered) ============ */
   N.eld_death_hp = {scene: "webway", speaker: null,
     text: L("你倒下了。灵族们停下脚步，低头看了你一会儿，很有礼貌。\n没有灵魂石接住你。你的灵魂升起来，又亮又干净，像一盏灯，被远处某个很饿的东西看见了。\n先知在符文上，轻轻划掉了一根线。",
@@ -1166,7 +1191,7 @@
              "A wraithbone wall has been polished like a mirror. The you inside is taller, lovelier, without scars, without grief.\nThe reflection holds out a hand. “You could have been this. You deserve it.”\nThe ancestors in the wall fall suddenly silent."),
      codex: ["eld_she_who_thirsts"],
      choices: [
-       O("碰一碰镜中的手", "Touch the reflection's hand", {corruption: 10, sanity: 5, renown: 3, taint: {slaanesh: 12}},
+       O("碰一碰镜中的手", "Touch the reflection's hand", {corruption: 10, sanity: 5, renown: 3, taint: {slaanesh: 30}},
          "镜面是暖的。之后好几天，你照什么都觉得自己不够好看。",
          "The surface is warm. For days afterward, every reflection you catch seems not quite beautiful enough."),
        O("转身走开", "Turn and walk away", {sanity: -5},
@@ -1204,6 +1229,7 @@
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("命运", "Fate"),
     renownIcon: "icon_fate",
+    taintMod: {khorne: 0.9, nurgle: 0.9, tzeentch: 0.9, slaanesh: 1.3},   // SPEC §19: multiplier on positive taint deltas (cleanses unscaled)
     renownHelp: L("命运：先知眼中你这根线有多粗。勇敢、诚实、出人意料的选择让它变粗，退缩与背弃让它变细。命运够高，你就能请先知重看未来、在网道里相信那根线，走向更好的结局。",
                   "Fate: how thick your thread looks to the Farseer. Brave, honest or unexpected choices thicken it; flinching and betrayal thin it. With enough Fate you can ask the Farseer to read the future again, trust the thread in the webway, and reach better endings."),
     origins: [
