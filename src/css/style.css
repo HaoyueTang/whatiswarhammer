@@ -887,3 +887,9 @@ body.portrait .egg-letter { position: fixed; left: 14px; bottom: 46px; }
 .data-paste { width: 100%; resize: vertical; padding: 6px 8px; font: 12px/1.4 monospace; color: var(--ink); background: #0b090b; border: 0; box-shadow: 0 0 0 2px #000, 0 0 0 3px var(--brass-lo); }
 .data-paste:focus { outline: none; box-shadow: 0 0 0 2px #000, 0 0 0 3px var(--brass-hi); }
 .data-count { margin: 0; font-size: 11px; color: var(--ink-faint); text-align: right; }
+
+/* ======================= v0.2.2: DIFFICULTY SKULLS (SPEC §24) ======================= */
+.fcard, .ocard { position: relative; }
+.fcard > .diff, .ocard > .diff { position: absolute; top: 9px; right: 9px; z-index: 2; display: inline-flex; gap: 2px; pointer-events: none; }
+.diff .skull { width: 18px; height: 18px; image-rendering: pixelated; filter: drop-shadow(1px 1px 0 #000); }
+body.portrait .fcard > .diff, body.portrait .ocard > .diff { top: 7px; right: 7px; }

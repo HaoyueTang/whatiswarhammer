@@ -158,6 +158,7 @@ def run_desktop(p):
     cards = page.locator(".fcard")
     check("race cards built from WH.factions", cards.count() == nf, f"{cards.count()} cards")
     shot(page, "03_select")
+    first_fid = page.evaluate("document.querySelector('.fcard').dataset.faction")
     n_or = page.evaluate("WH.Game.origins(WH.factions[document.querySelector('.fcard').dataset.faction]).length")
     if not REAL:
         check("sample faction declares 3 origins", n_or == 3, f"{n_or}")
@@ -169,8 +170,16 @@ def run_desktop(p):
             tr = page.locator('.ocard[data-origin="scav"] .otrade').inner_text()
             check("§23: origin card shows the trade-off (生命上限 125 ▲ · 理智上限 85 ▼)", "生命上限 125 ▲" in tr and "理智上限 85 ▼" in tr, tr)
             check("§23: default origin card reads balanced", "均衡" in page.locator('.ocard[data-origin="hive"] .otrade').inner_text())
+            check("§23: deltas vs neutral 100/100/0/10 (scav: 生命 +15, 理智 −15, 腐化 +10, hive: none)",
+                  page.locator('.ocard[data-origin="scav"] .od').all_inner_texts() == ["+15", "−15", "+10", ""]
+                  and all(x == "" for x in page.locator('.ocard[data-origin="hive"] .od').all_inner_texts()),
+                  str(page.locator('.ocard[data-origin="scav"] .od').all_inner_texts()))
         else:
             check("§23: every origin card has a trade-off line", page.locator(".ocard .otrade").count() == n_or)
+            caps = page.evaluate("f => WH.Game.origins(WH.factions[f]).map(o => WH.Rules.capsOf(o))", first_fid)
+            lines = page.locator(".ocard .otrade").all_inner_texts()
+            ok = all((("生命上限 %d" % c["hp"]) in l) == (c["hp"] != 100) and (("理智上限 %d" % c["sanity"]) in l) == (c["sanity"] != 100) for c, l in zip(caps, lines))
+            check("§23: cap line lists every cap ≠ 100 with ▲/▼", ok, str(lines))
             shot(page, "05b_origin_tradeoffs")
         shot(page, "03b_origins")
         page.locator(".back-race").click(); page.wait_for_timeout(150)
@@ -971,6 +980,9 @@ def run_data(p):
     ctx = b.new_context(viewport={"width": 1280, "height": 720}, locale="zh-CN", accept_downloads=True)
     page = ctx.new_page(); attach_console(page, "data")
     page.goto(BASE + QS + ("&" if QS else "?") + "seed=7"); page.wait_for_selector("#scr-title .title-main")
+    page.evaluate("() => localStorage.clear()"); page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
+    check("fresh install: no update notice, lastVersion recorded silently", page.locator(".toasts").count() == 0
+          and page.evaluate("localStorage.getItem('whatiswh.lastVersion')") == page.evaluate("WH.VERSION"))
     page.evaluate("""(L) => { localStorage.clear(); for (const k in L) localStorage.setItem('whatiswh.' + k, JSON.stringify(L[k])); }""", LEGACY)
     before = page.evaluate("() => Object.fromEntries(Object.keys(localStorage).filter(k => k.startsWith('whatiswh.')).map(k => [k, localStorage.getItem(k)]))")
     page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(300)
@@ -1073,6 +1085,36 @@ def run_real_v022(p):
         check(f"real{' mobile' if mobile else ''}: hidden egg entry not counted", page.evaluate("WH.UI.eggProgress().ct") == page.evaluate("Object.keys(WH.codex).filter(i => !WH.codex[i].hidden).length"))
         ctx.close(); b.close()
 
+def run_difficulty(p):
+    """SPEC §24: skull icons on race + origin cards (code-drawn, no text); missing data/difficulty.js → no skulls."""
+    print("\n== v0.2.2 difficulty skulls ==")
+    for mobile in (False, True):
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="diff" + ("-m" if mobile else ""))
+        has_file = page.evaluate("!!WH.difficulty")
+        if not REAL:   # sample mode: the real file is loaded too, but has no "sample" key → set levels for the test
+            check(f"diff{' (m)' if mobile else ''}: no level for a faction → no skulls", (page.evaluate("WH.UI.show('select')") or True) and page.locator(".fcard .diff").count() == 0)
+            page.evaluate("() => { WH.difficulty = {sample: 2, 'sample/hive': 1, 'sample/scav': 3, 'sample/clerk': 2}; }")
+        fid = page.evaluate("Object.keys(WH.factions)[0]")
+        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(200)
+        card = page.locator(f'.fcard[data-faction="{fid}"]')
+        lvl = page.evaluate(f"WH.difficulty['{fid}']")
+        d = card.locator(".diff")
+        check(f"diff{' (m)' if mobile else ''}: race card shows {lvl} filled of 3 pixel skulls", d.count() == 1 and d.locator("img.skull").count() == 3
+              and d.locator("img.skull.on").count() == lvl and (d.locator("img.skull").first.get_attribute("src") or "").startswith("data:image/png"), f"file={has_file}")
+        check("diff: skulls only — no text, no tooltip, aria-label 难度 n/3", d.inner_text().strip() == "" and d.get_attribute("title") is None
+              and d.get_attribute("aria-label") == f"难度 {lvl}/3" and page.locator(".fcard .diff[title], .fcard .diff img[title]").count() == 0)
+        if mobile: page.screenshot(path=os.path.join(OUT, "m50_diff_races.png"), full_page=True)
+        else: shot(page, "90_diff_races")
+        card.click(); page.wait_for_timeout(250)
+        if page.locator(".ocard").count() > 1:
+            n_d = page.locator(".ocard .diff").count()
+            check(f"diff{' (m)' if mobile else ''}: every origin card has its skulls", n_d == page.locator(".ocard").count(), str(n_d))
+            if mobile: page.screenshot(path=os.path.join(OUT, "m51_diff_origins.png"), full_page=True)
+            else: shot(page, "91_diff_origins")
+        page.evaluate("() => { delete WH.difficulty; WH.UI.show('select'); }"); page.wait_for_timeout(150)
+        check(f"diff{' (m)' if mobile else ''}: missing difficulty file → no skulls", page.locator(".diff").count() == 0)
+        ctx.close(); b.close()
+
 FIVE = """() => { const base = Object.values(WH.factions)[0]; const ids = ['imperium','chaos','tau','aeldari','necrons'];
   const names = {imperium:['人类帝国','Imperium of Man'], chaos:['混沌','Chaos'], tau:['钛帝国',"T'au Empire"], aeldari:['灵族','Aeldari'], necrons:['死灵','Necrons']};
   const col = {imperium:'#c9a227', chaos:'#b0304a', tau:'#d08a3a', aeldari:'#5fb3a1', necrons:'#4fd16b'};
@@ -1146,6 +1188,7 @@ with sync_playwright() as p:
         run_egg(p)
         run_data(p)
     if "--only-v022" not in ARGS: run_five(p)
+    run_difficulty(p)
     if REAL:
         run_new_routes(p)
         run_real_v022(p)

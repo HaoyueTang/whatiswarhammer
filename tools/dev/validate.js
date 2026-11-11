@@ -4,6 +4,8 @@
  *   node tools/dev/validate.js              validate real data (data/**, assets/manifest.js)
  *   node tools/dev/validate.js --sample     validate tools/dev/sample_data.js instead of data/
  *   options: --runs N (default 3000)  --seed S (default 1)  --faction id  --quiet (errors/warnings summary only)
+ *   node tools/dev/validate.js --write-difficulty   also writes data/difficulty.js (SPEC §24): fixed seeds 1/5/9 × --runs per
+ *     faction (origins alternate), level 1/2/3 by random-play death rate <24 / 24–29 / ≥29 %, per faction and per "faction/origin".
  *   SPEC §20: also checks data/chronicle.js (timeline codex entries), data/rumors.js and data/events_lore.js, and
  *   reports rumours per route, chronicle entries per millennium and avg rumours overheard per simulated run.
  *
@@ -24,6 +26,9 @@ const QUIET = argv.includes("--quiet");
 const RUNS = parseInt(arg("--runs", "3000"), 10);
 const SEED = parseInt(arg("--seed", "1"), 10);
 const ONLY = arg("--faction", null);
+const WRITE_DIFF = argv.includes("--write-difficulty");
+const DIFF_SEEDS = [1, 5, 9];
+const diffLevel = (deathPct) => deathPct < 24 ? 1 : deathPct < 29 ? 2 : 3;   // SPEC §24
 const STEP_LIMIT = 1500;
 
 const errors = [], warnings = [], notes = [];
@@ -122,6 +127,8 @@ else {
   const tags = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((m) => m[1]);
   const onDisk = CODEX_FILES.concat(EVENT_FILES, files.map((f) => "data/factions/" + f)).filter((r) => fs.existsSync(path.join(ROOT, r)));
   for (const r of onDisk) if (!tags.includes(r)) err(`index.html does not load ${r}`);
+  if (fs.existsSync(path.join(ROOT, "data/difficulty.js")) && !tags.includes("data/difficulty.js")) err("index.html does not load data/difficulty.js (SPEC §24)");
+  load("data/difficulty.js", false);
   const order = tags.filter((x) => x.startsWith("data/"));
   const want = CODEX_FILES.concat(EVENT_FILES);
   let last = -1;
@@ -754,7 +761,8 @@ function originReach(f, o) {
 }
 
 /* ---------- Monte-Carlo ---------- */
-function simulate(f) {
+function simulate(f, seed) {
+  if (seed === undefined) seed = SEED;
   const origins = WH.Game.origins(f);
   const res = {runs: RUNS, visits: [], endings: {}, kinds: {good: 0, bad: 0, death: 0}, deathCause: {}, loops: 0, crashes: 0,
                softlocks: new Map(), events: {}, eventsPerRun: [], years: [], visited: new Set(), firstCrash: null, maxRevisit: 0, maxRevisitNode: null,
@@ -766,7 +774,7 @@ function simulate(f) {
   res.claimRuns = {}, res.claimTwice = {}, res.claimEnd = {}, res.resisted = {}; res.anyClaimEnd = 0; res.anyClaimFired = 0;
   TAINT_GODS.forEach((gd) => { res.claimRuns[gd] = 0; res.claimTwice[gd] = 0; res.claimEnd[gd] = 0; res.resisted[gd] = 0; });
   for (let r = 0; r < RUNS; r++) {
-    const rng = WH.RNG(SEED * 100003 + r);
+    const rng = WH.RNG(seed * 100003 + r);
     const origin = origins[r % origins.length], po = res.perOrigin[origin.id];
     po.runs++;
     let g, steps = 0, evCount = 0;
@@ -962,6 +970,45 @@ for (const r of reports) {
 }
 
 if (reports.some((r) => r.rumorAvg !== undefined)) console.log(`\n§20 rumours overheard per run: ${reports.filter((r) => r.rumorAvg !== undefined).map((r) => `${r.id} ${r.rumorAvg.toFixed(2)}`).join(" · ")}`);
+/* ---------- SPEC §24 difficulty levels ---------- */
+if (WH.difficulty && !WRITE_DIFF) {
+  const d = WH.difficulty;
+  for (const k of Object.keys(d)) {
+    const [fid, oid] = k.split("/");
+    if (![1, 2, 3].includes(d[k])) err(`difficulty.${k}: ${d[k]} (need 1|2|3)`);
+    if (!WH.factions[fid]) warn(`difficulty: "${k}" — faction ${fid} not loaded`);
+    else if (oid && !WH.Game.origins(WH.factions[fid]).some((o) => o.id === oid)) warn(`difficulty: "${k}" — no origin ${oid}`);
+  }
+  for (const fid of factionIds) {
+    if (d[fid] === undefined) warn(`difficulty: no level for ${fid} (run --write-difficulty)`);
+    for (const o of WH.Game.origins(WH.factions[fid])) if (WH.Game.origins(WH.factions[fid]).length > 1 && d[fid + "/" + o.id] === undefined) warn(`difficulty: no level for ${fid}/${o.id}`);
+  }
+  console.log(`\ndifficulty (SPEC §24, data/difficulty.js): ${Object.entries(d).filter(([k]) => !k.includes("/")).map(([k, v]) => `${k} ${v}`).join(" · ")}`);
+} else if (!WRITE_DIFF && !SAMPLE) note("difficulty (SPEC §24): data/difficulty.js missing — no skulls shown (run --write-difficulty)");
+if (WRITE_DIFF && !SAMPLE && !errors.length) {
+  const out = {}, lines = [];
+  for (const fid of factionIds) {
+    const f = WH.factions[fid], agg = {n: 0, death: 0, claim: 0}, po = {};
+    for (const sd of DIFF_SEEDS) {
+      const s = simulate(f, sd);
+      agg.n += s.visits.length; agg.death += s.kinds.death; agg.claim += s.anyClaimEnd;
+      for (const [oid, o] of Object.entries(s.perOrigin)) { po[oid] = po[oid] || {n: 0, death: 0}; po[oid].n += o.visits.length; po[oid].death += o.kinds.death; }
+    }
+    const dp = 100 * agg.death / (agg.n || 1);
+    out[fid] = diffLevel(dp);
+    lines.push(`  ${fid.padEnd(9)} death ${dp.toFixed(1)}% · claim ${(100 * agg.claim / (agg.n || 1)).toFixed(1)}% → ${out[fid]}`);
+    if (Object.keys(po).length > 1) for (const [oid, o] of Object.entries(po)) {
+      const op = 100 * o.death / (o.n || 1);
+      out[fid + "/" + oid] = diffLevel(op);
+      lines.push(`    ${(fid + "/" + oid).padEnd(20)} death ${op.toFixed(1)}% → ${out[fid + "/" + oid]}`);
+    }
+  }
+  const body = "/* data/difficulty.js — GENERATED by `node tools/dev/validate.js --write-difficulty` (SPEC §24). Do not edit by hand.\n" +
+    ` * Random-play death rate, seeds ${DIFF_SEEDS.join("/")} × ${RUNS} runs per faction (origins alternate): <24% → 1 · 24–29% → 2 · ≥29% → 3.\n */\n` +
+    "WH.difficulty = {\n" + Object.entries(out).map(([k, v]) => `  ${/^[a-z_]+$/.test(k) ? k : JSON.stringify(k)}: ${v}`).join(",\n") + "\n};\n";
+  fs.writeFileSync(path.join(ROOT, "data", "difficulty.js"), body);
+  console.log(`\nwrote data/difficulty.js (SPEC §24):\n${lines.join("\n")}`);
+} else if (WRITE_DIFF) note("--write-difficulty skipped (sample data or errors)");
 {
   const banded = reports.filter((r) => r.band);
   if (banded.length) console.log(`\n§19 claim-rate bands: ${banded.map((r) => `${r.id} ${r.band.rate.toFixed(1)}% (${r.band.lo}–${r.band.hi}) ${r.band.ok ? "✓" : "✗"}${r.band.proxy ? "*" : ""}`).join(" · ")}` +

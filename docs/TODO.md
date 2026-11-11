@@ -14,16 +14,14 @@ Open items and decisions waiting on Howie. Newest decisions at the top of each s
 - [ ] Route difficulty contrast (#23 follow-up, kept as-is for now — Howie 2026-11-11): optional later
   - Imperium harsher: raise front-line damage (trench, Black Crusade chapters) so random-play death ≈ 35–40%, careful play still survives.
   - Aeldari & T'au safer: random-play death ≈ 15–20% to sharpen the contrast between routes.
-- [ ] v0.2.2 — difficulty icons on race and origin cards (SPEC §24). *(in progress)*
-- [ ] v0.2.2 — lore clues for veterans (SPEC §20): rumours, lore events, 战史 / Chronicle timeline. *(in progress)*
-- [ ] v0.2.2 — Tzeentch collection easter egg (SPEC §21). *(in progress)*
-- [ ] v0.2.2 — updates never touch local progress; full backup export/import (SPEC §22). *(in progress)*
 - [ ] Orks route; Genestealer Cult route; Adeptus Mechanicus.
 - [ ] Achievements.
 - [ ] Human listen-through of the music (`tools/dev/audio_test.html`); retune moods that grate.
 - [ ] Art polish: craftworld towers, tomb_interior glow.
 
 ## Done
+- [x] v0.2.3 — skull-only difficulty, origin delta baseline fix.
+- [x] v0.2.2 — rumours + Chronicle, Tzeentch egg, origin trade-offs (caps), progress preservation + full backup.
 - [x] v0.2.1 — 20 claim endings, per-route taintMod, claim rates in target bands.
 - [x] v0.2.0 — Aeldari & Necron routes, race → origin, consequences, codex v2, hidden taint, lore-card modes, Home button, stat tips.
 - [x] v0.1.0 — 3 routes, codex, saves, music.

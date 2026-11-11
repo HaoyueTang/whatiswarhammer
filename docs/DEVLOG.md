@@ -400,3 +400,96 @@ Newest at the bottom. Format: `## YYYY-MM-DD · role` then short bullets (what c
 - **Checks:** a per-origin set of endings was compared with the old profiles (same seeds, 9000 runs per origin): no origin lost an ending. §19 claim rates are all in band (imp 13.6, cha 23.8, tau 8.7, eld 15.8, nec 5.4). `node tools/dev/validate.js` with seeds 1/5/9 gives PASS with 0 errors. The worst per-origin Δ in the validator is +3.7 (hive, seed 5). There are no §23 budget or trade-off warnings.
 - **Left for others:** with some seeds the validator warns "tau.origin.pow/trader never reached tau_end_reeducation". The cause is structural, not stats: that ending sits in the colonist-only opening (tau_10x, before the merge at tau_104), and it was unreachable for those origins before as well. The per-origin ending check could skip endings that are only reachable from another origin's prologue. eld_end_claim_nurgle is ~1/9000 on every origin; that is a taint-tuning matter.
 - desc texts now hint at the trade-off (≤40 zh / ≤25 en words). Deserter and Turned Guardsman share a soldier's profile (strong body, nightmares).
+
+## 2026-11-11 · web (v0.2.2: SPEC §20 rumours + Chronicle · §21 Tzeentch egg · §22 local data · §23 caps · §24 difficulty)
+
+### §20 — rumours and Chronicle
+- **Registry.** Added `WH.rumors` and `WH.registerRumors(list)`.
+- **Load order in index.html:** codex files → `chronicle.js` → `easter_tzeentch.js` → `events.js` → `events_taint.js` → `events_lore.js` → `rumors.js` → factions → `difficulty.js`. Every one of these script tags has `onerror` set, so a missing file does not stop the game.
+- **Engine (no DOM).** Rumours roll in `_enter`, but only on nodes that have no `eventRoll`, are not endings, and have no pending death. The chance is `RUMOR_P = 0.25`.
+  - The roll uses its own RNG stream, seeded from the main seed (seed XOR a constant). Turning rumours on or off therefore never changes nodes, rolls, events or time in a seeded run (a smoke test checks this).
+  - One rumour per node at most. It is picked uniformly from the unseen eligible ones (faction or `*`, inside the min/max chapter window).
+  - Results: `step.rumor` and `step.rumorCodex`; `state.seenRumors` and `state.rumor` are saved; `g.currentRumor()` returns the current one.
+  - Off switch: `opts.rumors:false` or `g.rumors = false`. Older saves get empty defaults, and the schema number stays the same.
+- **UI.** `#dlg-rumor` is an italic footer: "传闻 · 讲话者：…" in Chinese, "Overheard · …" in English, with dictionary words linked.
+  - Its space is reserved while the typewriter runs; it fades in afterwards. Its codex ids then go through the normal toast and lore-card settings.
+  - It is hidden during consequence panels and events.
+  - The new setting is 传闻 / Overheard rumours (default on). Turning it off hides the footer immediately and stops new rolls.
+- **Codex — 战史 / Chronicle view** (tab after 地点):
+  - Timeline ordered by `sortKey`, with separators per millennium (M25…M42). Keys below 1000 go into an **远古 / Ancient** band for later entries such as the War in Heaven.
+  - The date is always shown. Locked entries show "???" with the date and "此时，有事发生……". Unlocked entries show the name, a type·race badge, the text and `more`.
+  - Race chips filter the list; the header shows "已知 n/t".
+  - Chronicle entries are left out of the 条目 grid. Lore cards for them show the date, plus an "M41" seal when the entry has no sprite.
+
+### §21 — Tzeentch easter egg
+- **Progress:** `P = round(100 × (0.6 × codex + 0.4 × endings))`. P is capped at 99 while anything is still missing.
+- **Hidden entries** (`hidden:true`) are never counted and never appear in any list or in the NEW badge.
+- **Tiers** are stored in `whatiswh.eggTiers` and each fires once:
+  - whisper — the subtitle glitches in blue/pink for 3 s.
+  - letter — a sealed letter icon on the title screen; clicking it opens a card.
+  - flame — a blue flame next to the logo; clicking it opens a mini-scene with 2 choices whose result lines change nothing in the game.
+  - last — a codex-header line, shown for one opening.
+  - planned — a full-screen glitch scene, then the hidden letter is unlocked and its card shown. After that the logo shimmers, and Settings gains 奸奇的玩笑 / Tzeentch's joke: while the codex is open, every 2.4 s one random locked "???" briefly shows that entry's real name, shuffled.
+- **Debug:** `?egg=N` sets P to N and re-fires the tier at N once per page load.
+
+### §22 — local data is never overwritten
+- **Version check.** `Save.bootCheck()` runs first in `UI.init`. It compares `whatiswh.lastVersion` with `WH.VERSION`.
+  - Every older save slot is migrated on a copy, and the raw text from before the migration is kept as `whatiswh.bak.<old>.<slot>`.
+  - A one-time toast reads "已更新到 vX · 存档与记录已保留". A new install and a downgrade both stay silent.
+  - It never deletes or renames a key.
+- **Corrupt data.** A value that can't be parsed is copied to `whatiswh.corrupt.<key>` before anything could write over it.
+- **Unknown fields.** Record fields this build doesn't know survive a load → save cycle (`g.extraFields`).
+- **Run records.** The cap went from 50 to 200.
+- **Settings → 数据 / Data** has: export everything (download), copy to clipboard (the JSON also appears in a box, for pages that block downloads), import from a file, and import from a paste box.
+- **Merge rules on import:**
+  - Run records: union by `runId:endingId`; totals are added once.
+  - Codex, NEW-seen, tips and egg tiers: union.
+  - Endings: the higher value wins.
+  - Save slots: only empty slots are filled unless the player confirms overwriting; any overwritten slot is kept as `bak.import.<slot>`.
+  - Settings and unknown keys: copied only if they don't exist yet.
+- **README:** added a note in both languages that progress is tied to the browser and the address.
+
+### §23 — stat caps
+- **Engine.** `capsOf(origin)` gives hp/sanity caps of 70–130 (default 100) and fills `state.max`.
+  - Starting stats default to the caps.
+  - hp and sanity are clamped to `g.cap(k)`; corruption and renown still clamp to 0–100.
+  - Saves store `max`; saves without it get 100/100.
+- **HUD** shows "118/120" (`#sm-hp`), with the bar scaled to the cap.
+- **Origin cards**
+  - hp/sanity bars share a 0–130 scale with a tick at 100.
+  - Deltas are measured against the neutral 100/100/0/10.
+  - A cap line lists each cap that differs from 100, e.g. "生命上限 115 ▲ · 理智上限 95 ▼", or "均衡" when both are 100.
+- **Validator**
+  - Checks `max` ranges.
+  - Applies the budget rule (`(maxHp−100)+(maxSan−100)+(renown−10)−1.5×corruption` within ±5) and the up+down rule for non-default origins.
+  - Notes origins that start below their cap.
+  - Per origin it reports caps, budget and death rate against the route average, and warns beyond ±6 points.
+  - It also warns about route endings an origin never reached — only endings that origin can reach statically from its own start, and only those hit in at least 0.5 % of runs.
+
+### §24 — difficulty
+- Generated by `validate.js --write-difficulty`, which writes `data/difficulty.js` with levels only (faction and "faction/origin").
+- **Current levels:** imperium 3, chaos 2, tau 2, aeldari 1, necrons 3.
+- The skulls are drawn in code (like the slime placeholder) and tinted to the faction; the remainder are empty skulls. There is no text and no tooltip, only an aria-label.
+
+### Validator, sample data and results
+- **Validator now also checks:**
+  - Rumours: unique ids, factions, chapter ranges, codex refs, zh/en, and ≤50 zh / ≤35 en.
+  - Chronicle: tags, date, numeric `sortKey`, the date's millennium matching the `sortKey`, zh/en agreement, and entries that can never be unlocked.
+  - Lore events, which go through the normal event checks.
+  - Load order, hidden entries, and the shape of the egg tiers.
+- **Validator reports:**
+  - Rumours per route and per chapter.
+  - Chronicle entries per millennium.
+  - Average rumours heard per simulated run: imperium 9.1, chaos 8.8, tau 10.1, aeldari 9.4, necrons 9.9.
+- **sample_data:** 3 chronicle entries, 2 rumours, the hidden egg entry, and the scav/clerk caps.
+- **Results:**
+  - validate (real): PASS, 0 errors.
+  - Smoke, sample: 252 checks, all passing.
+  - Smoke, real: 78 + 20 checks, all passing.
+  - 0 console errors.
+- **For lead:** the public `release/README.public.md` still lacks the §22 "per browser + address / full backup" note; I didn't edit `release/`.
+
+## 2026-11-11 · lead (v0.2.2 / v0.2.3 release)
+- v0.2.2 = stable §20–§23 snapshot (committed from a copy while §24 was in progress). v0.2.3 = §24 skulls + origin-card delta baseline (neutral 100/100/0/10) + fresh-install toast fix.
+- Gates: validate PASS (0 err), smoke real 87/87, sample 253/253, 0 console errors.
+- Public README gained the progress-per-browser note and difficulty line.
