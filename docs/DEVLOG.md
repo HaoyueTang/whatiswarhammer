@@ -100,3 +100,8 @@ Newest at the bottom. Format: `## YYYY-MM-DD · role` then short bullets (what c
 - v0.1.0 integrated: validate.js PASS (0 err), smoke real 49/49 + sample 71/71 with 0 console errors, audio_check OK. Avg nodes/run imp 45.3 · cha 45.8 · tau 48.5.
 - Lead polish: toasts moved to above the dialogue box (max 3), locked place tiles darkened/blurred with ???.
 - Repo created on GitHub (HaoyueTang/whatiswarhammer), first push of v0.1.0.
+
+## 2026-11-11 · lead (v0.2 kickoff)
+- User asked for more races + better codex classification; mid-request also reported: choices jump to the next node with no consequence beat.
+- Scope v0.2: Aeldari + Necron routes (Orks / Genestealer Cult deferred), choice consequences (`result` / `rollResult` + auto summary), codex taxonomy v2 (`race` × `type`, search, NEW badge). SPEC §11–§15.
+- Applying v0.1 lessons: workspace is now a git repo (branch `v0.2-new-races`); one text agent per route (2 new routes + 3 consequence editors); agents don't run git, lead commits per milestone.
