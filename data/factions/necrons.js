@@ -101,6 +101,7 @@
   N.nec_106 = {chapter: 1, scene: "dig_site", speaker: VEKTRIX, time: {d: 2},
     text: L("贤者要在塔尖的封印上钻孔。“里面是万机之神的遗产，”他说，“也许是一台神之机。”\n玛罗教授已经在调令上签了字。\n钻机开始预热，整片营地都在发抖。",
             "The magos means to drill the seal on the spire. “Inside lies the Omnissiah's legacy,” he says. “Perhaps a god-machine.”\nProfessor Marrow has already signed the order.\nThe drill warms up. The whole camp trembles."),
+    codex: ["place_arcosa"],
     choices: [
       C("“这些符文是警告！”", "“These glyphs are a warning!”", "nec_107", O(Q({flag: "sketched"}), X({renown: 5, set: {warned: true}},
         "贤者把你的素描存档，标注“原始迷信，有趣”。卡尔中士却默默给枪上了膛。",
@@ -108,7 +109,9 @@
       C("帮他们校准钻头", "Help calibrate the drill", "nec_107", X({renown: 3},
         "贤者夸你手稳。钻头咬进黑金属时，发出一声像叹气的响。",
         "The magos praises your steady hands. The bit bites black metal with a sound like a sigh.")),
-      C("什么也不说", "Say nothing", "nec_107")
+      C("什么也不说", "Say nothing", "nec_107", X(null,
+        "你低头记录。钻机外壳上烙着锻造世界的齿轮印——这次发掘的钱，本来就是他们出的。",
+        "You keep your head down and take notes. The drill casing bears a forge world's cog-brand. This dig was their money from the start."))
     ]};
 
   N.nec_107 = {chapter: 1, scene: "tomb_exterior", speaker: null, time: {h: 5},
@@ -124,9 +127,9 @@
 
   /* ---------- Origin prologue · Convict labourer ---------- */
   N.nec_o_convict_1 = {chapter: 1, scene: "dig_site", speaker: null,
-    text: L("你脚镣上的编号是4471。总督把一整船犯人卖给了考察队：挖满十年，刑期勾销。\n忒萨零号没有风。监工说这是好事，坑不会被沙子填回去。\n第一铲下去，沙子底下是金属。",
-            "Your shackle number is 4471. The governor sold a whole hold of convicts to the dig: ten years' digging, sentence wiped.\nThessa Null has no wind. The overseer says that's good; the pits won't fill back in.\nYour first spadeful hits metal."),
-    codex: ["place_thessa_null"],
+    text: L("你脚镣上的编号是4471。卡尔卡罗斯的总督把一整船犯人卖给了考察队：挖满十年，刑期勾销。\n忒萨零号没有风。监工说这是好事，坑不会被沙子填回去。\n第一铲下去，沙子底下是金属。",
+            "Your shackle number is 4471. The governor of Carcharos sold a whole hold of convicts to the dig: ten years' digging, sentence wiped.\nThessa Null has no wind. The overseer says that's good; the pits won't fill back in.\nYour first spadeful hits metal."),
+    codex: ["place_thessa_null", "place_carcharos"],
     choices: [
       C("接着挖，别多问", "Keep digging, ask nothing", "nec_o_convict_2", X({hp: -5, renown: 3},
         "你挖到太阳落山，手掌磨出了血泡。监工在你的编号旁边画了个勾。",
@@ -438,7 +441,7 @@
             "Its claws are faster than you.\nBy the time the guards arrive it has slunk back into shadow, rubbing a scrap of your coat against its face like a hand-warmer.\nThe wounds on your back are cold. Too cold for wounds."),
     effects: {hp: -20, sanity: -5},
     choices: [
-      C("让守卫带你回去", "Let the guards take you back", "nec_311")
+      C("让守卫带你回去", "Let the guards take you back", "nec_311", X(null, "路上，两个技师在低声交谈：另一座墓也醒了，正在收割一颗人类叫“瓦尔达”的麦子星。", "On the way, two crypteks talk quietly: another tomb has woken too, and is harvesting a wheat world the humans call Valda."))
     ]};
 
   N.nec_310 = {chapter: 3, scene: "tomb_interior", speaker: MERUK, time: {h: 1},
@@ -446,7 +449,7 @@
             "It freezes, claws mid-air.\n“Meruk,” it says slowly. “I was Lord Meruk. I had a garden.”\nThen it looks at your face and its eyes empty again. “You are warm.” You back away. It doesn't follow."),
     effects: {set: {meruk: true}},
     choices: [
-      C("回到大厅", "Return to the hall", "nec_311")
+      C("回到大厅", "Return to the hall", "nec_311", X(null, "路上，两个技师在低声交谈：另一座墓也醒了，正在收割一颗人类叫“瓦尔达”的麦子星。", "On the way, two crypteks talk quietly: another tomb has woken too, and is harvesting a wheat world the humans call Valda."))
     ]};
 
   N.nec_311 = {chapter: 3, scene: "tomb_interior", speaker: KING, time: {d: 3},
@@ -1071,12 +1074,12 @@
   N.nec_end_inquisition = {chapter: 8, scene: "dig_site", speaker: MORDANE, time: {d: 1},
     text: L("审判庭的记录很简短：证人一名，所知过多，已处理。\n他们在你的档案上盖了红章，和第一支勘测队的放在一起。\n后来有人说，沙丘上那排靴子又多了一双，鞋尖朝外。",
             "The Inquisition's record is brief: one witness, knew too much, processed.\nThey stamp your file red and shelve it beside the first survey team's.\nLater someone says the row of boots on the dune has grown by one pair, toes pointing out."),
-    ending: {kind: "bad", title: L("所知过多", "Knew Too Much"), cause: L("因所知过多被审判庭处决", "Executed for what you knew")}};
+    ending: {kind: "bad", title: L("所知过多", "Knew Too Much"), cause: L("因所知过多被审判庭处决", "Executed for knowing too much")}};
 
   N.nec_end_metal = {chapter: 8, scene: "tomb_interior", speaker: null, time: {d: 3},
     text: L("技师们很仔细，几乎是温柔的。疼只疼了一会儿，然后什么都没有了。\n你有了一具永不腐朽的身体，站在朝臣的队列里，眼睛亮着。\n有时霸主会问你一个问题。你只记得回答“是”。",
             "The crypteks are careful, almost tender. The pain lasts a moment, then there is nothing.\nYou have a body that will never decay. You stand among the courtiers, eyes glowing.\nSometimes the overlord asks you a question. You only remember how to say yes."),
-    ending: {kind: "bad", title: L("不朽的朝臣", "The Undying Courtier"), cause: L("生体转移，失去灵魂", "Lost your soul to the metal")}};
+    ending: {kind: "bad", title: L("不朽的朝臣", "The Undying Courtier"), cause: L("生体转移，失去灵魂", "Soul lost to the metal")}};
 
   N.nec_end_flayer = {chapter: 8, scene: "tomb_interior", speaker: MERUK, time: {y: 1},
     text: L("梅鲁克勋爵牵起你的手，带你走进一个没有光的地方。那里很冷，挤满了想要变暖的东西。\n你开始理解他们。你开始觉得冷。\n你开始看别人的皮肤，觉得那看起来很暖和。",
@@ -1170,6 +1173,7 @@
     name: L("死灵", "Necrons"),
     tagline: L("在死人的墓里，做一件有趣的藏品", "In a tomb of the dead, be an interesting exhibit"),
     role: L("考察队档案员", "Expedition archivist"),
+    world: L("忒萨零号", "Thessa Null"),   // SPEC §27 home world (the convict overrides: shipped from Carcharos)
     playerSprite: "player_necrons",
     color: "#4fd16b",
     startNode: "nec_101",
@@ -1186,7 +1190,7 @@
        desc: L("考察队最年轻的档案员，带着素描簿和灯。年轻，腿脚好，可人微言轻。", "The dig's youngest archivist, with sketchbook and lamp. Young and quick on your feet, but nobody listens to the junior."),
        sprite: "player_necrons", startNode: "nec_101",
        max: {hp: 105, sanity: 100}, stats: {hp: 105, sanity: 100, corruption: 0, renown: 5}, set: {origin_archivist: true}},
-      {id: "convict", name: L("罪犯劳工", "Convict labourer"),
+      {id: "convict", name: L("罪犯劳工", "Convict labourer"), world: L("卡尔卡罗斯", "Carcharos"),
        desc: L("用十年苦役抵刑期的犯人。皮糙肉厚，心早已麻木，没人在乎你。", "A convict sold to the dig for ten years' labour. Tough hide, numbed mind; nobody cares about you."),
        sprite: "player_necrons", startNode: "nec_o_convict_1",
        max: {hp: 120, sanity: 90}, stats: {hp: 120, sanity: 90, corruption: 0, renown: 0}, set: {origin_convict: true}},
