@@ -218,3 +218,21 @@ UI (16): `icon_fate`, `icon_worth`
 
 ## 15. Audio
 New moods: `aeldari` (ethereal, harp-like arps, slow, modal) and `necron` (cold, mechanical, low drones, sparse metallic percussion). moodFor: aeldari route scenes craftworld/webway/maiden_world → `aeldari`; tomb_exterior/tomb_interior/stasis_gallery/dig_site → `necron` (battle/boss/ending rules still take priority).
+
+## 16. Race → Origin selection (先选种族，再选出身)
+New game flow: **选择种族/势力** (race cards: imperium, chaos, tau, aeldari, necrons; later orks, tyranids) → **选择出身** (origin cards for that race) → prologue.
+Each faction gets an optional `origins` array (if absent, the engine builds one default origin from the faction's own role/playerSprite/startNode/startStats):
+```js
+origins: [
+  { id:"hive", name:{zh:"巢都工人",en:"Hive worker"}, desc:{zh:"≤40字",en:"≤25 words"},
+    sprite:"player_imperium", startNode:"imp_001",                 // the existing opening = default origin
+    stats:{hp:100, sanity:100, corruption:0, renown:10},            // full start stats for this origin
+    set:{origin_hive:true} },
+  { id:"agri", name:{…}, desc:{…}, sprite:"player_imperium", startNode:"imp_o_agri_1",
+    stats:{hp:110, sanity:100, corruption:0, renown:5}, set:{origin_agri:true} },
+]
+```
+- 3 origins per race (the existing opening stays as origin #1). Each new origin has a short **prologue of 3–6 nodes** (ids `<prefix>o_<origin>_N`, chapter 1) that merges into the route's existing spine at a sensible node (end of chapter 1 / start of chapter 2), so the rest of the route is shared.
+- Origins differ in start stats (balanced: total within ±15 of the default) and set an `origin_<id>` flag; add 1–3 origin-specific choices/beats later in the route via `require:{flag:"origin_<id>"}` (+ `hideIfLocked`) where it's natural — not required everywhere.
+- Prologue nodes follow all rules (result beats, scenes/sprites from the key lists, ≤90 zh).
+- Records/saves store `origin`; the ending screen and 生涯 show race · origin.
