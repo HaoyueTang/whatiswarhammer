@@ -173,6 +173,34 @@
     }
     return (slimeCache[id] = c.toDataURL());
   }
+  /* SPEC §24: difficulty = 1–3 pixel skulls, drawn in code (faction-tinted; empty skulls for the rest). No text, no tooltip. */
+  var SKULL = ["..ooooo..", ".oBBBBBo.", "oBBBBBBBo", "oBeeBeeBo", "oBeeBeeBo", "oBBBnBBBo", ".ooBBBoo.", "..oBoBo..", "...ooo..."];
+  var skullCache = {};
+  function skullURL(color, full) {
+    var id = color + (full ? "1" : "0");
+    if (skullCache[id]) return skullCache[id];
+    var s = 2, c = document.createElement("canvas");
+    c.width = SKULL[0].length * s; c.height = SKULL.length * s;
+    var x = c.getContext("2d");
+    if (!x) return "";
+    var pal = full ? {o: mix(color, "#000000", 0.7), B: mix(color, "#f2e8d0", 0.72), e: "#160f0b", n: "#160f0b"}
+                   : {o: "rgba(236,226,200,.30)", B: "rgba(236,226,200,.06)"};
+    for (var r = 0; r < SKULL.length; r++) for (var q = 0; q < SKULL[r].length; q++) {
+      var ch = SKULL[r][q];
+      if (ch === "." || !pal[ch]) continue;
+      x.fillStyle = pal[ch];
+      x.fillRect(q * s, r * s, s, s);
+    }
+    return (skullCache[id] = c.toDataURL());
+  }
+  function diffOf(key) { var d = WH.difficulty, v = d && d[key]; return v === 1 || v === 2 || v === 3 ? v : null; }
+  function diffSkulls(level, color) {
+    if (!level) return null;
+    var kids = [];
+    for (var i = 1; i <= 3; i++) kids.push(h("img", {class: "skull" + (i <= level ? " on" : ""), src: skullURL(color || "#c9a227", i <= level), alt: "", "aria-hidden": "true", draggable: "false"}));
+    return h("span", {class: "diff", role: "img", "data-level": level, "aria-label": t("diff_aria", {n: level})}, kids);
+  }
+
   function placeholder(kind, key, w, hh, cls, color) {
     if (kind === "ui") return h("span", {class: "ph-icon icon " + (cls || ""), vars: {"--w": w, "--h": hh}, "aria-hidden": "true", title: key || ""}, GLYPH[key] || "■");
     if (kind === "scene") return h("div", {class: "ph ph-scene " + (cls || "")}, UI.debug ? h("span", null, "[ " + key + " ]") : null);
@@ -260,6 +288,7 @@
   };
 
   UI.init = function () {
+    try { UI.bootCheck = WH.Save.bootCheck(); } catch (e) { UI.bootCheck = null; console.warn("bootCheck", e); }   // SPEC §22: before anything writes
     UI.settings = WH.Save.loadSettings();
     WH.Save.codexSeen();                       // initialise the NEW-badge seen-set before anything unlocks
     WH.lang = UI.settings.lang;
@@ -310,11 +339,7 @@
     fit();
     show("title");
     if (!WH.Save.isPersistent()) toast(t("storage_off"));
-    try {                                                  // SPEC §22: one-time notice after an update; data is never reset
-      var bc = WH.Save.bootCheck();
-      UI.bootCheck = bc;
-      if (bc.updated) toast(t("upd_toast", {v: bc.to}));
-    } catch (e) { console.warn("bootCheck", e); }
+    if (UI.bootCheck && UI.bootCheck.updated) toast(t("upd_toast", {v: UI.bootCheck.to}));   // SPEC §22: one-time notice, data kept
   };
 
   function applyFxSetting() {
@@ -578,10 +603,11 @@
     var wrap = selectShell(t("choose_race"), null, null);
     var cards = h("div", {class: "cards race-cards" + (list.length >= 4 ? " many n" + list.length : ""), role: "list"});
     list.forEach(function (f) {
-      var os = WH.Game.origins(f);
+      var os = WH.Game.origins(f), dl = diffOf(f.id);
       cards.appendChild(h("button", {class: "fcard px", type: "button", role: "listitem", "data-faction": f.id, vars: {"--accent": fcolor(f)},
-          "aria-label": L(f.name) + ". " + L(f.tagline) + (os.length > 1 ? " — " + t("origins_n", {n: os.length}) : ""),
+          "aria-label": L(f.name) + ". " + L(f.tagline) + (os.length > 1 ? " — " + t("origins_n", {n: os.length}) : "") + (dl ? " · " + t("diff_aria", {n: dl}) : ""),
           "data-sfx": "select", onclick: function () { pickRace(f); }},
+        diffSkulls(dl, fcolor(f)),
         h("div", {class: "portrait"}, art("sprite", f.playerSprite, null, fcolor(f))),
         h("div", {class: "fname"}, L(f.name)),
         h("div", {class: "ftag"}, "“" + L(f.tagline) + "”"),
@@ -608,7 +634,9 @@
   function statPreview(f, o, base) {
     var rows = [["hp", "icon_hp", "var(--c-hp)"], ["sanity", "icon_sanity", "var(--c-sanity)"],
                 ["corruption", "icon_corruption", "var(--c-corruption)"], ["renown", f.renownIcon, "var(--accent)"]];
-    var me = originStart(o), b = base && base !== o ? originStart(base) : null;
+    /* deltas vs the neutral baseline 100/100/0/10 (not vs the route's first origin, which may itself be a trade-off) */
+    var me = originStart(o), b = {hp: 100, sanity: 100, corruption: 0, renown: 10};
+    void base;
     var trade = ["hp", "sanity"].filter(function (k) { return me.max[k] !== 100; }).map(function (k) {
       var up = me.max[k] > 100;
       return h("span", {class: "tr " + (up ? "up" : "down")}, t("cap_" + k) + " " + me.max[k] + " " + (up ? "▲" : "▼"));
@@ -637,8 +665,10 @@
     $("scr-select").style.setProperty("--accent", fcolor(f));
     var cards = h("div", {class: "cards origin-cards n" + os.length, role: "list", vars: {"--accent": fcolor(f)}});
     os.forEach(function (o, i) {
+      var dl = diffOf(f.id + "/" + o.id);
       cards.appendChild(h("button", {class: "ocard px", type: "button", role: "listitem", "data-origin": o.id, vars: {"--accent": fcolor(f)},
-          "aria-label": L(o.name) + ". " + L(o.desc), "data-sfx": "start", onclick: function () { startGame(f.id, o.id); }},
+          "aria-label": L(o.name) + ". " + L(o.desc) + (dl ? " · " + t("diff_aria", {n: dl}) : ""), "data-sfx": "start", onclick: function () { startGame(f.id, o.id); }},
+        diffSkulls(dl, fcolor(f)),
         h("div", {class: "portrait"}, art("sprite", o.sprite || f.playerSprite, null, fcolor(f))),
         h("div", {class: "oinfo"},
           h("div", {class: "oname"}, L(o.name)),

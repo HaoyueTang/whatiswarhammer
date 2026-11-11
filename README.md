@@ -38,9 +38,10 @@ Each side has **three origins** to start from — a different prologue, differen
 - **Many endings.** Good ones, bad ones, and a lot of ways to die. Each ending records how long you survived and what killed you.
 - **The gods are watching.** Khorne, Nurgle, Tzeentch and Slaanesh make you offers. Some are very generous. You won't see what they take until the end.
 - **Time doesn't behave.** Hours, days, sometimes years pass between scenes. Warp travel is worse.
+- **Difficulty.** Skulls on each side and origin tell you how deadly it is.
 - **Codex.** Every leader, monster, god and place you meet gets a short card, explained by what people do, not by lectures.
 - **Pixel art and chiptune.** Original art and music; the soundtrack changes with the mood.
-- **Saves.** Three slots plus autosave.
+- **Saves.** Three slots plus autosave. Updates never wipe your saves or records. Progress lives in your browser at the address you play from (local file, website…); use Settings → Data to export it and carry it elsewhere.
 
 ### Tips (no spoilers)
 - Being brave and being stupid look the same until the dice roll.
@@ -90,9 +91,10 @@ Warhammer 40,000 and associated names are trademarks of Games Workshop Limited. 
 - **多结局。** 好结局、坏结局，还有很多种死法。每个结局都会记下你活了多久、死于什么。
 - **诸神在注视。** 恐虐、纳垢、奸奇、色孽会给你开条件。有些条件非常慷慨。它们拿走了什么，要到结局你才知道。
 - **时间不老实。** 场景之间可能过去几小时、几天，有时是几年。亚空间航行更糟。
+- **难度。** 每个阵营和出身上的骷髅数告诉你它有多致命。
 - **图鉴。** 遇到的每个领袖、怪物、神祇和地点都有一张短卡片——靠人物的言行来讲，不靠说教。
 - **像素美术与芯片音乐。** 全部原创，配乐随剧情情绪变化。
-- **存档。** 三个存档位加自动存档。
+- **存档。** 三个存档位加自动存档。版本更新不会清掉你的存档和记录。进度保存在你玩游戏的浏览器和地址里（本地文件、网页……），想换地方玩，用 设置 → 数据 导出再导入。
 
 ### 小提示（无剧透）
 - 勇敢和愚蠢，在掷骰之前看起来一模一样。
