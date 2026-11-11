@@ -6,6 +6,8 @@
  * auto-summary line is exercised; codex `race` / `type` (SPEC §13) — smp_hive deliberately has neither (UI fallback);
  * `origins` (SPEC §16): 3 origins, two with short prologues (smp_o_*) that merge into the spine, one origin-gated choice;
  * `renownHelp` (SPEC §17); hidden taint (SPEC §18): taint effects, a cleansing event, a Khorne claim event, a taint-gated choice.
+ * v0.2.1 (SPEC §19): `taintMod` (tzeentch ×1.5, slaanesh ×0.5, khorne/nurgle ×1); the Khorne claim has accept (goto → claim
+ * ending), resist (taint −40, resisted_khorne) and a forced second-time choice (require flag resisted_khorne, goto); smp_end_claim_khorne.
  */
 WH.registerCodex({
   smp_commissar:  {cat: "leader", faction: "imperium", race: "imperium", type: "unit", sprite: "commissar",
@@ -72,8 +74,15 @@ WH.registerEvents([
    text: {zh: "你数不清自己杀了多少人。有个声音替你数着，而且很满意。", en: "You have lost count of the dead. Something else has been counting, and it is pleased."},
    codex: ["smp_khorne"],
    choices: [
-     {text: {zh: "接受烙印", en: "Accept the mark"}, effects: {corruption: 25, sanity: -10, set: {claimed_khorne: true}}, result: {zh: "你的手背上浮出一个烧红的记号。", en: "A red-hot mark rises on the back of your hand."}},
-     {text: {zh: "咬破舌头，背诵祷文", en: "Bite your tongue and pray"}, effects: {corruption: 15, hp: -15, set: {claimed_khorne: true}}, result: {zh: "血的味道让祷文变了调。", en: "The taste of blood bends the litany out of tune."}}
+     {text: {zh: "接受烙印", en: "Accept the mark"}, require: {notFlag: "resisted_khorne"}, hideIfLocked: true,
+      effects: {corruption: 25, sanity: -10, set: {claimed_khorne: true}}, goto: {sample: "smp_end_claim_khorne"},
+      result: {zh: "你的手背上浮出一个烧红的记号。", en: "A red-hot mark rises on the back of your hand."}},
+     {text: {zh: "咬破舌头，背诵祷文", en: "Bite your tongue and pray"}, require: {notFlag: "resisted_khorne"}, hideIfLocked: true,
+      effects: {corruption: 15, hp: -15, taint: {khorne: -40}, set: {claimed_khorne: true, resisted_khorne: true}},
+      result: {zh: "血的味道让祷文变了调。", en: "The taste of blood bends the litany out of tune."}},
+     {text: {zh: "铜王座不再询问", en: "The Brass Throne asks no more"}, require: {flag: "resisted_khorne"}, hideIfLocked: true,
+      effects: {corruption: 10}, goto: {sample: "smp_end_claim_khorne"},
+      result: {zh: "这一次，你的舌头没有流血。是别人的血。", en: "This time the blood is not from your tongue. It is someone else's."}}
    ]}
 ]);
 
@@ -89,6 +98,7 @@ WH.registerFaction({
   startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
   renownLabel: {zh: "信仰", en: "Faith"},
   renownIcon: "icon_faith",
+  taintMod: {khorne: 1, nurgle: 1, tzeentch: 1.5, slaanesh: 0.5},
   renownHelp: {zh: "信仰代表你对帝皇的虔诚与名声。祈祷、服从、勇敢会提高它；怀疑和逃避会降低它。信仰够高时，能解锁领导众人的选项与更好的结局。",
                en: "Faith is your devotion and standing before the Emperor. Prayer, obedience and courage raise it; doubt and flight lower it. High Faith unlocks leadership choices and better endings."},
   deathNodes: {hp: "smp_death_hp", sanity: "smp_death_sanity", corruption: "smp_death_corruption"},
@@ -222,6 +232,9 @@ WH.registerFaction({
     smp_end_bad_coward: {chapter: 4, scene: "trench", speaker: {sprite: "commissar", name: {zh: "卡斯政委", en: "Commissar Kast"}},
       text: {zh: "你只跑了十步。政委的手枪很准。", en: "You make it ten steps. The commissar's aim is true."},
       ending: {kind: "bad", title: {zh: "十步", en: "Ten Steps"}, cause: {zh: "被政委处决", en: "Executed by the commissar"}}},
+    smp_end_claim_khorne: {chapter: 4, scene: "daemon_world", speaker: {sprite: "daemon_khorne", name: {zh: "铜王座的回声", en: "Echo of the Brass Throne"}},
+      text: {zh: "你不再数了。战场一个接一个，颅骨一颗接一颗。王座从不说够。", en: "You no longer count. Battlefield after battlefield, skull after skull. The Throne never says enough."},
+      ending: {kind: "bad", title: {zh: "颅骨献给王座", en: "Skulls for the Throne"}, cause: {zh: "被恐虐认领", en: "Claimed by Khorne"}}},
     smp_death_hp: {scene: "ruins", speaker: null,
       text: {zh: "你的血渗进了这个星球的土里。这里的土早已喝饱了血。", en: "Your blood soaks into this world's soil. It has drunk its fill before."},
       ending: {kind: "death", title: {zh: "无名之死", en: "A Nameless Death"}}},

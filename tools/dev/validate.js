@@ -54,6 +54,15 @@ const CODEX_FACTIONS = ["imperium", "chaos", "tau", "aeldari", "necrons", "xenos
 const STATS = ["hp", "sanity", "corruption", "renown"];
 const PREFIX = {imperium: "imp_", chaos: "cha_", tau: "tau_", aeldari: "eld_", necrons: "nec_"};
 const RESULT_ZH = 50, RESULT_EN = 35;   // SPEC §11 consequence text limits (warn)
+/* SPEC §19 lore table: per-route taintMod guide + target claim rate (random play, any god, % of runs ending in a claim ending) */
+const TAINT_GUIDE = {
+  imperium: {mod: {khorne: 0.9, nurgle: 0.9, tzeentch: 0.9, slaanesh: 0.9}, band: [12, 18]},
+  chaos:    {mod: {khorne: 1.3, nurgle: 1.3, tzeentch: 1.3, slaanesh: 1.3}, band: [20, 30]},
+  tau:      {mod: {khorne: 0.7, nurgle: 0.7, tzeentch: 0.7, slaanesh: 0.7}, band: [6, 12]},
+  aeldari:  {mod: {khorne: 0.9, nurgle: 0.9, tzeentch: 0.9, slaanesh: 1.3}, band: [12, 18]},
+  necrons:  {mod: {khorne: 0.5, nurgle: 0.5, tzeentch: 0.5, slaanesh: 0.5}, band: [3, 8]}
+};
+const claimGodOf = (id) => { const m = /_end_claim_(khorne|nurgle|tzeentch|slaanesh)(?:$|_)/.exec(String(id || "")); return m ? m[1] : null; };
 
 /* ---------- load into vm ---------- */
 const ctx = vm.createContext({console: {log() {}, warn() {}, error() {}}, Math, Date, JSON, Object, Array});
@@ -169,6 +178,50 @@ function checkRequire(r, where, flagsSet) {
   }
 }
 
+/* every flag set anywhere (factions, origins, events) — for require checks on event choices */
+const ALL_FLAGS = new Set();
+{
+  const add = (e) => { if (e && e.set) Object.keys(e.set).forEach((k) => ALL_FLAGS.add(k)); };
+  for (const f of Object.values(WH.factions)) {
+    for (const n of Object.values(f.nodes || {})) { add(n.effects); (n.choices || []).forEach((c) => add(c.effects)); }
+    WH.Game.origins(f).forEach(add);
+  }
+  WH.events.forEach((e) => (e.choices || []).forEach((c) => add(c.effects)));
+}
+/* SPEC §19 goto: "node" or {factionId:"node"}; targets must exist in the faction they are used in */
+function eventGotoTargets(fid) {
+  const out = [];
+  for (const e of WH.events) {
+    if (!(e.factions || ["*"]).some((x) => x === "*" || x === fid)) continue;
+    for (const c of e.choices || []) {
+      if (!c.goto) continue;
+      const t = typeof c.goto === "string" ? c.goto : c.goto[fid];
+      if (t) out.push(t);
+    }
+  }
+  return out;
+}
+function checkGoto(go, cw, applies, e) {
+  const known = new Set(Object.keys(WH.factions).concat(FACTION_FILES));
+  if (typeof go === "string") {
+    const has = applies.filter((fid) => WH.factions[fid].nodes && WH.factions[fid].nodes[go]);
+    if (!has.length) err(`${cw}: goto → "${go}" does not exist in ${applies.length ? applies.join("/") : "any loaded faction"}`);
+    else if (has.length < applies.length) warn(`${cw}: goto "${go}" only exists in ${has.join("/")} — other factions resume the pending node (use a per-faction map)`);
+    return;
+  }
+  if (!go || typeof go !== "object" || Array.isArray(go)) { err(`${cw}: goto must be a node id or {faction:"node"}`); return; }
+  for (const k of Object.keys(go)) {
+    if (!known.has(k)) { err(`${cw}: goto key "${k}" is not a faction id`); continue; }
+    if (typeof go[k] !== "string") { err(`${cw}: goto.${k} must be a node id`); continue; }
+    const f = WH.factions[k];
+    if (!f) continue;                                  // faction file not loaded (reported elsewhere)
+    if (!applies.includes(k)) warn(`${cw}: goto.${k} but the event does not apply to ${k}`);
+    if (!f.nodes || !f.nodes[go[k]]) err(`${cw}: goto.${k} → "${go[k]}" does not exist in ${k}`);
+  }
+  const miss = applies.filter((fid) => !go[fid] && fid !== "sample");
+  if (miss.length && e.trigger === "claim") warn(`${cw}: goto map has no entry for ${miss.join(", ")} — those routes resume the pending node`);
+}
+
 /* ---------- manifest ---------- */
 function checkManifest() {
   if (!hasManifest) return;
@@ -260,12 +313,26 @@ function checkEvents() {
     checkL(e.text, w + ".text", 90, 65);
     codexRef(e.codex, w);
     if (!e.choices || e.choices.length < 2 || e.choices.length > 3) err(`${w}: needs 2–3 choices (has ${(e.choices || []).length})`);
+    const applies = Object.keys(WH.factions).filter((fid) => (e.factions || ["*"]).some((x) => x === "*" || x === fid));
     (e.choices || []).forEach((c, i) => {
-      checkL(c.text, `${w}.choice${i + 1}.text`, 24, 14);
-      checkL(c.result, `${w}.choice${i + 1}.result`, 90, 65);
-      checkEffects(c.effects, `${w}.choice${i + 1}`);
-      codexRef(c.codex, `${w}.choice${i + 1}`);
+      const cw = `${w}.choice${i + 1}`;
+      checkL(c.text, `${cw}.text`, 24, 14);
+      checkL(c.result, `${cw}.result`, 90, 65);
+      checkEffects(c.effects, cw);
+      codexRef(c.codex, cw);
+      checkRequire(c.require, cw, ALL_FLAGS);
+      if (c.goto !== undefined) checkGoto(c.goto, cw, applies, e);
     });
+    // SPEC §19: at least one choice must be open on the first fire, and (claims) on the second fire after resisting
+    const openWith = (flags) => (e.choices || []).filter((c) => WH.Rules.requireOK(c.require, {flags, stats: {hp: 50, sanity: 50, corruption: 50, renown: 50}, taint: WH.Rules.zeroTaint()}));
+    if (e.choices && e.choices.length && !openWith({}).length) err(`${w}: every choice is locked on a fresh run (softlock; engine opens the last one)`);
+    if (e.trigger === "claim" && TAINT_GODS.includes(e.god)) {
+      const second = openWith({["claimed_" + e.god]: true, ["resisted_" + e.god]: true});
+      if (!second.length) err(`${w}: no choice open on the 2nd claim (flag resisted_${e.god}) — softlock`);
+      else if (second.some((c) => !c.goto)) warn(`${w}: 2nd claim (flag resisted_${e.god}) still offers a choice without goto — player can resist twice (SPEC §19: only accept/forced)`);
+      if (!SAMPLE && !(e.choices || []).some((c) => c.goto)) warn(`${w}: claim event has no goto choice yet (SPEC §19 claim endings)`);
+      if (!SAMPLE && !(e.choices || []).some((c) => c.effects && c.effects.set && c.effects.set["resisted_" + e.god])) warn(`${w}: no choice sets resisted_${e.god} (SPEC §19 resist path)`);
+    }
   }
   if (!SAMPLE) {
     for (const g of TAINT_GODS) if (!claims[g]) warn(`events: no claim event (trigger:"claim") for ${g} — taint 100 does nothing (SPEC §18)`);
@@ -334,6 +401,29 @@ function checkFaction(f) {
   if (!f.startDate || typeof f.startDate.year !== "number" || typeof f.startDate.mill !== "number") err(`${w}: startDate {year,mill} missing`);
   if (!nodes[f.startNode]) err(`${w}: startNode "${f.startNode}" missing`);
   checkOrigins(f, origins, nodes, flagsSet);
+  // SPEC §19 taintMod
+  if (f.taintMod === undefined) { if (!SAMPLE && TAINT_GUIDE[f.id]) warn(`${w}: no taintMod (SPEC §19; all gods ×1)`); }
+  else if (!f.taintMod || typeof f.taintMod !== "object" || Array.isArray(f.taintMod)) err(`${w}.taintMod: must be {khorne,nurgle,tzeentch,slaanesh}`);
+  else for (const k of Object.keys(f.taintMod)) {
+    if (!TAINT_GODS.includes(k)) err(`${w}.taintMod: unknown god "${k}"`);
+    else if (typeof f.taintMod[k] !== "number" || !(f.taintMod[k] >= 0) || f.taintMod[k] > 5) err(`${w}.taintMod.${k}: ${f.taintMod[k]} (need a number 0–5)`);
+  }
+  // SPEC §19 claim endings: <prefix>end_claim_<god> for all 4 gods (warn while the writer adds them)
+  if (PREFIX[f.id]) for (const gd of TAINT_GODS) {
+    const id = PREFIX[f.id] + "end_claim_" + gd, n = nodes[id];
+    if (!n) { warn(`${w}: claim ending "${id}" missing (SPEC §19)`); continue; }
+    if (!n.ending) err(`${f.id}/${id}: claim ending node has no ending`);
+    else {
+      if (n.ending.kind !== "bad" && !(f.id === "chaos" && n.ending.kind === "good")) warn(`${f.id}/${id}: claim ending kind "${n.ending.kind}" (SPEC §19: bad; chaos may be good)`);
+      if (!n.ending.cause) warn(`${f.id}/${id}: claim ending without cause`);
+    }
+    if (!eventGotoTargets(f.id).includes(id)) warn(`${f.id}/${id}: no claim-event goto leads here`);
+  }
+  for (const id of ids) {
+    if (!nodes[id].ending) continue;
+    const cg = claimGodOf(id);
+    if (cg && PREFIX[f.id] && !id.startsWith(PREFIX[f.id] + "end_claim_")) warn(`${f.id}/${id}: looks like a claim ending but is not named ${PREFIX[f.id]}end_claim_<god>`);
+  }
   for (const k of STATS) if (!f.startStats || typeof f.startStats[k] !== "number") warn(`${w}: startStats.${k} missing`);
   const chapterIds = Object.keys(f.chapters || {}).map(Number);
   if (!SAMPLE && (chapterIds.length < 6 || chapterIds.length > 8)) warn(`${w}: ${chapterIds.length} chapters (spec 6–8)`);
@@ -415,6 +505,7 @@ function checkFaction(f) {
       checkEffects(c.effects, cw);
       codexRef(c.codex, cw);
       checkRequire(c.require, cw, flagsSet);
+      if (c.goto !== undefined) warn(`${cw}: goto is only used on event choices (use next)`);
       if (c.roll) {
         if (c.next) warn(`${cw}: has both roll and next (next ignored)`);
         if (!(c.roll.p >= 0 && c.roll.p <= 1)) err(`${cw}: roll.p ${c.roll.p} not in [0,1]`);
@@ -441,7 +532,8 @@ function checkFaction(f) {
     }
     return r;
   };
-  const reach = reachFrom([f.startNode].concat(origins.map((o) => o.startNode), Object.values(f.deathNodes || {})));
+  const gotoT = eventGotoTargets(f.id).filter((x) => nodes[x]);       // SPEC §19: event gotos are entry points too
+  const reach = reachFrom([f.startNode].concat(origins.map((o) => o.startNode), Object.values(f.deathNodes || {}), gotoT));
   // every origin's prologue must merge into the spine of the first (default) origin
   if (origins.length > 1) {
     const deathIds = new Set(Object.values(f.deathNodes || {}));
@@ -482,11 +574,15 @@ function simulate(f) {
                perOrigin: {}};
   origins.forEach((o) => { res.perOrigin[o.id] = {runs: 0, visits: [], kinds: {good: 0, bad: 0, death: 0}}; });
   res.taint = {khorne: [], nurgle: [], tzeentch: [], slaanesh: []}; res.claims = {}; res.cleanses = 0;
+  // SPEC §19 per-god run counts: claim fired ≥1 / fired twice / ended in that god's claim ending / resisted (flag) and not claimed
+  res.claimRuns = {}, res.claimTwice = {}, res.claimEnd = {}, res.resisted = {}; res.anyClaimEnd = 0; res.anyClaimFired = 0;
+  TAINT_GODS.forEach((gd) => { res.claimRuns[gd] = 0; res.claimTwice[gd] = 0; res.claimEnd[gd] = 0; res.resisted[gd] = 0; });
   for (let r = 0; r < RUNS; r++) {
     const rng = WH.RNG(SEED * 100003 + r);
     const origin = origins[r % origins.length], po = res.perOrigin[origin.id];
     po.runs++;
     let g, steps = 0, evCount = 0;
+    const fired = {};
     try {
       g = new WH.Game(f.id, {rng, data: WH});
       let step = g.start(origin.id);
@@ -497,9 +593,10 @@ function simulate(f) {
         if (step && step.kind === "event") {
           const e = step.event; evCount++;
           res.events[e.id] = (res.events[e.id] || 0) + 1;
-          if (e.trigger === "claim") res.claims[e.god] = (res.claims[e.god] || 0) + 1;
+          if (e.trigger === "claim") { res.claims[e.god] = (res.claims[e.god] || 0) + 1; fired[e.god] = (fired[e.god] || 0) + 1; }
           if (e.cleanse) res.cleanses++;
-          g.eventChoose(Math.floor(rng() * e.choices.length));
+          const open = g.eventChoices().filter((v) => !v.locked);
+          g.eventChoose(open[Math.floor(rng() * open.length)].index);
           step = g.eventContinue();
           continue;
         }
@@ -520,6 +617,14 @@ function simulate(f) {
       res.kinds[n.ending.kind] = (res.kinds[n.ending.kind] || 0) + 1;
       po.visits.push(g.state.visits); po.kinds[n.ending.kind]++;
       for (const gd of TAINT_GODS) res.taint[gd].push((g.state.taint && g.state.taint[gd]) || 0);
+      const cg = claimGodOf(g.state.nodeId);
+      if (cg) { res.claimEnd[cg]++; res.anyClaimEnd++; }
+      if (Object.keys(fired).length) res.anyClaimFired++;
+      for (const gd of TAINT_GODS) {
+        if (fired[gd]) res.claimRuns[gd]++;
+        if (fired[gd] > 1) res.claimTwice[gd]++;
+        if (g.state.flags["resisted_" + gd] && cg !== gd) res.resisted[gd]++;
+      }
       res.eventsPerRun.push(evCount);
       res.years.push((g.state.hours - WH.Rules.startHours(f)) / 8760);
     } catch (e) {
@@ -608,7 +713,21 @@ for (const r of reports) {
     const fin = v.length;
     console.log(`hidden taint (avg final): ${TAINT_GODS.map((gd) => `${gd} ${avg(s.taint[gd]).toFixed(1)}`).join(" · ")} · ` +
       `≥50: ${TAINT_GODS.map((gd) => `${gd} ${pct(s.taint[gd].filter((x) => x >= 50).length, fin)}`).join(" ")}`);
-    console.log(`claim events: ${TAINT_GODS.map((gd) => `${gd} ${pct(s.claims[gd] || 0, RUNS)}`).join(" · ")} · cleansing events fired ${s.cleanses}`);
+    console.log(`claim events fired (all fires / runs): ${TAINT_GODS.map((gd) => `${gd} ${s.claims[gd] || 0}`).join(" · ")} · cleansing events fired ${s.cleanses}`);
+    // SPEC §19 claims per god (% of finished runs)
+    const tm = TAINT_GODS.map((gd) => `${gd} ×${(f.taintMod && typeof f.taintMod[gd] === "number") ? f.taintMod[gd] : 1}`).join(" ");
+    const guide = TAINT_GUIDE[r.id];
+    console.log(`claims (SPEC §19) · taintMod ${tm}${guide ? "  (guide " + TAINT_GODS.map((gd) => "×" + guide.mod[gd]).join(" ") + ")" : ""}`);
+    console.log("  god        fired  2nd fire  claimed(end)  resisted  avg taint");
+    for (const gd of TAINT_GODS) console.log(`  ${gd.padEnd(9)} ${pct(s.claimRuns[gd], fin).padStart(6)} ${pct(s.claimTwice[gd], fin).padStart(9)} ${pct(s.claimEnd[gd], fin).padStart(13)} ${pct(s.resisted[gd], fin).padStart(9)} ${avg(s.taint[gd]).toFixed(1).padStart(10)}`);
+    const hasClaimEnds = Object.keys(f.nodes).some((id) => claimGodOf(id) && f.nodes[id].ending);
+    console.log(`  total     ${pct(s.anyClaimFired, fin).padStart(6)} ${"".padStart(9)} ${pct(s.anyClaimEnd, fin).padStart(13)}`);
+    if (guide) {
+      const rate = 100 * (hasClaimEnds ? s.anyClaimEnd : s.anyClaimFired) / (fin || 1), [lo, hi] = guide.band;
+      const ok = rate >= lo && rate <= hi;
+      console.log(`  §19 target band ${lo}–${hi}% (claim ending, any god): ${rate.toFixed(1)}% ${ok ? "✓" : "✗"}${hasClaimEnds ? "" : "  (no claim endings yet — using claim-event rate)"}`);
+      r.band = {rate, lo, hi, ok, proxy: !hasClaimEnds};
+    }
     const evs = Object.entries(s.events);
     if (evs.length) console.log(`events fired: ${evs.map(([k, c]) => `${k}×${c}`).join(", ")}`);
     console.log(`max visits of one node in a run: ${s.maxRevisit} (${s.maxRevisitNode})`);
@@ -623,6 +742,11 @@ for (const r of reports) {
   }
 }
 
+{
+  const banded = reports.filter((r) => r.band);
+  if (banded.length) console.log(`\n§19 claim-rate bands: ${banded.map((r) => `${r.id} ${r.band.rate.toFixed(1)}% (${r.band.lo}–${r.band.hi}) ${r.band.ok ? "✓" : "✗"}${r.band.proxy ? "*" : ""}`).join(" · ")}` +
+    (banded.some((r) => r.band.proxy) ? "   * = no claim endings yet, claim-event rate shown" : ""));
+}
 console.log("");
 if (!QUIET || errors.length) notes.forEach((n) => console.log("NOTE    " + n));
 const WARN_SHOW = QUIET ? 0 : 200;

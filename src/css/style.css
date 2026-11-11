@@ -746,3 +746,21 @@ body.portrait .race-cards .fcard { grid-template-areas: "p n" "p t" "p s" "p s";
 .taint-rev[data-god="khorne"] { --tg: #b3261e; } .taint-rev[data-god="nurgle"] { --tg: #7a9a3a; }
 .taint-rev[data-god="tzeentch"] { --tg: #3b6fd1; } .taint-rev[data-god="slaanesh"] { --tg: #b45cc8; }
 .god-card.locked .taint-rev { opacity: .8; }
+/* SPEC §19 claim ending: the god's sigil + verdict at the top of the ending scroll */
+.claim-banner { --cg: #8a3fbf; display: flex; gap: 14px; align-items: center; margin: 4px 0 10px; padding: 10px 12px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--cg) 28%, #0b090b), #0b090b 80%);
+  box-shadow: 0 0 0 2px #000, 0 0 0 4px var(--cg), 0 0 24px color-mix(in srgb, var(--cg) 45%, transparent); }
+.claim-banner.god-khorne { --cg: #b3261e; } .claim-banner.god-nurgle { --cg: #7a9a3a; }
+.claim-banner.god-tzeentch { --cg: #3b6fd1; } .claim-banner.god-slaanesh { --cg: #b45cc8; }
+.claim-banner .cb-sigil { width: 96px; height: 96px; flex: none; filter: drop-shadow(0 0 10px var(--cg)); }
+.claim-banner .cb-sigil > * { width: 100%; height: 100%; image-rendering: pixelated; object-fit: contain; }
+.claim-banner .cb-body { flex: 1; min-width: 0; }
+.claim-banner .cb-k { font-size: 11px; letter-spacing: .35em; color: var(--ink-dim); text-transform: uppercase; }
+.claim-banner .cb-verdict { font-size: 20px; color: #fff; margin: 4px 0 6px; text-shadow: 0 0 8px var(--cg); }
+.claim-banner .taint-rev .tbar { height: 10px; }
+.claim-banner .taint-rev .tverdict { display: none; }
+.god-card.claimed { box-shadow: inset 3px 0 0 var(--tg, #fff), 0 0 0 1px #fff3 !important; }
+.god-card.claimed .tverdict { color: #fff; font-weight: bold; }
+body.portrait .claim-banner .cb-sigil { width: 64px; height: 64px; }
+body.portrait .claim-banner .cb-verdict { font-size: 16px; }
+.fx-off .claim-banner .cb-sigil { filter: none; }

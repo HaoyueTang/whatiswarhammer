@@ -101,7 +101,8 @@ def pick_faction(page, fid=None, origin=0, tap=False):
 def resolve_event(page, pick=0):
     page.wait_for_selector("#event-overlay", timeout=3000)
     finish_text(page)
-    page.locator("#event-overlay .choices button").nth(pick).click()
+    btns = page.locator("#event-overlay .choices button:not([disabled])")
+    btns.nth(min(pick, max(0, btns.count() - 1))).click()
     page.wait_for_timeout(100)
     finish_text(page)
     page.wait_for_timeout(60)
@@ -113,7 +114,7 @@ def play_until_end(page, rng, max_steps=200, prefer=None):
     for _ in range(max_steps):
         st = state(page)
         if page.locator("#event-overlay").count():
-            resolve_event(page, rng.randrange(page.locator("#event-overlay .choices button").count() or 1))
+            resolve_event(page, rng.randrange(page.locator("#event-overlay .choices button:not([disabled])").count() or 1))
             continue
         if pass_conseq(page):
             wait_idle(page)
@@ -582,13 +583,53 @@ def run_v02(p):
     check("taint ≥50: vignette tell, no number in the HUD", page.evaluate("document.getElementById('scr-game').getAttribute('data-taint')") == "khorne"
           and "60" not in page.locator("#hud").inner_text())
     check("taint-gated hidden choice appears", page.locator("#choices button", has_text="链锯剑").count() == 1)
-    page.evaluate("() => { WH.UI.game.state.taint.khorne = 100; WH.UI.game.state.stats.corruption = 0; WH.UI.game.state.stats.hp = 100; }")
-    goto_node(page, "smp_004")
-    page.locator("#choices button").first.click(); page.wait_for_timeout(100); pass_conseq(page); page.wait_for_timeout(200)
+    # --- SPEC §19: taintMod, claim → accept (goto ending) / resist (continue) / second claim (forced) ---
+    check("taintMod scales positive taint only (×1.5 / ×0.5, cleanse unscaled, Math.round)", page.evaluate(
+        "(() => { const g = new WH.Game('sample'); g.start('hive'); g._applyTaint({tzeentch:10, slaanesh:10}); const a = [g.state.taint.tzeentch, g.state.taint.slaanesh];"
+        " g._applyTaint({all:-4}); g._applyTaint({tzeentch:3}); return a.concat([g.state.taint.tzeentch, g.state.taint.slaanesh]).join(); })()") == "15,5,16,1")
+    def claim_at(node, **extra):
+        page.evaluate("() => { const s = WH.UI.game.state; s.stats.corruption = 0; s.stats.hp = 100; s.stats.sanity = 100; }")
+        goto_node(page, node, **extra)
+        page.evaluate("() => { WH.UI.game.state.taint.khorne = 100; }")
+        page.locator("#choices button:not([disabled])").first.click(); page.wait_for_timeout(100); pass_conseq(page); page.wait_for_timeout(200)
+        finish_text(page)
+    def ev_labels():
+        return page.evaluate("Array.from(document.querySelectorAll('#event-overlay .choices button')).map(b => b.innerText)")
+    claim_at("smp_004", flags={}, claims={})
     check("taint 100 fires the god's claim event", page.locator("#event-overlay.claim").count() == 1 and "烙印" in page.locator("#event-overlay .event-tag").inner_text())
-    finish_text(page); shot(page, "33_claim_event")
-    resolve_event(page)
-    check("claim sets claimed_<god> and fires once", state(page)["flags"].get("claimed_khorne") is True and state(page)["seenEvents"].count("smp_claim_khorne") == 1)
+    labs = ev_labels()
+    check("first claim: accept + resist shown, forced choice hidden (require filter)", len(labs) == 2 and not any("不再询问" in x for x in labs), str(labs))
+    shot(page, "33_claim_event")
+    resolve_event(page, 0)
+    st = state(page)
+    check("accept → goto the route's claim ending", st["nodeId"] == "smp_end_claim_khorne" and st["ended"], st["nodeId"])
+    page.locator("#choices .choice.ending").click(); page.wait_for_timeout(300)
+    check("claim ending: big sigil banner + verdict 你已归属于恐虐", page.locator("#scr-ending .claim-banner[data-god=khorne] .cb-sigil").count() == 1
+          and "你已归属于恐虐" in page.locator("#scr-ending .claim-banner .cb-verdict").inner_text())
+    check("claim ending: god card marked claimed with the same verdict", page.locator("#scr-ending .god-card.claimed.god-khorne").count() == 1
+          and "你已归属于恐虐" in page.locator("#scr-ending .god-card.claimed .tverdict").inner_text())
+    check("claim ending unlocks the god's codex entry", "smp_khorne" in state(page)["codex"])
+    shot(page, "33b_claim_ending")
+    page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(150)
+    check("claim verdict in English", "You belong to Khorne" in page.locator("#scr-ending .claim-banner .cb-verdict").inner_text())
+    page.evaluate("() => WH.UI.setLang('zh')"); page.wait_for_timeout(150)
+    # resist → continues; second claim → only the forced choice → claim ending
+    claim_at("smp_004", flags={}, claims={}, ended=False)
+    resolve_event(page, 1)
+    st = state(page)
+    check("resist → resumes the pending node, taint −40, flag resisted_khorne", st["nodeId"] == "smp_006" and not st["ended"]
+          and st["taint"]["khorne"] == 60 and st["flags"].get("resisted_khorne") is True, f"{st['nodeId']} {st['taint']}")
+    check("claim count stored (fires once so far)", st["claims"].get("khorne") == 1 and st["seenEvents"].count("smp_claim_khorne") == 1)
+    claim_at("smp_004")
+    labs = ev_labels()
+    check("second claim fires and offers only the forced choice", page.locator("#event-overlay.claim").count() == 1 and len(labs) == 1 and "不再询问" in labs[0], str(labs))
+    shot(page, "33c_claim_forced")
+    resolve_event(page, 0)
+    st = state(page)
+    check("forced → claim ending; claims capped at 2", st["nodeId"] == "smp_end_claim_khorne" and st["claims"].get("khorne") == 2, str(st["claims"]))
+    check("engine: no third claim", page.evaluate("(() => { const g = WH.Game.fromRecord(Object.assign(WH.UI.game.toRecord(), {nodeId:'smp_004', ended:false})); g.state.taint.khorne = 100; return g.claimDue(); })()") is None)
+    page.locator("#choices .choice.ending").click(); page.wait_for_timeout(300)
+    page.locator("#scr-ending .ending-btns .btn.primary").click(); page.wait_for_timeout(300); wait_idle(page); finish_text(page)
     # --- codex v2 ---
     nb = page.evaluate("WH.Save.codexUnseen().length")
     check("codex button shows NEW count", nb > 0 and page.locator("#tools .nbadge").inner_text() == str(nb), str(nb))

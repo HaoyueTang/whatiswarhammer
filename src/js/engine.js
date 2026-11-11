@@ -9,7 +9,9 @@
  *   g.choices();                     // visible choices with lock / roll info
  *   step = g.choose(0);              // -> step {kind:"node"|"event", ...}
  *   step.consequence                 // what the UI shows between the click and the next node (see consequenceOf)
- *   if (step.kind === "event") { var r = g.eventChoose(1); step = g.eventContinue(); }
+ *   if (step.kind === "event") { g.eventChoices(); var r = g.eventChoose(1); step = g.eventContinue(); }
+ *   SPEC §19: faction.taintMod scales positive taint; event choices may `goto` a node (string or {faction:id});
+ *   claim events fire at most twice per god (2nd only if flag resisted_<god>); claim endings = ids with "_end_claim_<god>".
  *   g.toRecord() / WH.Game.fromRecord(rec)
  */
 (function (root) {
@@ -18,6 +20,12 @@
   var STATS = ["hp", "sanity", "corruption", "renown"];
   var GODS = ["khorne", "nurgle", "tzeentch", "slaanesh"];      // hidden taint tracks (SPEC §18)
   function zeroTaint() { return {khorne: 0, nurgle: 0, tzeentch: 0, slaanesh: 0}; }
+  var CLAIM_MAX = 2;                                             // SPEC §19: a god's claim event fires at most twice per run
+  /* SPEC §19: "<prefix>end_claim_<god>" → god, else null */
+  function claimGodOf(nodeId) {
+    var m = /_end_claim_(khorne|nurgle|tzeentch|slaanesh)(?:$|_)/.exec(String(nodeId || ""));
+    return m ? m[1] : null;
+  }
   var HOURS_PER_YEAR = 8760;
   var WARP_MIN = 0.4, WARP_MAX = 3.0;
   var HISTORY_MAX = 30;
@@ -104,6 +112,14 @@
             ending: {kind: "death", title: {zh: "死亡", en: "Death"}}, _synthetic: true};
   }
 
+  /* the codex id of a god: "god_<god>", else any cat:"god" entry whose id contains the god's name */
+  function godCodexId(data, god) {
+    var cx = (data && data.codex) || {};
+    if (cx["god_" + god]) return "god_" + god;
+    for (var k in cx) if (cx[k] && cx[k].cat === "god" && k.indexOf(god) >= 0) return k;
+    return null;
+  }
+
   /* ---------- consequence beat (SPEC §11) ----------
    * Pure data for the UI's consequence panel, attached to every step returned by choose() as step.consequence:
    *   {text:{zh,en}|null, auto:bool, deltas:{hp,…}, roll:{pEff,success,stat}|null, flags:bool, death:cause|null,
@@ -174,7 +190,7 @@
       stats: {hp: ss.hp !== undefined ? ss.hp : 100, sanity: ss.sanity !== undefined ? ss.sanity : 100,
               corruption: ss.corruption || 0, renown: ss.renown || 0},
       runId: Date.now().toString(36) + Math.floor(Math.random() * 1e8).toString(36),
-      flags: {}, codex: [], seenEvents: [], hours: startHours(f), taint: zeroTaint(),
+      flags: {}, codex: [], seenEvents: [], hours: startHours(f), taint: zeroTaint(), claims: {},
       pendingEvent: null, pendingNext: null, eventChoice: null, eventDeath: null,
       deathPending: null, history: [], visits: 0, playMs: 0, ended: false
     };
@@ -229,25 +245,42 @@
     return d;
   };
 
-  /* taint:{god:±n} or {all:±n}; clamped 0–100 */
+  /* SPEC §19: per-route multiplier for one god (positive deltas only), default 1 */
+  Game.prototype.taintMod = function (god) {
+    var m = this.faction.taintMod, v = m && +m[god];
+    return (typeof v === "number" && isFinite(v) && v >= 0) ? v : 1;
+  };
+
+  /* taint:{god:±n} or {all:±n}; net positive deltas × faction.taintMod[god] (Math.round), cleanses unscaled; clamped 0–100 */
   Game.prototype._applyTaint = function (tt) {
     var st = this.state;
     if (!st.taint) st.taint = zeroTaint();
     for (var i = 0; i < GODS.length; i++) {
       var g = GODS[i], n = (+tt[g] || 0) + (+tt.all || 0);
+      if (n > 0) n = Math.round(n * this.taintMod(g));
       if (n) st.taint[g] = clamp((st.taint[g] || 0) + n, 0, 100);
     }
   };
 
-  /* a god at 100 whose claim event (trigger:"claim") has not fired yet in this run */
+  /* times god G's claim event has fired this run (state.claims; legacy saves derive it in fromRecord) */
+  Game.prototype.claimCount = function (god) {
+    var c = this.state && this.state.claims;
+    return (c && +c[god]) || 0;
+  };
+
+  /* SPEC §18/§19: a god at 100 taint whose claim event may fire: never fired yet, or fired once and the player
+   * resisted (flag resisted_<god>) — at most CLAIM_MAX times. All other events stay once per run. */
   Game.prototype.claimDue = function () {
     var st = this.state, evs = this.data.events || [];
     if (!st || !st.taint) return null;
     for (var i = 0; i < GODS.length; i++) {
-      if ((st.taint[GODS[i]] || 0) < 100) continue;
+      var god = GODS[i];
+      if ((st.taint[god] || 0) < 100) continue;
+      var n = this.claimCount(god);
+      if (n >= CLAIM_MAX || (n >= 1 && !st.flags["resisted_" + god])) continue;
       for (var j = 0; j < evs.length; j++) {
         var e = evs[j];
-        if (e.trigger !== "claim" || e.god !== GODS[i] || st.seenEvents.indexOf(e.id) >= 0) continue;
+        if (e.trigger !== "claim" || e.god !== god) continue;
         var fs = e.factions || ["*"];
         if (fs.indexOf("*") < 0 && fs.indexOf(st.faction) < 0) continue;
         if (!e.choices || !e.choices.length) continue;
@@ -320,6 +353,8 @@
     if (node.ending) {
       st.ended = true;
       step.ending = node.ending;
+      var cg = claimGodOf(id);                              // SPEC §19: a claim ending also unlocks the god's codex entry
+      if (cg) { step.claimGod = cg; this._unlock(godCodexId(this.data, cg), step); }
     } else {
       var cause = this.deathCause();
       if (cause) {
@@ -403,7 +438,8 @@
   Game.prototype._openEvent = function (e, target, step) {
     var st = this.state;
     st.pendingEvent = e.id; st.pendingNext = target; st.eventChoice = null; st.eventDeath = null;
-    st.seenEvents.push(e.id);
+    if (e.trigger === "claim" && e.god) { if (!st.claims) st.claims = {}; st.claims[e.god] = this.claimCount(e.god) + 1; }
+    if (st.seenEvents.indexOf(e.id) < 0) st.seenEvents.push(e.id);
     step.kind = "event"; step.event = e; step.nodeId = target;
     return step;
   };
@@ -432,30 +468,62 @@
     return this.state && this.state.pendingEvent ? this.event(this.state.pendingEvent) : null;
   };
 
-  /* choose an option inside the pending event. Returns {result, deltas, codexNew, death} */
+  /* Choices of the pending event, filtered by `require` like node choices (SPEC §19).
+   * Each: {index (into e.choices), choice, locked, fallback}. hideIfLocked + failing require → omitted. */
+  Game.prototype.eventChoices = function () {
+    var st = this.state, e = this.currentEvent(), out = [];
+    if (!e) return out;
+    var list = e.choices || [];
+    for (var i = 0; i < list.length; i++) {
+      var c = list[i], ok = requireOK(c.require, st);
+      if (!ok && c.hideIfLocked) continue;
+      out.push({index: i, choice: c, locked: !ok});
+    }
+    if (!out.some(function (v) { return !v.locked; }) && list.length) {   // softlock guard (validator reports it)
+      if (out.length) { out[out.length - 1].locked = false; out[out.length - 1].fallback = true; }
+      else out.push({index: list.length - 1, choice: list[list.length - 1], locked: false, fallback: true});
+    }
+    return out;
+  };
+
+  /* SPEC §19: resolve a choice's goto for this faction → node id or null (unknown/missing → null = resume pending) */
+  Game.prototype.gotoOf = function (c) {
+    if (!c || !c.goto) return null;
+    var id = typeof c.goto === "string" ? c.goto : c.goto[this.faction.id];
+    return (id && this.faction.nodes && this.faction.nodes[id]) ? id : null;
+  };
+
+  /* choose option i (index into e.choices) of the pending event. Returns {result, deltas, codexNew, death, goto, choice, consequence}.
+   * A goto into an ending overrides a lethal stat change from the same choice (the ending is the fate). */
   Game.prototype.eventChoose = function (i) {
     var st = this.state, e = this.currentEvent();
     if (!e || st.eventChoice !== null) return null;
-    var c = e.choices[i];
-    if (!c) return null;
+    var c = e.choices[i], vis = this.eventChoices(), ok = false;
+    for (var k = 0; k < vis.length; k++) if (vis[k].index === i && !vis[k].locked) ok = true;
+    if (!c || !ok) return null;
     var tmp = {codexNew: []}, sum = {};
     var deltas = this._applyEffects(c.effects, sum);
     this._unlock(e.codex, tmp);
     this._unlock(c.codex, tmp);
     st.eventChoice = i;
-    var cause = this.deathCause();
+    var go = this.gotoOf(c), cause = this.deathCause();
+    if (cause && go && this.node(go).ending) cause = null;
     if (cause) st.eventDeath = cause;
-    return {result: c.result || null, deltas: deltas, codexNew: tmp.codexNew, death: cause, choice: c,
+    return {result: c.result || null, deltas: deltas, codexNew: tmp.codexNew, death: cause, choice: c, goto: go,
             consequence: consequenceOf(c, {choiceDeltas: deltas, roll: null, death: cause, time: null}, true)};
   };
 
-  /* resume the node the event interrupted (or the death node if the event killed you) */
+  /* resume the node the event interrupted — or the choice's goto node (SPEC §19), or the death node if the event killed you */
   Game.prototype.eventContinue = function () {
-    var st = this.state;
+    var st = this.state, e = this.currentEvent();
     if (!st.pendingEvent) return null;
-    var next = st.pendingNext, death = st.eventDeath;
+    var c = e && st.eventChoice !== null ? e.choices[st.eventChoice] : null;
+    var go = this.gotoOf(c);
+    var next = go || st.pendingNext, death = st.eventDeath;
+    if (go && this.node(go).ending) death = null;
     st.pendingEvent = null; st.pendingNext = null; st.eventChoice = null; st.eventDeath = null;
     var step = newStep();
+    if (go) step.goto = go;
     if (death) { step.death = death; return this._enter(this.deathNodeId(death), step); }
     var claim = this.claimDue();                           // the event's own taint pushed a god to 100
     if (claim && !this.node(next).ending) return this._openEvent(claim, next, step);
@@ -471,7 +539,7 @@
       faction: st.faction, origin: st.origin, runId: st.runId, nodeId: st.nodeId, chapter: st.chapter,
       stats: JSON.parse(JSON.stringify(st.stats)), flags: JSON.parse(JSON.stringify(st.flags)),
       codex: st.codex.slice(), seenEvents: st.seenEvents.slice(), hours: st.hours,
-      taint: JSON.parse(JSON.stringify(st.taint || zeroTaint())),
+      taint: JSON.parse(JSON.stringify(st.taint || zeroTaint())), claims: JSON.parse(JSON.stringify(st.claims || {})),
       pendingEvent: st.pendingEvent, pendingNext: st.pendingNext,
       eventChoice: st.eventChoice, eventDeath: st.eventDeath, deathPending: st.deathPending,
       history: st.history.slice(), visits: st.visits, playMs: Math.round(st.playMs), ended: st.ended
@@ -496,6 +564,8 @@
     if (rec.taint) for (var gi = 0; gi < GODS.length; gi++) { var tv = +rec.taint[GODS[gi]]; if (tv) st.taint[GODS[gi]] = clamp(tv, 0, 100); }
     st.codex = (rec.codex || []).slice();
     st.seenEvents = (rec.seenEvents || []).slice();
+    st.claims = {};
+    if (rec.claims) for (var ci = 0; ci < GODS.length; ci++) { var cn = +rec.claims[GODS[ci]]; if (cn > 0) st.claims[GODS[ci]] = Math.min(CLAIM_MAX, Math.floor(cn)); }
     st.hours = typeof rec.hours === "number" ? rec.hours : st.hours;
     st.pendingEvent = rec.pendingEvent || null;
     st.pendingNext = rec.pendingNext || null;
@@ -508,6 +578,8 @@
     st.ended = !!rec.ended;
     if (st.pendingEvent && !g.event(st.pendingEvent)) { st.pendingEvent = null; }
     g.state = st;
+    if (!rec.claims) st.seenEvents.forEach(function (id) {             // pre-§19 saves: each claim event fired once
+      var e = g.event(id); if (e && e.trigger === "claim" && GODS.indexOf(e.god) >= 0) st.claims[e.god] = Math.min(CLAIM_MAX, (st.claims[e.god] || 0) + 1); });
     var n = g.node(); // throws if node missing
     if (typeof n.chapter === "number") st.chapter = n.chapter;
     return g;
@@ -520,7 +592,7 @@
     return {game: g, step: g.start(originId)};
   };
   WH.Rules = {
-    STATS: STATS, GODS: GODS, zeroTaint: zeroTaint, clamp: clamp, rollChance: rollChance, requireOK: requireOK,
+    STATS: STATS, GODS: GODS, zeroTaint: zeroTaint, CLAIM_MAX: CLAIM_MAX, claimGodOf: claimGodOf, godCodexId: godCodexId, clamp: clamp, rollChance: rollChance, requireOK: requireOK,
     timeHours: timeHours, dateParts: dateParts, startHours: startHours, consequenceOf: consequenceOf, hasDeltas: hasDeltas,
     WARP_MIN: WARP_MIN, WARP_MAX: WARP_MAX, HOURS_PER_YEAR: HOURS_PER_YEAR
   };

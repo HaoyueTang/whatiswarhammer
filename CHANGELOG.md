@@ -3,6 +3,11 @@
 Format follows Keep a Changelog; versions follow SemVer.
 
 ## [Unreleased]
+### Added
+- Engine (SPEC §19): per-route `taintMod` (scales positive taint only); event choices can `goto` a node (string or per-faction map, ending nodes allowed); claim events can fire a second time after `resisted_<god>`, at most twice per god; event choices honour `require` / `hideIfLocked`; claim endings (`<prefix>end_claim_<god>`) unlock the god's codex entry.
+- Ending screen: claim endings show the god's sigil banner and the verdict "你已归属于<神>".
+- Validator: taintMod / goto / claim-event / claim-ending checks; per-god claim table (fired, 2nd fire, claimed, resisted, avg taint) and §19 target band per route with ✓/✗.
+- Saves: optional `claims` counts (derived for older saves, no schema bump).
 
 ## [0.2.0] — 2026-11-11
 ### Added
