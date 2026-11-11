@@ -311,3 +311,32 @@ User: rumours trigger too mechanically; they must only appear when relevant.
 - Engine: on node enter (same exclusions as §20), collect eligible unseen rumours whose `when` matches this node's context (scene, speaker sprite, foe, codex unlocked here, flags, node text in zh+en); pick the best match (score = number of matched criteria, ties random) with probability 0.6 if score ≥ 2, 0.35 if score = 1. Spacing: at least 3 nodes since the last rumour; at most 2 rumours per chapter. Seeded as before.
 - Content: each rumour's `when` should point at what it talks about — Orks/Armageddon ↔ ork sprites, trench, "兽人"; Cadia ↔ guardsman/commissar, "卡迪亚", place_cadia; Damocles ↔ tau_water_caste/tau_warrior, "海湾"; the Fall ↔ aeldari_seer, craftworld, "色孽"; War in Heaven ↔ cryptek, tomb_interior, "星神"/"C'tan" … Rewrite a rumour's wording if needed so the link reads naturally.
 - Validator: every rumour has `when`; report per rumour how many nodes in its routes can match it (warn if 0 = unreachable, warn if > 40% of a route's nodes = too generic); simulate rumours heard per run (target 4–8) and the share that matched on ≥ 2 criteria.
+
+## 25. Achievements (成就, v0.3)
+- Data: `data/achievements.js` → `WH.registerAchievements([...])` (registry adds `WH.achievements` + `registerAchievements`).
+  `{ id:"ach_<slug>", name:{zh,en}, desc:{zh,en} (≤30 zh), icon:"<sprite or ui key>", hidden:false, tier:"bronze|silver|gold", cond:{…} }`
+- Condition types (engine evaluates generically; all global across runs):
+  `ending:{id}` · `endingKind:{kind, count, faction?}` · `endingsAll:{faction}` · `claim:{god}` · `claimAll:{}` (all 4 gods, any routes) · `chosen:{}` (a Chaos "chosen" ending) · `resist:{count}` · `deaths:{count, cause?:"hp|sanity|corruption", faction?}` · `runs:{count}` · `origins:{faction}` (all origins of a faction finished) · `factionsAll:{}` (an ending on every route) · `codexPct:{pct, type?, race?}` · `chronicleAll:{}` · `rumors:{count}` · `egg:{tier}` · `survive:{stat:"sanity|hp", max}` (reach a good ending with stat ≤ max) · `fast:{maxNodes}` (an ending in ≤ N nodes) · `flag:{id, faction?}` (a run flag ever set) · `taintSum:{min}` (end a run with total hidden taint ≥ min, revealed only by unlocking).
+- UI: title-screen button 成就 / Achievements → grid (tier colour, icon, name, desc; locked: dim; `hidden` locked: "???" + "隐藏成就"), progress n/t; toast "成就解锁：…" with sfx('codex'); unlocked state stored in `whatiswh.achievements` (never cleared by updates, included in full backup).
+- Tone: short, funny, lore-savvy names (original wording; no GW slogans verbatim).
+
+## 26. New routes (v0.3): Orks · Genestealer Cult · Adeptus Mechanicus
+All rules of §3, §11, §16 (3 origins), §17 (renownHelp), §18–§19 (taintMod, 4 claim endings, claim gotos), §20b (route rumours with `when`, may be registered in the faction file via `WH.registerRumors`), §23 (origin trade-offs) apply. 8 chapters, 75–90 spine nodes, ≥2 good / ≥3 bad endings + 3 death nodes, 5 route taint events (≥1 cleanse) and 1–2 route events inside the faction file. Player is always an ordinary human.
+| | Orks 兽人 | Genestealer Cult 基因窃取者教派 | Adeptus Mechanicus 机械神教 |
+|---|---|---|---|
+| id / prefix | `orks` / `ork_` | `gsc` / `gsc_` | `mechanicus` / `mech_` |
+| You | a human scrap-trader enslaved on an Imperial world overrun by a Waaagh!, kept alive because a Mek finds you useful | a human miner on a mining world drawn into the Cult of the Four-Armed Emperor | a human menial on a forge world, one step from servitor conversion, who climbs the Cult Mechanicus |
+| renownLabel / icon | 牙币 Teef / `icon_teef` | 血亲 Kinship / `icon_kinship` | 机眷 Grace / `icon_grace` |
+| color | `#6aa84f` | `#9b59b6` | `#c0392b` |
+| Leaders | 加兹库尔 Ghazghkull (prophet), 戈克与莫克 Gork & Mork, Warbosses, Meks, Weirdboyz; Ork kultur (might makes right, belief makes tech work, spores) | Patriarch, Magus, Primus; the Four-Armed Emperor; generations of hybrids | the Omnissiah / Machine God, Mars & the Fabricator-General, 贝利撒留·考尔 Belisarius Cawl, Tech-Priests, Skitarii; STCs, tech-heresy |
+| Main enemies | the Imperium (Armageddon-style war), everyone else, Chaos (Khorne loves it) | Imperium (Arbites, PDF, Inquisition) — and the hidden truth: the "Star Children" are a Tyranid hive fleet | Dark Mechanicum (Chaos), Necrons (explorators raid tombs), Orks (who steal everything) |
+| Final boss | a Warboss duel as Ghazghkull's Waaagh! arrives (`omen_waaagh`) | Day of Ascension → the hive fleet devours the cult (`omen_star_children`, hive_tyrant) | a Dark Mechanicum warsmith's daemon engine (`daemon_engine`) |
+| taintMod | khorne 1.0, others 0.6 (Orks are warp-loud but rarely corrupted) | all 0.6 (Shadow in the Warp) | tzeentch 1.1 (forbidden knowledge), others 0.8 |
+| target claim band | 5–10% | 3–8% | 8–14% |
+
+New asset keys (art, fixed list):
+- Sprites (48 unless noted): `player_orks` (human scrap-trader, salvage goggles), `player_gsc` (miner, hazard helmet, lamp), `player_mechanicus` (grey-robed menial, small augment) · `ork_mek`, `ork_weirdboy`, `ork_nob`(64), `gretchin`(32), `squig`(32) · `gsc_neophyte`, `gsc_acolyte`, `gsc_magus`, `gsc_primus`(64), `gsc_patriarch`(96) · `skitarius`, `magos`(64), `electro_priest`, `kastelan_robot`(64), `dark_mechanicus`(64), `daemon_engine`(96)
+- Omens (96, no figures): `omen_waaagh` (green storm over a scrap horizon), `omen_gork_mork` (two colossal green shapes in the clouds, no faces), `omen_star_children` (purple sky, descending lights), `omen_four_armed` (an original four-armed icon painting, abstract), `omen_mars` (red planet ringed by forges), `omen_cawl` (vast archeotech workshop, cable shadows), `omen_omnissiah` (golden gear halo)
+- Scenes (192×108): `ork_scrapyard`, `ork_fort`, `mine_shaft`, `gsc_chapel`, `forge_floor`, `mars_vista`, `tech_vault`
+- UI (16): `icon_teef`, `icon_kinship`, `icon_grace`
+Audio moods: `orks` (rowdy, stompy, brassy square leads), `gsc` (hymn-like but wrong, organ + insectile clicks), `mechanicus` (binary chant, mechanical rhythm, choir-pad); moodFor maps the new scenes/factions.
