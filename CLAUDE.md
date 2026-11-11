@@ -9,6 +9,7 @@ Read this first in every session on this project. Keep it short and current; his
 
 ## Contract
 - Full design + data schema: `docs/SPEC.md` (single source of truth).
+- Lessons learned from v0.1: `docs/LESSONS-v0.1.md`.
 - Shared registry API: `src/js/registry.js` — don't change without updating SPEC.
 - Runs from `file://` — plain `<script>` tags, no fetch, no build step, no CDN.
 
