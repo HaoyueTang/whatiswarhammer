@@ -283,3 +283,10 @@ Goal: newcomers aren't burdened, but people who know the setting spot named wars
   - 99 `last`: when exactly one countable item remains, the codex header shows the text in place of the counter for one opening.
   - 100 `planned`: full-screen scene (sprite daemon_tzeentch, glitch FX, sfx 'event'), then unlock `egg_tzeentch_letter` and show its card; from then on the title logo has a subtle blue-pink shimmer and Settings gains a toggle "奸奇的玩笑 / Tzeentch's joke": locked "???" in the codex shuffle their characters every few seconds.
 - Debug: `?egg=25|50|75|99|100` forces a tier for testing.
+
+## 22. Updates never touch the player's local data (版本更新不覆盖本地记录)
+- All progress lives in the browser under `whatiswh.*` keys (saves, autosave, settings, codexGlobal, codexSeen, run records `whatiswh.runs`, run stats, ending stats, tier flags). **No version may delete, reset or rename these keys.** New data goes into new keys or new optional fields; old records must load (migration functions per schema step, unknown fields preserved, never dropped).
+- On boot, compare stored `whatiswh.lastVersion` with `WH.VERSION`; if newer, run migrations, then show a one-time toast "已更新到 vX.Y.Z · 存档与记录已保留" / "Updated to vX.Y.Z · saves and records kept", and store the new version.
+- **Full backup**: Settings → 数据 / Data: "导出全部进度" exports every `whatiswh.*` key as one JSON (game version + timestamp); "导入全部进度" merges it back (records union by run id, codex union, endings max, saves only into empty slots unless the player confirms overwrite). Inside sandboxed pages where downloads are blocked, offer "复制到剪贴板" and a paste box instead.
+- Note for players (README): progress belongs to the browser and the address it was opened from (local file vs. GitHub Pages vs. artifact are separate) — use the full backup to move it.
+- Repo/local folder: files players may customise (`assets/audio/files.js`, any `*.local.*`, `saves/`, `user/`, `logs/`, user audio files) are never overwritten by the local sync (`.sync/apply.py`).
