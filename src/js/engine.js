@@ -12,6 +12,10 @@
  *   if (step.kind === "event") { g.eventChoices(); var r = g.eventChoose(1); step = g.eventContinue(); }
  *   SPEC §19: faction.taintMod scales positive taint; event choices may `goto` a node (string or {faction:id});
  *   claim events fire at most twice per god (2nd only if flag resisted_<god>); claim endings = ids with "_end_claim_<god>".
+ *   SPEC §20 rumours: entering a node without eventRoll (not an ending, no pending death) → with p = RUMOR_P (own seeded
+ *   stream, so the main RNG sequence is unchanged) one unseen eligible rumour → step.rumor / step.rumorCodex, g.currentRumor().
+ *   new WH.Game(fid, {rumors:false}) or g.rumors = false turns them off (UI setting 传闻).
+ *   SPEC §23: origin.max:{hp,sanity} (70–130, default 100) → state.max; hp/sanity clamp to g.cap(k); start values default to the caps.
  *   g.toRecord() / WH.Game.fromRecord(rec)
  */
 (function (root) {
@@ -29,6 +33,18 @@
   var HOURS_PER_YEAR = 8760;
   var WARP_MIN = 0.4, WARP_MAX = 3.0;
   var HISTORY_MAX = 30;
+  var RUMOR_P = 0.25;                                            // SPEC §20: chance per eligible node
+  var CAP_MIN = 70, CAP_MAX = 130, CAP_DEFAULT = 100;            // SPEC §23: per-run caps for hp / sanity
+  var CAPPED = ["hp", "sanity"];
+  /* SPEC §23: the run's caps from an origin's max:{hp,sanity} (missing → 100, clamped 70–130) */
+  function capsOf(o) {
+    var m = (o && o.max) || {}, out = {};
+    for (var i = 0; i < CAPPED.length; i++) {
+      var v = +m[CAPPED[i]];
+      out[CAPPED[i]] = (m[CAPPED[i]] === undefined || m[CAPPED[i]] === null || !isFinite(v)) ? CAP_DEFAULT : clamp(Math.round(v), CAP_MIN, CAP_MAX);
+    }
+    return out;
+  }
 
   /* ---------- seedable RNG (mulberry32) ---------- */
   function RNG(seed) {
@@ -173,6 +189,11 @@
     this.faction = this.data.factions[factionId];
     if (!this.faction) throw new Error("Unknown faction: " + factionId);
     this.state = null;
+    /* SPEC §20: rumours draw from their own stream (derived from the main seed) so turning them on/off never changes
+     * rolls, events or warp time of a seeded run */
+    this.rumors = opts.rumors !== false;
+    this.rumorChance = typeof opts.rumorChance === "number" ? opts.rumorChance : RUMOR_P;
+    this.rumorRng = opts.rumorRng || RNG(((this.rng.getState ? this.rng.getState() : Math.floor(Math.random() * 4294967296)) ^ 0x2545F491) >>> 0);
   }
 
   Game.STATS = STATS;
@@ -181,16 +202,22 @@
 
   /* the origin of the current run (falls back to the first origin for legacy saves / unknown ids) */
   Game.prototype.origin = function () { return findOrigin(this.faction, this.state && this.state.origin); };
+  /* SPEC §23: upper bound of a stat this run (hp/sanity per origin, corruption/renown 100) */
+  Game.prototype.cap = function (k) {
+    var m = this.state && this.state.max;
+    return (CAPPED.indexOf(k) >= 0 && m && typeof m[k] === "number") ? m[k] : 100;
+  };
   Game.prototype.playerSprite = function () { var o = this.origin(); return (o && o.sprite) || this.faction.playerSprite; };
 
   Game.prototype.freshState = function (origin) {
-    var f = this.faction, ss = (origin && origin.stats) || f.startStats || {};
+    var f = this.faction, ss = (origin && origin.stats) || f.startStats || {}, mx = capsOf(origin);
     return {
       faction: f.id, origin: origin ? origin.id : null, nodeId: null, chapter: 1,
-      stats: {hp: ss.hp !== undefined ? ss.hp : 100, sanity: ss.sanity !== undefined ? ss.sanity : 100,
+      max: mx,                                                     // SPEC §23: start values default to the caps
+      stats: {hp: ss.hp !== undefined ? clamp(ss.hp, 0, mx.hp) : mx.hp, sanity: ss.sanity !== undefined ? clamp(ss.sanity, 0, mx.sanity) : mx.sanity,
               corruption: ss.corruption || 0, renown: ss.renown || 0},
       runId: Date.now().toString(36) + Math.floor(Math.random() * 1e8).toString(36),
-      flags: {}, codex: [], seenEvents: [], hours: startHours(f), taint: zeroTaint(), claims: {},
+      flags: {}, codex: [], seenEvents: [], seenRumors: [], rumor: null, hours: startHours(f), taint: zeroTaint(), claims: {},
       pendingEvent: null, pendingNext: null, eventChoice: null, eventDeath: null,
       deathPending: null, history: [], visits: 0, playMs: 0, ended: false
     };
@@ -222,7 +249,7 @@
   function newStep() {
     return {kind: "node", nodeId: null, choiceDeltas: {}, nodeDeltas: {}, deltas: {},
             time: null, chapterChanged: false, fromChapter: null, codexNew: [],
-            roll: null, death: null, ending: null, event: null, deathPending: null};
+            roll: null, death: null, ending: null, event: null, deathPending: null, rumor: null, rumorCodex: []};
   }
 
   /* apply {hp,sanity,corruption,renown,set,unset}; returns actual (clamped) deltas */
@@ -234,7 +261,7 @@
       var k = STATS[i];
       if (typeof eff[k] === "number" && eff[k] !== 0) {
         var before = st[k];
-        st[k] = clamp(before + eff[k], 0, 100);
+        st[k] = clamp(before + eff[k], 0, this.cap(k));
         if (st[k] !== before) d[k] = st[k] - before;
         if (into) into[k] = (into[k] || 0) + (st[k] - before);
       }
@@ -330,6 +357,7 @@
     step.nodeId = id;
     st.nodeId = id;
     st.deathPending = null;
+    st.rumor = null;
     st.history.push(id);
     if (st.history.length > HISTORY_MAX) st.history.shift();
     st.visits++;
@@ -360,9 +388,55 @@
       if (cause) {
         st.deathPending = cause;
         step.deathPending = cause;
-      }
+      } else if (!node.eventRoll) this._rollRumor(node, step);
     }
     return step;
+  };
+
+  /* ---------- rumours (SPEC §20) ---------- */
+  function rumorEligible(r, fid, chapter) {
+    if (!r || !r.id || !r.text) return false;
+    var fs = r.factions || ["*"];
+    if (fs.indexOf("*") < 0 && fs.indexOf(fid) < 0) return false;
+    if (typeof r.minChapter === "number" && chapter < r.minChapter) return false;
+    if (typeof r.maxChapter === "number" && chapter > r.maxChapter) return false;
+    return true;
+  }
+  /* unseen rumours this run could show in `chapter` (default: current chapter) */
+  Game.prototype.eligibleRumors = function (chapter) {
+    var st = this.state, list = this.data.rumors || [], out = [];
+    if (chapter === undefined) chapter = st.chapter;
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      if ((st.seenRumors || []).indexOf(r.id) >= 0) continue;
+      if (rumorEligible(r, st.faction, chapter)) out.push(r);
+    }
+    return out;
+  };
+  Game.prototype.rumor = function (id) {
+    var list = this.data.rumors || [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
+  };
+  /* the rumour overheard at the current node (null if none) */
+  Game.prototype.currentRumor = function () { return this.state && this.state.rumor ? this.rumor(this.state.rumor) : null; };
+
+  /* called by _enter for nodes without eventRoll / ending / pending death; one draw per node from rumorRng */
+  Game.prototype._rollRumor = function (node, step) {
+    var st = this.state;
+    if (!this.rumors || !(this.data.rumors && this.data.rumors.length)) return;
+    if (this.rumorRng() >= this.rumorChance) return;
+    var ch = typeof node.chapter === "number" ? node.chapter : st.chapter;
+    var pool = this.eligibleRumors(ch);
+    if (!pool.length) return;
+    var r = pool[Math.min(pool.length - 1, Math.floor(this.rumorRng() * pool.length))];
+    if (!st.seenRumors) st.seenRumors = [];
+    st.seenRumors.push(r.id);
+    st.rumor = r.id;
+    step.rumor = r;
+    var tmp = {codexNew: []};
+    this._unlock(r.codex, tmp);
+    step.rumorCodex = tmp.codexNew;
   };
 
   /* Visible choices. Each: {index, choice, locked, roll:{pEff,stat}|null, forced, fallback} */
@@ -537,16 +611,22 @@
     var st = this.state, rec = {
       schema: WH.SAVE_SCHEMA || 1, gameVersion: WH.VERSION || "0", savedAt: new Date().toISOString(),
       faction: st.faction, origin: st.origin, runId: st.runId, nodeId: st.nodeId, chapter: st.chapter,
+      max: {hp: (st.max && st.max.hp) || CAP_DEFAULT, sanity: (st.max && st.max.sanity) || CAP_DEFAULT},
       stats: JSON.parse(JSON.stringify(st.stats)), flags: JSON.parse(JSON.stringify(st.flags)),
-      codex: st.codex.slice(), seenEvents: st.seenEvents.slice(), hours: st.hours,
+      codex: st.codex.slice(), seenEvents: st.seenEvents.slice(), seenRumors: (st.seenRumors || []).slice(), rumor: st.rumor || null, hours: st.hours,
       taint: JSON.parse(JSON.stringify(st.taint || zeroTaint())), claims: JSON.parse(JSON.stringify(st.claims || {})),
       pendingEvent: st.pendingEvent, pendingNext: st.pendingNext,
       eventChoice: st.eventChoice, eventDeath: st.eventDeath, deathPending: st.deathPending,
       history: st.history.slice(), visits: st.visits, playMs: Math.round(st.playMs), ended: st.ended
     };
     if (extra) for (var k in extra) rec[k] = extra[k];
+    // SPEC §22: fields this version doesn't know (written by a newer/older build) survive a load → save round trip
+    if (this.extraFields) for (var x in this.extraFields) if (!has(rec, x)) rec[x] = this.extraFields[x];
     return rec;
   };
+  var RECORD_KEYS = ["schema", "gameVersion", "savedAt", "faction", "origin", "runId", "nodeId", "chapter", "max", "stats", "flags", "codex",
+    "seenEvents", "seenRumors", "rumor", "hours", "taint", "claims", "pendingEvent", "pendingNext", "eventChoice", "eventDeath",
+    "deathPending", "history", "visits", "playMs", "ended", "lang"];
 
   Game.fromRecord = function (rec, opts) {
     var g = new Game(rec.faction, opts);
@@ -555,15 +635,18 @@
     st.origin = findOrigin(g.faction, rec.origin) ? findOrigin(g.faction, rec.origin).id : null;
     st.runId = rec.runId || ("legacy-" + rec.faction + "-" + (rec.savedAt || ""));
     st.chapter = rec.chapter || 1;
+    st.max = capsOf({max: rec.max});                                   // SPEC §23: saves without max → 100/100
     for (var i = 0; i < STATS.length; i++) {
       var k = STATS[i];
-      if (rec.stats && typeof rec.stats[k] === "number") st.stats[k] = clamp(rec.stats[k], 0, 100);
+      if (rec.stats && typeof rec.stats[k] === "number") st.stats[k] = clamp(rec.stats[k], 0, CAPPED.indexOf(k) >= 0 ? st.max[k] : 100);
     }
     st.flags = rec.flags || {};
     st.taint = zeroTaint();
     if (rec.taint) for (var gi = 0; gi < GODS.length; gi++) { var tv = +rec.taint[GODS[gi]]; if (tv) st.taint[GODS[gi]] = clamp(tv, 0, 100); }
     st.codex = (rec.codex || []).slice();
     st.seenEvents = (rec.seenEvents || []).slice();
+    st.seenRumors = Array.isArray(rec.seenRumors) ? rec.seenRumors.slice() : [];     // SPEC §20, additive (older saves: none)
+    st.rumor = typeof rec.rumor === "string" && g.rumor(rec.rumor) ? rec.rumor : null;
     st.claims = {};
     if (rec.claims) for (var ci = 0; ci < GODS.length; ci++) { var cn = +rec.claims[GODS[ci]]; if (cn > 0) st.claims[GODS[ci]] = Math.min(CLAIM_MAX, Math.floor(cn)); }
     st.hours = typeof rec.hours === "number" ? rec.hours : st.hours;
@@ -578,6 +661,8 @@
     st.ended = !!rec.ended;
     if (st.pendingEvent && !g.event(st.pendingEvent)) { st.pendingEvent = null; }
     g.state = st;
+    g.extraFields = {};
+    for (var rk in rec) if (has(rec, rk) && RECORD_KEYS.indexOf(rk) < 0) g.extraFields[rk] = JSON.parse(JSON.stringify(rec[rk]));
     if (!rec.claims) st.seenEvents.forEach(function (id) {             // pre-§19 saves: each claim event fired once
       var e = g.event(id); if (e && e.trigger === "claim" && GODS.indexOf(e.god) >= 0) st.claims[e.god] = Math.min(CLAIM_MAX, (st.claims[e.god] || 0) + 1); });
     var n = g.node(); // throws if node missing
@@ -594,6 +679,7 @@
   WH.Rules = {
     STATS: STATS, GODS: GODS, zeroTaint: zeroTaint, CLAIM_MAX: CLAIM_MAX, claimGodOf: claimGodOf, godCodexId: godCodexId, clamp: clamp, rollChance: rollChance, requireOK: requireOK,
     timeHours: timeHours, dateParts: dateParts, startHours: startHours, consequenceOf: consequenceOf, hasDeltas: hasDeltas,
-    WARP_MIN: WARP_MIN, WARP_MAX: WARP_MAX, HOURS_PER_YEAR: HOURS_PER_YEAR
+    WARP_MIN: WARP_MIN, WARP_MAX: WARP_MAX, HOURS_PER_YEAR: HOURS_PER_YEAR, RUMOR_P: RUMOR_P, rumorEligible: rumorEligible,
+    capsOf: capsOf, CAP_MIN: CAP_MIN, CAP_MAX: CAP_MAX, CAP_DEFAULT: CAP_DEFAULT, CAPPED: CAPPED
   };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -1,14 +1,19 @@
 /* save.js — save system (SPEC §9). Owned by: web.
  * localStorage (try/catch) with in-memory fallback. Keys: whatiswh.slot1..3, whatiswh.auto, whatiswh.settings, whatiswh.codexGlobal,
- * whatiswh.codexSeen (codex NEW badges), whatiswh.runs / runStats / endingStats / runsSeen (records).
+ * whatiswh.codexSeen (codex NEW badges), whatiswh.runs / runStats / endingStats / runsSeen (records), eggTiers, tipsSeen, lastVersion.
+ * SPEC §22: NO version may delete, reset or rename whatiswh.* keys. Migrations work on a copy and keep unknown fields;
+ * a corrupt JSON value is copied to whatiswh.corrupt.<key> before anything can overwrite it; whatiswh.lastVersion drives a
+ * one-time "updated · data kept" notice (Save.bootCheck); exportAll / importAll move every key between browsers / addresses.
  */
 (function (root) {
   var WH = root.WH = root.WH || {};
   var PREFIX = "whatiswh.";
   /* schema 2 (v0.2): records carry `origin` (SPEC §16) and hidden `taint` (SPEC §18). registry.js (lead-owned) still says 1,
-   * so the bump lives here; engine.toRecord reads WH.SAVE_SCHEMA. v0.2.1 adds optional `claims:{god:n}` (SPEC §19) without a bump. */
+   * so the bump lives here; engine.toRecord reads WH.SAVE_SCHEMA. v0.2.1 adds optional `claims:{god:n}` (SPEC §19) without a bump;
+   * v0.2.2 adds optional `seenRumors:[id]` + `rumor:id|null` (SPEC §20), also without a bump (engine defaults them). */
   WH.SAVE_SCHEMA = Math.max(WH.SAVE_SCHEMA || 1, 2);
   var SLOTS = ["slot1", "slot2", "slot3", "auto"];
+  var RUNS_MAX = 200;                // run records kept (v0.2.2: was 50; raised so records are effectively never dropped)
   var mem = {};
   var persistent = true;
 
@@ -34,14 +39,39 @@
   function getJSON(key) {
     var s = get(key);
     if (!s) return null;
-    try { return JSON.parse(s); } catch (e) { return null; }
+    try { return JSON.parse(s); }
+    catch (e) {   // SPEC §22: keep the unreadable value (once) so a later write can never destroy it
+      if (key.indexOf("corrupt.") !== 0 && get("corrupt." + key) === null) set("corrupt." + key, s);
+      return null;
+    }
+  }
+  /* every whatiswh.* key name (without prefix), from localStorage or the in-memory fallback */
+  function allKeys() {
+    var out = {}, k;
+    for (k in mem) out[k] = 1;
+    if (persistent) {
+      try { for (var i = 0; i < root.localStorage.length; i++) { k = root.localStorage.key(i); if (k && k.indexOf(PREFIX) === 0) out[k.slice(PREFIX.length)] = 1; } }
+      catch (e) { /* keep mem keys */ }
+    }
+    delete out.__test;
+    return Object.keys(out).sort();
+  }
+  /* "0.2.10" > "0.2.9" */
+  function cmpVer(a, b) {
+    var x = String(a || "0").split(/[.\-+]/), y = String(b || "0").split(/[.\-+]/);
+    for (var i = 0; i < Math.max(x.length, y.length); i++) {
+      var p = parseInt(x[i] || "0", 10) || 0, q = parseInt(y[i] || "0", 10) || 0;
+      if (p !== q) return p < q ? -1 : 1;
+    }
+    return 0;
   }
 
   /* schema migrations: MIGRATE[n] upgrades a record from schema n to n+1 */
   var MIGRATE = {
-    1: function (rec) {               // v0.1 → v0.2: no taint yet, origin = faction default
+    1: function (rec) {               // v0.1 → v0.2: no taint yet, origin = faction default (only ADDS fields — SPEC §22)
       rec.taint = rec.taint || {khorne: 0, nurgle: 0, tzeentch: 0, slaanesh: 0};
       if (rec.origin === undefined) rec.origin = null;
+      if (rec.seenRumors === undefined) rec.seenRumors = [];
       rec.schema = 2;
       return rec;
     }
@@ -74,6 +104,12 @@
     if (rec.flags && typeof rec.flags !== "object") return {ok: false, error: "err_schema"};
     // SPEC §19 (additive, no schema bump): per-god claim-event counts; absent in older saves (engine derives them)
     if (rec.claims !== undefined && (!rec.claims || typeof rec.claims !== "object" || Array.isArray(rec.claims))) return {ok: false, error: "err_schema"};
+    // SPEC §20 (additive, no schema bump): rumours overheard this run + the one shown at the current node
+    if (rec.seenRumors !== undefined && !Array.isArray(rec.seenRumors)) return {ok: false, error: "err_schema"};
+    // SPEC §23 (additive): per-run caps; missing → 100/100 (engine fills it in)
+    if (rec.max !== undefined && (!rec.max || typeof rec.max !== "object" || Array.isArray(rec.max))) return {ok: false, error: "err_schema"};
+    if (rec.max === undefined) rec.max = {hp: 100, sanity: 100};
+    if (rec.rumor !== undefined && rec.rumor !== null && typeof rec.rumor !== "string") return {ok: false, error: "err_schema"};
     return {ok: true, rec: rec};
   }
 
@@ -105,7 +141,7 @@
     /* settings */
     defaultSettings: function () {
       var nav = (root.navigator && (root.navigator.language || "")) || "";
-      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true};
+      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true, rumors: true, tzeentchJoke: true};
     },
     loadSettings: function () {
       var d = Save.defaultSettings(), s = getJSON("settings") || {};
@@ -151,11 +187,15 @@
       return Save.codexGlobal().filter(function (id) { return !seen[id]; });
     },
 
+    /* SPEC §21: Tzeentch easter-egg tiers already triggered (whatiswh.eggTiers = {tierId: ISO date}) */
+    eggTiers: function () { var o = getJSON("eggTiers"); return (o && typeof o === "object" && !Array.isArray(o)) ? o : {}; },
+    markEggTier: function (id) { var o = Save.eggTiers(); if (!o[id]) { o[id] = new Date().toISOString(); set("eggTiers", JSON.stringify(o)); } return o; },
+
     /* SPEC §17: faction-stat tip shown once per faction (whatiswh.tipsSeen = {faction: ISO date}) */
     tipSeen: function (fid) { var o = getJSON("tipsSeen"); return !!(o && o[fid]); },
     markTipSeen: function (fid) { var o = getJSON("tipsSeen") || {}; o[fid] = new Date().toISOString(); set("tipsSeen", JSON.stringify(o)); },
 
-    /* finished-run records ("往生录"): whatiswh.runs (newest first, max 50), whatiswh.runStats (totals),
+    /* finished-run records ("往生录"): whatiswh.runs (newest first, max RUNS_MAX), whatiswh.runStats (totals),
      * whatiswh.endingStats ({"faction:node": {count, first, best, firstAt}}), whatiswh.runsSeen (dedupe keys) */
     runs: function () { var a = getJSON("runs"); return Array.isArray(a) ? a : []; },
     runStats: function () {
@@ -174,7 +214,7 @@
       set("runsSeen", JSON.stringify(seen));
       var runs = Save.runs();
       runs.unshift(run);
-      if (runs.length > 50) runs = runs.slice(0, 50);
+      if (runs.length > RUNS_MAX) runs = runs.slice(0, RUNS_MAX);
       set("runs", JSON.stringify(runs));
       var st = Save.runStats();
       var newRecord = st.runs > 0 && run.survived > (st.longest || 0);
@@ -199,6 +239,145 @@
     },
     /* clears the service record; ending collection (endingStats) and dedupe keys stay */
     clearRuns: function () { del("runs"); del("runStats"); },
+
+    /* ---------- SPEC §22: version check, full backup, merge import ---------- */
+    keys: allKeys, cmpVer: cmpVer,
+    /* On boot: if whatiswh.lastVersion is older than WH.VERSION (or missing while progress exists), migrate every save slot
+     * IN PLACE on a copy (unknown fields kept; the pre-migration text is kept as whatiswh.bak.<old version>.<slot>), then
+     * record the new version. Returns {updated, from, to, migrated:[slots]} — the UI shows a one-time toast if updated.
+     * Never deletes or renames a key. A downgrade (stored version newer) changes nothing. */
+    bootCheck: function () {
+      var cur = WH.VERSION || "0", last = get("lastVersion"), out = {updated: false, from: last, to: cur, migrated: []};
+      var hasData = allKeys().some(function (k) { return k !== "lastVersion" && k !== "settings" && k.indexOf("corrupt.") !== 0; }) || get("settings") !== null;
+      if (last && cmpVer(last, cur) >= 0) return out;
+      if (!last && !hasData) { set("lastVersion", cur); return out; }       // fresh install: nothing to keep
+      SLOTS.forEach(function (sl) {
+        var raw = get(sl), obj;
+        if (!raw) return;
+        try { obj = JSON.parse(raw); } catch (e) { getJSON(sl); return; }    // unreadable → copied to corrupt.<slot>, left in place
+        if (!obj || typeof obj.schema !== "number" || obj.schema >= (WH.SAVE_SCHEMA || 1)) return;
+        var v = validate(obj);
+        if (!v.ok) return;                                                   // e.g. a faction file is missing today: leave it alone
+        var bk = "bak." + (last || "pre-" + cur) + "." + sl;
+        if (get(bk) === null) set(bk, raw);
+        set(sl, JSON.stringify(v.rec));
+        out.migrated.push(sl);
+      });
+      set("lastVersion", cur);
+      out.updated = true;
+      return out;
+    },
+    /* every whatiswh.* key as one object (values parsed when they are JSON) */
+    exportAll: function () {
+      var data = {};
+      allKeys().forEach(function (k) {
+        if (k.indexOf("corrupt.") === 0) return;
+        var v = get(k);
+        try { data[k] = JSON.parse(v); } catch (e) { data[k] = v; }
+      });
+      return {format: "whatiswh-backup", backupVersion: 1, gameVersion: WH.VERSION || "0", exportedAt: new Date().toISOString(), prefix: PREFIX, data: data};
+    },
+    downloadAll: function () {
+      var obj = Save.exportAll(), d = new Date(), pad = function (n) { return ("0" + n).slice(-2); };
+      var blob = new Blob([JSON.stringify(obj, null, 1)], {type: "application/json"});
+      var a = document.createElement("a");
+      a.download = "whatiswarhammer_backup_" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "_" + pad(d.getHours()) + pad(d.getMinutes()) + ".json";
+      a.href = URL.createObjectURL(blob);
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      return obj;
+    },
+    /* parse a backup (object or JSON text) → {ok, backup} | {ok:false, error} */
+    parseBackup: function (x) {
+      var o = x;
+      if (typeof x === "string") { try { o = JSON.parse(x); } catch (e) { return {ok: false, error: "err_json"}; } }
+      if (!o || o.format !== "whatiswh-backup" || !o.data || typeof o.data !== "object") return {ok: false, error: "err_backup"};
+      return {ok: true, backup: o};
+    },
+    /* save slots in the backup that would overwrite a different local save */
+    backupConflicts: function (b) {
+      return SLOTS.filter(function (sl) { var v = b.data[sl], cur = get(sl); return v && cur !== null && JSON.stringify(v) !== cur; });
+    },
+    /* Merge a backup into this browser (SPEC §22): run records union by runId:endingId, codex / seen / tips / egg tiers union,
+     * ending stats max, save slots only into empty slots unless opts.overwrite, settings only if none here, any other
+     * unknown key only if missing here. Returns a summary. Never deletes anything. */
+    importAll: function (b, opts) {
+      opts = opts || {};
+      var d = b.data, sum = {runs: 0, codex: 0, endings: 0, slots: [], skipped: [], keys: 0};
+      var union = function (key) {
+        if (!Array.isArray(d[key])) return 0;
+        var a = getJSON(key); if (!Array.isArray(a)) a = [];
+        var n = 0; d[key].forEach(function (x) { if (a.indexOf(x) < 0) { a.push(x); n++; } });
+        if (n) set(key, JSON.stringify(a));
+        return n;
+      };
+      var mergeObj = function (key) {          // {id: date} maps: keep the earliest
+        var src = d[key]; if (!src || typeof src !== "object" || Array.isArray(src)) return;
+        var o = getJSON(key) || {}, ch = false;
+        for (var k in src) if (!o[k] || (src[k] && String(src[k]) < String(o[k]))) { o[k] = src[k]; ch = true; }
+        if (ch) set(key, JSON.stringify(o));
+      };
+      sum.codex = union("codexGlobal");
+      union("codexSeen");
+      mergeObj("tipsSeen"); mergeObj("eggTiers");
+      // run records
+      if (Array.isArray(d.runs)) {
+        var seen = getJSON("runsSeen"); if (!Array.isArray(seen)) seen = [];
+        var runs = Save.runs(), st = Save.runStats(), fresh = !(st.runs > 0), have = {};
+        runs.forEach(function (r) { have[r.runId + ":" + r.endingId] = 1; });
+        d.runs.forEach(function (r) {
+          if (!r || !r.runId) return;
+          var key = r.runId + ":" + r.endingId;
+          if (have[key]) return;
+          var counted = seen.indexOf(key) >= 0;
+          have[key] = 1; runs.push(r); sum.runs++;
+          if (!counted) seen.push(key);
+          if (!fresh && !counted) {          // add its totals once (imported runStats are taken whole when this browser has none)
+            st.runs = (st.runs || 0) + 1;
+            if (r.kind === "death") st.deaths = (st.deaths || 0) + 1;
+            if (r.survived > (st.longest || 0)) st.longest = r.survived;
+            if (r.kind !== "good" && r.cause) { st.causes = st.causes || {}; var ck = r.cause.en || r.cause.zh, c = st.causes[ck] || {count: 0, label: r.cause}; c.count++; st.causes[ck] = c; }
+          }
+        });
+        runs.sort(function (a, b) { return String(b.at || "") < String(a.at || "") ? -1 : String(b.at || "") > String(a.at || "") ? 1 : 0; });
+        set("runs", JSON.stringify(runs));                                  // union: nothing imported is dropped
+        if (Array.isArray(d.runsSeen)) d.runsSeen.forEach(function (k) { if (seen.indexOf(k) < 0) seen.push(k); });
+        set("runsSeen", JSON.stringify(seen.slice(-1000)));
+        if (fresh && d.runStats && typeof d.runStats === "object") st = d.runStats;
+        set("runStats", JSON.stringify(st));
+      } else if (d.runStats && !(Save.runStats().runs > 0)) set("runStats", JSON.stringify(d.runStats));
+      // ending collection: max per ending
+      if (d.endingStats && typeof d.endingStats === "object") {
+        var es = Save.endingStats();
+        for (var ek in d.endingStats) {
+          var x = d.endingStats[ek], y = es[ek];
+          if (!x) continue;
+          if (!y) { es[ek] = x; sum.endings++; continue; }
+          y.count = Math.max(y.count || 0, x.count || 0);
+          y.best = Math.max(y.best || 0, x.best || 0);
+          if (x.firstAt && (!y.firstAt || x.firstAt < y.firstAt)) { y.firstAt = x.firstAt; y.first = x.first; }
+        }
+        set("endingStats", JSON.stringify(es));
+      }
+      // save slots
+      SLOTS.forEach(function (sl) {
+        var v = d[sl];
+        if (!v || typeof v !== "object") return;
+        var cur = get(sl), txt = JSON.stringify(v);
+        if (cur === txt) return;
+        if (cur !== null && !opts.overwrite) { sum.skipped.push(sl); return; }
+        if (cur !== null && get("bak.import." + sl) === null) set("bak.import." + sl, cur);
+        set(sl, txt); sum.slots.push(sl);
+      });
+      if (d.settings && get("settings") === null) set("settings", JSON.stringify(d.settings));
+      // any other key we don't know: copy only if missing here
+      var known = ["codexGlobal", "codexSeen", "tipsSeen", "eggTiers", "runs", "runsSeen", "runStats", "endingStats", "settings", "lastVersion"].concat(SLOTS);
+      for (var k in d) {
+        if (known.indexOf(k) >= 0 || k.indexOf("corrupt.") === 0 || get(k) !== null) continue;
+        set(k, typeof d[k] === "string" ? d[k] : JSON.stringify(d[k])); sum.keys++;
+      }
+      return sum;
+    },
 
     /* JSON export / import (works from file://: Blob URL + FileReader) */
     exportRecord: function (rec) {

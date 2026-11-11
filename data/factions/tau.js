@@ -860,17 +860,17 @@
                   "Greater Good is the T'au Empire's measure of your contribution. Obeying orders, patience, and hard choices made for the Greater Good raise it; questioning, disobedience and sympathy for the old Imperium lower it. Enough of it earns honours, and decides which wave you are in."),
     origins: [
       {id: "colonist", name: L("人类殖民者", "Human colonist"),
-       desc: L("新卡尔德的码头工人。帝国不再来，钛人来了，工钱从不迟到。", "A dockhand on New Calder. The Imperium stopped coming; the T'au came, and their wages are never late."),
+       desc: L("新卡尔德的码头工人，扛货练出好身板。钛人工钱从不迟到，大义你还没想明白。", "A New Calder dockhand, strong from hauling cargo. The T'au pay on time; the Greater Good you haven't worked out yet."),
        sprite: "player_tau", startNode: "tau_101",
-       stats: {hp: 100, sanity: 100, corruption: 0, renown: 10}, set: {origin_colonist: true}},
+       max: {hp: 105, sanity: 100}, stats: {hp: 105, sanity: 100, corruption: 0, renown: 5}, set: {origin_colonist: true}},
       {id: "pow", name: L("归顺的星界军俘虏", "Turned Guardsman"),
-       desc: L("帝国的兵，被俘后选了大义。吃过两边的饭，也挨过两边的骂。", "An Imperial soldier who, once captured, chose the Greater Good. You've eaten both sides' bread and taken both sides' scorn."),
+       desc: L("被俘后选了大义的帝国兵。体格还在，噩梦未散，两边都不太信你。", "An Imperial soldier who chose the Greater Good after capture. Still fit, still haunted, and trusted by neither side."),
        sprite: "guardsman", startNode: "tau_o_pow_1",
-       stats: {hp: 100, sanity: 85, corruption: 0, renown: 20}, set: {origin_pow: true}},
+       max: {hp: 115, sanity: 95}, stats: {hp: 115, sanity: 95, corruption: 0, renown: 0}, set: {origin_pow: true}},
       {id: "trader", name: L("港口商人", "Port trader"),
-       desc: L("在达尔诺尔港两头做买卖：帝国的圣物，钛人的电池，都有价钱。", "You trade both ways at Dal'nor port: Imperial relics, T'au power cells. Everything has a price."),
+       desc: L("在达尔诺尔港两头做买卖。脑子活、人脉广，就是没扛过枪。", "You trade both ways at Dal'nor port: quick wits, good contacts, and you've never carried a gun."),
        sprite: "player_tau", startNode: "tau_o_trader_1",
-       stats: {hp: 95, sanity: 100, corruption: 0, renown: 20}, set: {origin_trader: true}}
+       max: {hp: 90, sanity: 105}, stats: {hp: 90, sanity: 105, corruption: 0, renown: 15}, set: {origin_trader: true}}
     ],
     deathNodes: {hp: "tau_death_hp", sanity: "tau_death_sanity", corruption: "tau_death_corruption"},
     learn: {

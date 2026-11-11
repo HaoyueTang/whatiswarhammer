@@ -51,6 +51,7 @@
           <div class="nameplate" id="nameplate"></div>
           <div class="dlg-text" id="dlg-text" aria-hidden="true"></div>
           <div class="sr-only" id="dlg-live" aria-live="polite"></div>
+          <p class="dlg-rumor" id="dlg-rumor" hidden></p>
           <div class="choices" id="choices" role="group"></div>
         </div>
         <div class="fx-layer fx-flash" id="flash"></div>
@@ -64,14 +65,18 @@
   <footer id="footer"></footer>
 </div>
 
-<!-- Load order (SPEC §2, §13): registry → assets/manifest → data/codex → codex_aeldari → codex_necrons → data/events → data/events_taint → data/factions/* → i18n → save → (audio files → audio, optional) → engine → ui → main -->
+<!-- Load order (SPEC §2, §13): registry → assets/manifest → data/codex → codex_aeldari → codex_necrons → chronicle → easter_tzeentch → data/events → data/events_taint → events_lore → rumors → data/factions/* → i18n → save → (audio files → audio, optional) → engine → ui → main -->
 <script src="src/js/registry.js"></script>
 <script src="assets/manifest.js" onerror="whMissing(this)"></script>
 <script src="data/codex.js" onerror="whMissing(this)"></script>
 <script src="data/codex_aeldari.js" onerror="whMissing(this)"></script>
 <script src="data/codex_necrons.js" onerror="whMissing(this)"></script>
+<script src="data/chronicle.js" onerror="whMissing(this)"></script>
+<script src="data/easter_tzeentch.js" onerror="whMissing(this)"></script>
 <script src="data/events.js" onerror="whMissing(this)"></script>
 <script src="data/events_taint.js" onerror="whMissing(this)"></script>
+<script src="data/events_lore.js" onerror="whMissing(this)"></script>
+<script src="data/rumors.js" onerror="whMissing(this)"></script>
 <script src="data/factions/imperium.js" onerror="whMissing(this)"></script>
 <script src="data/factions/chaos.js" onerror="whMissing(this)"></script>
 <script src="data/factions/tau.js" onerror="whMissing(this)"></script>

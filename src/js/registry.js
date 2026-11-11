@@ -4,7 +4,7 @@
  */
 (function (root) {
   var WH = root.WH = root.WH || {};
-  WH.VERSION = "0.2.0";
+  WH.VERSION = "0.2.2";
   WH.SAVE_SCHEMA = 2;
 
   WH.factions = WH.factions || {};   // id -> faction object (see SPEC §3)
@@ -13,9 +13,11 @@
   WH.sprites  = WH.sprites  || {};   // key -> {src,w,h,name}  (SPEC §7)
   WH.scenes   = WH.scenes   || {};   // key -> {src,w,h,name}  (SPEC §7)
   WH.ui       = WH.ui       || {};   // key -> {src,w,h}       (SPEC §7)
+  WH.rumors   = WH.rumors   || [];   // overheard lines shown under node text (SPEC §20)
 
   WH.registerFaction = function (f) { WH.factions[f.id] = f; };
   WH.registerEvents  = function (list) { Array.prototype.push.apply(WH.events, list); };
+  WH.registerRumors  = function (list) { Array.prototype.push.apply(WH.rumors, list); };
   WH.registerCodex   = function (obj) { for (var k in obj) WH.codex[k] = obj[k]; };
   WH.registerSprites = function (obj) { for (var k in obj) WH.sprites[k] = obj[k]; };
   WH.registerScenes  = function (obj) { for (var k in obj) WH.scenes[k] = obj[k]; };

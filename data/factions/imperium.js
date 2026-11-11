@@ -979,17 +979,17 @@
                   "Faith is your worth in the Imperium's eyes: obedience, courage, piety. Holding the line, praying, and reporting heresy raise it; fleeing, cowardice and abandoning comrades lower it. High Faith opens certain daring heroic deeds, and a place in the crusade."),
     origins: [
       {id: "hive", name: L("巢都工人", "Hive worker"),
-       desc: L("奥雷克斯巢都的工人。什一税日，帝皇要兵，巢都要配额。", "A worker in Aurex hive. On Tithe Day the Emperor wants soldiers, and the hive wants its quota."),
+       desc: L("奥雷克斯巢都的工人。重活练出一副硬身板，配额却磨掉了信仰和心气。", "An Aurex hive worker. Heavy shifts built a tough body; the quotas ground down your faith and nerve."),
        sprite: "player_imperium", startNode: "imp_101",
-       stats: {hp: 100, sanity: 100, corruption: 0, renown: 10}, set: {origin_hive: true}},
+       max: {hp: 115, sanity: 95}, stats: {hp: 115, sanity: 95, corruption: 0, renown: 0}, set: {origin_hive: true}},
       {id: "agri", name: L("农庄之子", "Farmer's child"),
-       desc: L("在巢都外灰原的穹顶农庄长大，见过天，种过麦。麦子不够，就拿人补税。", "Raised on a domed farm on the ash plains. You've seen the sky. When the wheat falls short, people make up the tithe."),
+       desc: L("在灰原穹顶农庄长大，干农活练出好身板；可巢都的教堂不认得你。", "Raised on a domed farm on the ash plains. Farm work made you sturdy, but the hive's chapel barely knows your name."),
        sprite: "player_imperium", startNode: "imp_o_agri_1",
-       stats: {hp: 95, sanity: 100, corruption: 0, renown: 20}, set: {origin_agri: true}},
+       max: {hp: 105, sanity: 100}, stats: {hp: 105, sanity: 100, corruption: 0, renown: 5}, set: {origin_agri: true}},
       {id: "noble", name: L("落魄贵族次子", "Fallen noble's second-born"),
-       desc: L("尖塔破落家族的次子。买不起军官衔，只能当列兵替家族还债。", "Second-born of a sinking spire house. Too poor for a commission, you enlist as a trooper to pay its debts."),
+       desc: L("尖塔破落家族的次子。读过经、受过祝福，却没吃过苦；只能当列兵替家族还债。", "Second-born of a sinking spire house. Schooled and blessed, but soft-handed. Too poor for a commission, you enlist to pay its debts."),
        sprite: "guardsman", startNode: "imp_o_noble_1",
-       stats: {hp: 85, sanity: 100, corruption: 0, renown: 30}, set: {origin_noble: true}}
+       max: {hp: 85, sanity: 105}, stats: {hp: 85, sanity: 105, corruption: 0, renown: 20}, set: {origin_noble: true}}
     ],
     deathNodes: {hp: "imp_death_hp", sanity: "imp_death_sanity", corruption: "imp_death_corruption"},
     learn: {
