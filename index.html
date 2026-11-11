@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="什么是战锤 / What is Warhammer? — an unofficial bilingual pixel-art text adventure about the Warhammer 40,000 setting.">
+<title>什么是战锤 / What is Warhammer?</title>
+<link rel="stylesheet" href="src/css/style.css">
+<script>
+  /* Missing / broken data or asset files must never stop the boot. */
+  window.WH_LOAD_ERRORS = [];
+  function whMissing(el) { window.WH_LOAD_ERRORS.push({file: el.getAttribute("src"), msg: "missing"}); }
+  window.addEventListener("error", function (e) {
+    if (e && e.filename && /\/(data|assets)\//.test(e.filename)) {
+      window.WH_LOAD_ERRORS.push({file: e.filename.replace(/^.*\/(data|assets)\//, "$1/"), msg: e.message});
+    }
+  });
+</script>
+</head>
+<body>
+<div id="viewport">
+  <div id="stage-host">
+    <div id="stage" class="stage">
+
+      <section id="scr-title" class="screen" aria-label="Title"></section>
+
+      <section id="scr-select" class="screen" aria-label="Faction select" hidden></section>
+
+      <section id="scr-game" class="screen" aria-label="Game" hidden>
+        <div class="scene-box" id="scene-box">
+          <div class="scene-img" id="scene-img"></div>
+          <div class="fx-layer fx-glitch"></div>
+          <div class="actor actor-left" id="actor-left"></div>
+          <div class="actor actor-right" id="actor-right"></div>
+          <div class="fx-layer fx-vignette"></div>
+          <div class="fx-layer fx-whispers" id="whispers" aria-hidden="true"></div>
+          <div class="ticker px" id="ticker" aria-hidden="true"></div>
+        </div>
+        <header class="hud" id="hud">
+          <div class="stats" id="stats"></div>
+          <div class="hud-time">
+            <div class="row"><span id="clock-icon"></span><span class="date" id="date"></span></div>
+            <div class="row play"><span id="playtime"></span></div>
+          </div>
+        </header>
+        <div class="toolbar">
+          <div class="chapter-plate px" id="chapter-plate"></div>
+          <nav class="tools" id="tools" aria-label="Menu"></nav>
+        </div>
+        <div class="dialogue px" id="dialogue" tabindex="0">
+          <div class="nameplate" id="nameplate"></div>
+          <div class="dlg-text" id="dlg-text" aria-hidden="true"></div>
+          <div class="sr-only" id="dlg-live" aria-live="polite"></div>
+          <div class="choices" id="choices" role="group"></div>
+        </div>
+        <div class="fx-layer fx-flash" id="flash"></div>
+      </section>
+
+      <section id="scr-ending" class="screen" aria-label="Ending" hidden></section>
+
+      <div id="overlay-root"></div>
+    </div>
+  </div>
+  <footer id="footer"></footer>
+</div>
+
+<!-- Load order (SPEC §2): registry → assets/manifest → data/codex → data/events → data/factions/* → i18n → save → (audio files → audio, optional) → engine → ui → main -->
+<script src="src/js/registry.js"></script>
+<script src="assets/manifest.js" onerror="whMissing(this)"></script>
+<script src="data/codex.js" onerror="whMissing(this)"></script>
+<script src="data/events.js" onerror="whMissing(this)"></script>
+<script src="data/factions/imperium.js" onerror="whMissing(this)"></script>
+<script src="data/factions/chaos.js" onerror="whMissing(this)"></script>
+<script src="data/factions/tau.js" onerror="whMissing(this)"></script>
+<script src="src/js/i18n.js"></script>
+<script src="src/js/save.js"></script>
+<script src="assets/audio/files.js" onerror="whMissing(this)"></script>
+<script src="src/js/audio.js" onerror="whMissing(this)"></script>
+<script src="src/js/engine.js"></script>
+<script src="src/js/ui.js"></script>
+<script src="src/js/main.js"></script>
+<noscript><p style="color:#eee;padding:20px">This game needs JavaScript. / 本游戏需要启用 JavaScript。</p></noscript>
+</body>
+</html>

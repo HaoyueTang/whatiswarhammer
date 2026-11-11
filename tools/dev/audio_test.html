@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Audio test — 什么是战锤</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { background:#08070a; color:#ece2c8; font:14px/1.4 "Courier New", monospace; margin:20px; }
+  h1 { font-size:18px; color:#e3c47c; margin:0 0 4px; }
+  h2 { font-size:14px; color:#a8834c; margin:18px 0 6px; border-bottom:1px solid #3a2f25; }
+  .grid { display:flex; flex-wrap:wrap; gap:6px; }
+  button { background:#201922; color:#ece2c8; border:2px solid #a8834c; padding:6px 10px; font:inherit; cursor:pointer; min-width:92px; text-align:left; }
+  button:hover { background:#2c2230; }
+  button.on { background:#a8834c; color:#08070a; }
+  button small { display:block; color:#a99c83; font-size:11px; }
+  button.on small { color:#201922; }
+  label { display:inline-flex; gap:8px; align-items:center; margin-right:18px; }
+  #status { color:#a99c83; margin-top:8px; white-space:pre; }
+  .row { margin:6px 0; }
+</style>
+</head>
+<body>
+<h1>WH.Audio — audition page</h1>
+<div>Click anywhere first (browsers block sound until a user gesture). Moods crossfade; SFX play over the music.</div>
+
+<h2>Music moods</h2>
+<div class="grid" id="moods"></div>
+<div class="row">
+  <button id="stop">■ stop</button>
+  <button id="mute">mute</button>
+  <label><input type="checkbox" id="force" checked> force (skip 8 s hysteresis)</label>
+  <label>fade ms <input type="number" id="fade" value="1200" min="0" step="100" style="width:70px"></label>
+</div>
+<div class="row">
+  <label>Music <input type="range" id="mv" min="0" max="100" value="50"> <span id="mvv">50</span></label>
+  <label>SFX <input type="range" id="sv" min="0" max="100" value="70"> <span id="svv">70</span></label>
+</div>
+
+<h2>SFX</h2>
+<div class="grid" id="sfx"></div>
+<div class="row"><button id="typeburst">type ×40 (rate-limit test)</button></div>
+
+<div id="status"></div>
+
+<script src="../../src/js/registry.js"></script>
+<script>WH.audioBase = "../../";</script>
+<script src="../../assets/audio/files.js" onerror="void 0"></script>
+<script src="../../src/js/audio.js"></script>
+<script>
+(function () {
+  var A = WH.Audio, $ = function (id) { return document.getElementById(id); };
+  var moodBox = $("moods"), sfxBox = $("sfx");
+  function status() {
+    var c = A._ctx();
+    $("status").textContent = "context: " + (c ? c.state + "  t=" + c.currentTime.toFixed(1) + "s" : "not created (click to unlock)") +
+      "\ncurrent mood: " + A.current() + "   wanted: " + A.wanted() + "   muted: " + A.isMuted() +
+      "\nmusic " + A.getMusicVolume().toFixed(2) + "   sfx " + A.getSfxVolume().toFixed(2);
+    [].forEach.call(moodBox.children, function (b) { b.classList.toggle("on", b.dataset.mood === A.current()); });
+    $("mute").textContent = A.isMuted() ? "unmute" : "mute";
+  }
+  document.addEventListener("pointerdown", function () { A.unlock(); }, true);
+  A.moods.forEach(function (m) {
+    var info = A.songInfo(m), b = document.createElement("button");
+    b.dataset.mood = m;
+    b.innerHTML = m + "<small>" + info.key + " · " + info.bpm + " bpm · " + (info.introBars ? info.introBars + "+" : "") + info.loopBars + " bars · " + info.loopSec.toFixed(0) + " s</small>";
+    b.onclick = function () { A.unlock(); A.setMood(m, {force: $("force").checked, fade: +$("fade").value}); A.sfx("click"); status(); };
+    moodBox.appendChild(b);
+  });
+  A.sfxNames.forEach(function (s) {
+    var b = document.createElement("button");
+    b.textContent = s;
+    b.onclick = function () { A.unlock(); A.sfx(s); };
+    b.onmouseenter = function () { A.sfx("hover"); };
+    sfxBox.appendChild(b);
+  });
+  $("stop").onclick = function () { A.stop({fade: 800}); status(); };
+  $("mute").onclick = function () { A.unlock(); A.mute(!A.isMuted()); status(); };
+  $("mv").oninput = function () { $("mvv").textContent = this.value; A.setMusicVolume(this.value / 100); status(); };
+  $("sv").oninput = function () { $("svv").textContent = this.value; A.setSfxVolume(this.value / 100); };
+  $("typeburst").onclick = function () {
+    A.unlock(); var n = 0, ok = 0;
+    var iv = setInterval(function () { if (A.sfx("type")) ok++; if (++n >= 40) { clearInterval(iv); $("status").textContent += "\ntype burst: " + ok + "/40 played (rest rate-limited)"; } }, 16);
+  };
+  setInterval(status, 500); status();
+})();
+</script>
+</body>
+</html>
