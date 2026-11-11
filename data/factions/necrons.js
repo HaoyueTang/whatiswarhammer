@@ -1183,17 +1183,17 @@
     deathNodes: {hp: "nec_death_hp", sanity: "nec_death_sanity", corruption: "nec_death_corruption"},
     origins: [
       {id: "archivist", name: L("考察队档案员", "Expedition archivist"),
-       desc: L("帝国考察队最年轻的档案员，带着素描簿和一盏灯，来到一颗“死去”的星球。", "The Imperial dig's youngest archivist, with a sketchbook and a lamp, on a “dead” world."),
+       desc: L("考察队最年轻的档案员，带着素描簿和灯。年轻，腿脚好，可人微言轻。", "The dig's youngest archivist, with sketchbook and lamp. Young and quick on your feet, but nobody listens to the junior."),
        sprite: "player_necrons", startNode: "nec_101",
-       stats: {hp: 100, sanity: 100, corruption: 0, renown: 10}, set: {origin_archivist: true}},
+       max: {hp: 105, sanity: 100}, stats: {hp: 105, sanity: 100, corruption: 0, renown: 5}, set: {origin_archivist: true}},
       {id: "convict", name: L("罪犯劳工", "Convict labourer"),
-       desc: L("用十年苦役抵刑期的犯人，被卖给考察队挖沙。皮糙肉厚，没人在乎你。", "A convict sold to the dig for ten years' labour. Tough hide; nobody cares about you."),
+       desc: L("用十年苦役抵刑期的犯人。皮糙肉厚，心早已麻木，没人在乎你。", "A convict sold to the dig for ten years' labour. Tough hide, numbed mind; nobody cares about you."),
        sprite: "player_necrons", startNode: "nec_o_convict_1",
-       stats: {hp: 100, sanity: 95, corruption: 0, renown: 5}, set: {origin_convict: true}},
+       max: {hp: 120, sanity: 90}, stats: {hp: 120, sanity: 90, corruption: 0, renown: 0}, set: {origin_convict: true}},
       {id: "lexmech", name: L("契约书记", "Indentured lexmechanic"),
-       desc: L("机械神教贤者的契约书记，耳后插着数据线，替主人把念头写成文件。", "A Mechanicus magos's indentured scribe, data-cable behind one ear, turning his thoughts into files."),
+       desc: L("机械神教贤者的契约书记，耳后插着数据线。身子单薄，头脑冷静，主人看重你。", "A magos's indentured scribe, data-cable behind one ear. Frail but clear-headed, and valued by your master."),
        sprite: "player_necrons", startNode: "nec_o_lexmech_1",
-       stats: {hp: 90, sanity: 100, corruption: 0, renown: 15}, set: {origin_lexmech: true}}
+       max: {hp: 90, sanity: 105}, stats: {hp: 90, sanity: 105, corruption: 0, renown: 15}, set: {origin_lexmech: true}}
     ],
     learn: {
       leaders: ["nec_silent_king", "nec_imotekh", "nec_trazyn"],

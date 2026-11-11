@@ -1012,17 +1012,17 @@
                   "Favor is how closely the gods are watching you. Offerings, killing, daring to take, and standing firm before the voices behind the door raise it; mercy, retreat and abandoning your own lower it. Enough Favor, and the gods may answer you in person."),
     origins: [
       {id: "scavenger", name: L("下巢拾荒者", "Underhive scavenger"),
-       desc: L("污池里长大的拾荒者。三天没吃饭，垃圾瀑布今天会下好货。", "A scavenger raised in the Sump. Three days without food, and the garbage falls might drop something good today."),
+       desc: L("污池里长大的拾荒者。三天没吃饭，身子发虚；下巢的怪事早已见怪不怪。", "A Sump scavenger. Three days without food leave you weak, but nothing in the underhive frightens you any more."),
        sprite: "player_chaos", startNode: "cha_101",
-       stats: {hp: 100, sanity: 100, corruption: 0, renown: 10}, set: {origin_scavenger: true}},
+       max: {hp: 95, sanity: 105}, stats: {hp: 95, sanity: 105, corruption: 0, renown: 10}, set: {origin_scavenger: true}},
       {id: "deserter", name: L("星界军逃兵", "Guard deserter"),
-       desc: L("从团里逃出来，躲进了下巢。政委还在找你，执法官也在找。", "You ran from your regiment and went to ground in the underhive. The commissar is still looking. So are the enforcers."),
+       desc: L("从团里逃出来的兵。身手还在，噩梦也在；政委和执法官都在找你。", "You ran from your regiment. The soldier's body remains, and so do the nightmares. The commissar and the enforcers are both looking."),
        sprite: "guardsman", startNode: "cha_o_deserter_1",
-       stats: {hp: 100, sanity: 85, corruption: 0, renown: 15}, set: {origin_deserter: true}},
+       max: {hp: 115, sanity: 90}, stats: {hp: 115, sanity: 90, corruption: 0, renown: 5}, set: {origin_deserter: true}},
       {id: "scribe", name: L("教会抄写员", "Ecclesiarchy scribe"),
-       desc: L("在大教堂抄了十一年经文，直到抄到一本不该存在的书。", "Eleven years copying scripture in the cathedral, until you copied a book that should not exist."),
+       desc: L("在大教堂抄了十一年经文，手无缚鸡之力，心却定；直到抄到一本不该存在的书。", "Eleven years copying scripture: frail hands, a disciplined mind. Then you copied a book that should not exist."),
        sprite: "preacher", startNode: "cha_o_scribe_1",
-       stats: {hp: 90, sanity: 95, corruption: 0, renown: 20}, set: {origin_scribe: true}}
+       max: {hp: 85, sanity: 110}, stats: {hp: 85, sanity: 110, corruption: 0, renown: 15}, set: {origin_scribe: true}}
     ],
     deathNodes: {hp: "cha_death_hp", sanity: "cha_death_sanity", corruption: "cha_death_corruption"},
     learn: {
