@@ -302,3 +302,12 @@ User: origins must trade off, not just lose — e.g. a labourer has more HP but 
 ## 24. Difficulty icons (难易图标)
 - Race cards and origin cards show **only** 1–3 small pixel skulls (drawn in code like the slime, faction-tinted, empty skulls for the remainder). No text label, no tooltip, no numbers (aria-label "难度 n/3" for screen readers only).
 - Levels live in `data/difficulty.js` (`WH.difficulty = {imperium:3, "imperium/hive":3, …}`); `node tools/dev/validate.js --write-difficulty` may regenerate them from the fixed-seed simulation. Missing file → no skulls.
+
+## 20b. Rumours must be relevant (v0.2.4 — replaces the flat 25% roll)
+User: rumours trigger too mechanically; they must only appear when relevant.
+- Every rumour gets `when` (required): any match of
+  `scenes:[scene keys]`, `sprites:[speaker/foe sprite keys]`, `codex:[ids unlocked by this node]`, `flags:[run flags set]`, `keywords:{zh:[…], en:[…]}` (substring of the node text in the current language… match on either language's text so behaviour is language-independent).
+  Rumours without `when` never fire.
+- Engine: on node enter (same exclusions as §20), collect eligible unseen rumours whose `when` matches this node's context (scene, speaker sprite, foe, codex unlocked here, flags, node text in zh+en); pick the best match (score = number of matched criteria, ties random) with probability 0.6 if score ≥ 2, 0.35 if score = 1. Spacing: at least 3 nodes since the last rumour; at most 2 rumours per chapter. Seeded as before.
+- Content: each rumour's `when` should point at what it talks about — Orks/Armageddon ↔ ork sprites, trench, "兽人"; Cadia ↔ guardsman/commissar, "卡迪亚", place_cadia; Damocles ↔ tau_water_caste/tau_warrior, "海湾"; the Fall ↔ aeldari_seer, craftworld, "色孽"; War in Heaven ↔ cryptek, tomb_interior, "星神"/"C'tan" … Rewrite a rumour's wording if needed so the link reads naturally.
+- Validator: every rumour has `when`; report per rumour how many nodes in its routes can match it (warn if 0 = unreachable, warn if > 40% of a route's nodes = too generic); simulate rumours heard per run (target 4–8) and the share that matched on ≥ 2 criteria.
