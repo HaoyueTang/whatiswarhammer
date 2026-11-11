@@ -272,3 +272,14 @@ Goal: newcomers aren't burdened, but people who know the setting spot named wars
 - **Rumours** — `data/rumors.js`: `WH.registerRumors([{id, factions:["imperium",…]|["*"], minChapter, maxChapter, speaker:{zh,en}|null, text:{zh,en} (≤50 zh / ≤35 en words), codex:["chr_…"]}])`. Overheard lines, graffiti, a veteran's tattoo, a broadcast fragment — never an explanation. 8–12 per route + ~15 shared.
 - **Lore events** — `data/events_lore.js`: 6–10 random events (SPEC §5 format, god "other"/"undivided") built around a named campaign (a veteran of Armageddon, a relic from Cadia, a Damocles veteran, an Aeldari who remembers the Fall, a cryptek who remembers the War in Heaven…), small effects, codex unlocks.
 - **Engine/UI** — `WH.registerRumors` in the registry; on entering a node without `eventRoll`, with chance 0.25 (setting 传闻: on/off) show one unseen eligible rumour as an italic "传闻 / Overheard" footer under the node text (unlocks its codex ids; never during consequence panels or endings; max one per node; never repeats in a run). Codex gets a **战史 / Chronicle** view: a vertical timeline sorted by `sortKey`, dates always visible, locked entries shown as "???" (teasing that something happened then), unlocked show name/text/more. Validator: check rumours/chronicle ids, dates, sortKeys, codex references, lengths; report counts per route.
+
+## 21. Tzeentch collection easter egg (奸奇彩蛋)
+- Progress `P` = round(100 × (0.6 × codex unlocked / codex total + 0.4 × endings found / endings total)), global across runs, excluding the egg entry itself (codex entries with `hidden:true` are not counted and never shown as ??? anywhere).
+- Data: `data/easter_tzeentch.js` → `WH.easter.tzeentch.tiers` (at 25 / 50 / 75 / 99 / 100) + hidden codex entry `egg_tzeentch_letter`. Load after the codex files.
+- Each tier triggers **once** (persist), the next time the player is on the title screen or opens the codex after crossing it:
+  - 25 `whisper`: the title subtitle briefly glitches into the tier text (blue-pink RGB split, 3 s), then reverts.
+  - 50 `letter`: a sealed letter icon appears on the title screen; clicking shows a card with title/text (sigil_tzeentch).
+  - 75 `flame`: a small blue flame flickers next to the title; clicking opens a mini-scene (sprite daemon_tzeentch, scene warp) with the two choices and their `result` lines (no gameplay effect).
+  - 99 `last`: when exactly one countable item remains, the codex header shows the text in place of the counter for one opening.
+  - 100 `planned`: full-screen scene (sprite daemon_tzeentch, glitch FX, sfx 'event'), then unlock `egg_tzeentch_letter` and show its card; from then on the title logo has a subtle blue-pink shimmer and Settings gains a toggle "奸奇的玩笑 / Tzeentch's joke": locked "???" in the codex shuffle their characters every few seconds.
+- Debug: `?egg=25|50|75|99|100` forces a tier for testing.
