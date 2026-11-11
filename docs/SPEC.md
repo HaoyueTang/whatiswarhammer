@@ -298,3 +298,7 @@ User: origins must trade off, not just lose — e.g. a labourer has more HP but 
 - Every origin (including the default one) should get a distinct, lore-fitting profile; the default origin may stay 100/100/0/10.
 - Balance target (random play): per-origin death rate within ±6 points of the route average, and every origin still reaches all of its route's endings.
 - Origin cards show the trade-off clearly (e.g. "生命上限 120 ▲ · 理智上限 85 ▼").
+
+## 24. Difficulty icons (难易图标)
+- Difficulty is **measured, not hand-set**: `node tools/dev/validate.js --write-difficulty` runs the fixed-seed simulation (seeds 1/5/9, 3000 runs) and writes the generated file `data/difficulty.js`: `WH.difficulty = { imperium:{level, death}, "imperium/hive":{level, death}, … }` where `death` = random-play death rate (incl. claim endings counted separately as `claim`), `level` = 1 易 (<24%), 2 中 (24–29%), 3 难 (≥29%). Re-run it whenever balance changes; the release checklist includes it.
+- UI: race cards and origin cards show 1–3 small pixel skulls (drawn in code like the slime, faction-tinted, empty skulls for the remainder) + label 易/中/难 (Easy/Normal/Hard); tooltip: "随机游玩死亡率约 30% · 邪神占有约 14%". Missing file → no icons.
