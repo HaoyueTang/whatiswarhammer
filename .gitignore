@@ -1,6 +1,2 @@
-.sync/
 __pycache__/
 *.pyc
-tools/dev/screenshots/
-tools/dev/screenshots_real/
-*.wav
