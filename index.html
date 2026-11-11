@@ -64,14 +64,19 @@
   <footer id="footer"></footer>
 </div>
 
-<!-- Load order (SPEC §2): registry → assets/manifest → data/codex → data/events → data/factions/* → i18n → save → (audio files → audio, optional) → engine → ui → main -->
+<!-- Load order (SPEC §2, §13): registry → assets/manifest → data/codex → codex_aeldari → codex_necrons → data/events → data/events_taint → data/factions/* → i18n → save → (audio files → audio, optional) → engine → ui → main -->
 <script src="src/js/registry.js"></script>
 <script src="assets/manifest.js" onerror="whMissing(this)"></script>
 <script src="data/codex.js" onerror="whMissing(this)"></script>
+<script src="data/codex_aeldari.js" onerror="whMissing(this)"></script>
+<script src="data/codex_necrons.js" onerror="whMissing(this)"></script>
 <script src="data/events.js" onerror="whMissing(this)"></script>
+<script src="data/events_taint.js" onerror="whMissing(this)"></script>
 <script src="data/factions/imperium.js" onerror="whMissing(this)"></script>
 <script src="data/factions/chaos.js" onerror="whMissing(this)"></script>
 <script src="data/factions/tau.js" onerror="whMissing(this)"></script>
+<script src="data/factions/aeldari.js" onerror="whMissing(this)"></script>
+<script src="data/factions/necrons.js" onerror="whMissing(this)"></script>
 <script src="src/js/i18n.js"></script>
 <script src="src/js/save.js"></script>
 <script src="assets/audio/files.js" onerror="whMissing(this)"></script>

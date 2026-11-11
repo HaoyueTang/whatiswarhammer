@@ -28,11 +28,15 @@ and in about an hour you'll know who rules, who they fight, and what is coming f
 | **Imperium of Man** | a hive-city worker drafted into the Imperial Guard | the Emperor, commissars, the Inquisition, Orks, Tyranids, and the Black Crusade |
 | **Chaos** | an underhive scavenger the cult was kind to, at first | the four Chaos gods, the Warmaster, and the people sent to burn you |
 | **T'au Empire** | a human colonist living under the Greater Good | the Ethereals, the castes, Farsight, and something hungry from beyond the stars |
+| **Aeldari** | a survivor of a world the farseers chose to let die | the Farseers, the Path, the webway, and She Who Thirsts |
+| **Necrons** | an archaeologist on a dig that was never dead | the Silent King, the dynasties, the collector, and a star god in a cage |
+
+Each side has **three origins** to start from — a different prologue, different strengths, and a few choices only you will see.
 
 ### What's inside
-- **Choices with a price.** Health, Sanity, Corruption and a faction stat. Run out of the first two, or max out the third, and it's over.
+- **Choices with a price.** Health, Sanity, Corruption and a faction stat. Run out of the first two, or max out the third, and it's over. Every choice shows you what it cost.
 - **Many endings.** Good ones, bad ones, and a lot of ways to die. Each ending records how long you survived and what killed you.
-- **The gods are watching.** Random events where Khorne, Nurgle, Tzeentch and Slaanesh make you offers. Some are very generous.
+- **The gods are watching.** Khorne, Nurgle, Tzeentch and Slaanesh make you offers. Some are very generous. You won't see what they take until the end.
 - **Time doesn't behave.** Hours, days, sometimes years pass between scenes. Warp travel is worse.
 - **Codex.** Every leader, monster, god and place you meet gets a short card, explained by what people do, not by lectures.
 - **Pixel art and chiptune.** Original art and music; the soundtrack changes with the mood.
@@ -44,7 +48,7 @@ and in about an hour you'll know who rules, who they fight, and what is coming f
 - Dying is part of learning. The codex keeps what you discovered.
 
 ### Coming soon
-New sides (Aeldari, Necrons), choosing your origin, and more.
+Orks, the Genestealer Cult, and more.
 
 ### Disclaimer
 Unofficial, non-commercial fan project, not affiliated with or endorsed by Games Workshop.
@@ -76,11 +80,15 @@ Warhammer 40,000 and associated names are trademarks of Games Workshop Limited. 
 | **人类帝国** | 被征召进星界军的巢都工人 | 帝皇、政委、审判庭、兽人、泰伦虫族、黑色远征 |
 | **混沌** | 被邪教"善待"过的下巢拾荒者——一开始是 | 混沌四神、战帅，以及被派来烧死你的人 |
 | **钛帝国** | 生活在"大义"之下的人类殖民者 | 以太族、种姓、远见，以及从群星之外饿来的东西 |
+| **灵族** | 一颗被先知判了死刑的星球上的幸存者 | 先知、道途、网道，以及"渴求者" |
+| **死灵** | 一处"从未死去"的考古现场里的考古学家 | 寂静之王、王朝、收藏家，以及笼中的星神 |
+
+每个阵营都有**三种出身**可选——不同的序章、不同的长处，以及只有你能看到的选项。
 
 ### 游戏内容
-- **每个选择都有代价。** 生命、理智、腐化，加一个阵营属性。前两个归零，或者腐化满了，就结束了。
+- **每个选择都有代价。** 生命、理智、腐化，加一个阵营属性。前两个归零，或者腐化满了，就结束了。每次选择后你都会看到它的后果。
 - **多结局。** 好结局、坏结局，还有很多种死法。每个结局都会记下你活了多久、死于什么。
-- **诸神在注视。** 随机事件里，恐虐、纳垢、奸奇、色孽会给你开条件。有些条件非常慷慨。
+- **诸神在注视。** 恐虐、纳垢、奸奇、色孽会给你开条件。有些条件非常慷慨。它们拿走了什么，要到结局你才知道。
 - **时间不老实。** 场景之间可能过去几小时、几天，有时是几年。亚空间航行更糟。
 - **图鉴。** 遇到的每个领袖、怪物、神祇和地点都有一张短卡片——靠人物的言行来讲，不靠说教。
 - **像素美术与芯片音乐。** 全部原创，配乐随剧情情绪变化。
@@ -92,7 +100,7 @@ Warhammer 40,000 and associated names are trademarks of Games Workshop Limited. 
 - 死亡是学习的一部分。图鉴会留住你发现过的东西。
 
 ### 即将推出
-新阵营（灵族、死灵）、出身选择，以及更多内容。
+兽人、基因窃取者教派，以及更多内容。
 
 ### 声明
 非官方、非商业的粉丝作品，与 Games Workshop 无关，也未获其认可。

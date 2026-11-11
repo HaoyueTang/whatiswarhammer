@@ -3,9 +3,12 @@
  *
  * Usage:
  *   var g = new WH.Game("imperium", {rng: WH.RNG(1234)});
- *   var step = g.start();            // enters faction.startNode
+ *   var step = g.start(originId);    // enters the origin's startNode (SPEC §16); no id = first origin
+ *   WH.newGame("imperium", "agri")   // same, returns {game, step}
+ *   WH.Game.origins(faction)         // faction.origins, or one default origin synthesized from the faction fields
  *   g.choices();                     // visible choices with lock / roll info
  *   step = g.choose(0);              // -> step {kind:"node"|"event", ...}
+ *   step.consequence                 // what the UI shows between the click and the next node (see consequenceOf)
  *   if (step.kind === "event") { var r = g.eventChoose(1); step = g.eventContinue(); }
  *   g.toRecord() / WH.Game.fromRecord(rec)
  */
@@ -13,6 +16,8 @@
   var WH = root.WH = root.WH || {};
 
   var STATS = ["hp", "sanity", "corruption", "renown"];
+  var GODS = ["khorne", "nurgle", "tzeentch", "slaanesh"];      // hidden taint tracks (SPEC §18)
+  function zeroTaint() { return {khorne: 0, nurgle: 0, tzeentch: 0, slaanesh: 0}; }
   var HOURS_PER_YEAR = 8760;
   var WARP_MIN = 0.4, WARP_MAX = 3.0;
   var HISTORY_MAX = 30;
@@ -50,6 +55,11 @@
     if (Array.isArray(req)) { for (var i = 0; i < req.length; i++) if (!requireOK(req[i], state)) return false; return true; }
     if (has(req, "flag") && !state.flags[req.flag]) return false;
     if (has(req, "notFlag") && state.flags[req.notFlag]) return false;
+    if (req.taint) {
+      var tv = (state.taint && state.taint[req.taint]) || 0;
+      if (req.min !== undefined && req.min !== null && tv < req.min) return false;
+      if (req.max !== undefined && req.max !== null && tv > req.max) return false;
+    }
     if (req.stat) {
       var v = state.stats[req.stat];
       if (typeof v !== "number") v = 0;
@@ -94,6 +104,51 @@
             ending: {kind: "death", title: {zh: "死亡", en: "Death"}}, _synthetic: true};
   }
 
+  /* ---------- consequence beat (SPEC §11) ----------
+   * Pure data for the UI's consequence panel, attached to every step returned by choose() as step.consequence:
+   *   {text:{zh,en}|null, auto:bool, deltas:{hp,…}, roll:{pEff,success,stat}|null, flags:bool, death:cause|null,
+   *    time:step.time|null, show:bool}
+   * text  = choice.result, or choice.rollResult.success/fail for roll choices (falls back to result).
+   * auto  = no text but real (clamped) stat deltas → UI prints a compact "生命 −10 · 理智 −5" line.
+   * show  = there is something to show (text, deltas, a roll outcome or a death). Flags alone → nothing. */
+  function hasDeltas(d) {
+    if (!d) return false;
+    for (var i = 0; i < STATS.length; i++) if (d[STATS[i]]) return true;
+    return false;
+  }
+  function consequenceOf(c, step, isEvent) {
+    var text = null, roll = step.roll || null;
+    if (c.roll && roll) {
+      var rr = c.rollResult || {};
+      text = (roll.success ? rr.success : rr.fail) || c.result || null;
+    } else text = c.result || null;
+    var d = step.choiceDeltas || {}, dl = hasDeltas(d);
+    var eff = c.effects || {};
+    return {text: text, auto: !text && dl, deltas: d, roll: roll, flags: !!(eff.set || eff.unset),
+            death: step.death || null, time: isEvent ? null : (step.time || null),
+            show: !!(text || dl || roll || step.death)};
+  }
+
+  /* ---------- origins (SPEC §16) ---------- */
+  /* faction.origins if present, else one default origin built from the faction's own fields (data written before §16) */
+  function origins(f) {
+    if (f && Array.isArray(f.origins) && f.origins.length) return f.origins;
+    if (!f) return [];
+    if (!f._defaultOrigin) {
+      var ss = f.startStats || {};
+      f._defaultOrigin = [{id: "default", _default: true, name: f.role || f.name, desc: f.tagline || null,
+        sprite: f.playerSprite, startNode: f.startNode,
+        stats: {hp: ss.hp !== undefined ? ss.hp : 100, sanity: ss.sanity !== undefined ? ss.sanity : 100,
+                corruption: ss.corruption || 0, renown: ss.renown || 0}, set: {}}];
+    }
+    return f._defaultOrigin;
+  }
+  function findOrigin(f, id) {
+    var list = origins(f);
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return list[0] || null;
+  }
+
   /* ---------- Game ---------- */
   function Game(factionId, opts) {
     opts = opts || {};
@@ -105,15 +160,21 @@
   }
 
   Game.STATS = STATS;
+  Game.origins = origins;
+  Game.findOrigin = findOrigin;
 
-  Game.prototype.freshState = function () {
-    var f = this.faction, ss = f.startStats || {};
+  /* the origin of the current run (falls back to the first origin for legacy saves / unknown ids) */
+  Game.prototype.origin = function () { return findOrigin(this.faction, this.state && this.state.origin); };
+  Game.prototype.playerSprite = function () { var o = this.origin(); return (o && o.sprite) || this.faction.playerSprite; };
+
+  Game.prototype.freshState = function (origin) {
+    var f = this.faction, ss = (origin && origin.stats) || f.startStats || {};
     return {
-      faction: f.id, nodeId: null, chapter: 1,
+      faction: f.id, origin: origin ? origin.id : null, nodeId: null, chapter: 1,
       stats: {hp: ss.hp !== undefined ? ss.hp : 100, sanity: ss.sanity !== undefined ? ss.sanity : 100,
               corruption: ss.corruption || 0, renown: ss.renown || 0},
       runId: Date.now().toString(36) + Math.floor(Math.random() * 1e8).toString(36),
-      flags: {}, codex: [], seenEvents: [], hours: startHours(f),
+      flags: {}, codex: [], seenEvents: [], hours: startHours(f), taint: zeroTaint(),
       pendingEvent: null, pendingNext: null, eventChoice: null, eventDeath: null,
       deathPending: null, history: [], visits: 0, playMs: 0, ended: false
     };
@@ -133,10 +194,13 @@
     return null;
   };
 
-  Game.prototype.start = function () {
-    this.state = this.freshState();
+  Game.prototype.start = function (originId) {
+    var o = findOrigin(this.faction, originId);
+    this.state = this.freshState(o);
+    if (o && o.set) for (var k in o.set) this.state.flags[k] = o.set[k];
     var step = newStep();
-    return this._enter(this.faction.startNode, step);
+    step.origin = o ? o.id : null;
+    return this._enter((o && o.startNode) || this.faction.startNode, step);
   };
 
   function newStep() {
@@ -159,9 +223,46 @@
         if (into) into[k] = (into[k] || 0) + (st[k] - before);
       }
     }
+    if (eff.taint) this._applyTaint(eff.taint);       // hidden: never part of the returned (visible) deltas
     if (eff.set) for (var f in eff.set) this.state.flags[f] = eff.set[f];
     if (eff.unset) for (var j = 0; j < eff.unset.length; j++) delete this.state.flags[eff.unset[j]];
     return d;
+  };
+
+  /* taint:{god:±n} or {all:±n}; clamped 0–100 */
+  Game.prototype._applyTaint = function (tt) {
+    var st = this.state;
+    if (!st.taint) st.taint = zeroTaint();
+    for (var i = 0; i < GODS.length; i++) {
+      var g = GODS[i], n = (+tt[g] || 0) + (+tt.all || 0);
+      if (n) st.taint[g] = clamp((st.taint[g] || 0) + n, 0, 100);
+    }
+  };
+
+  /* a god at 100 whose claim event (trigger:"claim") has not fired yet in this run */
+  Game.prototype.claimDue = function () {
+    var st = this.state, evs = this.data.events || [];
+    if (!st || !st.taint) return null;
+    for (var i = 0; i < GODS.length; i++) {
+      if ((st.taint[GODS[i]] || 0) < 100) continue;
+      for (var j = 0; j < evs.length; j++) {
+        var e = evs[j];
+        if (e.trigger !== "claim" || e.god !== GODS[i] || st.seenEvents.indexOf(e.id) >= 0) continue;
+        var fs = e.factions || ["*"];
+        if (fs.indexOf("*") < 0 && fs.indexOf(st.faction) < 0) continue;
+        if (!e.choices || !e.choices.length) continue;
+        return e;
+      }
+    }
+    return null;
+  };
+
+  /* random-event weight (SPEC §18): god events 1 + taint/25, cleansing events 1 + sum(taint)/100 */
+  Game.prototype.eventWeight = function (e) {
+    var tt = this.state.taint || zeroTaint();
+    if (e.cleanse) return 1 + (tt.khorne + tt.nurgle + tt.tzeentch + tt.slaanesh) / 100;
+    if (GODS.indexOf(e.god) >= 0) return 1 + (tt[e.god] || 0) / 25;
+    return 1;
   };
 
   Game.prototype._unlock = function (ids, step) {
@@ -267,14 +368,21 @@
     step.choiceDeltas = this._applyEffects(c.effects, step.deltas);
     this._unlock(c.codex, step);
     var cause = this.deathCause();
-    if (cause) { step.death = cause; return this._enter(this.deathNodeId(cause), step); }
+    if (cause) {
+      step.death = cause;
+      step = this._enter(this.deathNodeId(cause), step);
+      step.consequence = consequenceOf(c, step);
+      return step;
+    }
     var target = c.next;
     if (c.roll) {
       var p = rollChance(c.roll, st.stats), r = this.rng(), ok = r < p;
       step.roll = {pEff: p, success: ok, stat: c.roll.stat || null};
       target = ok ? c.roll.success : c.roll.fail;
     }
-    return this._goTo(target, step);
+    step = this._goTo(target, step);
+    step.consequence = consequenceOf(c, step);
+    return step;
   };
 
   Game.prototype.eligibleEvents = function (chapter) {
@@ -285,24 +393,36 @@
       var fs = e.factions || ["*"];
       if (fs.indexOf("*") < 0 && fs.indexOf(st.faction) < 0) continue;
       if ((e.minChapter || 0) > chapter) continue;
+      if (e.trigger === "claim") continue;                 // claim events only fire from claimDue()
       if (!e.choices || !e.choices.length) continue;
       out.push(e);
     }
     return out;
   };
 
+  Game.prototype._openEvent = function (e, target, step) {
+    var st = this.state;
+    st.pendingEvent = e.id; st.pendingNext = target; st.eventChoice = null; st.eventDeath = null;
+    st.seenEvents.push(e.id);
+    step.kind = "event"; step.event = e; step.nodeId = target;
+    return step;
+  };
+
   Game.prototype._goTo = function (target, step) {
     var node = this.node(target);
+    if (!node.ending) {
+      var claim = this.claimDue();                         // a god at 100 taint claims you before anything else
+      if (claim) return this._openEvent(claim, target, step);
+    }
     if (node.eventRoll && !node.ending && this.rng() < node.eventRoll) {
       var ch = typeof node.chapter === "number" ? node.chapter : this.state.chapter;
       var pool = this.eligibleEvents(ch);
       if (pool.length) {
-        var e = pool[Math.floor(this.rng() * pool.length)];
-        var st = this.state;
-        st.pendingEvent = e.id; st.pendingNext = target; st.eventChoice = null; st.eventDeath = null;
-        st.seenEvents.push(e.id);
-        step.kind = "event"; step.event = e; step.nodeId = target;
-        return step;
+        var tot = 0, i, w = [];
+        for (i = 0; i < pool.length; i++) { w.push(this.eventWeight(pool[i])); tot += w[i]; }
+        var r = this.rng() * tot, e = pool[pool.length - 1];
+        for (i = 0; i < pool.length; i++) { r -= w[i]; if (r < 0) { e = pool[i]; break; } }
+        return this._openEvent(e, target, step);
       }
     }
     return this._enter(target, step);
@@ -325,7 +445,8 @@
     st.eventChoice = i;
     var cause = this.deathCause();
     if (cause) st.eventDeath = cause;
-    return {result: c.result || null, deltas: deltas, codexNew: tmp.codexNew, death: cause, choice: c};
+    return {result: c.result || null, deltas: deltas, codexNew: tmp.codexNew, death: cause, choice: c,
+            consequence: consequenceOf(c, {choiceDeltas: deltas, roll: null, death: cause, time: null}, true)};
   };
 
   /* resume the node the event interrupted (or the death node if the event killed you) */
@@ -336,6 +457,8 @@
     st.pendingEvent = null; st.pendingNext = null; st.eventChoice = null; st.eventDeath = null;
     var step = newStep();
     if (death) { step.death = death; return this._enter(this.deathNodeId(death), step); }
+    var claim = this.claimDue();                           // the event's own taint pushed a god to 100
+    if (claim && !this.node(next).ending) return this._openEvent(claim, next, step);
     return this._enter(next, step);
   };
 
@@ -345,9 +468,10 @@
   Game.prototype.toRecord = function (extra) {
     var st = this.state, rec = {
       schema: WH.SAVE_SCHEMA || 1, gameVersion: WH.VERSION || "0", savedAt: new Date().toISOString(),
-      faction: st.faction, runId: st.runId, nodeId: st.nodeId, chapter: st.chapter,
+      faction: st.faction, origin: st.origin, runId: st.runId, nodeId: st.nodeId, chapter: st.chapter,
       stats: JSON.parse(JSON.stringify(st.stats)), flags: JSON.parse(JSON.stringify(st.flags)),
       codex: st.codex.slice(), seenEvents: st.seenEvents.slice(), hours: st.hours,
+      taint: JSON.parse(JSON.stringify(st.taint || zeroTaint())),
       pendingEvent: st.pendingEvent, pendingNext: st.pendingNext,
       eventChoice: st.eventChoice, eventDeath: st.eventDeath, deathPending: st.deathPending,
       history: st.history.slice(), visits: st.visits, playMs: Math.round(st.playMs), ended: st.ended
@@ -360,6 +484,7 @@
     var g = new Game(rec.faction, opts);
     var st = g.freshState();
     st.nodeId = rec.nodeId;
+    st.origin = findOrigin(g.faction, rec.origin) ? findOrigin(g.faction, rec.origin).id : null;
     st.runId = rec.runId || ("legacy-" + rec.faction + "-" + (rec.savedAt || ""));
     st.chapter = rec.chapter || 1;
     for (var i = 0; i < STATS.length; i++) {
@@ -367,6 +492,8 @@
       if (rec.stats && typeof rec.stats[k] === "number") st.stats[k] = clamp(rec.stats[k], 0, 100);
     }
     st.flags = rec.flags || {};
+    st.taint = zeroTaint();
+    if (rec.taint) for (var gi = 0; gi < GODS.length; gi++) { var tv = +rec.taint[GODS[gi]]; if (tv) st.taint[GODS[gi]] = clamp(tv, 0, 100); }
     st.codex = (rec.codex || []).slice();
     st.seenEvents = (rec.seenEvents || []).slice();
     st.hours = typeof rec.hours === "number" ? rec.hours : st.hours;
@@ -388,9 +515,13 @@
 
   WH.RNG = RNG;
   WH.Game = Game;
+  WH.newGame = function (factionId, originId, opts) {
+    var g = new Game(factionId, opts);
+    return {game: g, step: g.start(originId)};
+  };
   WH.Rules = {
-    STATS: STATS, clamp: clamp, rollChance: rollChance, requireOK: requireOK,
-    timeHours: timeHours, dateParts: dateParts, startHours: startHours,
+    STATS: STATS, GODS: GODS, zeroTaint: zeroTaint, clamp: clamp, rollChance: rollChance, requireOK: requireOK,
+    timeHours: timeHours, dateParts: dateParts, startHours: startHours, consequenceOf: consequenceOf, hasDeltas: hasDeltas,
     WARP_MIN: WARP_MIN, WARP_MAX: WARP_MAX, HOURS_PER_YEAR: HOURS_PER_YEAR
   };
 })(typeof window !== "undefined" ? window : globalThis);
