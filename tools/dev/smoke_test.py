@@ -165,6 +165,13 @@ def run_desktop(p):
         cards.first.click(); page.wait_for_timeout(250)
         check("origin step: one card per origin with 4 stat bars", page.locator(".ocard").count() == n_or and page.locator(".ocard").first.locator(".orow").count() == 4)
         check("origin cards show stat deltas vs default", page.locator(".ocard .od.up, .ocard .od.down").count() >= 1)
+        if not REAL:
+            tr = page.locator('.ocard[data-origin="scav"] .otrade').inner_text()
+            check("§23: origin card shows the trade-off (生命上限 125 ▲ · 理智上限 85 ▼)", "生命上限 125 ▲" in tr and "理智上限 85 ▼" in tr, tr)
+            check("§23: default origin card reads balanced", "均衡" in page.locator('.ocard[data-origin="hive"] .otrade').inner_text())
+        else:
+            check("§23: every origin card has a trade-off line", page.locator(".ocard .otrade").count() == n_or)
+            shot(page, "05b_origin_tradeoffs")
         shot(page, "03b_origins")
         page.locator(".back-race").click(); page.wait_for_timeout(150)
         check("back button returns to race step", page.locator(".fcard").count() == nf and page.locator(".ocard").count() == 0)
@@ -293,7 +300,7 @@ def run_desktop(p):
     page.locator("#tools button", has_text="图鉴").click(); page.wait_for_timeout(200)
     check("codex lists entries incl. locked ???", page.locator(".modal .centry").count() > 0 and page.locator(".modal .centry.locked").count() > 0)
     shot(page, "13_codex")
-    check("codex has 4 views", page.locator(".modal .views button").count() == 4)
+    check("codex has 5 views (incl. 战史)", page.locator(".modal .views button").count() == 5)
     page.locator(".modal .views button", has_text="地点").click(); page.wait_for_timeout(200)
     check("places grid with thumbnails", page.locator(".modal .place-tile").count() >= (0 if REAL else 2))
     shot(page, "13b_places")
@@ -485,7 +492,7 @@ def run_no_storage(p):
     check("in-memory save works", page.evaluate("!!WH.Save.read('slot1')"))
     ctx.close()
 
-def new_ctx(p, mobile=False, seed=7, tag="v02"):
+def new_ctx(p, mobile=False, seed=7, tag="v02", extra=""):
     b = p.chromium.launch(executable_path=CHROME, headless="--headed" not in ARGS)
     if mobile:
         ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True, locale="zh-CN")
@@ -493,7 +500,7 @@ def new_ctx(p, mobile=False, seed=7, tag="v02"):
         ctx = b.new_context(viewport={"width": 1280, "height": 720}, locale="zh-CN")
     page = ctx.new_page()
     attach_console(page, tag)
-    page.goto(BASE + QS + ("&" if QS else "?") + f"seed={seed}")
+    page.goto(BASE + QS + ("&" if QS else "?") + f"seed={seed}" + extra)
     page.wait_for_selector("#scr-title .title-main")
     page.evaluate("() => localStorage.clear()")
     page.reload(); page.wait_for_selector("#scr-title .title-main")
@@ -501,7 +508,7 @@ def new_ctx(p, mobile=False, seed=7, tag="v02"):
 
 def goto_node(page, node, **extra):
     """reload the current game at `node` (engine-level), keeping origin/taint unless overridden"""
-    page.evaluate("""([n, x]) => { const g = WH.UI.game; WH.UI.loadRecord(Object.assign(g.toRecord(), {nodeId: n, pendingEvent: null, pendingNext: null, eventChoice: null}, x)); }""", [node, extra])
+    page.evaluate("""([n, x]) => { const g = WH.UI.game; WH.UI.loadRecord(Object.assign(g.toRecord(), {nodeId: n, pendingEvent: null, pendingNext: null, eventChoice: null, rumor: null}, x)); }""", [node, extra])
     page.wait_for_timeout(120); finish_text(page)
 
 def run_v02(p):
@@ -514,7 +521,9 @@ def run_v02(p):
     wait_idle(page); finish_text(page)
     st = state(page)
     check("origin: scavenger starts at its prologue with its own stats + flag", st["nodeId"] == "smp_o_scav_1" and st["origin"] == "scav"
-          and st["stats"] == {"hp": 90, "sanity": 95, "corruption": 10, "renown": 5} and st["flags"].get("origin_scav") is True, str(st and st["nodeId"]))
+          and st["stats"] == {"hp": 115, "sanity": 85, "corruption": 10, "renown": 10} and st["flags"].get("origin_scav") is True, str(st and st["stats"]))
+    check("§23: run caps from the origin (max hp 125 / sanity 85), HUD shows value/cap", st.get("max") == {"hp": 125, "sanity": 85}
+          and page.locator("#sm-hp").inner_text() == "/125" and page.locator("#sm-sanity").inner_text() == "/85")
     check("origin sprite used for the player portrait", page.evaluate("WH.UI.actorKeys.left") == "player_chaos")
     # --- consequence beat with result ---
     page.locator("#choices button", has_text="拿去换水").click(); page.wait_for_timeout(120)
@@ -524,7 +533,9 @@ def run_v02(p):
     finish_text(page)
     check("panel shows pick + result + delta line", "拿去换水" in page.locator("#conseq .cq-pick").inner_text()
           and "锈色" in page.locator("#conseq .cq-text").inner_text() and "生命" in page.locator("#conseq .cq-deltas").inner_text())
-    check("HUD shows post-choice stats during the beat", page.locator("#sv-hp").inner_text() == "95", page.locator("#sv-hp").inner_text())
+    check("HUD shows post-choice stats during the beat", page.locator("#sv-hp").inner_text() == "120", page.locator("#sv-hp").inner_text())
+    check("§23: bar scales to the cap (120/125 = 96%)", abs(page.evaluate("parseFloat(document.querySelector('#sb-hp i').style.width)") - 96) < 0.5)
+    check("§23: engine clamps hp to the run cap, not 100", page.evaluate("(() => { const g = WH.Game.fromRecord(WH.UI.game.toRecord()); g._applyEffects({hp: 50, sanity: 50}); return [g.state.stats.hp, g.state.stats.sanity]; })()") == [125, 85])
     check("time skip shown in the beat when the next node has time", page.locator("#conseq .cq-time").count() == 1)
     shot(page, "30_consequence")
     page.locator("#tools button", has_text="EN").click(); page.wait_for_timeout(200)
@@ -711,6 +722,357 @@ def run_v02(p):
     check("select screen back button reads ⌂ 主页", "主页" in page.locator("#scr-select .home-btn").inner_text())
     ctx.close(); b.close()
 
+def run_v022(p):
+    """SPEC §20 on sample data: rumour footer (seeded), its codex unlock, setting off, save/load, 战史 timeline (desktop + mobile)."""
+    print("\n== v0.2.2 rumours + chronicle (sample) ==")
+    b, ctx, page = new_ctx(p, tag="v022")
+    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(200)
+    pick_faction(page, "sample", "hive")
+    wait_idle(page); finish_text(page)
+    # engine-level: seeded + DOM-free, rumours never perturb the main RNG stream
+    eng = page.evaluate("""() => {
+      const play = (on) => { const g = new WH.Game('sample', {rng: WH.RNG(7), rumors: on}); g.start('hive'); const r = WH.RNG(99);
+        while (!g.state.ended && g.state.visits < 40) { if (g.state.pendingEvent) { const v = g.eventChoices().filter(x => !x.locked); g.eventChoose(v[0].index); g.eventContinue(); continue; }
+          const all = g.choices(), cs = all.filter(c => !c.locked); g.choose(all.indexOf(cs[Math.floor(r() * cs.length)])); }
+        return {nodes: g.state.history.join(), hours: g.state.hours, seen: g.state.seenRumors.slice()}; };
+      const a = play(true), a2 = play(true), off = play(false);
+      const g = new WH.Game('sample', {rng: WH.RNG(3), rumorChance: 1}); g.start('hive'); g.state.chapter = 2;
+      const pool = g.eligibleRumors(2).map(r => r.id), pool4 = g.eligibleRumors(4).map(r => r.id), pool1 = g.eligibleRumors(1).length;
+      return {same: JSON.stringify(a) === JSON.stringify(a2), mainSame: a.nodes === off.nodes && a.hours === off.hours, offNone: off.seen.length === 0, pool, pool4, pool1}; }""")
+    check("rumours: seeded engine is deterministic", eng["same"])
+    check("rumours: on/off never changes the main RNG stream (nodes, time)", eng["mainSame"] and eng["offNone"], str(eng))
+    check("rumours: eligibility by faction + chapter window", sorted(eng["pool"]) == ["smp_rum_cadia", "smp_rum_wall"] and eng["pool4"] == ["smp_rum_cadia"] and eng["pool1"] == 0, str(eng))
+    # UI: force a rumour on the next node (chance 1) — smp_002 → smp_004 (chapter 2, no eventRoll)
+    goto_node(page, "smp_002")
+    page.evaluate("() => { WH.UI.game.rumorChance = 1; WH.UI.settings.textSpeed = 'normal'; }")
+    page.locator("#choices button", has_text="拼命干活").click(); page.wait_for_timeout(80)
+    pass_conseq(page); page.wait_for_timeout(100)
+    page.evaluate("WH.UI.cardDone && WH.UI.cardDone()"); page.wait_for_timeout(250)
+    st = state(page)
+    check("rumour picked on entering a node without eventRoll", st["nodeId"] == "smp_004" and st["rumor"] in ("smp_rum_cadia", "smp_rum_wall") and st["seenRumors"] == [st["rumor"]], str(st and st.get("rumor")))
+    check("rumour footer waits for the typewriter (space reserved, invisible)", page.evaluate("WH.UI.typer.active") is True
+          and page.evaluate("(e => !e.hidden && !e.classList.contains('show') && getComputedStyle(e).visibility === 'hidden')(document.getElementById('dlg-rumor'))"))
+    page.evaluate("() => { if (WH.UI.typer.active) WH.UI.typer.finish(); }"); page.wait_for_timeout(150)
+    rm = page.locator("#dlg-rumor")
+    check("rumour footer: 传闻 · speaker：text, italic, visible after the text", rm.is_visible() and "传闻" in rm.inner_text()
+          and page.evaluate("getComputedStyle(document.getElementById('dlg-rumor')).fontStyle") == "italic", rm.inner_text() if rm.count() else "")
+    chr_id = {"smp_rum_cadia": "chr_sample_cadia", "smp_rum_wall": "chr_sample_armageddon"}[st["rumor"]]
+    st = state(page)
+    check("rumour unlocks its codex id (run + global)", chr_id in st["codex"] and page.evaluate(f"WH.Save.codexGlobal().includes('{chr_id}')"))
+    ids = page.evaluate("WH.UI.lore ? WH.UI.lore.ids : []")
+    check("rumour codex goes through the normal lore-card queue (after node unlocks)", chr_id in ids, str(ids))
+    for _ in range(ids.index(chr_id) if chr_id in ids else 0):
+        page.locator("#lore-overlay .lore-btns .btn.primary").click(); page.wait_for_timeout(80)
+    check("rumour's chronicle entry pops a lore card with date + millennium seal", page.locator("#lore-overlay .lore-date").count() == 1
+          and page.locator("#lore-overlay .chr-seal").count() == 1 and "M41" in page.locator("#lore-overlay .chr-seal").inner_text())
+    shot(page, "60_rumor_lore_card")
+    dismiss_lore(page); page.wait_for_timeout(100)
+    shot(page, "61_rumor_footer")
+    page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(150)
+    check("rumour footer re-renders in English (Overheard)", "Overheard" in rm.inner_text() and rm.is_visible())
+    shot(page, "61b_rumor_footer_en")
+    page.evaluate("() => WH.UI.setLang('zh')"); page.wait_for_timeout(100)
+    # save / load keeps it
+    rec = page.evaluate("WH.UI.game.toRecord()")
+    check("record stores seenRumors + rumor", rec.get("seenRumors") == st["seenRumors"] and rec.get("rumor") == st["rumor"])
+    page.evaluate("r => WH.UI.loadRecord(r)", rec); page.wait_for_timeout(150); finish_text(page)
+    check("load restores the footer", page.locator("#dlg-rumor").is_visible() and state(page)["rumor"] == st["rumor"])
+    old = {k: v for k, v in rec.items() if k not in ("seenRumors", "rumor")}
+    old["schema"] = 1
+    check("older save without rumour fields still validates", page.evaluate("r => WH.Save.validate(r).ok", old))
+    # consequence beat hides the footer
+    page.evaluate("() => { WH.UI.game.rumorChance = 0; }")
+    page.locator("#choices button", has_text="立正").click(); page.wait_for_timeout(120)
+    check("no rumour during the consequence panel", page.locator("#conseq").count() == 1 and not page.locator("#dlg-rumor").is_visible())
+    pass_conseq(page); page.wait_for_timeout(100)
+    if page.locator("#event-overlay").count():
+        check("footer hidden while an event is open", not page.locator("#dlg-rumor").is_visible())
+        resolve_event(page)
+    wait_idle(page); finish_text(page)
+    check("chance 0 → no footer on the next node", not page.locator("#dlg-rumor").is_visible())
+    # setting off hides it
+    goto_node(page, "smp_004", rumor=st["rumor"])
+    check("footer back on reload of the rumour node", page.locator("#dlg-rumor").is_visible())
+    page.locator("#tools button", has_text="设置").click(); page.wait_for_timeout(150)
+    row = page.locator(".modal .setrow", has_text="传闻")
+    check("settings: 传闻 on/off row", row.count() == 1)
+    row.locator("button", has_text="关").click(); page.wait_for_timeout(100)
+    check("传闻 off: persisted, engine off, footer hidden", json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["rumors"] is False
+          and page.evaluate("WH.UI.game.rumors") is False and not page.locator("#dlg-rumor").is_visible())
+    page.keyboard.press("Escape"); page.wait_for_timeout(100)
+    page.evaluate("() => { WH.UI.game.rumorChance = 1; }")
+    goto_node(page, "smp_002")
+    page.locator("#choices button", has_text="拼命干活").click(); page.wait_for_timeout(80); pass_conseq(page); wait_idle(page); finish_text(page)
+    check("传闻 off: no rumour rolled even at chance 1", state(page)["rumor"] is None and not page.locator("#dlg-rumor").is_visible())
+    page.evaluate("() => { WH.UI.settings.rumors = true; WH.UI.game.rumors = true; WH.Save.saveSettings(WH.UI.settings); }")
+    # 战史 / Chronicle view
+    page.evaluate("() => WH.UI.openCodex(null, false, 'chronicle')"); page.wait_for_timeout(200)
+    tl = page.locator(".modal .timeline")
+    check("战史 tab sits after 地点", page.locator(".modal .views button").nth(2).inner_text().strip() == "战史"
+          and page.locator(".modal .views button").nth(2).get_attribute("aria-selected") == "true")
+    check("timeline: 3 entries sorted by sortKey, M31 + M41 separators", tl.locator(".tl-item").count() == 3
+          and [x.strip() for x in tl.locator(".tl-mill .tl-m").all_inner_texts()] == ["M31", "M41"]
+          and page.evaluate("Array.from(document.querySelectorAll('.modal .tl-item')).map(e => e.dataset.id).join()") == "chr_sample_heresy,chr_sample_armageddon,chr_sample_cadia")
+    lk = tl.locator(".tl-item.locked")
+    check("locked entry shows ??? with its date (tease)", lk.count() >= 1 and "???" in lk.first.inner_text() and "014.M31" in lk.first.locator(".tl-date").inner_text())
+    op = tl.locator(".tl-item:not(.locked)")
+    check("unlocked entry shows name, type·race badge, text, more", op.count() >= 1 and op.first.locator(".tl-name").inner_text().strip() not in ("", "???")
+          and "·" in op.first.locator(".rbadge").inner_text() and op.first.locator(".tl-text").count() == 1 and op.first.locator(".tl-more").count() == 1)
+    check("all dates visible", tl.locator(".tl-date").count() == 3 and all(".M" in x for x in tl.locator(".tl-date").all_inner_texts()))
+    check("progress 已知 n/t in the header", "已知" in page.locator(".modal-head .sub").inner_text() and "/3" in page.locator(".modal-head .sub").inner_text())
+    shot(page, "62_chronicle")
+    page.locator(".modal .race-chips .rchip[data-race=orks]").click(); page.wait_for_timeout(150)
+    check("race chip filters the timeline", page.locator(".modal .tl-item").count() == 1 and page.locator(".modal .tl-item").first.get_attribute("data-id") == "chr_sample_armageddon")
+    page.locator(".modal .race-chips .rchip[data-race=all]").click(); page.wait_for_timeout(150)
+    page.locator(".modal .views button").nth(0).click(); page.wait_for_timeout(150)
+    check("chronicle entries are not in the 条目 grid", page.evaluate("Array.from(document.querySelectorAll('.modal .centry')).every(e => !(e.dataset.id||'').startsWith('chr_'))"))
+    page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(100)
+    page.evaluate("() => WH.UI.openCodex(null, true, 'chronicle')"); page.wait_for_timeout(150)
+    check("Chronicle in English (Known n/t, 41st millennium)", "Known" in page.locator(".modal-head .sub").inner_text() and "41st millennium" in page.locator(".modal .timeline").inner_text())
+    shot(page, "62b_chronicle_en")
+    ctx.close(); b.close()
+    # mobile
+    b, ctx, page = new_ctx(p, mobile=True, tag="v022-m")
+    page.evaluate("() => WH.Save.addCodexGlobal(['chr_sample_cadia'])")
+    page.locator("#scr-title .menu .btn.primary").tap(); page.wait_for_timeout(200)
+    pick_faction(page, "sample", "hive", tap=True); wait_idle(page); finish_text(page)
+    goto_node(page, "smp_004", rumor="smp_rum_wall", seenRumors=["smp_rum_wall"])
+    page.screenshot(path=os.path.join(OUT, "m20_rumor_footer.png"), full_page=True)
+    check("mobile: rumour footer visible, no overflow", page.locator("#dlg-rumor").is_visible() and page.evaluate("document.documentElement.scrollWidth") <= 391)
+    page.evaluate("() => WH.UI.openCodex(null, false, 'chronicle')"); page.wait_for_timeout(200)
+    page.screenshot(path=os.path.join(OUT, "m21_chronicle.png"))
+    bx = page.locator(".modal .tl-item").first.bounding_box()
+    check("mobile: timeline fits the phone", bx and bx["x"] >= 0 and bx["x"] + bx["width"] <= 391)
+    ctx.close(); b.close()
+
+def run_egg(p):
+    """SPEC §21 Tzeentch easter egg: hidden entries, progress formula, tiers forced via ?egg=N, persistence, joke."""
+    print("\n== v0.2.2 Tzeentch easter egg ==")
+    b, ctx, page = new_ctx(p, tag="egg")
+    info = page.evaluate("""() => { const ids = Object.keys(WH.codex), vis = ids.filter(i => !WH.codex[i].hidden);
+      const pr = WH.UI.eggProgress(); return {all: ids.length, vis: vis.length, ct: pr.ct, et: pr.et, p: pr.p, hasEgg: !!WH.codex.egg_tzeentch_letter}; }""")
+    check("hidden entry loaded but excluded from the progress total", info["hasEgg"] and info["ct"] == info["vis"] == info["all"] - 1, str(info))
+    check("title codex counter excludes hidden entries", f"/{info['vis']}" in page.locator(".title-meta").inner_text(), page.locator(".title-meta").inner_text())
+    # formula: half the countable codex + 1 ending
+    pr = page.evaluate("""() => { const ids = Object.keys(WH.codex).filter(i => !WH.codex[i].hidden); const half = ids.slice(0, Math.floor(ids.length / 2));
+      WH.Save.addCodexGlobal(half.concat(['egg_tzeentch_letter'])); const f = Object.values(WH.factions)[0]; const end = Object.keys(f.nodes).find(n => f.nodes[n].ending);
+      localStorage.setItem('whatiswh.endingStats', JSON.stringify({[f.id + ':' + end]: {count: 1}}));
+      const pr = WH.UI.eggProgress(); return {pr, half: half.length, n: ids.length}; }""")
+    exp = round(100 * (0.6 * pr["half"] / pr["n"] + 0.4 * 1 / pr["pr"]["et"]))
+    check("P = round(100 × (0.6 × codex + 0.4 × endings)), hidden unlock not counted", pr["pr"]["p"] == exp and pr["pr"]["cu"] == pr["half"], f"{pr} exp {exp}")
+    page.evaluate("() => WH.UI.openCodex()"); page.wait_for_timeout(150)
+    check("hidden entry never listed (not even as ???)", page.locator(".modal [data-id=egg_tzeentch_letter]").count() == 0)
+    page.keyboard.press("Escape")
+    ctx.close(); b.close()
+    # 25: whisper glitch
+    b, ctx, page = new_ctx(p, tag="egg25", extra="&egg=25")
+    page.wait_for_timeout(200)
+    sub = page.locator("#scr-title .title-sub")
+    check("egg 25: subtitle glitches into the whisper", "egg-glitch" in (sub.get_attribute("class") or "") and "数你翻过" in sub.inner_text())
+    shot(page, "70_egg25_whisper")
+    page.wait_for_timeout(3200)
+    check("egg 25: reverts after 3 s, tier persisted", "egg-glitch" not in (sub.get_attribute("class") or "") and "WHAT IS" in sub.inner_text()
+          and "whisper" in json.loads(page.evaluate("localStorage.getItem('whatiswh.eggTiers')") or "{}"))
+    # natural progress ≥ 50 on the next title render: letter appears, whisper does not repeat
+    page.evaluate("() => { WH.UI.eggForce = null; WH.Save.addCodexGlobal(Object.keys(WH.codex).filter(i => !WH.codex[i].hidden)); WH.UI.show('title'); }"); page.wait_for_timeout(200)
+    check("natural P ≥ 50: letter appears, whisper fires only once", page.locator("#egg-letter").count() == 1 and "egg-glitch" not in (sub.get_attribute("class") or "")
+          and page.evaluate("WH.UI.eggProgress().p") >= 50)
+    ctx.close(); b.close()
+    # 50: letter
+    b, ctx, page = new_ctx(p, tag="egg50", extra="&egg=50")
+    check("egg 50: sealed letter on the title screen", page.locator("#egg-letter.fresh").count() == 1)
+    shot(page, "71_egg50_letter_icon")
+    page.locator("#egg-letter").click(); page.wait_for_timeout(150)
+    check("egg 50: letter card with title + text + sigil", "没有署名" in page.locator(".modal-head h3").inner_text() and "别停下" in page.locator(".modal .egg-text").inner_text()
+          and page.locator(".modal .egg-sig img, .modal .egg-sig .ph").count() >= 1)
+    shot(page, "72_egg50_letter")
+    page.keyboard.press("Escape")
+    ctx.close(); b.close()
+    # 75: flame
+    b, ctx, page = new_ctx(p, tag="egg75", extra="&egg=75")
+    check("egg 75: blue flame beside the title (+ letter)", page.locator(".title-main #egg-flame").count() == 1 and page.locator("#egg-letter").count() == 1)
+    page.locator("#egg-flame").click(); page.wait_for_timeout(150)
+    check("egg 75: mini-scene with warp + daemon and 2 choices", page.locator(".modal .egg-mini .egg-stage").count() == 1 and page.locator(".modal .egg-choices button").count() == 2)
+    shot(page, "73_egg75_flame")
+    page.locator(".modal .egg-choices button").nth(1).click(); page.wait_for_timeout(100)
+    check("egg 75: choice shows its result line (no gameplay effect)", "点了点头" in page.locator(".modal .egg-result").inner_text())
+    page.keyboard.press("Escape")
+    ctx.close(); b.close()
+    # 99: last line in the codex header, one opening only
+    b, ctx, page = new_ctx(p, tag="egg99", extra="&egg=99")
+    page.evaluate("() => WH.UI.openCodex()"); page.wait_for_timeout(150)
+    check("egg 99: codex header shows the last-entry line instead of the counter", "最后一条" in page.locator(".modal-head .sub").inner_text())
+    shot(page, "74_egg99_codex")
+    page.keyboard.press("Escape"); page.wait_for_timeout(80)
+    page.evaluate("() => WH.UI.openCodex()"); page.wait_for_timeout(150)
+    check("egg 99: only for one opening", "最后一条" not in page.locator(".modal-head .sub").inner_text() and "已解锁" in page.locator(".modal-head .sub").inner_text())
+    page.keyboard.press("Escape")
+    ctx.close(); b.close()
+    # 100: planned
+    for mobile in (False, True):
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="egg100" + ("-m" if mobile else ""), extra="&egg=100")
+        page.wait_for_timeout(400)
+        ep = page.locator("#egg-planned")
+        check(f"egg 100{' (mobile)' if mobile else ''}: full-screen scene with daemon + glitch", ep.count() == 1 and ep.locator(".egg-full-actor").count() == 1 and "egg-full" in ep.get_attribute("class"))
+        page.wait_for_timeout(500)
+        shot(page, "m30_egg100" if mobile else "75_egg100_scene")
+        page.keyboard.press("Enter"); page.wait_for_timeout(100)
+        check("egg 100: text finished → continue", "如计划" in ep.locator(".egg-full-text").inner_text() and ep.locator(".egg-full-btns button").is_visible())
+        page.keyboard.press("Enter"); page.wait_for_timeout(250)
+        if mobile:
+            page.evaluate("() => WH.UI.closeLore()"); page.wait_for_timeout(150)
+            page.screenshot(path=os.path.join(OUT, "m31_egg_title.png"))
+            check("mobile: title fits with egg decorations", page.evaluate("document.documentElement.scrollWidth") <= 391)
+            ctx.close(); b.close(); continue
+        check("egg 100: unlocks the hidden letter and shows its card", page.evaluate("WH.Save.codexGlobal().includes('egg_tzeentch_letter')")
+              and "改变之主的回信" in page.locator("#lore-overlay .lore-name").inner_text())
+        shot(page, "76_egg100_card")
+        page.evaluate("() => WH.UI.closeLore()"); page.wait_for_timeout(150)
+        check("egg 100: title shimmer from now on", "tz-shimmer" in page.locator("#scr-title .title-main").get_attribute("class"))
+        shot(page, "77_egg_title_after")
+        check("egg 100: NEW badge does not count the hidden entry", not page.evaluate("WH.Save.codexUnseen().includes('egg_tzeentch_letter')") or page.evaluate("(document.querySelector('#scr-title .nbadge')||{}).hidden !== false"))
+        page.locator("#scr-title .menu button", has_text="设置").click(); page.wait_for_timeout(150)
+        check("egg 100: Settings gains 奸奇的玩笑", page.locator(".modal .setrow.tz-row").count() == 1)
+        page.keyboard.press("Escape"); page.wait_for_timeout(80)
+        page.evaluate("() => WH.UI.openCodex()"); page.wait_for_timeout(150)
+        page.evaluate("() => WH.UI.jokeTick && WH.UI.jokeTick()"); page.wait_for_timeout(100)
+        j = page.locator(".codex-body [data-joke]")
+        check("奸奇的玩笑: a locked ??? shows a shuffled name", j.count() == 1 and j.first.inner_text().strip() not in ("???", ""), j.first.inner_text() if j.count() else "none")
+        shot(page, "78_egg_joke")
+        page.wait_for_timeout(1000)
+        check("…and reverts to ???", page.locator(".codex-body [data-joke]").count() == 0)
+        page.keyboard.press("Escape"); page.wait_for_timeout(80)
+        page.locator("#scr-title .menu button", has_text="设置").click(); page.wait_for_timeout(150)
+        page.locator(".modal .setrow.tz-row button", has_text="关").click(); page.wait_for_timeout(80)
+        page.keyboard.press("Escape"); page.wait_for_timeout(80)
+        page.evaluate("() => WH.UI.openCodex()"); page.wait_for_timeout(2700)
+        check("奸奇的玩笑 off: no shuffling", page.locator(".codex-body [data-joke]").count() == 0 and page.evaluate("WH.UI.jokeTimer") is None)
+        page.keyboard.press("Escape")
+        ctx.close(); b.close()
+
+LEGACY = {
+  "slot1": {"schema": 1, "gameVersion": "0.1.0", "savedAt": "2026-11-10T09:00:00.000Z", "faction": "sample", "nodeId": "smp_004", "chapter": 2,
+            "stats": {"hp": 80, "sanity": 70, "corruption": 5, "renown": 12}, "flags": {"prayed": True}, "codex": ["smp_commissar"], "seenEvents": [],
+            "hours": 500, "pendingEvent": None, "pendingNext": None, "history": ["smp_001", "smp_002", "smp_004"], "playMs": 60000, "lang": "zh",
+            "customFutureField": {"x": 1}},
+  "runs": [{"runId": "r1", "endingId": "smp_end_bad_cult", "faction": "sample", "kind": "bad", "title": {"zh": "墙里的歌", "en": "Song"},
+            "cause": {"zh": "邪教", "en": "Cult"}, "survived": 100, "at": "2026-11-10T10:00:00.000Z", "visits": 5, "playMs": 1000, "finalHours": 200}],
+  "runStats": {"runs": 1, "deaths": 0, "longest": 100, "causes": {"Cult": {"count": 1, "label": {"zh": "邪教", "en": "Cult"}}}},
+  "endingStats": {"sample:smp_end_bad_cult": {"count": 1, "first": 100, "best": 100, "firstAt": "2026-11-10T10:00:00.000Z"}},
+  "runsSeen": ["r1:smp_end_bad_cult"],
+  "codexGlobal": ["smp_commissar", "smp_hive"],
+  "settings": {"lang": "zh", "textSpeed": "fast", "loreCards": "auto", "effects": True},
+}
+
+def run_data(p):
+    """SPEC §22: a v0.1-era localStorage survives the update untouched; full backup export → clear → import; merge without duplicates."""
+    print("\n== v0.2.2 local data is never overwritten (SPEC §22) ==")
+    b = p.chromium.launch(executable_path=CHROME, headless="--headed" not in ARGS)
+    ctx = b.new_context(viewport={"width": 1280, "height": 720}, locale="zh-CN", accept_downloads=True)
+    page = ctx.new_page(); attach_console(page, "data")
+    page.goto(BASE + QS + ("&" if QS else "?") + "seed=7"); page.wait_for_selector("#scr-title .title-main")
+    page.evaluate("""(L) => { localStorage.clear(); for (const k in L) localStorage.setItem('whatiswh.' + k, JSON.stringify(L[k])); }""", LEGACY)
+    before = page.evaluate("() => Object.fromEntries(Object.keys(localStorage).filter(k => k.startsWith('whatiswh.')).map(k => [k, localStorage.getItem(k)]))")
+    page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(300)
+    ver = page.evaluate("WH.VERSION")
+    check("update notice shown once: 已更新到 vX · 存档与记录已保留", f"已更新到 v{ver}" in page.locator(".toasts").inner_text() and "存档与记录已保留" in page.locator(".toasts").inner_text())
+    shot(page, "80_update_toast")
+    after = page.evaluate("() => Object.fromEntries(Object.keys(localStorage).filter(k => k.startsWith('whatiswh.')).map(k => [k, localStorage.getItem(k)]))")
+    check("no whatiswh.* key deleted or renamed", all(k in after for k in before), str([k for k in before if k not in after]))
+    check("records / codex / endings untouched byte-for-byte", all(after[f"whatiswh.{k}"] == before[f"whatiswh.{k}"] for k in ("runs", "runStats", "endingStats", "runsSeen", "codexGlobal")))
+    check("lastVersion recorded", after.get("whatiswh.lastVersion") == ver)
+    s1 = json.loads(after["whatiswh.slot1"])
+    check("schema-1 slot migrated in place, unknown field kept, pre-migration copy kept", s1["schema"] == 2 and s1.get("customFutureField") == {"x": 1}
+          and any(k.startswith("whatiswh.bak.") and k.endswith(".slot1") and after[k] == before["whatiswh.slot1"] for k in after), str(s1.get("schema")))
+    sts = page.evaluate("WH.UI.settings")
+    check("old settings kept (text speed), v0.1 loreCards 'auto' read as 'new'", sts["textSpeed"] == "fast" and sts["loreCards"] == "new" and sts["rumors"] is True)
+    check("title counts the old codex progress", "2/" in page.locator(".title-meta").inner_text())
+    page.locator("#scr-title .menu button", has_text="继续").click(); page.wait_for_timeout(300); finish_text(page)
+    st = state(page)
+    check("old save loads (Continue) with its stats; caps default 100/100", st and st["nodeId"] == "smp_004" and st["stats"]["hp"] == 80 and st["max"] == {"hp": 100, "sanity": 100})
+    check("unknown fields survive load → save", page.evaluate("WH.UI.game.toRecord().customFutureField && WH.UI.game.toRecord().customFutureField.x") == 1)
+    page.evaluate("() => WH.UI.openCodex(null, false, 'records')"); page.wait_for_timeout(150)
+    check("old run record shown in 生涯", page.locator(".modal .run-row").count() == 1)
+    page.keyboard.press("Escape")
+    page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(300)
+    check("second boot: no update notice", "已更新" not in (page.locator(".toasts").inner_text() if page.locator(".toasts").count() else ""))
+    # full backup: export → clear → import restores
+    keys = ["runs", "runStats", "endingStats", "codexGlobal", "slot1", "settings"]
+    snap = page.evaluate("(ks) => Object.fromEntries(ks.map(k => [k, localStorage.getItem('whatiswh.' + k)]))", keys)
+    page.locator("#scr-title .menu button", has_text="设置").click(); page.wait_for_timeout(150)
+    page.locator("#data-btn").click(); page.wait_for_timeout(150)
+    check("Settings → 数据 opens the backup panel", page.locator(".modal .data-view").count() == 1 and "导出全部进度" in page.locator(".modal .data-view").inner_text())
+    shot(page, "81_data_panel")
+    with page.expect_download() as dl:
+        page.locator("#data-export").click()
+    bk = json.loads(open(dl.value.path(), encoding="utf-8").read())
+    check("导出全部进度 downloads every whatiswh.* key + version + time", bk.get("format") == "whatiswh-backup" and bk.get("gameVersion") == ver and bk.get("exportedAt")
+          and all(k in bk["data"] for k in keys + ["lastVersion"]))
+    page.locator("#data-copy").click(); page.wait_for_timeout(200)
+    check("复制到剪贴板 fallback shows the JSON text", page.locator("#data-out").is_visible() and '"whatiswh-backup"' in page.locator("#data-out").input_value())
+    text = page.locator("#data-out").input_value()
+    page.keyboard.press("Escape"); page.wait_for_timeout(80); page.keyboard.press("Escape")
+    page.evaluate("() => localStorage.clear()")
+    page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
+    check("cleared browser: nothing left", page.evaluate("WH.Save.runs().length") == 0 and page.evaluate("WH.Save.codexGlobal().length") == 0)
+    page.evaluate("() => WH.UI.openData()"); page.wait_for_timeout(150)
+    page.locator("#data-paste").fill(text)
+    page.locator("#data-import-paste").click(); page.wait_for_timeout(300)
+    rest = page.evaluate("(ks) => Object.fromEntries(ks.map(k => [k, localStorage.getItem('whatiswh.' + k)]))", keys)
+    check("paste-box import restores runs, stats, endings, codex, save slot, settings", all(json.loads(rest[k] or "null") == json.loads(snap[k] or "null") for k in keys),
+          str([k for k in keys if json.loads(rest[k] or "null") != json.loads(snap[k] or "null")]))
+    check("import toast summarises the merge", "已合并" in page.locator(".toasts").inner_text())
+    shot(page, "82_import_done")
+    page.keyboard.press("Escape")
+    # merge again: nothing duplicated
+    page.evaluate("t => WH.Save.importAll(WH.Save.parseBackup(t).backup)", text)
+    check("re-importing the same backup duplicates nothing", page.evaluate("WH.Save.runs().length") == 1 and page.evaluate("WH.Save.runStats().runs") == 1
+          and page.evaluate("WH.Save.codexGlobal().length") == 2)
+    # merge a backup with one more run + a different slot1
+    sum_ = page.evaluate("""t => { const b = WH.Save.parseBackup(t).backup; b.data.runs = b.data.runs.concat([{runId: 'r2', endingId: 'smp_death_hp', faction: 'sample', kind: 'death',
+        title: {zh: '无名之死', en: 'Death'}, cause: {zh: '伤', en: 'Wounds'}, survived: 300, at: '2026-11-11T10:00:00.000Z', visits: 7, playMs: 2000, finalHours: 400}]);
+        b.data.codexGlobal = b.data.codexGlobal.concat(['smp_ork']); b.data.slot1 = Object.assign({}, b.data.slot1, {nodeId: 'smp_005'});
+        const conf = WH.Save.backupConflicts(b); const s = WH.Save.importAll(b); return {conf, s, runs: WH.Save.runs().length, rs: WH.Save.runStats(),
+        slot: JSON.parse(localStorage.getItem('whatiswh.slot1')).nodeId, cg: WH.Save.codexGlobal().length}; }""", text)
+    check("merge: new run added once, totals updated, codex union", sum_["runs"] == 2 and sum_["rs"]["runs"] == 2 and sum_["rs"]["deaths"] == 1 and sum_["cg"] == 3, str(sum_))
+    check("merge: occupied save slot not overwritten without confirmation", sum_["conf"] == ["slot1"] and sum_["slot"] == "smp_004" and sum_["s"]["skipped"] == ["slot1"])
+    ctx.close(); b.close()
+
+def run_real_v022(p):
+    """--real: rumours + 战史 with the lore writer's data (desktop + mobile screenshots)"""
+    print("\n== v0.2.2 rumours + chronicle (real data) ==")
+    for mobile in (False, True):
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="real022" + ("-m" if mobile else ""), seed=21)
+        n_r, n_c = page.evaluate("[WH.rumors.length, Object.keys(WH.codex).filter(i => (WH.codex[i].tags||[]).includes('chronicle')).length]")
+        print(f"  rumours {n_r} · chronicle {n_c}")
+        if not n_r or not n_c:
+            check("real data: rumours + chronicle present", False, f"{n_r}/{n_c}"); ctx.close(); b.close(); continue
+        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(150)
+        pick_faction(page, "imperium", tap=mobile); wait_idle(page); finish_text(page)
+        page.evaluate("() => { WH.UI.game.rumorChance = 1; }")
+        rng = random.Random(4); seen = False
+        for _ in range(12):
+            if page.locator("#event-overlay").count(): resolve_event(page); continue
+            if state(page)["ended"]: break
+            click_choice(page, None, rng)
+            if page.locator("#event-overlay").count(): resolve_event(page)
+            finish_text(page)
+            if page.locator("#dlg-rumor").is_visible(): seen = True; break
+        check(f"real{' mobile' if mobile else ''}: a rumour footer appears on the imperium route", seen and state(page)["rumor"] is not None)
+        if seen:
+            if mobile: page.screenshot(path=os.path.join(OUT, "m40_real_rumor.png"), full_page=True)
+            else: shot(page, "60_real_rumor")
+        page.evaluate("() => WH.UI.openCodex(null, false, 'chronicle')"); page.wait_for_timeout(250)
+        check(f"real{' mobile' if mobile else ''}: 战史 lists every chronicle entry with a date", page.locator(".modal .tl-item").count() == n_c
+              and page.locator(".modal .tl-date").count() == n_c and page.locator(".modal .tl-item:not(.locked)").count() >= 1)
+        if mobile: page.screenshot(path=os.path.join(OUT, "m41_real_chronicle.png"))
+        else:
+            shot(page, "61_real_chronicle")
+            page.locator(".modal-body").evaluate("e => e.scrollTop = e.scrollHeight / 2"); page.wait_for_timeout(100)
+            shot(page, "61b_real_chronicle_mid")
+        check(f"real{' mobile' if mobile else ''}: hidden egg entry not counted", page.evaluate("WH.UI.eggProgress().ct") == page.evaluate("Object.keys(WH.codex).filter(i => !WH.codex[i].hidden).length"))
+        ctx.close(); b.close()
+
 FIVE = """() => { const base = Object.values(WH.factions)[0]; const ids = ['imperium','chaos','tau','aeldari','necrons'];
   const names = {imperium:['人类帝国','Imperium of Man'], chaos:['混沌','Chaos'], tau:['钛帝国',"T'au Empire"], aeldari:['灵族','Aeldari'], necrons:['死灵','Necrons']};
   const col = {imperium:'#c9a227', chaos:'#b0304a', tau:'#d08a3a', aeldari:'#5fb3a1', necrons:'#4fd16b'};
@@ -775,14 +1137,18 @@ def run_new_routes(p):
 
 with sync_playwright() as p:
     t0 = time.time()
-    run_desktop(p)
-    run_mobile(p)
-    run_no_storage(p)
+    if "--only-v022" not in ARGS: run_desktop(p)
+    if "--only-v022" not in ARGS: run_mobile(p)
+    if "--only-v022" not in ARGS: run_no_storage(p)
     if not REAL:
-        run_v02(p)
-    run_five(p)
+        if "--only-v022" not in ARGS: run_v02(p)
+        run_v022(p)
+        run_egg(p)
+        run_data(p)
+    if "--only-v022" not in ARGS: run_five(p)
     if REAL:
         run_new_routes(p)
+        run_real_v022(p)
     fails = [r for r in results if not r[1]]
     print(f"\nconsole/page errors: {len(errors)}")
     for e in errors: print("  " + e)

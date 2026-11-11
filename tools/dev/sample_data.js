@@ -8,6 +8,9 @@
  * `renownHelp` (SPEC §17); hidden taint (SPEC §18): taint effects, a cleansing event, a Khorne claim event, a taint-gated choice.
  * v0.2.1 (SPEC §19): `taintMod` (tzeentch ×1.5, slaanesh ×0.5, khorne/nurgle ×1); the Khorne claim has accept (goto → claim
  * ending), resist (taint −40, resisted_khorne) and a forced second-time choice (require flag resisted_khorne, goto); smp_end_claim_khorne.
+ * v0.2.2 (SPEC §23): origin caps — scav max hp 125 / sanity 85 (starts hp 115, below its cap on purpose), clerk max hp 85; budgets −5 / 0.
+ * v0.2.2 (SPEC §20): 3 chronicle entries (tags ["chronicle"], date, sortKey; M31 + M41; no cat / sprite on purpose → seal on the
+ * lore card) and 2 rumours (one route-only, one "*" with a chapter window) that unlock two of them; chr_sample_heresy stays locked.
  */
 WH.registerCodex({
   smp_commissar:  {cat: "leader", faction: "imperium", race: "imperium", type: "unit", sprite: "commissar",
@@ -43,6 +46,41 @@ WH.registerCodex({
   smp_genestealer: {cat: "enemy", faction: "xenos", race: "tyranids", type: "unit", sprite: "genestealer",
     name: {zh: "基因窃取者", en: "Genestealer"}, text: {zh: "虫巢的先锋，潜伏在巢都底层。", en: "Vanguard of the hive, lurking in the underhive."}}
 });
+
+/* SPEC §20 chronicle entries (normally data/chronicle.js) */
+WH.registerCodex({
+  chr_sample_heresy: {type: "concept", tags: ["chronicle"], race: "imperium", faction: "any", sortKey: 31014,
+    date: {zh: "014.M31", en: "014.M31"}, name: {zh: "泰拉之围", en: "Siege of Terra"},
+    text: {zh: "叛乱的战帅荷鲁斯兵临皇宫。帝皇亲自登上了荷鲁斯的旗舰。", en: "The rebel Warmaster Horus besieged the Palace. The Emperor himself boarded Horus's flagship."},
+    more: {zh: "荷鲁斯死了。帝皇从此坐上黄金王座，再没起身。", en: "Horus died. The Emperor was set upon the Golden Throne, and never rose again."}},
+  chr_sample_armageddon: {type: "concept", tags: ["chronicle"], race: "orks", faction: "any", sortKey: 41998,
+    date: {zh: "998.M41", en: "998.M41"}, name: {zh: "第三次阿玛迦顿战争", en: "Third War for Armageddon"},
+    text: {zh: "兽人大军阀加兹库尔再次扑向巢都世界阿玛迦顿。", en: "Ork Warlord Ghazghkull fell upon the hive world Armageddon once more."},
+    more: {zh: "战争从未真正结束，只是变成了季节——干季，就是开战的季节。", en: "The war never really ended. It became a season: when the dry months come, so do the Orks."},
+    aliases: {zh: ["阿玛迦顿"], en: ["Armageddon"]}},
+  chr_sample_cadia: {type: "concept", tags: ["chronicle"], race: "imperium", faction: "any", sortKey: 41999,
+    date: {zh: "999.M41", en: "999.M41"}, name: {zh: "卡迪亚陷落", en: "Fall of Cadia"},
+    text: {zh: "阿巴顿的第十三次黑色远征终于攻破卡迪亚。星球本身碎裂了。", en: "Abaddon's Thirteenth Black Crusade finally broke Cadia. The planet itself shattered."},
+    more: {zh: "卡迪亚人说，倒下的是星球，不是他们。", en: "Cadians say it was the planet that fell, not them."},
+    aliases: {zh: ["卡迪亚"], en: ["Cadia"]}}
+});
+
+/* SPEC §21: the hidden easter-egg entry (normally in data/easter_tzeentch.js; sample mode clears WH.codex) */
+WH.registerCodex({
+  egg_tzeentch_letter: {cat: "lore", race: "chaos", type: "concept", faction: "any", sprite: "sigil_tzeentch", hidden: true,
+    name: {zh: "改变之主的回信", en: "A Reply from the Changer of Ways"}, text: {zh: "你以为是你在收集图鉴。", en: "You thought you were the one collecting."}}
+});
+
+/* SPEC §20 rumours (normally data/rumors.js) */
+WH.registerRumors([
+  {id: "smp_rum_cadia", factions: ["sample"], minChapter: 2,
+   speaker: {zh: "独臂老兵", en: "One-armed veteran"},
+   text: {zh: "“卡迪亚没倒，”他把杯子扣在桌上，“是星球先碎的。人还站着。”", en: "\"Cadia didn't fall,\" he says, slamming his cup down. \"The planet broke first. We were still standing.\""},
+   codex: ["chr_sample_cadia"]},
+  {id: "smp_rum_wall", factions: ["*"], minChapter: 2, maxChapter: 3, speaker: null,
+   text: {zh: "墙上的炭笔字：记住阿玛迦顿。绿皮总会回来。", en: "Charcoal on the wall: REMEMBER ARMAGEDDON. THE GREENSKINS ALWAYS COME BACK."},
+   codex: ["chr_sample_armageddon"]}
+]);
 
 WH.registerEvents([
   {id: "smp_evt_khorne", god: "khorne", factions: ["*"], minChapter: 1,
@@ -107,9 +145,9 @@ WH.registerFaction({
     {id: "hive", name: {zh: "巢都工人", en: "Hive worker"}, desc: {zh: "十六小时一班，配额永远在涨。", en: "Sixteen-hour shifts, and the quota always rises."},
      sprite: "player_imperium", startNode: "smp_001", stats: {hp: 100, sanity: 100, corruption: 0, renown: 10}, set: {origin_hive: true}},
     {id: "scav", name: {zh: "下巢拾荒者", en: "Underhive scavenger"}, desc: {zh: "你在废料堆里长大，听得懂墙里的声音。", en: "Raised in the scrap heaps, you understand the voices in the walls."},
-     sprite: "player_chaos", startNode: "smp_o_scav_1", stats: {hp: 90, sanity: 95, corruption: 10, renown: 5}, set: {origin_scav: true}},
+     sprite: "player_chaos", startNode: "smp_o_scav_1", max: {hp: 125, sanity: 85}, stats: {hp: 115, corruption: 10, renown: 10}, set: {origin_scav: true}},
     {id: "clerk", name: {zh: "档案书记", en: "Archive clerk"}, desc: {zh: "你抄写别人的死亡名单，从没想过会抄到自己。", en: "You copy out other people's death lists. You never expected your own name."},
-     sprite: "player_imperium", startNode: "smp_o_clerk_1", stats: {hp: 85, sanity: 100, corruption: 0, renown: 20}, set: {origin_clerk: true}}
+     sprite: "player_imperium", startNode: "smp_o_clerk_1", max: {hp: 85}, stats: {corruption: 0, renown: 25}, set: {origin_clerk: true}}
   ],
   chapters: {1: {zh: "巢都之底", en: "Bottom of the Hive"}, 2: {zh: "什一税", en: "The Tithe"}, 3: {zh: "亚空间", en: "The Warp"}, 4: {zh: "黑色远征", en: "Black Crusade"}},
   nodes: {

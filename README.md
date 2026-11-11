@@ -58,6 +58,12 @@ The language switch re-renders the current scene immediately.
   the game keeps saves in memory for the session and says so.
 - **Export** downloads the current run as `.json`; **Import** loads one back (validated first; bad files are rejected with a message).
 - Codex progress and run records are kept across runs.
+- **Your progress belongs to this browser *and* to the address the game was opened from.** The local file (`file://…/index.html`),
+  GitHub Pages and the Claude artifact page each have their own separate storage, and clearing site data / a private window wipes it.
+  Updating the game never deletes or resets it (on the first start after an update you get a one-time "saves and records kept" note).
+  To move or back up everything — saves, codex, endings, run records, settings — use **Settings → Data → Export all progress**
+  and **Import all progress** on the other side (merges: records are combined, nothing local is lost; occupied save slots are only
+  overwritten if you confirm). Where downloads are blocked, use **Copy to clipboard** and the paste box instead.
 - Settings: text speed, visual effects, consequence beats, music / SFX volume, mute, lore cards (new entries only / every unlock / off),
   already-collected entries (small toast / silent), language. The OS "reduce motion" setting is respected.
 
@@ -166,6 +172,10 @@ Warhammer 40,000, Warhammer and associated names are trademarks of Games Worksho
   游戏会在本次会话内用内存保存并给出提示。
 - **导出**把当前进度下载为 `.json`；**导入**读回（先校验，无效文件会被拒绝并提示）。
 - 图鉴进度和生涯记录跨周目保留。
+- **进度属于这个浏览器，并且和打开游戏的地址绑定。** 本地文件（`file://…/index.html`）、GitHub Pages、Claude 页面各自存储、互不相通；
+  清除网站数据或使用无痕窗口会丢失进度。游戏更新永远不会删除或重置进度（更新后首次启动会提示一次"存档与记录已保留"）。
+  要搬家或备份全部内容（存档、图鉴、结局、生涯记录、设置），用**设置 → 数据 → 导出全部进度**，在另一处**导入全部进度**
+  （合并导入：记录取并集，本地内容不会丢；已有存档的存档位只有在你确认后才会被覆盖）。若页面禁止下载，用**复制到剪贴板**和粘贴框。
 - 设置：文字速度、视觉特效、过场提示、音乐 / 音效音量、静音、知识卡片（仅新条目弹出 / 全部弹出 / 不弹出）、
   已收录条目提示（小提示 / 静默）、语言。会遵循系统的"减少动态效果"设置。
 

@@ -320,3 +320,83 @@ Newest at the bottom. Format: `## YYYY-MM-DD · role` then short bullets (what c
   - Claim endings never reached by random play: tau nurgle, aeldari nurgle, necron khorne and slaanesh. They are reachable by feeding that god through events.
   - Avg nodes per run fell to imp 43.4, cha 42.1, eld 44.4 (target 45–60 warns), because claim endings cut runs short mid-route.
   - Claims mostly fire in ch4–8; Imperium has a handful in ch2–3.
+
+## 2026-11-11 · text-lore (SPEC §20: lore clues for veterans)
+- **New files** (text-lore only): `data/chronicle.js`, `data/rumors.js`, `data/events_lore.js`. Nothing else touched. `index.html` must load them in this order: chronicle.js after codex_necrons.js; events_lore.js and rumors.js after events_taint.js (web role). `validate.js` already loads them.
+- **Chronicle** (36 `chr_*`, type concept, tags chronicle, faction any, cat lore, sprites from the SPEC key lists):
+  - M25 1 · M30 3 · M31 6 · M32 1 · M36 1 · M41 19 · M42 5.
+  - Covers the Age of Strife, the Eye of Terror's birth, Unification, the Great Crusade, Ullanor, Isstvan, the Siege of Terra, the Second Founding, Guilliman struck down, the 1st Black Crusade, the War of the Beast, the Age of Apostasy, the 1st/2nd/3rd Armageddon wars, Damocles, the Silent King's return, Macragge, Sabbat Worlds, the Farsight Expedition, Badab, Kraken/Iyanden, Leviathan, the Third Sphere, Taros, Octarius, the Fall of Cadia, the Great Rift, Baal, Ynnead, Guilliman's return, the Plague Wars, Vigilus, the Fourth Sphere, the Pariah Nexus and Arks of Omen.
+  - Post-Rift (M42) canon has no fixed years, so those entries say "M42初 / early M42", "大裂隙后 / after the Rift" or "M42".
+- **Dropped:** an entry for the War in Heaven / shattering of the C'tan (c. 60 million years ago). Its sortKey (−60,000,000) gave a "M-60000" millennium band in the UI and a validator warning. Rumours and events unlock the existing `nec_war_in_heaven` / `nec_great_sleep` instead. If the web role adds an "远古 / Ancient" band for sortKey < 1000, it can come back.
+- **Not duplicated:** `chaos_horus_heresy`, `imp_great_rift`, `imp_indomitus`, `eld_the_fall`, `nec_war_in_heaven` and `place_cadia` stay as they are. Chronicle entries cover specific dated events, and their aliases avoid clashing with existing ones. "野兽" was removed because it already appears in route text.
+- **Rumours** (72): imperium 12 · chaos 12 · tau 11 · aeldari 11 · necrons 11 · shared 15.
+  - Every chr entry is unlocked by at least one rumour or event.
+  - Shared rumours are memories, dreams, rhymes and found objects, so they fit a craftworld or a tomb.
+  - When a first-hand witness would be too old (e.g. 941.M41 told in 111.M42), the line is second-hand ("照爷爷的纹身纹的").
+  - The T'au "Third Sphere" line comes from the speaker's mother, because T'au lifespans are short.
+- **Lore events** (9, god other/undivided; effects ±3–10; taint at most ±5):
+  - `evt_lore_armageddon` (imperium): a cook with his grandfather's Hades tattoo.
+  - `evt_lore_cadia` (imperium, chaos): a Cadian who won't talk about the Gate.
+  - `evt_lore_damocles` (tau): an aged water-caste envoy remembers Dal'yth.
+  - `evt_lore_fall` (aeldari): an old soul in wraithbone smells wheat; one choice cleanses slaanesh −5.
+  - `evt_lore_war_in_heaven` (necrons): a cryptek for whom the War in Heaven is "recent".
+  - `evt_lore_silent_king` (necrons): an overlord rattled by the King's return.
+  - `evt_lore_terra_vision` (all but necrons, since the null field blocks visions): a vision of the Siege.
+  - `evt_lore_isstvan` (chaos): a Black Legion veteran with a scraped pauldron.
+  - `evt_lore_badab` (imperium, chaos, tau): a Red Corsair recruiting over an open channel.
+- **Rules kept:** original prose, no GW slogans (e.g. "Cadia Stands" is deliberately avoided; the graffiti breaks off at "卡迪亚还……"), no gore.
+- **Checks:** a /tmp vm checker with stubbed registerRumors (lengths, ids, codex refs, keys, sortKeys, coverage). `node tools/dev/validate.js` → PASS, 0 errors, no warnings from these files (2 notes: "after the Rift" dates group under M42 by sortKey). Simulated runs overhear 8.9–10.1 rumours each.
+- **Sources** for dates and outcomes:
+  - Lexicanum, 41st Millennium timeline (Damocles 742, Macragge 745, Sabbat 755, Farsight Enclaves 760, Badab 901–912, Armageddon 444/941/998, Kraken 992–993, Leviathan 997, Third Sphere 997, Taros 998, 13th Black Crusade / Fall of Cadia / Guilliman / Ynnari / Octarius c. 999): https://wh40k.lexicanum.com/wiki/41st_Millenium
+  - Lexicanum, 31st Millennium (Ullanor 000, Isstvan III 005 / V 006, Siege 014, Second Founding 021, Thessala 121, 1st Black Crusade 781): https://wh40k.lexicanum.com/wiki/31st_Millennium
+  - Lexicanum, 30th Millennium (Fall ca. M30, Unification ends 712, Olympus 739, Great Crusade c. 798): https://wh40k.lexicanum.com/wiki/30th_Millennium
+  - Third Armageddon War (998, 57 years to the day, Ghazghkull leaves, Yarrick pursues): https://wh40k.lexicanum.com/wiki/Third_Armageddon_War
+  - Age of Apostasy (M36, 70-year reign, Thor, Sororitas): https://wh40k.lexicanum.com/wiki/Reign_of_Blood
+  - Farsight Expedition (~750s.M41, Enclaves 760.M41): https://wh40k.lexicanum.com/wiki/Farsight_Expedition
+  - Great Beast (544.M32, attack moon, Imperial Fists rebuilt): https://wh40k.lexicanum.com/wiki/Great_Beast
+  - Octarius (989 or 999.M41, Kryptman, ongoing): https://wh40k.lexicanum.com/wiki/Octavius_War
+  - Devastation of Baal (~999.M41, Rift and daemons, Guilliman's relief): https://wh40k.lexicanum.com/wiki/Battle_of_Baal
+  - Fourth Sphere (slipstream rift, about ¾ lost, Chalnath Expanse, Nem'yar): https://wh40k.lexicanum.com/wiki/Fourth_Sphere_Expansion
+  - Vigilus (Nachmund Gauntlet, orks/GSC/Abaddon, outcome): https://wh40k.lexicanum.com/wiki/War_of_Nightmares
+  - Pariah Nexus (M42): https://wh40k.lexicanum.com/wiki/War_in_the_Pariah_Nexus
+  - Cadian pylons (Necron-like, their loss → Rift): https://wh40k.lexicanum.com/wiki/Pylon
+  - Will of Eternity debris shattered Cadia: https://wh40k.lexicanum.com/wiki/Blackstone_Fortresses
+  - War in Heaven (~60 Myr before M41): https://wh40k.lexicanum.com/wiki/War_in_Heaven_(Necron)
+  - Szarekh (shattered the C'tan, Great Sleep, exile, return c. 744.M41 on seeing Tyranids): https://www.belloflostsouls.net/2026/05/40k-lore-szarekh-the-silent-king.html
+  - Era overview (Age of Strife M25–M30; Indomitus = first century of M42): https://www.pcgamer.com/uk/major-events-in-the-warhammer-40000-timeline
+  - Macragge details (First Company, Calgar): https://www.warhammer-community.com/en-gb/articles/sM45KF7s/3-key-conflicts-that-shaped-the-destiny-of-the-41st-millennium/
+  - Arks of Omen (Vashtorr, arks from hulks + daemon fleshmetal): https://www.warhammer-community.com/en-gb/articles/jwWlgLqL/arks-of-omen-abaddon-is-your-first-step-into-an-even-grimmer-even-darker-future/
+  - Arks of Omen: Farsight (three-way T'au / orks / Chaos): https://www.warhammer-community.com/2023/03/22/arks-of-omen-farsight-is-a-three-way-bloodbath-between-tau-orks-and-chaos/
+  - Damocles withdrawal under truce when Behemoth arrived: https://2d4chan.org/wiki/Damocles_Crusade
+  - Plague Wars (Guilliman ends the crusade's first phase; core worlds held, periphery infected): https://2d4chan.org/wiki/Plague_Wars
+  - Post-Rift calendar drift: https://bolterandchainsword.com/topic/376462-can-anyone-explain-the-indomitus-crusade-timeline-devastation-of-baal/
+
+## 2026-11-11 · balance (SPEC §23: origin trade-offs)
+- User: "不同身份的人只有属性减益，没有属性增益" → every origin now trades off. Only the `origins` entries were edited (`max`, `stats`, `desc`); no story text changed.
+- **Key finding:** in random play, Sanity is worth far more than HP. Most deaths are sanity deaths (Imperium ~85 %, T'au ~75 %, Necrons ~80 %). On Imperium, +20 max HP lowers the death rate by only ~3 points, but −15 Sanity raises it by ~15. Renown has almost no effect on death rate. So the profiles keep sanity moves small (±5–10) and HP moves large (±15–20), and pay the rest with renown. The brief's harsher examples (deserter 80 Sanity, convict 85, Guardsman 90/+5) came out 6–9 points over their route average.
+- **Profiles** (max hp / max sanity / corruption / renown → budget; death % and Δ vs route avg from /tmp/balance/sim.js, 3000 runs × seeds 1/5/9 per origin):
+  | route | origin | hp | san | cor | ren | budget | death | Δ |
+  |---|---|---|---|---|---|---|---|---|
+  | imperium | hive | 115 | 95 | 0 | 0 | 0 | 32.7 | +2.4 |
+  | imperium | agri | 105 | 100 | 0 | 5 | 0 | 31.0 | +0.7 |
+  | imperium | noble | 85 | 105 | 0 | 20 | 0 | 27.2 | −3.1 |
+  | chaos | scavenger | 95 | 105 | 0 | 10 | 0 | 27.1 | −1.3 |
+  | chaos | deserter | 115 | 90 | 0 | 5 | 0 | 29.9 | +1.5 |
+  | chaos | scribe | 85 | 110 | 0 | 15 | 0 | 28.1 | −0.3 |
+  | tau | colonist | 105 | 100 | 0 | 5 | 0 | 23.8 | −1.1 |
+  | tau | pow | 115 | 95 | 0 | 0 | 0 | 25.1 | +0.1 |
+  | tau | trader | 90 | 105 | 0 | 15 | 0 | 25.8 | +0.9 |
+  | aeldari | agri | 100 | 90 | 0 | 20 | 0 | 21.7 | −0.1 |
+  | aeldari | pilgrim | 80 | 110 | 5 | 25 | −2.5 | 20.1 | −1.7 |
+  | aeldari | trooper | 110 | 95 | 0 | 5 | 0 | 23.6 | +1.8 |
+  | necrons | archivist | 105 | 100 | 0 | 5 | 0 | 31.2 | +0.7 |
+  | necrons | convict | 120 | 90 | 0 | 0 | 0 | 33.1 | +2.6 |
+  | necrons | lexmech | 90 | 105 | 0 | 15 | 0 | 27.3 | −3.3 |
+  Route averages: imperium 30.3 (was 30.3) · chaos 28.4 (27.3) · tau 24.9 (25.0) · aeldari 21.8 (22.0) · necrons 30.5 (29.9).
+- **Compensations:**
+  - Before this change the Aeldari prologues were very uneven at equal stats: farmhand 12.9 % deaths, pilgrim 28.3 %, trooper 25.1 %. So the farmhand (default) pays with Sanity 90 and gets Fate 20 ("never seen anything strange"). The pilgrim gets Sanity 110 to match the dream visions.
+  - The farmhand keeps HP 100. With HP 110 the HP death (eld_death_hp) became too rare to show up in 1000 validator runs.
+  - The Necron convict's prologue is the gentlest, so it can carry the full labourer trade-off of 120/90.
+- **Checks:** a per-origin set of endings was compared with the old profiles (same seeds, 9000 runs per origin): no origin lost an ending. §19 claim rates are all in band (imp 13.6, cha 23.8, tau 8.7, eld 15.8, nec 5.4). `node tools/dev/validate.js` with seeds 1/5/9 gives PASS with 0 errors. The worst per-origin Δ in the validator is +3.7 (hive, seed 5). There are no §23 budget or trade-off warnings.
+- **Left for others:** with some seeds the validator warns "tau.origin.pow/trader never reached tau_end_reeducation". The cause is structural, not stats: that ending sits in the colonist-only opening (tau_10x, before the merge at tau_104), and it was unreachable for those origins before as well. The per-origin ending check could skip endings that are only reachable from another origin's prologue. eld_end_claim_nurgle is ~1/9000 on every origin; that is a taint-tuning matter.
+- desc texts now hint at the trade-off (≤40 zh / ≤25 en words). Deserter and Turned Guardsman share a soldier's profile (strong body, nightmares).

@@ -4,6 +4,8 @@
  *   node tools/dev/validate.js              validate real data (data/**, assets/manifest.js)
  *   node tools/dev/validate.js --sample     validate tools/dev/sample_data.js instead of data/
  *   options: --runs N (default 3000)  --seed S (default 1)  --faction id  --quiet (errors/warnings summary only)
+ *   SPEC §20: also checks data/chronicle.js (timeline codex entries), data/rumors.js and data/events_lore.js, and
+ *   reports rumours per route, chronicle entries per millennium and avg rumours overheard per simulated run.
  *
  * Loads registry + manifest + data + the REAL engine (src/js/engine.js) into a vm context, so simulated runs
  * use exactly the game rules (effects, clamps, death checks, roll formula, warp time, events).
@@ -45,7 +47,10 @@ const SPEC2_SCENES = "craftworld webway maiden_world dig_site tomb_exterior tomb
 const SPEC2_UI = ["icon_fate", "icon_worth"];
 const RACES = ["imperium", "chaos", "tau", "aeldari", "necrons", "orks", "tyranids", "other"];
 const TYPES = ["figure", "deity", "organization", "unit", "place", "concept"];
-const CODEX_FILES = ["data/codex.js", "data/codex_aeldari.js", "data/codex_necrons.js"];
+const CODEX_FILES = ["data/codex.js", "data/codex_aeldari.js", "data/codex_necrons.js", "data/chronicle.js", "data/easter_tzeentch.js"];
+const EVENT_FILES = ["data/events.js", "data/events_taint.js", "data/events_lore.js", "data/rumors.js"];   // SPEC §18/§20 load order
+const RUMOR_ZH = 50, RUMOR_EN = 35;     // SPEC §20 rumour text limits (warn)
+const MAX_CHAPTER = 8;
 const FACTION_FILES = ["imperium", "chaos", "tau", "aeldari", "necrons"];
 const GODS = ["khorne", "nurgle", "tzeentch", "slaanesh", "undivided", "other"];
 const TAINT_GODS = ["khorne", "nurgle", "tzeentch", "slaanesh"];   // SPEC §18
@@ -66,6 +71,7 @@ const claimGodOf = (id) => { const m = /_end_claim_(khorne|nurgle|tzeentch|slaan
 
 /* ---------- load into vm ---------- */
 const ctx = vm.createContext({console: {log() {}, warn() {}, error() {}}, Math, Date, JSON, Object, Array});
+ctx.window = ctx;   // some data files wrap themselves in (function (WH) {…})(window.WH)
 const loaded = [];
 function load(rel, required) {
   const p = path.join(ROOT, rel);
@@ -95,6 +101,15 @@ else {
   ctx.__codexOwner = codexOwner;
   load("data/events.js", true);
   load("data/events_taint.js", false);
+  {   // SPEC §20 lore events: remember which ids came from events_lore.js (for the report)
+    const orig = ctx.WH.registerEvents, ids = [];
+    ctx.WH.registerEvents = (list) => { (list || []).forEach((e) => e && ids.push(e.id)); orig(list); };
+    load("data/events_lore.js", false);
+    ctx.WH.registerEvents = orig;
+    ctx.__loreEvents = ids;
+  }
+  if (ctx.WH.registerRumors) load("data/rumors.js", false);
+  else if (fs.existsSync(path.join(ROOT, "data/rumors.js"))) err("data/rumors.js exists but registry.js has no WH.registerRumors");
   const fdir = path.join(ROOT, "data", "factions");
   const files = fs.existsSync(fdir) ? fs.readdirSync(fdir).filter((f) => f.endsWith(".js")).sort((a, b) => {
     const ia = FACTION_FILES.indexOf(a.slice(0, -3)), ib = FACTION_FILES.indexOf(b.slice(0, -3));
@@ -105,12 +120,15 @@ else {
   // index.html must load every data file that exists (plain <script> tags, no fetch)
   const html = fs.existsSync(path.join(ROOT, "index.html")) ? fs.readFileSync(path.join(ROOT, "index.html"), "utf8") : "";
   const tags = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((m) => m[1]);
-  const onDisk = CODEX_FILES.concat(["data/events.js", "data/events_taint.js"], files.map((f) => "data/factions/" + f)).filter((r) => fs.existsSync(path.join(ROOT, r)));
+  const onDisk = CODEX_FILES.concat(EVENT_FILES, files.map((f) => "data/factions/" + f)).filter((r) => fs.existsSync(path.join(ROOT, r)));
   for (const r of onDisk) if (!tags.includes(r)) err(`index.html does not load ${r}`);
   const order = tags.filter((x) => x.startsWith("data/"));
-  const want = CODEX_FILES.concat(["data/events.js", "data/events_taint.js"]);
+  const want = CODEX_FILES.concat(EVENT_FILES);
   let last = -1;
-  for (const r of want) { const i = order.indexOf(r); if (i < 0) continue; if (i < last) err(`index.html: ${r} loads out of SPEC §13 order`); last = i; }
+  for (const r of want) { const i = order.indexOf(r); if (i < 0) continue; if (i < last) err(`index.html: ${r} loads out of SPEC §13/§20 order`); last = i; }
+  for (const r of CODEX_FILES.concat(EVENT_FILES)) if (!tags.includes(r)) warn(`index.html has no <script> for ${r} (SPEC §20 load order)`);
+  const fi = order.findIndex((x) => x.startsWith("data/factions/"));
+  for (const r of EVENT_FILES) { const i = order.indexOf(r); if (i >= 0 && fi >= 0 && i > fi) err(`index.html: ${r} must load before data/factions/*`); }
 }
 load("src/js/engine.js", true);
 const WH = ctx.WH;
@@ -248,10 +266,16 @@ function checkCodex() {
     if (c.race === undefined) noRace.push(id); else if (!RACES.includes(c.race)) err(`${w}: bad race "${c.race}" (${RACES.join("|")})`);
     if (c.type === undefined) noType.push(id); else if (!TYPES.includes(c.type)) err(`${w}: bad type "${c.type}" (${TYPES.join("|")})`);
     if (c.type === "place" && c.cat !== undefined && c.cat !== "place") warn(`${w}: type "place" but cat "${c.cat}" (places view uses type)`);
-    if (!CODEX_CATS.includes(c.cat)) err(`${w}: bad cat "${c.cat}"`);
+    const chr = isChr(c);
+    if (c.hidden !== undefined && typeof c.hidden !== "boolean") err(`${w}: hidden must be true/false`);
+    if (!CODEX_CATS.includes(c.cat) && !(chr && c.cat === undefined)) err(`${w}: bad cat "${c.cat}"`);   // chronicle entries may omit cat (SPEC §20)
     if (!CODEX_FACTIONS.includes(c.faction)) err(`${w}: bad faction "${c.faction}"`);
     sprite(c.sprite, w);
-    if (c.cat === "place") {
+    if (chr) { checkChronicle(id, c, w); }
+    else if (c.tags !== undefined && !Array.isArray(c.tags)) err(`${w}.tags: must be an array of strings`);
+    else if (c.date !== undefined || c.sortKey !== undefined) warn(`${w}: has date/sortKey but no tags:["chronicle"] — not shown in 战史`);
+    if (chr) { /* sprite optional: the lore card shows a millennium seal */ }
+    else if (c.cat === "place") {
       if (!c.scene) warn(`${w}: place entry without scene`);
       else scene(c.scene, w + ".scene");
     } else {
@@ -273,6 +297,135 @@ function checkCodex() {
   if (noRace.length) warn(`codex: ${noRace.length} entr${noRace.length > 1 ? "ies" : "y"} without race (SPEC §13; UI derives one): ${short(noRace)}`);
   if (noType.length) warn(`codex: ${noType.length} entr${noType.length > 1 ? "ies" : "y"} without type (SPEC §13; UI derives one from cat): ${short(noType)}`);
 }
+/* ---------- SPEC §21 hidden entries + Tzeentch easter egg ---------- */
+const EGG_TIERS = [[25, "whisper"], [50, "letter"], [75, "flame"], [99, "last"], [100, "planned"]];
+function checkEgg() {
+  const hidden = Object.keys(WH.codex).filter((id) => WH.codex[id].hidden);
+  // hidden entries must not be things the player is told to collect (they never appear as ??? / in counts)
+  const learnRefs = new Set();
+  Object.values(WH.factions).forEach((f) => ["leaders", "enemies", "boss"].forEach((g) => ((f.learn && f.learn[g]) || []).forEach((x) => learnRefs.add(x))));
+  for (const id of hidden) if (learnRefs.has(id)) err(`codex.${id}: hidden entry is in a faction's learn list (would show as ??? on the ending screen)`);
+  const e = WH.easter && WH.easter.tzeentch;
+  if (!e) { if (!SAMPLE) note("easter egg (SPEC §21): data/easter_tzeentch.js not loaded"); return hidden; }
+  const w = "easter.tzeentch";
+  sprite(e.sprite, w + ".sprite"); sprite(e.sigil, w + ".sigil");
+  if (!Array.isArray(e.tiers)) { err(`${w}.tiers: must be an array`); return hidden; }
+  for (const [at, id] of EGG_TIERS) {
+    const tr = e.tiers.find((x) => x && x.id === id);
+    if (!tr) { warn(`${w}: tier "${id}" (${at}) missing`); continue; }
+    if (tr.at !== at) warn(`${w}.${id}: at ${tr.at} (SPEC §21: ${at})`);
+    checkL(tr.text, `${w}.${id}.text`);
+    if (["letter", "flame", "planned"].includes(id)) checkL(tr.title, `${w}.${id}.title`);
+    if (id === "flame") {
+      if (!Array.isArray(tr.choices) || tr.choices.length !== 2) err(`${w}.flame: needs 2 choices`);
+      else tr.choices.forEach((c, i) => { checkL(c.text, `${w}.flame.choice${i + 1}.text`, 24, 14); checkL(c.result, `${w}.flame.choice${i + 1}.result`); });
+    }
+  }
+  for (const tr of e.tiers) if (!EGG_TIERS.some(([, id]) => id === tr.id)) warn(`${w}: unknown tier id "${tr.id}"`);
+  const eid = e.codex || "egg_tzeentch_letter";
+  if (!WH.codex[eid]) err(`${w}: codex entry "${eid}" missing`);
+  else if (!WH.codex[eid].hidden) err(`codex.${eid}: easter-egg entry must have hidden:true (SPEC §21)`);
+  return hidden;
+}
+
+/* ---------- SPEC §20 chronicle entries ---------- */
+const isChr = (c) => !!(c && Array.isArray(c.tags) && c.tags.includes("chronicle"));
+/* "999.M41" → {mill:41, year:999, approx:false}; ranges "005–014.M31" use the LAST date; 约/c./ca. → approx */
+function parseImpDate(s) {
+  if (typeof s !== "string") return null;
+  const all = [...s.matchAll(/(?:(\d{1,3})\s*\.\s*)?M\s*(\d{2})/g)];
+  if (!all.length) return null;
+  const m = all[all.length - 1];
+  return {mill: +m[2], year: m[1] !== undefined ? +m[1] : null, approx: /约|c\.|ca\.|circa|~|左右|前后|末|初|早期|晚期|late|early|mid/i.test(s) || all.length > 1 || /[–—-]/.test(s)};
+}
+function checkChronicle(id, c, w) {
+  if (!/^chr_/.test(id)) warn(`${w}: chronicle id should start with chr_ (SPEC §20)`);
+  if (!c.tags.every((x) => typeof x === "string")) err(`${w}.tags: must be strings`);
+  if (c.type !== "concept") warn(`${w}: chronicle entry type "${c.type}" (SPEC §20: concept)`);
+  if (c.faction !== "any") warn(`${w}: chronicle entry faction "${c.faction}" (SPEC §20: any)`);
+  if (c.race === undefined) err(`${w}: chronicle entry needs race (race chips in 战史)`);
+  if (c.date === undefined) err(`${w}: chronicle entry needs date {zh,en} (shown even when locked)`);
+  else if (typeof c.date === "string") warn(`${w}.date: plain string — use {zh,en}`);
+  else checkL(c.date, w + ".date", 16, 8);
+  if (typeof c.sortKey !== "number" || !isFinite(c.sortKey)) { err(`${w}: sortKey must be a number (e.g. 41999 for 999.M41)`); return; }
+  if (c.sortKey > 43999) warn(`${w}: sortKey ${c.sortKey} beyond M43 (expected mill×1000 + year)`);
+  if (c.sortKey < 1000) return;      // 远古 / Ancient band (e.g. War in Heaven, negative keys) — no Mxx check
+  const ds = c.date && (typeof c.date === "string" ? c.date : (c.date.en || c.date.zh));
+  const pd = parseImpDate(ds);
+  if (!pd) { if (ds) note(`${w}: date "${ds}" has no Mxx — timeline groups it by sortKey M${Math.floor(c.sortKey / 1000)}`); return; }
+  const km = Math.floor(c.sortKey / 1000);
+  if (pd.mill !== km) warn(`${w}: date "${ds}" is M${pd.mill} but sortKey ${c.sortKey} sorts it into M${km}`);
+  else if (pd.year !== null && !pd.approx && c.sortKey !== km * 1000 + pd.year && Math.floor(c.sortKey) !== km * 1000 + pd.year)
+    warn(`${w}: date "${ds}" → sortKey ${km * 1000 + pd.year} expected, has ${c.sortKey}`);
+  if (c.date && typeof c.date === "object" && c.date.zh && c.date.en) {
+    const a = parseImpDate(c.date.zh), b = parseImpDate(c.date.en);
+    if (a && b && (a.mill !== b.mill || a.year !== b.year)) warn(`${w}.date: zh "${c.date.zh}" and en "${c.date.en}" disagree`);
+  }
+}
+function chronicleReport() {
+  const ids = Object.keys(WH.codex).filter((id) => isChr(WH.codex[id]));
+  if (!ids.length) { if (!SAMPLE) note("chronicle (SPEC §20): no entries yet (data/chronicle.js)"); return; }
+  const by = {}, keys = new Map();
+  for (const id of ids) {
+    const k = WH.codex[id].sortKey, m = typeof k === "number" ? (k < 1000 ? "Ancient" : "M" + Math.floor(k / 1000)) : "M??";
+    by[m] = (by[m] || 0) + 1;
+    if (typeof k === "number") { if (keys.has(k)) note(`chronicle: ${id} and ${keys.get(k)} share sortKey ${k} (tie → id order)`); else keys.set(k, id); }
+  }
+  const mk = (m) => m === "Ancient" ? -1 : m === "M??" ? 999 : +m.slice(1);
+  console.log(`chronicle (SPEC §20): ${ids.length} entries · by millennium ${Object.keys(by).sort((a, b) => mk(a) - mk(b)).map((m) => `${m} ${by[m]}`).join(" · ")}`);
+  // every chronicle entry should be unlockable somewhere (rumour, event, node, choice)
+  const refs = new Set();
+  const add = (x) => [].concat(x || []).forEach((i) => refs.add(i));
+  (WH.rumors || []).forEach((r) => add(r.codex));
+  WH.events.forEach((e) => { add(e.codex); (e.choices || []).forEach((c) => add(c.codex)); });
+  Object.values(WH.factions).forEach((f) => Object.values(f.nodes || {}).forEach((n) => { add(n.codex); (n.choices || []).forEach((c) => add(c.codex)); }));
+  const orphan = ids.filter((id) => !refs.has(id));
+  if (orphan.length) warn(`chronicle: ${orphan.length} entr${orphan.length > 1 ? "ies are" : "y is"} never unlocked by any rumour/event/node (stays ??? forever): ${orphan.slice(0, 8).join(", ")}${orphan.length > 8 ? ", …" : ""}`);
+}
+
+/* ---------- SPEC §20 rumours ---------- */
+function checkRumors() {
+  const list = WH.rumors || [], seen = new Set();
+  const known = new Set(Object.keys(WH.factions).concat(FACTION_FILES));
+  if (!list.length) { if (!SAMPLE) note("rumours (SPEC §20): none registered yet (data/rumors.js)"); return; }
+  list.forEach((r, i) => {
+    const w = `rumor.${(r && r.id) || "#" + i}`;
+    if (!r || typeof r !== "object") { err(`rumor #${i}: not an object`); return; }
+    if (!r.id || typeof r.id !== "string") err(`${w}: missing id`);
+    else if (seen.has(r.id)) err(`${w}: duplicate id`);
+    seen.add(r.id);
+    if (!Array.isArray(r.factions) || !r.factions.length) err(`${w}: factions must be a non-empty array (ids or "*")`);
+    else for (const f of r.factions) {
+      if (f === "*") continue;
+      if (!known.has(f) && !(SAMPLE && WH.factions[f])) err(`${w}: unknown faction "${f}"`);
+      else if (!WH.factions[f]) warn(`${w}: faction "${f}" not loaded`);
+    }
+    for (const k of ["minChapter", "maxChapter"]) if (r[k] !== undefined && (typeof r[k] !== "number" || r[k] < 1 || r[k] > MAX_CHAPTER || r[k] % 1)) err(`${w}: ${k} ${r[k]} (need an integer 1–${MAX_CHAPTER})`);
+    if (typeof r.minChapter === "number" && typeof r.maxChapter === "number" && r.minChapter > r.maxChapter) err(`${w}: minChapter ${r.minChapter} > maxChapter ${r.maxChapter} (never eligible)`);
+    if (r.speaker !== null && r.speaker !== undefined) checkL(r.speaker, w + ".speaker", 10, 6);
+    checkL(r.text, w + ".text", RUMOR_ZH, RUMOR_EN);
+    if (r.codex !== undefined && !Array.isArray(r.codex)) err(`${w}.codex: must be an array of codex ids`);
+    codexRef(r.codex, w);
+    for (const k of Object.keys(r)) if (!["id", "factions", "minChapter", "maxChapter", "speaker", "text", "codex"].includes(k)) warn(`${w}: unknown key "${k}"`);
+  });
+}
+function rumorReport() {
+  const list = WH.rumors || [];
+  if (!list.length) return;
+  const shared = list.filter((r) => (r.factions || []).includes("*")).length;
+  const parts = Object.keys(WH.factions).filter((id) => !ONLY || id === ONLY).map((fid) => {
+    const own = list.filter((r) => (r.factions || []).includes(fid)).length;
+    const chs = Object.keys(WH.factions[fid].chapters || {}).map(Number).sort((a, b) => a - b);
+    const per = chs.map((ch) => list.filter((r) => WH.Rules.rumorEligible(r, fid, ch)).length);
+    const gaps = chs.filter((ch, i) => !per[i]);
+    if (!SAMPLE && own && (own < 8 || own > 12)) warn(`rumours: ${fid} has ${own} route rumours (SPEC §20: 8–12)`);
+    if (gaps.length && !SAMPLE) note(`rumours: ${fid} chapter(s) ${gaps.join(",")} have no eligible rumour`);
+    return `${fid} ${own}+${shared} (ch ${per.join("/")})`;
+  });
+  if (!SAMPLE && (shared < 10 || shared > 20)) warn(`rumours: ${shared} shared ("*") rumours (SPEC §20: ~15)`);
+  console.log(`rumours (SPEC §20): ${list.length} total · per route own+shared (eligible per chapter): ${parts.join(" · ")}`);
+}
+
 /* race × type table, using the same fallback as the UI for entries that lack the fields */
 const CAT_TYPE = {leader: "figure", boss: "figure", enemy: "unit", god: "deity", lore: "concept", place: "place"};
 function codexTable() {
@@ -364,15 +517,36 @@ function checkOrigins(f, origins, nodes, flagsSet) {
     checkL(o.desc, ow + ".desc", 40, 25, true);
     if (!o.sprite) warn(`${ow}: no sprite (falls back to playerSprite)`); else sprite(o.sprite, ow + ".sprite");
     if (!o.startNode || !nodes[o.startNode]) err(`${ow}: startNode "${o.startNode}" does not exist`);
+    // SPEC §23 caps: max:{hp,sanity} 70–130 (default 100); start values default to the caps
+    if (o.max !== undefined) {
+      if (!o.max || typeof o.max !== "object" || Array.isArray(o.max)) err(`${ow}.max: must be {hp, sanity}`);
+      else for (const k of Object.keys(o.max)) {
+        if (!["hp", "sanity"].includes(k)) err(`${ow}.max: only hp/sanity can have a cap (got "${k}")`);
+        else if (typeof o.max[k] !== "number" || o.max[k] < 70 || o.max[k] > 130) err(`${ow}.max.${k}: ${o.max[k]} (need 70–130)`);
+      }
+    }
+    const caps = WH.Rules.capsOf ? WH.Rules.capsOf(o) : {hp: 100, sanity: 100};
     if (!o.stats || typeof o.stats !== "object") err(`${ow}: stats missing`);
     else {
       for (const k of STATS) {
-        const v = o.stats[k];
-        if (typeof v !== "number" || v < 0 || v > 100) err(`${ow}.stats.${k}: ${v} (need a number 0–100)`);
+        const v = o.stats[k], hi = caps[k] || 100;
+        if (v === undefined && caps[k]) continue;                     // hp/sanity default to the cap
+        if (typeof v !== "number" || v < 0 || v > hi) err(`${ow}.stats.${k}: ${v} (need a number 0–${hi})`);
+        else if (caps[k] && v < hi) note(`${ow}: starts with ${k} ${v} below its cap ${hi} (SPEC §23: rare — intended?)`);
       }
       for (const k of Object.keys(o.stats)) if (!STATS.includes(k)) warn(`${ow}.stats: unknown stat "${k}"`);
-      if (Math.abs(total(o.stats) - total(base)) > 15) warn(`${ow}: stat total ${total(o.stats)} vs default ${total(base)} (spec ±15)`);
+      // SPEC §23 budget: (maxHp−100) + (maxSanity−100) + (renown−10) − 1.5 × corruption within ±5
+      const ren = o.stats.renown || 0, cor = o.stats.corruption || 0;
+      const budget = (caps.hp - 100) + (caps.sanity - 100) + (ren - 10) - 1.5 * cor;
+      if (Math.abs(budget) > 5) warn(`${ow}: §23 budget ${budget >= 0 ? "+" : ""}${budget} (maxHp ${caps.hp}, maxSanity ${caps.sanity}, renown ${ren}, corruption ${cor}; need within ±5)`);
+      if (i > 0) {
+        const better = caps.hp > 100 || caps.sanity > 100 || ren > 10;
+        const worse = caps.hp < 100 || caps.sanity < 100 || ren < 10 || cor > 0;
+        if (!better || !worse) warn(`${ow}: §23 trade-off — needs at least one stat above default and one below (${better ? "no downside" : "no upside"})`);
+      }
+      o.__budget = budget;
     }
+    void total;
     if (o.set !== undefined && (typeof o.set !== "object" || Array.isArray(o.set))) err(`${ow}.set: must be an object of flags`);
     if (o.id && (!o.set || !o.set["origin_" + o.id])) warn(`${ow}: does not set flag "origin_${o.id}" (SPEC §16)`);
     if (o.startNode && nodes[o.startNode] && nodes[o.startNode].chapter !== 1 && i > 0) warn(`${ow}: prologue start "${o.startNode}" is not in chapter 1`);
@@ -568,14 +742,26 @@ function checkFaction(f) {
   return {endings, nodeCount: ids.length, chapters: chapterIds.length, cons};
 }
 
+/* static reachability from one origin's start node (+ death nodes + event gotos, which any origin can hit) */
+function originReach(f, o) {
+  const nodes = f.nodes || {}, r = new Set(), q = [];
+  const push = (x) => { if (x && nodes[x] && !r.has(x)) { r.add(x); q.push(x); } };
+  push((o && o.startNode) || f.startNode);
+  Object.values(f.deathNodes || {}).forEach(push);
+  eventGotoTargets(f.id).forEach(push);
+  while (q.length) for (const c of nodes[q.shift()].choices || []) targetsOf(c).forEach(push);
+  return r;
+}
+
 /* ---------- Monte-Carlo ---------- */
 function simulate(f) {
   const origins = WH.Game.origins(f);
   const res = {runs: RUNS, visits: [], endings: {}, kinds: {good: 0, bad: 0, death: 0}, deathCause: {}, loops: 0, crashes: 0,
                softlocks: new Map(), events: {}, eventsPerRun: [], years: [], visited: new Set(), firstCrash: null, maxRevisit: 0, maxRevisitNode: null,
                perOrigin: {}};
-  origins.forEach((o) => { res.perOrigin[o.id] = {runs: 0, visits: [], kinds: {good: 0, bad: 0, death: 0}}; });
+  origins.forEach((o) => { res.perOrigin[o.id] = {runs: 0, visits: [], kinds: {good: 0, bad: 0, death: 0}, endings: new Set()}; });
   res.taint = {khorne: [], nurgle: [], tzeentch: [], slaanesh: []}; res.claims = {}; res.cleanses = 0;
+  res.rumors = []; res.rumorIds = {}; res.chrUnlocked = [];      // SPEC §20
   // SPEC §19 per-god run counts: claim fired ≥1 / fired twice / ended in that god's claim ending / resisted (flag) and not claimed
   res.claimRuns = {}, res.claimTwice = {}, res.claimEnd = {}, res.resisted = {}; res.anyClaimEnd = 0; res.anyClaimFired = 0;
   TAINT_GODS.forEach((gd) => { res.claimRuns[gd] = 0; res.claimTwice[gd] = 0; res.claimEnd[gd] = 0; res.resisted[gd] = 0; });
@@ -617,7 +803,7 @@ function simulate(f) {
       res.visits.push(g.state.visits);
       res.endings[g.state.nodeId] = (res.endings[g.state.nodeId] || 0) + 1;
       res.kinds[n.ending.kind] = (res.kinds[n.ending.kind] || 0) + 1;
-      po.visits.push(g.state.visits); po.kinds[n.ending.kind]++;
+      po.visits.push(g.state.visits); po.kinds[n.ending.kind]++; po.endings.add(g.state.nodeId);
       for (const gd of TAINT_GODS) res.taint[gd].push((g.state.taint && g.state.taint[gd]) || 0);
       const cg = claimGodOf(g.state.nodeId);
       if (cg) { res.claimEnd[cg]++; res.anyClaimEnd++; }
@@ -628,6 +814,10 @@ function simulate(f) {
         if (g.state.flags["resisted_" + gd] && cg !== gd) res.resisted[gd]++;
       }
       res.eventsPerRun.push(evCount);
+      const sr = g.state.seenRumors || [];
+      res.rumors.push(sr.length);
+      sr.forEach((id) => { res.rumorIds[id] = (res.rumorIds[id] || 0) + 1; });
+      res.chrUnlocked.push(g.state.codex.filter((id) => isChr(WH.codex[id])).length);
       res.years.push((g.state.hours - WH.Rules.startHours(f)) / 8760);
     } catch (e) {
       res.crashes++;
@@ -650,12 +840,21 @@ if (!factionIds.length) err("no factions registered");
 checkManifest();
 checkCodex();
 const perGod = checkEvents();
+checkRumors();
 console.log(`events per god: ${JSON.stringify(perGod)}`);
+if ((ctx.__loreEvents || []).length) console.log(`lore events (SPEC §20, data/events_lore.js): ${ctx.__loreEvents.length} — ${ctx.__loreEvents.join(", ")}`);
+else if (!SAMPLE) note("lore events (SPEC §20): data/events_lore.js has none yet");
+chronicleReport();
+rumorReport();
+{
+  const hidden = checkEgg();
+  if (hidden.length) console.log(`hidden codex entries (SPEC §21, excluded from counts): ${hidden.join(", ")} · countable ${Object.keys(WH.codex).length - hidden.length}`);
+}
 {
   const pc = {};
   for (const id of Object.keys(WH.codex)) if (WH.codex[id].cat === "place") pc[WH.codex[id].faction || "any"] = (pc[WH.codex[id].faction || "any"] || 0) + 1;
   const cats = {};
-  for (const id of Object.keys(WH.codex)) cats[WH.codex[id].cat] = (cats[WH.codex[id].cat] || 0) + 1;
+  for (const id of Object.keys(WH.codex)) { const k = WH.codex[id].cat || (isChr(WH.codex[id]) ? "(chronicle)" : "(none)"); cats[k] = (cats[k] || 0) + 1; }
   console.log(`codex per category: ${JSON.stringify(cats)}`);
   console.log(`places per faction: ${JSON.stringify(pc)}`);
   if (ctx.__codexOwner) {
@@ -732,18 +931,37 @@ for (const r of reports) {
     }
     const evs = Object.entries(s.events);
     if (evs.length) console.log(`events fired: ${evs.map(([k, c]) => `${k}×${c}`).join(", ")}`);
+    if ((WH.rumors || []).length) {
+      const elig = WH.rumors.filter((x) => (x.factions || []).some((y) => y === "*" || y === r.id));
+      const never = elig.filter((x) => !s.rumorIds[x.id]).map((x) => x.id);
+      const lore = (ctx.__loreEvents || []).filter((id) => s.events[id]);
+      console.log(`rumours (SPEC §20): avg ${avg(s.rumors).toFixed(2)} overheard/run (max ${Math.max(...s.rumors)}) · ${elig.length - never.length}/${elig.length} ever heard · ` +
+        `chronicle entries unlocked/run avg ${avg(s.chrUnlocked).toFixed(2)}${(ctx.__loreEvents || []).length ? ` · lore events fired: ${lore.length}/${ctx.__loreEvents.length} ids` : ""}`);
+      if (never.length) warn(`${r.id}: ${never.length} eligible rumour(s) never heard in ${RUNS} runs: ${never.slice(0, 8).join(", ")}${never.length > 8 ? ", …" : ""}`);
+      r.rumorAvg = avg(s.rumors);
+    }
     console.log(`max visits of one node in a run: ${s.maxRevisit} (${s.maxRevisitNode})`);
     const po = Object.entries(s.perOrigin);
     if (po.length > 1 || (f.origins && f.origins.length)) {
-      console.log("per origin:");
+      // SPEC §23: per-origin death rate vs route average (flag > ±6 pts) + every origin reaches all route endings
+      const routeDeath = 100 * s.kinds.death / (v.length || 1), allEnds = Object.keys(s.endings).filter((e) => s.endings[e] / (v.length || 1) >= 0.005);   // ignore ≤0.5% flukes
+      console.log(`per origin (SPEC §23 caps · death vs route avg ${routeDeath.toFixed(1)}%):`);
       for (const [oid, o] of po) {
-        const n = o.visits.length;
-        console.log(`  ${oid.padEnd(12)} runs ${String(o.runs).padStart(5)} · avg nodes ${avg(o.visits).toFixed(1).padStart(5)} · good ${pct(o.kinds.good, n).padStart(6)} · bad ${pct(o.kinds.bad, n).padStart(6)} · death ${pct(o.kinds.death, n).padStart(6)}`);
+        const n = o.visits.length, d = 100 * o.kinds.death / (n || 1), diff = d - routeDeath;
+        const og = WH.Game.findOrigin(f, oid), caps = WH.Rules.capsOf ? WH.Rules.capsOf(og) : {hp: 100, sanity: 100};
+        const bud = og && og.__budget !== undefined ? ` · budget ${og.__budget >= 0 ? "+" : ""}${og.__budget}` : "";
+        const flag = Math.abs(diff) > 6 ? "  ✗" : "";
+        console.log(`  ${oid.padEnd(12)} max ${caps.hp}/${caps.sanity}${bud} · runs ${String(o.runs).padStart(5)} · avg nodes ${avg(o.visits).toFixed(1).padStart(5)} · good ${pct(o.kinds.good, n).padStart(6)} · bad ${pct(o.kinds.bad, n).padStart(6)} · death ${pct(o.kinds.death, n).padStart(6)} (${diff >= 0 ? "+" : ""}${diff.toFixed(1)})${flag}`);
+        if (!SAMPLE && po.length > 1 && Math.abs(diff) > 6) warn(`${r.id}.origin.${oid}: death rate ${d.toFixed(1)}% vs route ${routeDeath.toFixed(1)}% (${diff >= 0 ? "+" : ""}${diff.toFixed(1)} pts; SPEC §23 ±6)`);
+        const canReach = originReach(f, og);              // only endings this origin can statically reach (not another origin's prologue)
+        const miss = allEnds.filter((e) => !o.endings.has(e) && !claimGodOf(e) && canReach.has(e));
+        if (!SAMPLE && po.length > 1 && miss.length) warn(`${r.id}.origin.${oid}: never reached ${miss.length} route ending(s) in ${o.runs} runs: ${miss.slice(0, 6).join(", ")}${miss.length > 6 ? ", …" : ""}`);
       }
     }
   }
 }
 
+if (reports.some((r) => r.rumorAvg !== undefined)) console.log(`\n§20 rumours overheard per run: ${reports.filter((r) => r.rumorAvg !== undefined).map((r) => `${r.id} ${r.rumorAvg.toFixed(2)}`).join(" · ")}`);
 {
   const banded = reports.filter((r) => r.band);
   if (banded.length) console.log(`\n§19 claim-rate bands: ${banded.map((r) => `${r.id} ${r.band.rate.toFixed(1)}% (${r.band.lo}–${r.band.hi}) ${r.band.ok ? "✓" : "✗"}${r.band.proxy ? "*" : ""}`).join(" · ")}` +

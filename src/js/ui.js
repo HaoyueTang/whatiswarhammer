@@ -107,6 +107,19 @@
     return CAT_TYPE[c.cat] || "concept";
   }
   function raceColor(r) { return RACE_COLOR[r] || RACE_COLOR.other; }
+  /* SPEC §20: chronicle entries (tags:["chronicle"]) live in the 战史 timeline, not the 条目 grid */
+  function isChronicle(c) { return !!(c && Array.isArray(c.tags) && c.tags.indexOf("chronicle") >= 0); }
+  /* SPEC §21: entries with hidden:true (the easter-egg letter) are never counted and never listed as ??? */
+  function isHidden(c) { return !!(c && c.hidden); }
+  function codexIds() { return Object.keys(WH.codex).filter(function (id) { return !isHidden(WH.codex[id]); }); }
+  function chrKey(c) { var k = c && +c.sortKey; return isFinite(k) && c.sortKey !== null && c.sortKey !== "" ? k : Infinity; }
+  /* millennium of an entry: floor(sortKey/1000), else the "M41" in its date, else null */
+  function chrMill(c) {
+    var k = chrKey(c);
+    if (isFinite(k)) return k < 1000 ? 0 : Math.floor(k / 1000);       // sortKey < 1000 (e.g. War in Heaven, negative) → 远古 band (0)
+    var m = /M\s*(\d{2})/.exec((c && c.date && (c.date.en || c.date.zh || c.date)) || "");
+    return m ? +m[1] : null;
+  }
   /* readable ink on a coloured chip */
   function inkOn(hex) { var c = rgb(hex); return (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) > 140 ? "#120c08" : "#fff4e4"; }
   function badgeText(id) { var c = WH.codex[id]; return t("lt_" + typeOf(c)) + " · " + t("race_" + raceOf(c, id)); }
@@ -243,7 +256,7 @@
     sel: {faction: null}, keepSel: false,
     loreQueue: [], loreKnown: {}, lore: null, conseq: null,
     cx: {race: "all", type: "all", q: "", sort: "disc", placeRace: "all"}, cxNew: {},
-    accent: null, debug: /[?&]debug=1(&|$)/.test(location.search)
+    accent: null, debug: /[?&]debug=1(&|$)/.test(location.search), eggForce: null, eggForcedShown: {}, jokeTimer: null
   };
 
   UI.init = function () {
@@ -254,6 +267,8 @@
     try { UI.reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { UI.reduced = false; }
     var m = /[?&]seed=(\d+)/.exec(location.search);
     if (m) UI.seed = parseInt(m[1], 10);
+    var em = /[?&]egg=(\d+)/.exec(location.search);              // SPEC §21 debug: force a tier (25|50|75|99|100)
+    if (em) UI.eggForce = Math.max(0, Math.min(100, parseInt(em[1], 10)));
     applyFxSetting();
     UI.typer = new Typer($("dlg-text"), $("dlg-live"));
     UI.typer.linkify = true;
@@ -295,6 +310,11 @@
     fit();
     show("title");
     if (!WH.Save.isPersistent()) toast(t("storage_off"));
+    try {                                                  // SPEC §22: one-time notice after an update; data is never reset
+      var bc = WH.Save.bootCheck();
+      UI.bootCheck = bc;
+      if (bc.updated) toast(t("upd_toast", {v: bc.to}));
+    } catch (e) { console.warn("bootCheck", e); }
   };
 
   function applyFxSetting() {
@@ -345,7 +365,7 @@
 
   /* ======================= TITLE ======================= */
   function codexStats() {
-    var all = Object.keys(WH.codex), g = WH.Save.codexGlobal();
+    var all = codexIds(), g = WH.Save.codexGlobal();
     var n = all.filter(function (id) { return g.indexOf(id) >= 0; }).length;
     return {n: n, t: all.length, pct: all.length ? Math.round(100 * n / all.length) : 0};
   }
@@ -378,8 +398,144 @@
     if (errs.length) s.appendChild(h("div", {class: "notice", role: "status"}, t("load_errors") + " " +
       errs.map(function (e) { return e.file + (e.msg && e.msg !== "missing" ? " (" + e.msg + ")" : ""); }).join(", ")));
     updateCodexBadge();
-    setTimeout(function () { if (UI.screen === "title" && !UI.modals.length) newBtn.focus({preventScroll: true}); }, 0);
+    eggTitle(s);
+    setTimeout(function () { if (UI.screen === "title" && !UI.modals.length && !$("egg-planned")) newBtn.focus({preventScroll: true}); }, 0);
   }
+
+  /* ======================= SPEC §21: TZEENTCH COLLECTION EASTER EGG =======================
+   * P = round(100 × (0.6 × codex unlocked/total + 0.4 × endings found/total)), global, hidden entries excluded.
+   * Tiers (data/easter_tzeentch.js) fire once each (whatiswh.eggTiers) on the title screen / a fresh codex open.
+   * ?egg=N forces P = N (and re-fires the tier at N once per page load). */
+  function egg() { var e = WH.easter && WH.easter.tzeentch; return e && Array.isArray(e.tiers) ? e : null; }
+  function eggTier(id) { var e = egg(); return e ? (e.tiers.filter(function (x) { return x.id === id; })[0] || null) : null; }
+  function eggCodexId() { var e = egg(), id = (e && e.codex) || "egg_tzeentch_letter"; return WH.codex[id] ? id : null; }
+  function eggProgress() {
+    var g = {}, es = WH.Save.endingStats(), ends = [];
+    WH.Save.codexGlobal().forEach(function (id) { g[id] = 1; });
+    factionList().forEach(function (f) { Object.keys(f.nodes || {}).forEach(function (id) { if (f.nodes[id].ending) ends.push(f.id + ":" + id); }); });
+    var ids = codexIds(), cu = ids.filter(function (id) { return g[id]; }).length, ef = ends.filter(function (k) { return es[k]; }).length;
+    var ct = ids.length, et = ends.length, left = (ct - cu) + (et - ef);
+    var p = (ct || et) ? Math.round(100 * (0.6 * (ct ? cu / ct : 1) + 0.4 * (et ? ef / et : 1))) : 0;
+    if (left > 0 && p >= 100) p = 99;
+    var r = {p: p, left: left, cu: cu, ct: ct, ef: ef, et: et, forced: false};
+    if (UI.eggForce !== null) { r.p = UI.eggForce; r.forced = true; r.left = UI.eggForce >= 100 ? 0 : UI.eggForce === 99 ? 1 : Math.max(left, 2); }
+    return r;
+  }
+  UI.eggProgress = eggProgress;
+  function eggReached(id, pr) { var tr = eggTier(id); return !!tr && (id === "last" ? pr.left === 1 : pr.p >= tr.at); }
+  /* reached and not yet triggered (or forced via ?egg= at exactly this tier, once per page load) */
+  function eggFresh(id, pr) {
+    if (!eggReached(id, pr)) return false;
+    if (!WH.Save.eggTiers()[id]) return true;
+    var tr = eggTier(id);
+    return pr.forced && tr.at === UI.eggForce && !UI.eggForcedShown[id];
+  }
+  function eggFire(id) { WH.Save.markEggTier(id); UI.eggForcedShown[id] = 1; }
+  function eggDone(id) { return !!WH.Save.eggTiers()[id]; }
+
+  function eggTitle(s) {
+    var e = egg();
+    if (!e) return;
+    var pr = eggProgress(), main = s.querySelector(".title-main"), sub = s.querySelector(".title-sub"), wrap = s.querySelector(".title-wrap");
+    if (eggReached("letter", pr) || eggDone("letter")) {
+      var fresh = eggFresh("letter", pr);
+      if (fresh) eggFire("letter");
+      s.appendChild(h("button", {class: "egg-letter px" + (fresh ? " fresh" : ""), type: "button", id: "egg-letter", "aria-label": t("egg_letter"), title: t("egg_letter"),
+        onclick: function () { this.classList.remove("fresh"); eggLetterCard(); }}, h("span", {class: "env", "aria-hidden": "true"}), h("span", {class: "seal", "aria-hidden": "true"})));
+    }
+    if (eggReached("flame", pr) || eggDone("flame")) {
+      if (eggFresh("flame", pr)) eggFire("flame");
+      main.appendChild(h("button", {class: "egg-flame", type: "button", id: "egg-flame", "aria-label": t("egg_flame"), title: t("egg_flame"),
+        onclick: function (ev) { ev.stopPropagation(); eggFlameScene(); }}, h("i"), h("i"), h("i")));
+    }
+    if (eggDone("planned") || (pr.forced && pr.p >= 100 && eggReached("planned", pr))) main.classList.add("tz-shimmer");
+    if (eggFresh("planned", pr)) { eggFire("planned"); setTimeout(eggPlanned, 250); }
+    else if (eggFresh("whisper", pr)) { eggFire("whisper"); eggWhisper(sub); }
+    void wrap;
+  }
+  function eggWhisper(sub) {
+    var tr = eggTier("whisper");
+    if (!sub || !tr) return;
+    sub.classList.add("egg-glitch");
+    sub.textContent = L(tr.text);
+    sub.setAttribute("data-text", L(tr.text));
+    sfx("scan");
+    setTimeout(function () { sub.classList.remove("egg-glitch"); sub.removeAttribute("data-text"); sub.textContent = t("title_sub"); }, 3000);
+  }
+  function eggLetterCard() {
+    var tr = eggTier("letter"), e = egg();
+    if (!tr) return;
+    openModal({title: L(tr.title), narrow: true, body: h("div", {class: "egg-card"},
+      h("div", {class: "egg-sig"}, art("sprite", e.sigil || "sigil_tzeentch", null, "#3b6fd1")),
+      h("p", {class: "egg-text"}, L(tr.text)),
+      h("p", {class: "egg-sign"}, "— " + t("egg_k")))});
+  }
+  function eggFlameScene() {
+    var tr = eggTier("flame"), e = egg();
+    if (!tr) return;
+    var box = h("div", {class: "egg-choices"});
+    (tr.choices || []).forEach(function (c) {
+      box.appendChild(h("button", {class: "btn choice px", type: "button", onclick: function () {
+        clear(box);
+        box.appendChild(h("p", {class: "egg-result"}, L(c.result)));
+        box.appendChild(h("button", {class: "btn px", type: "button", onclick: function () { closeTop(); }}, t("cont_btn")));
+        box.querySelector("button").focus({preventScroll: true});
+      }}, h("span", {class: "ct"}, L(c.text))));
+    });
+    openModal({title: L(tr.title), body: h("div", {class: "egg-mini"},
+      h("div", {class: "egg-stage"}, art("scene", "warp"), h("div", {class: "egg-actor"}, art("sprite", e.sprite || "daemon_tzeentch", null, "#3b6fd1"))),
+      h("p", {class: "egg-text"}, L(tr.text)), box), focus: ".egg-choices button"});
+  }
+  /* tier 100: full-screen scene → unlock the hidden letter + show its card; title shimmer + 奸奇的玩笑 from then on */
+  function eggPlanned() {
+    var tr = eggTier("planned"), e = egg();
+    if (!tr || $("egg-planned")) return;
+    var txt = h("div", {class: "egg-full-text", "aria-hidden": "true"}), live = h("div", {class: "sr-only", "aria-live": "polite"});
+    var go = h("button", {class: "btn primary px", type: "button", hidden: true}, t("cont_btn") + " ▸");
+    var ov = h("div", {class: "egg-full" + (UI.fxOn ? " glitchy" : ""), id: "egg-planned", role: "dialog", "aria-modal": "true", "aria-label": L(tr.title)},
+      h("div", {class: "egg-full-bg"}, art("scene", "warp")),
+      h("div", {class: "egg-full-actor"}, art("sprite", e.sprite || "daemon_tzeentch", null, "#3b6fd1")),
+      h("div", {class: "egg-full-box px"}, h("h2", null, L(tr.title)), txt, live, h("div", {class: "egg-full-btns"}, go)));
+    $("overlay-root").appendChild(ov);
+    sfx("event");
+    mood("warp");
+    var ty = new Typer(txt, live);
+    UI.eggTyper = ty;
+    var done = function () { go.hidden = false; go.focus({preventScroll: true}); };
+    ty.run(L(tr.text), UI.settings.textSpeed, done);
+    ov.addEventListener("click", function (ev) { if (ev.target !== go && ty.active) ty.finish(); });
+    go.addEventListener("click", function () {
+      ov.remove(); UI.eggTyper = null;
+      var id = eggCodexId();
+      if (id) { WH.Save.addCodexGlobal([id]); WH.Save.markCodexSeen([id]); showLore([id], 0, false); }
+      if (UI.screen === "title") { renderTitle(); mood("title"); }
+    });
+  }
+  UI.eggPlanned = eggPlanned;
+  /* 奸奇的玩笑: while a codex view is open, a random locked "???" briefly shows its real name shuffled */
+  function shuffleStr(a) {
+    a = Array.from(a);
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), x = a[i]; a[i] = a[j]; a[j] = x; }
+    return a.join("");
+  }
+  function startJoke() {
+    if (UI.jokeTimer || !eggDone("planned") || UI.settings.tzeentchJoke === false) return;
+    var tick = function () {
+      if (!document.querySelector(".codex-body") || UI.settings.tzeentchJoke === false) { clearInterval(UI.jokeTimer); UI.jokeTimer = null; return; }
+      var els = document.querySelectorAll(".codex-body .centry.locked .nm, .codex-body .place-tile.locked .pn, .codex-body .tl-item.locked .tl-name, .codex-body .end-tile.locked .et");
+      if (!els.length) return;
+      var el = els[Math.floor(Math.random() * els.length)];
+      if (el.getAttribute("data-joke")) return;
+      var host = el.closest("[data-id]"), c = host && WH.codex[host.getAttribute("data-id")];
+      var orig = el.textContent, nm = c ? L(c.name).replace(/\s+/g, "") : "";
+      el.setAttribute("data-joke", "1");
+      el.textContent = nm ? shuffleStr(nm) : shuffleStr("?¿⸮" + orig).slice(0, Math.max(3, orig.length));
+      setTimeout(function () { el.textContent = orig; el.removeAttribute("data-joke"); }, 900);
+    };
+    UI.jokeTimer = setInterval(tick, 2400);
+    UI.jokeTick = tick;
+  }
+  UI.startJoke = startJoke;
 
   /* ======================= FACTION SELECT ======================= */
   function factionList() {
@@ -440,20 +596,39 @@
     if (first) setTimeout(function () { if (!UI.modals.length) first.focus({preventScroll: true}); }, 0);
   }
 
+  /* SPEC §23: an origin's starting values (hp/sanity default to its caps) */
+  function originStart(o) {
+    var caps = WH.Rules.capsOf(o), ss = (o && o.stats) || {}, out = {max: caps};
+    WH.Rules.STATS.forEach(function (k) {
+      var cap = caps[k] || 100, v = typeof ss[k] === "number" ? ss[k] : (caps[k] ? cap : 0);
+      out[k] = Math.max(0, Math.min(cap, v));
+    });
+    return out;
+  }
   function statPreview(f, o, base) {
     var rows = [["hp", "icon_hp", "var(--c-hp)"], ["sanity", "icon_sanity", "var(--c-sanity)"],
                 ["corruption", "icon_corruption", "var(--c-corruption)"], ["renown", f.renownIcon, "var(--accent)"]];
-    return h("div", {class: "ostats"}, rows.map(function (r) {
-      var v = (o.stats && typeof o.stats[r[0]] === "number") ? o.stats[r[0]] : 0;
-      var d = base && base !== o && base.stats ? v - (base.stats[r[0]] || 0) : 0;
-      var good = r[0] === "corruption" ? d < 0 : d > 0;
-      return h("div", {class: "orow", vars: {"--c": r[2]}},
+    var me = originStart(o), b = base && base !== o ? originStart(base) : null;
+    var trade = ["hp", "sanity"].filter(function (k) { return me.max[k] !== 100; }).map(function (k) {
+      var up = me.max[k] > 100;
+      return h("span", {class: "tr " + (up ? "up" : "down")}, t("cap_" + k) + " " + me.max[k] + " " + (up ? "▲" : "▼"));
+    });
+    var kids = rows.map(function (r) {
+      var k = r[0], v = me[k], cap = me.max[k] || 100;
+      var d = b ? v - (b[k] || 0) : 0;
+      var good = k === "corruption" ? d < 0 : d > 0;
+      var scale = me.max[k] ? WH.Rules.CAP_MAX : 100;              // hp/sanity bars share a 0–130 scale (tick at 100)
+      return h("div", {class: "orow" + (me.max[k] ? " capped" : ""), vars: {"--c": r[2]}},
         art("ui", r[1]),
-        h("span", {class: "ol"}, r[0] === "renown" ? L(f.renownLabel) : t(r[0])),
-        h("span", {class: "obar", role: "progressbar", "aria-valuenow": v, "aria-valuemin": 0, "aria-valuemax": 100}, h("i", {style: "width:" + v + "%"})),
+        h("span", {class: "ol"}, k === "renown" ? L(f.renownLabel) : t(k)),
+        h("span", {class: "obar", role: "progressbar", "aria-valuenow": v, "aria-valuemin": 0, "aria-valuemax": cap},
+          h("i", {style: "width:" + Math.min(100, 100 * v / scale) + "%"})),
         h("b", {class: "ov"}, String(v)),
         h("span", {class: "od " + (d ? (good ? "up" : "down") : "")}, d ? signed(d) : ""));
-    }));
+    });
+    var tradeRow = h("div", {class: "otrade"}, trade.length ? trade.reduce(function (a, x, i) { return a.concat(i ? [h("span", {class: "sep"}, " · "), x] : [x]); }, [])
+                                                                : h("span", {class: "tr even"}, t("cap_even")));
+    return h("div", {class: "ostats"}, kids.concat([tradeRow]));
   }
 
   function renderOrigins(f) {
@@ -481,7 +656,7 @@
 
   function startGame(fid, originId) {
     var g, step;
-    try { var r = WH.newGame(fid, originId, {rng: newRng()}); g = r.game; step = r.step; }
+    try { var r = WH.newGame(fid, originId, {rng: newRng(), rumors: UI.settings.rumors !== false}); g = r.game; step = r.step; }
     catch (e) { toast(t("missing_node", {x: e.message})); console.error(e); return; }
     UI.game = g;
     enterGameScreen();
@@ -501,6 +676,7 @@
     closeEventOverlay();
     closeLore();
     UI.loreQueue = [];
+    UI.rumorCodex = null;
     buildStats();
     buildTools();
     show("game");
@@ -558,7 +734,8 @@
       box.appendChild(h("div", {class: "stat", id: "stat-" + d[0], vars: {"--c": d[2]}, role: "group", "aria-label": statLabel(d[0])},
         art("ui", d[1]),
         h("div", {class: "col"},
-          h("div", {class: "lab"}, h("span", null, statLabel(d[0]), info), h("b", {id: "sv-" + d[0]}, "0")),
+          h("div", {class: "lab"}, h("span", null, statLabel(d[0]), info),
+            h("span", {class: "val"}, h("b", {id: "sv-" + d[0]}, "0"), d[0] === "hp" || d[0] === "sanity" ? h("span", {class: "cap", id: "sm-" + d[0]}, "/100") : null)),
           h("div", {class: "bar", role: "progressbar", "aria-valuemin": 0, "aria-valuemax": 100, id: "sb-" + d[0]}, h("i", null)))));
     });
     clear($("clock-icon")).appendChild(art("ui", "icon_clock"));
@@ -587,9 +764,12 @@
       var v = Math.round(s[k]);
       var bar = $("sb-" + k);
       if (!bar) return;
+      var cap = g.cap ? g.cap(k) : 100;                      // SPEC §23: bars scale to the run's cap ("118/120")
       $("sv-" + k).textContent = v;
-      bar.firstChild.style.width = v + "%";
+      if ($("sm-" + k)) $("sm-" + k).textContent = "/" + cap;
+      bar.firstChild.style.width = Math.min(100, 100 * v / cap) + "%";
       bar.setAttribute("aria-valuenow", v);
+      bar.setAttribute("aria-valuemax", cap);
       var danger = (k === "hp" || k === "sanity") ? v < 30 : (k === "corruption" ? v > 60 : false);
       $("stat-" + k).classList.toggle("low", danger);
     });
@@ -654,7 +834,8 @@
     np.textContent = name;
     np.className = "nameplate" + (name ? "" : " narration");
     $("dlg-text").classList.toggle("narr", !node.speaker);
-    if (opts.nodeId) { UI.typer.run(L(node.text), "instant"); return; }
+    if (opts.nodeId) { UI.typer.run(L(node.text), "instant"); renderRumor(null); return; }
+    renderRumor(g.currentRumor ? g.currentRumor() : null, opts.instant);
     renderChoices(true);
     if (!UI.eventOpen) mood(au("moodFor", node, g.state, g.faction));
     var text = L(node.text);
@@ -665,6 +846,39 @@
     UI.typer.run(text, opts.instant ? "instant" : UI.settings.textSpeed, revealChoices);
     if (!opts.instant) taintWhisper();
     updateDlgH();
+  }
+
+  /* ---------- rumours (SPEC §20) ----------
+   * Italic footer under the node text: "传闻 · <speaker>：<text>". Rendered with the node (space reserved, invisible),
+   * revealed with a fade once the typewriter is done (revealRumor). Its codex unlocks (step.rumorCodex) are held in
+   * UI.rumorCodex until then, so lore cards / toasts follow the normal settings but never cover the text being typed. */
+  function renderRumor(r, visible) {
+    var el = $("dlg-rumor");
+    if (!el) return;
+    clear(el);
+    el.classList.remove("show", "fade-in");
+    if (!r || UI.settings.rumors === false || !UI.game || UI.game.state.ended) { el.hidden = true; return; }
+    var sp = L(r.speaker), zh = WH.lang === "zh";
+    var head = t("rumor_tag") + (sp ? " · " + sp : "") + (zh ? "：" : ": ");
+    var tx = h("span", {class: "rm-tx"});
+    linkify(tx, L(r.text));
+    el.appendChild(h("span", {class: "rm-head"}, h("span", {class: "rm-mark", "aria-hidden": "true"}, "”"), head));
+    el.appendChild(tx);
+    el.setAttribute("data-rumor", r.id);
+    el.setAttribute("aria-label", t("rumor_aria", {x: (sp ? sp + (zh ? "：" : ": ") : "") + L(r.text)}));
+    el.hidden = false;
+    if (visible) el.classList.add("show");
+  }
+  function revealRumor() {
+    var el = $("dlg-rumor");
+    if (el && !el.hidden && !el.classList.contains("show")) {
+      el.classList.add("show");
+      if (UI.fxOn) el.classList.add("fade-in");
+      updateDlgH();
+    }
+    var ids = UI.rumorCodex;
+    UI.rumorCodex = null;
+    if (ids && ids.length) codexToast(ids);
   }
 
   function reqHint(req) {
@@ -709,6 +923,7 @@
   }
 
   function revealChoices() {
+    revealRumor();
     flushLore();
     var box = $("choices");
     box.classList.remove("hidden-until");
@@ -744,6 +959,7 @@
     UI.busy = true;
     if (step.codexNew && step.codexNew.length) codexToast(step.codexNew);
     if (step.kind === "event") {
+      renderRumor(null);                                   // SPEC §20: never under an event
       renderHud();
       if (!afterCq) floatDeltas(step.choiceDeltas);
       UI.busy = false;
@@ -751,6 +967,7 @@
       return;
     }
     var isDeath = step.ending && step.ending.kind === "death";
+    UI.rumorCodex = step.rumorCodex && step.rumorCodex.length ? step.rumorCodex.slice() : null;
     var pre = (step.chapterChanged && !isDeath) ? chapterCard(g.state.chapter) : Promise.resolve();
     pre.then(function () {
       renderNode();
@@ -1229,10 +1446,12 @@
     var back = h("div", {class: "lore-back", id: "lore-overlay", role: "dialog", "aria-modal": "true", "aria-label": L(c.name)},
       h("div", {class: "lore-card px" + (isPlace ? " place" : ""), "data-race": raceOf(c, ids[i]), vars: {"--cat": rc, "--cat-ink": inkOn(rc)}},
         isPlace ? h("div", {class: "lore-banner"}, art("scene", c.scene || "void"))
+                : isChronicle(c) && !c.sprite ? h("div", {class: "lore-pic chr-seal", "aria-hidden": "true"}, h("span", {class: "px"}, chrMill(c) === 0 ? t("chr_ancient") : chrMill(c) ? "M" + chrMill(c) : "M??"))
                 : h("div", {class: "lore-pic"}, art("sprite", c.sprite, null, rc)),
         h("div", {class: "lore-main"},
           h("div", {class: "lore-top"},
             h("span", {class: "lore-cat"}, badgeText(ids[i])),
+            c.date ? h("span", {class: "lore-date"}, L(c.date)) : null,
             auto ? (isKnown ? h("span", {class: "lore-new known"}, "✓ " + t("lore_known")) : h("span", {class: "lore-new"}, "✦ " + t("lore_new"))) : null,
             ids.length > 1 ? h("span", {class: "lore-count"}, (i + 1) + "/" + ids.length) : null),
           h("h3", {class: "lore-name"}, L(c.name)),
@@ -1545,8 +1764,8 @@
   /* ---------- codex (taxonomy v2, SPEC §13) ---------- */
   function codexViews(view) {
     var bar = h("div", {class: "views", role: "tablist"});
-    [["entries", "view_entries"], ["places", "view_places"], ["endings", "view_endings"], ["records", "view_records"]].forEach(function (v) {
-      bar.appendChild(h("button", {class: "btn px", type: "button", role: "tab", "aria-selected": String(v[0] === view),
+    [["entries", "view_entries"], ["places", "view_places"], ["chronicle", "view_chronicle"], ["endings", "view_endings"], ["records", "view_records"]].forEach(function (v) {
+      bar.appendChild(h("button", {class: "btn px", type: "button", role: "tab", "data-view": v[0], "aria-selected": String(v[0] === view),
         onclick: function () { openCodex(null, true, v[0]); }}, t(v[1])));
     });
     return bar;
@@ -1555,7 +1774,7 @@
   /* "NEW" badge count on the codex buttons (title menu + game toolbar) */
   function newBadge() { return h("span", {class: "nbadge", "aria-hidden": "true"}); }
   function updateCodexBadge() {
-    var n = WH.Save.codexUnseen().filter(function (id) { return WH.codex[id]; }).length;
+    var n = WH.Save.codexUnseen().filter(function (id) { return WH.codex[id] && !isHidden(WH.codex[id]); }).length;
     Array.prototype.forEach.call(document.querySelectorAll(".nbadge"), function (b) {
       b.textContent = n > 99 ? "99+" : String(n);
       b.hidden = !n;
@@ -1609,7 +1828,7 @@
 
   function entriesView() {
     var o = UI.cx, un = unlockedSet(), isNew = UI.cxNew || {};
-    var all = Object.keys(WH.codex).filter(function (id) { return typeOf(WH.codex[id]) !== "place"; });
+    var all = codexIds().filter(function (id) { return typeOf(WH.codex[id]) !== "place" && !isChronicle(WH.codex[id]); });
     if (o.race !== "all" && !all.some(function (id) { return raceOf(WH.codex[id], id) === o.race; })) o.race = "all";
     var byRace = o.race === "all" ? all : all.filter(function (id) { return raceOf(WH.codex[id], id) === o.race; });
     if (o.type !== "all" && !byRace.some(function (id) { return typeOf(WH.codex[id]) === o.type; })) o.type = "all";
@@ -1665,7 +1884,7 @@
 
   function placesView(filter, detail) {
     var un = unlockedSet(), isNew = UI.cxNew || {}, body = h("div", {class: "places-view"});
-    var ids = Object.keys(WH.codex).filter(function (id) { return typeOf(WH.codex[id]) === "place" || WH.codex[id].cat === "place"; });
+    var ids = codexIds().filter(function (id) { return typeOf(WH.codex[id]) === "place" || WH.codex[id].cat === "place"; });
     var n = ids.filter(function (id) { return un[id]; }).length;
     if (detail && WH.codex[detail] && un[detail]) {
       var c = WH.codex[detail], rc = entryColor(c, detail);
@@ -1695,6 +1914,53 @@
     })));
     if (!ids.length) body.appendChild(h("p", {class: "empty-msg"}, "—"));
     return {body: body, sub: t("unlocked_n", {n: n, t: ids.length})};
+  }
+
+  /* ---------- 战史 / Chronicle (SPEC §20): vertical timeline by sortKey, millennium separators, dates always shown,
+   * locked entries tease "???" at their date; race chips filter; progress 已知 n/t ---------- */
+  function millLabel(m) {
+    if (WH.lang === "zh") return t("chr_mill", {n: m});
+    var suf = (m % 100 >= 11 && m % 100 <= 13) ? "th" : ({1: "st", 2: "nd", 3: "rd"}[m % 10] || "th");
+    return t("chr_mill", {n: m}).replace(/^(\d+)th/, m + suf);
+  }
+  function chronicleIds() {
+    return codexIds().filter(function (id) { return isChronicle(WH.codex[id]); })
+      .sort(function (a, b) { return chrKey(WH.codex[a]) - chrKey(WH.codex[b]) || (a < b ? -1 : 1); });
+  }
+  function chronicleView() {
+    var o = UI.cx, un = unlockedSet(), isNew = UI.cxNew || {}, body = h("div", {class: "chronicle-view"});
+    var ids = chronicleIds(), n = ids.filter(function (id) { return un[id]; }).length;
+    var sub = t("chr_known", {n: n, t: ids.length});
+    if (!ids.length) { body.appendChild(h("p", {class: "empty-msg"}, t("chr_empty"))); return {body: body, sub: sub}; }
+    if (!o.chrRace) o.chrRace = "all";
+    if (o.chrRace !== "all" && !ids.some(function (id) { return raceOf(WH.codex[id], id) === o.chrRace; })) o.chrRace = "all";
+    body.appendChild(raceChips(ids, o.chrRace, function (r) { o.chrRace = r; openCodex(null, true, "chronicle", {focus: ".race-chips [aria-selected='true']"}); }));
+    body.appendChild(h("p", {class: "chr-hint"}, t("chr_hint")));
+    var list = ids.filter(function (id) { return o.chrRace === "all" || raceOf(WH.codex[id], id) === o.chrRace; });
+    var tl = h("ol", {class: "timeline", "aria-label": t("view_chronicle")}), lastM;
+    list.forEach(function (id) {
+      var c = WH.codex[id], m = chrMill(c), open = !!un[id], rc = entryColor(c, id);
+      if (m !== lastM) {
+        tl.appendChild(h("li", {class: "tl-mill" + (m === 0 ? " ancient" : ""), "data-mill": m === null ? "?" : m, "aria-hidden": "true"},
+          h("span", {class: "tl-m px"}, m === null ? "M??" : m === 0 ? t("chr_ancient") : "M" + m),
+          m === null ? null : h("span", {class: "tl-mn"}, m === 0 ? t("chr_ancient_sub") : millLabel(m))));
+        lastM = m;
+      }
+      var date = h("div", {class: "tl-date"}, L(c.date) || "—");
+      var card = open
+        ? h("div", {class: "tl-card"},
+            h("div", {class: "tl-head"}, h("span", {class: "tl-name"}, L(c.name)),
+              isNew[id] ? h("span", {class: "new-badge"}, t("cx_new")) : null),
+            h("div", {class: "bd"}, h("span", {class: "rbadge", vars: {"--rc": rc, "--rc-ink": inkOn(rc)}}, badgeText(id))),
+            h("p", {class: "tl-text"}, L(c.text)),
+            c.more ? h("p", {class: "tl-more"}, L(c.more)) : null)
+        : h("div", {class: "tl-card"}, h("span", {class: "tl-name"}, t("codex_locked")), h("p", {class: "tl-tease"}, t("chr_tease")));
+      tl.appendChild(h("li", {class: "tl-item" + (open ? "" : " locked") + (open && isNew[id] ? " is-new" : ""), "data-id": id, vars: {"--rc": rc},
+        "aria-label": (L(c.date) || "") + " — " + (open ? L(c.name) : t("codex_locked"))},
+        date, h("div", {class: "tl-dot", "aria-hidden": "true"}), card));
+    });
+    body.appendChild(tl);
+    return {body: body, sub: sub};
   }
 
   var KIND_ORDER = {good: 0, bad: 1, death: 2};
@@ -1755,7 +2021,7 @@
     return {body: body, sub: runs.length ? t("last_n", {n: runs.length}) : "", foot: foot};
   }
 
-  /* openCodex(_, replace, view, opt): view = entries | places | endings | records; opt = {detail, focus}.
+  /* openCodex(_, replace, view, opt): view = entries | places | chronicle | endings | records; opt = {detail, focus}.
    * A fresh open (replace falsy) snapshots the NEW set (unlocked since the codex was last opened) and marks everything seen. */
   function openCodex(_tab, replace, view, opt) {
     view = view || "entries";
@@ -1767,11 +2033,16 @@
       if (UI.game) WH.Save.addCodexGlobal(UI.game.state.codex);
       updateCodexBadge();
     }
-    var v = view === "endings" ? endingsView() : view === "places" ? placesView(null, opt.detail) : view === "records" ? recordsView() : entriesView();
-    openModal({title: view === "records" ? t("records_title") : t("codex_title"), icon: "icon_codex", sub: v.sub, replace: replace,
+    var pr = !replace && egg() ? eggProgress() : null, lastLine = null;
+    if (pr && eggFresh("last", pr)) { eggFire("last"); lastLine = h("span", {class: "egg-last"}, L(eggTier("last").text)); }
+    var v = view === "endings" ? endingsView() : view === "places" ? placesView(null, opt.detail) : view === "records" ? recordsView()
+          : view === "chronicle" ? chronicleView() : entriesView();
+    openModal({title: view === "records" ? t("records_title") : t("codex_title"), icon: "icon_codex", sub: lastLine || v.sub, replace: replace,
       body: h("div", {class: "codex-body view-" + view}, codexViews(view), v.body), foot: v.foot,
       focus: opt.focus || (opt.detail ? ".place-detail, .modal-body button" : ".views [aria-selected='true']"),
       reopen: function () { openCodex(null, true, view, {detail: opt.detail}); }});
+    startJoke();
+    if (pr && eggFresh("planned", pr)) { eggFire("planned"); setTimeout(eggPlanned, 250); }
   }
   UI.openCodex = openCodex;
   UI.recordRun = recordRun;
@@ -1848,7 +2119,7 @@
 
   function loadRecord(rec) {
     var g;
-    try { g = WH.Game.fromRecord(rec, {rng: newRng()}); }
+    try { g = WH.Game.fromRecord(rec, {rng: newRng(), rumors: UI.settings.rumors !== false}); }
     catch (e) { toast(t("import_bad", {x: e.message})); return false; }
     UI.game = g;
     enterGameScreen();
@@ -1895,12 +2166,22 @@
         seg([[false, "🔊 " + t("on")], [true, "🔇 " + t("mute")]], !!st.muted, function (v) { if (!!st.muted !== v) toggleMute(); else openSettings(true); })),
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("consequences")),
         seg([[true, t("on")], [false, t("off")]], st.consequences !== false, function (v) { st.consequences = v; save(); openSettings(true); })),
+      h("div", {class: "setrow"}, h("span", {class: "k"}, t("rumors")),
+        seg([[true, t("on")], [false, t("off")]], st.rumors !== false, function (v) {
+          st.rumors = v; save();
+          if (UI.game) { UI.game.rumors = v; if (UI.screen === "game" && !UI.conseq) renderRumor(v ? UI.game.currentRumor() : null, !UI.typer.active); }
+          openSettings(true);
+        })),
+      eggDone("planned") ? h("div", {class: "setrow tz-row"}, h("span", {class: "k"}, t("tz_joke")),
+        seg([[true, t("on")], [false, t("off")]], st.tzeentchJoke !== false, function (v) { st.tzeentchJoke = v; save(); openSettings(true); })) : null,
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("lore_cards")),
         seg([["new", t("lore_new_only")], ["all", t("lore_all")], ["codex", t("lore_codex_only")]],
           st.loreCards === "all" || st.loreCards === "codex" ? st.loreCards : "new", function (v) { st.loreCards = v; save(); openSettings(true); })),
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("known_hint")),
         seg([["toast", t("hint_toast")], ["silent", t("hint_silent")]], st.knownHint === "silent" ? "silent" : "toast",
           function (v) { st.knownHint = v; save(); openSettings(true); })),
+      h("div", {class: "setrow"}, h("span", {class: "k"}, t("data")),
+        h("button", {class: "btn small px", type: "button", id: "data-btn", onclick: function () { openData(); }}, "⇅ " + t("data_manage"))),
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("language")),
         seg([["zh", "中文"], ["en", "English"]], WH.lang, function (v) { setLang(v); })),
       UI.reduced ? h("p", {style: "font-size:12px;color:var(--ink-dim)"}, t("reduced_motion")) : null);
@@ -1908,6 +2189,66 @@
       focus: ".modal-body [aria-pressed='true']", reopen: function () { openSettings(true); }});
   }
   UI.openSettings = openSettings;
+
+  /* ---------- SPEC §22: full backup (export / merge import; clipboard + paste box where downloads are blocked) ---------- */
+  function framed() { try { return window.top !== window.self; } catch (e) { return true; } }
+  function importSummary(sum) {
+    return t("import_all_ok", {r: sum.runs, c: sum.codex, e: sum.endings, s: sum.slots.length}) + (sum.skipped.length ? t("import_skipped", {n: sum.skipped.length}) : "");
+  }
+  function doImportAll(text) {
+    var r = WH.Save.parseBackup(text);
+    if (!r.ok) { toast(t("import_bad", {x: t(r.error)})); return Promise.resolve(null); }
+    var conf = WH.Save.backupConflicts(r.backup);
+    var ask = conf.length ? confirmBox(t("import_overwrite", {n: conf.length})) : Promise.resolve(false);
+    return ask.then(function (ow) {
+      var sum = WH.Save.importAll(r.backup, {overwrite: !!ow});
+      UI.lastImport = sum;
+      toast(importSummary(sum));
+      updateCodexBadge();
+      if (UI.screen === "title") renderTitle();
+      openData(true);
+      return sum;
+    });
+  }
+  UI.importAllText = doImportAll;
+  function openData(replace) {
+    var area = h("textarea", {class: "data-paste", id: "data-paste", rows: 4, placeholder: t("paste_box"), spellcheck: "false"});
+    var out = h("textarea", {class: "data-paste", id: "data-out", rows: 3, readonly: true, hidden: true});
+    var file = h("input", {type: "file", accept: "application/json,.json", hidden: true});
+    file.addEventListener("change", function () {
+      var f = file.files && file.files[0];
+      if (!f) return;
+      var fr = new FileReader();
+      fr.onload = function () { doImportAll(String(fr.result)); };
+      fr.onerror = function () { toast(t("import_bad", {x: t("err_json")})); };
+      fr.readAsText(f);
+      file.value = "";
+    });
+    var copy = function () {
+      var txt = JSON.stringify(WH.Save.exportAll());
+      out.value = txt; out.hidden = false;
+      var fallback = function () { out.focus(); out.select(); toast(t("copy_fail")); };
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { toast(t("copied")); }, fallback);
+        else { out.select(); if (document.execCommand && document.execCommand("copy")) toast(t("copied")); else fallback(); }
+      } catch (e) { fallback(); }
+    };
+    var body = h("div", {class: "data-view"},
+      h("p", {class: "data-intro"}, t("data_intro")),
+      framed() ? h("p", {class: "data-note"}, t("data_frame")) : null,
+      h("div", {class: "data-row"},
+        h("button", {class: "btn px", type: "button", id: "data-export", onclick: function () { WH.Save.downloadAll(); }}, "⇩ " + t("export_all")),
+        h("button", {class: "btn px", type: "button", id: "data-copy", onclick: copy}, "⧉ " + t("copy_clip"))),
+      out,
+      h("div", {class: "data-row"},
+        h("button", {class: "btn px", type: "button", id: "data-import-file", onclick: function () { file.click(); }}, "⇧ " + t("import_file")), file),
+      area,
+      h("div", {class: "data-row"},
+        h("button", {class: "btn px", type: "button", id: "data-import-paste", onclick: function () { if (area.value.trim()) doImportAll(area.value); }}, "⇧ " + t("import_paste"))),
+      h("p", {class: "data-count"}, t("data_keys", {n: WH.Save.keys().length})));
+    openModal({title: t("data_title"), narrow: true, body: body, replace: replace === true, reopen: function () { openData(true); }});
+  }
+  UI.openData = openData;
 
   /* ---------- language ---------- */
   function setLang(l) {
@@ -1946,6 +2287,14 @@
     if (k === "Tab" && UI.modals.length) { trapFocus(e); return; }
     if (UI.cardDone) {
       if (k === " " || k === "Enter" || k === "Escape") { e.preventDefault(); UI.cardDone(); }
+      return;
+    }
+    var ep = $("egg-planned");
+    if (ep) {                                              // SPEC §21 full-screen scene: Enter/Space/Esc advance
+      if (k === " " || k === "Enter" || k === "Escape") {
+        e.preventDefault();
+        if (UI.eggTyper && UI.eggTyper.active) UI.eggTyper.finish(); else { var gb = ep.querySelector(".egg-full-btns button"); if (gb && !gb.hidden) gb.click(); }
+      }
       return;
     }
     if (UI.lore && !UI.modals.length) {

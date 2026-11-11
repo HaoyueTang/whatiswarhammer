@@ -3,6 +3,15 @@
 Format follows Keep a Changelog; versions follow SemVer.
 
 ## [Unreleased]
+
+## [0.2.2] — 2026-11-11
+### Added
+- Lore clues for veterans: 36 chronicle entries (M25→M42, dates checked against Lexicanum), 72 overheard rumours, 9 campaign events; codex 战史 / Chronicle timeline.
+- Tzeentch collection easter egg (25 / 50 / 75 / 99 / 100 % tiers, hidden reply letter, "Tzeentch's joke").
+- Origins are trade-offs: per-run HP / Sanity caps (70–130), all 15 origins rebalanced.
+- Updates never touch local progress: version check + "saves and records kept" notice, full-progress export / import (clipboard fallback).
+### Changed
+- Claim endings v0.2.1 (20 endings, per-route taint multipliers).
 ### Added
 - Engine (SPEC §19): per-route `taintMod` (scales positive taint only); event choices can `goto` a node (string or per-faction map, ending nodes allowed); claim events can fire a second time after `resisted_<god>`, at most twice per god; event choices honour `require` / `hideIfLocked`; claim endings (`<prefix>end_claim_<god>`) unlock the god's codex entry.
 - Ending screen: claim endings show the god's sigil banner and the verdict "你已归属于<神>".
