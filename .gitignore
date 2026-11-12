@@ -4,3 +4,4 @@ __pycache__/
 tools/dev/screenshots/
 tools/dev/screenshots_real/
 *.wav
+tools/dev/test_art/
