@@ -23,6 +23,13 @@
 <h1>WH.Audio — audition page</h1>
 <div>Click anywhere first (browsers block sound until a user gesture). Moods crossfade; SFX play over the music.</div>
 
+<h2>Music style (SPEC §29)</h2>
+<div class="row">
+  <label>style <select id="style"></select></label>
+  <span id="styledesc" style="color:#a99c83"></span>
+</div>
+<div class="grid" id="previews"></div>
+
 <h2>Music moods</h2>
 <div class="grid" id="moods"></div>
 <div class="row">
@@ -56,19 +63,33 @@
   function status() {
     var c = A._ctx();
     $("status").textContent = "context: " + (c ? c.state + "  t=" + c.currentTime.toFixed(1) + "s" : "not created (click to unlock)") +
+      "\nstyle: " + A.getStyle() + (A.isPreviewing() ? "   (previewing)" : "") +
       "\ncurrent mood: " + A.current() + "   wanted: " + A.wanted() + "   muted: " + A.isMuted() +
       "\nmusic " + A.getMusicVolume().toFixed(2) + "   sfx " + A.getSfxVolume().toFixed(2);
     [].forEach.call(moodBox.children, function (b) { b.classList.toggle("on", b.dataset.mood === A.current()); });
     $("mute").textContent = A.isMuted() ? "unmute" : "mute";
   }
   document.addEventListener("pointerdown", function () { A.unlock(); }, true);
-  A.moods.forEach(function (m) {
-    var info = A.songInfo(m), b = document.createElement("button");
-    b.dataset.mood = m;
-    b.innerHTML = m + "<small>" + info.key + " · " + info.bpm + " bpm · " + (info.introBars ? info.introBars + "+" : "") + info.loopBars + " bars · " + info.loopSec.toFixed(0) + " s</small>";
-    b.onclick = function () { A.unlock(); A.setMood(m, {force: $("force").checked, fade: +$("fade").value}); A.sfx("click"); status(); };
-    moodBox.appendChild(b);
+  function buildMoods() {                       // mood buttons describe the song of the selected style
+    moodBox.innerHTML = "";
+    A.moods.forEach(function (m) {
+      var info = A.songInfo(m, A.getStyle()), b = document.createElement("button");
+      b.dataset.mood = m;
+      b.innerHTML = m + "<small>" + info.key + " · " + info.bpm + " bpm · " + (info.introBars ? info.introBars + "+" : "") + info.loopBars + " bars · " + info.loopSec.toFixed(0) + " s</small>";
+      b.onclick = function () { A.unlock(); A.setMood(m, {force: $("force").checked, fade: +$("fade").value}); A.sfx("click"); status(); };
+      moodBox.appendChild(b);
+    });
+  }
+  A.getStyles().forEach(function (st) {
+    var o = document.createElement("option"); o.value = st.id; o.textContent = st.id + " — " + st.name.zh + " / " + st.name.en; $("style").appendChild(o);
+    var b = document.createElement("button"); b.dataset.preview = st.id;
+    b.innerHTML = "▶ " + st.id + "<small>" + st.name.zh + " · preview ~8 s</small>";
+    b.onclick = function () { A.unlock(); A.previewStyle(st.id); status(); };
+    $("previews").appendChild(b);
   });
+  function styleDesc() { var st = A.getStyles().filter(function (x) { return x.id === A.getStyle(); })[0]; $("styledesc").textContent = st ? st.desc.zh + " | " + st.desc.en : ""; }
+  $("style").onchange = function () { A.unlock(); A.setStyle(this.value); buildMoods(); styleDesc(); status(); };
+  buildMoods(); styleDesc();
   A.sfxNames.forEach(function (s) {
     var b = document.createElement("button");
     b.textContent = s;

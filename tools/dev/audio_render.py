@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """audio_render.py — headless-Chrome test + offline render of every mood and SFX (audio role).
 
-    python3 tools/dev/audio_render.py                  # live API test + render all moods/SFX, print stats
+    python3 tools/dev/audio_render.py                  # live API test + render all chip moods/SFX, print stats
     options: --out /tmp/wh_audio_renders  --sr 22050  --chrome /usr/bin/google-chrome  --moods battle,boss  --no-live
+             --styles chip|all|dark,organ   (music styles to render offline; default chip. The style x mood render gate with
+                                             loudness / seam / repetition checks is `node tools/dev/audio_check.js`)
 
 1. Live: opens tools/dev/audio_test.html (file://), asserts no AudioContext before a gesture, clicks to unlock,
-   auditions every mood button and SFX button, checks hysteresis/mute/volume API, collects console errors.
-2. Offline: renders each mood through OfflineAudioContext with the real audio.js synth (music volume 1.0 = worst
-   case), writes WAVs, and checks peak < 0 dBFS, no clipping, RMS in range, no unintended silence, loop length,
-   and that the loop restarts (start of loop 1 vs loop 2 correlate).
+   auditions every mood button and SFX button, checks hysteresis/mute/volume API, music styles (setStyle crossfade,
+   every mood of every style plays, previewStyle timeline: calm phrase, tense phrase, self-stop, previous mood resumes,
+   never overlaps the running mood), collects console errors.
+2. Offline: renders each mood (of each requested style) through OfflineAudioContext with the real audio.js synth (music
+   volume 1.0 = worst case), writes WAVs, and checks peak <= -1 dBFS, no clipping, RMS in range, no unintended silence,
+   loop length, and that the loop restarts (start of loop 1 vs loop 2 correlate).
 """
 import base64, json, os, sys, wave
 import numpy as np
@@ -22,6 +26,7 @@ OUT = opt("--out", "/tmp/wh_audio_renders")
 SR = int(opt("--sr", "22050"))
 CHROME = opt("--chrome", "/usr/bin/google-chrome")
 ONLY = [m for m in opt("--moods", "").split(",") if m]
+STYLES_ARG = opt("--styles", "chip")
 os.makedirs(OUT, exist_ok=True)
 URL = "file://" + os.path.join(ROOT, "tools", "dev", "audio_test.html")
 
@@ -37,8 +42,8 @@ def write_wav(path, data):
     with wave.open(path, "wb") as w:
         w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(pcm.tobytes())
 
-JS_FETCH = """async ([kind, name, secs, sr]) => {
-  const res = kind === 'mood' ? await WH.Audio._render(name, secs, sr) : {buffer: await WH.Audio._renderSfx(name, secs, sr)};
+JS_FETCH = """async ([kind, name, secs, sr, style]) => {
+  const res = kind === 'mood' ? await WH.Audio._render(name, secs, sr, style) : {buffer: await WH.Audio._renderSfx(name, secs, sr)};
   const b = res.buffer, L = b.getChannelData(0), R = b.getChannelData(1), n = L.length;
   const out = new Float32Array(n * 2);
   for (let i = 0; i < n; i++) { out[2*i] = L[i]; out[2*i+1] = R[i]; }
@@ -47,8 +52,8 @@ JS_FETCH = """async ([kind, name, secs, sr]) => {
   return {b64: btoa(s), loops: res.loops || [], info: res.info || null};
 }"""
 
-def fetch(page, kind, name, secs):
-    r = page.evaluate(JS_FETCH, [kind, name, secs, SR])
+def fetch(page, kind, name, secs, style="chip"):
+    r = page.evaluate(JS_FETCH, [kind, name, secs, SR, style])
     data = np.frombuffer(base64.b64decode(r["b64"]), dtype="<f4").reshape(-1, 2)
     return data, r["loops"], r["info"]
 
@@ -145,6 +150,85 @@ with sync_playwright() as p:
         page.evaluate("Object.defineProperty(document, 'hidden', {configurable: true, get: () => false}); document.dispatchEvent(new Event('visibilitychange'))")
         page.wait_for_timeout(200)
         check("visible tab resumes audio", page.evaluate(f"{A}._ctx().state === 'running'"))
+        # ---- music styles (SPEC §29)
+        styles = page.evaluate(f"{A}.getStyles().map(s => s.id)")
+        check("getStyles(): chip first, >= 3 new styles", styles[0] == "chip" and len(styles) >= 4, json.dumps(styles))
+        check("every style has zh/en name + description", page.evaluate(f"{A}.getStyles().every(s => s.name.zh && s.name.en && s.desc.zh && s.desc.en)"))
+        check("WH.Audio.styles matches getStyles()", page.evaluate(f"JSON.stringify({A}.styles) === JSON.stringify({A}.getStyles())"))
+        check("default style is chip", page.evaluate(f"{A}.getStyle() === 'chip'"))
+        check("setStyle(unknown) -> chip", page.evaluate(f"{A}.setStyle('no-such-style') === 'chip' && {A}.getStyle() === 'chip'"))
+        def players_on():   # players that are playing and not fading out
+            return page.evaluate(f"Object.entries({A}._players()).filter(([k, p]) => p.active && p.stopAt == null).map(([k]) => k)")
+        page.evaluate(f"{A}.setMood('calm', {{force: true}})")
+        page.wait_for_timeout(700)
+        for st in styles[1:]:
+            page.evaluate(f"{A}.setStyle('chip'); {A}.setMood('calm', {{force: true}})")
+            page.wait_for_timeout(1900)
+            prev_key = players_on()
+            page.evaluate(f"{A}.setStyle('{st}')")
+            page.wait_for_timeout(350)
+            now = players_on()
+            check(f"setStyle('{st}') crossfades the running mood into the new style", now == [f"{st}:calm"] and page.evaluate(f"{A}.current() === 'calm' && {A}.getStyle() === '{st}'"), f"{prev_key} -> {now}")
+            page.wait_for_timeout(1700)
+            n_active = page.evaluate(f"Object.values({A}._players()).filter(p => p.active).length")
+            check(f"setStyle('{st}'): old style's player is gone within 2 s", n_active == 1, f"{n_active} active players")
+            bad = []
+            for m in moods:
+                page.evaluate(f"{A}.setMood('{m}', {{force: true}})")
+                page.wait_for_timeout(250)
+                ok = page.evaluate(f"(() => {{ const p = {A}._players()['{st}:{m}']; return !!(p && p.active && p.stopAt == null && p.nextTime > {A}._ctx().currentTime && p.S.trim > 0); }})()")
+                if not ok or page.evaluate(f"{A}.current()") != m: bad.append(m)
+            check(f"style '{st}': all {len(moods)} moods play", not bad, ("failed: " + ",".join(bad)) if bad else "")
+        page.evaluate(f"{A}.setMood('calm', {{force: true}})")
+        r = page.evaluate(f"{A}.setMood('tense')")
+        check(f"hysteresis still applies in style '{styles[-1]}' (calm->tense deferred)", r == "deferred" and page.evaluate(f"{A}.current()") == "calm", str(r))
+        r = page.evaluate(f"{A}.setMood('battle')")
+        check("battle still bypasses hysteresis in a new style", r is True and page.evaluate(f"{A}.current()") == "battle")
+        page.evaluate(f"{A}.setStyle('chip'); {A}.setMood('holy', {{force: true}})")
+        page.wait_for_timeout(2300)
+        check("setStyle('chip') returns to chip players only", players_on() == ["holy"], json.dumps(players_on()))
+        # real files keep overriding every style: a mapped mood that fails to load falls back to the *current style's* synth
+        page.evaluate(f"WH.audioFiles = {{tense: 'assets/audio/does_not_exist.ogg'}}; {A}.setStyle('{styles[1]}'); {A}.setMood('tense', {{force: true}})")
+        page.wait_for_timeout(900)
+        fb = [page.evaluate(f"{A}.current()"), ",".join(players_on())]
+        check("missing file in a new style falls back to that style's synth", fb == ["tense", f"{styles[1]}:tense"], json.dumps(fb))
+        page.evaluate(f"WH.audioFiles = {{}}; {A}.setStyle('chip')")
+        # previewStyle: ~8 s, calm phrase then tense phrase, never overlaps the running mood, self-stopping, previous mood resumes
+        for st in styles:
+            page.evaluate(f"{A}.setStyle('chip'); {A}.setMood('holy', {{force: true}})")
+            page.wait_for_timeout(2200)
+            started = page.evaluate(f"{A}.previewStyle('{st}')")
+            check(f"previewStyle('{st}') starts", started is True and page.evaluate(f"{A}.isPreviewing()"))
+            page.wait_for_timeout(1000)
+            keys = players_on()
+            calm, tense = ("calm", "tense") if st == "chip" else (f"{st}:calm", f"{st}:tense")
+            check(f"preview '{st}': calm phrase first, the running mood is silent (no overlap)", keys == [calm], json.dumps(keys))
+            if st == styles[1]:
+                r = page.evaluate(f"{A}.setMood('battle')")
+                check("setMood during a preview is deferred (no overlap)", r == "deferred" and page.evaluate(f"{A}.current()") is None, str(r))
+            page.wait_for_timeout(4200)
+            keys = players_on()
+            check(f"preview '{st}': then a tense phrase", keys == [tense], json.dumps(keys))
+            page.wait_for_timeout(4400)
+            want = "battle" if st == styles[1] else "holy"
+            keys = players_on()
+            check(f"preview '{st}' stops itself after ~8 s and the previous mood resumes", (not page.evaluate(f"{A}.isPreviewing()")) and page.evaluate(f"{A}.current()") == want and keys == [want] and page.evaluate(f"{A}.getStyle()") == "chip", f"{keys}")
+        page.evaluate(f"{A}.setMood('holy', {{force: true}})")
+        page.wait_for_timeout(900)
+        page.evaluate(f"{A}.previewStyle('no-such-style')")
+        page.wait_for_timeout(900)
+        check("previewStyle(unknown) previews chip", players_on() == ["calm"], json.dumps(players_on()))
+        page.evaluate(f"{A}.stop({{fade: 200}})")
+        page.wait_for_timeout(1500)
+        check("stop() cancels a preview and nothing resumes", page.evaluate(f"!{A}.isPreviewing() && {A}.current() === null") and players_on() == [], json.dumps(players_on()))
+        page.evaluate(f"{A}.mute(true)")
+        page.wait_for_timeout(200)
+        check("previewStyle while muted does nothing (false)", page.evaluate(f"{A}.previewStyle('dark') === false && !{A}.isPreviewing()"))
+        page.evaluate(f"{A}.mute(false)")
+        page.wait_for_timeout(200)
+        # the settings-panel flow: setStyle before the context exists only records the choice (checked in audio_check.js); here: style survives mood changes
+        page.evaluate(f"{A}.setStyle('chip'); {A}.setMood('title', {{force: true}})")
+        page.wait_for_timeout(600)
         # v0.2 / v0.3 scene → mood wiring plays the new moods
         for scene, fac, want in [("craftworld", "aeldari", "aeldari"), ("tomb_interior", "necrons", "necron"),
                                  ("ork_scrapyard", "orks", "orks"), ("gsc_chapel", "gsc", "gsc"), ("forge_floor", "mechanicus", "mechanicus")]:
@@ -164,15 +248,18 @@ with sync_playwright() as p:
         errs = [e for e in console_errors if "does_not_exist" not in e and "ERR_FILE_NOT_FOUND" not in e]
         check("no console errors", not errs, "; ".join(errs[:5]))
 
-    print(f"\nOffline renders → {OUT}  (sr {SR} Hz, music volume 1.0)")
+    all_styles = page.evaluate(f"{A}.getStyles().map(s => s.id)")
+    render_styles = all_styles if STYLES_ARG == "all" else [x for x in STYLES_ARG.split(",") if x in all_styles]
+    print(f"\nOffline renders → {OUT}  (sr {SR} Hz, music volume 1.0, styles: {','.join(render_styles)})")
     print("  mood       key                        bpm  loop(s) exp/actual   peak dBFS  RMS dBFS  clip  longest quiet  loop-sim  centroid  <200Hz  onsets/s")
-    for m in moods:
-        if ONLY and m not in ONLY: continue
-        info = page.evaluate(f"{A}.songInfo('{m}')")
+    jobs = [(st, m) for st in render_styles for m in moods if not ONLY or m in ONLY]
+    for style, m in jobs:
+        tag = m if style == "chip" else f"{style}.{m}"
+        info = page.evaluate(f"{A}.songInfo('{m}', '{style}')")
         exp_loop = info["introSec"] + info["loopSec"]
         secs = exp_loop * (1.25 if info["wobble"] else 1) + 6
-        data, loops, _ = fetch(page, "mood", m, secs)
-        write_wav(os.path.join(OUT, f"music_{m}.wav"), data)
+        data, loops, _ = fetch(page, "mood", m, secs, style)
+        write_wav(os.path.join(OUT, f"music_{tag.replace('.', '_')}.wav"), data)
         mono = data.mean(axis=1)
         peak = np.abs(data).max(); clip = int((np.abs(data) >= 0.999).sum())
         first = loops[0] if loops else None
@@ -192,20 +279,20 @@ with sync_playwright() as p:
                 corr = spec_sim(mono[a0:a0 + L], mono[a1:a1 + L])
         actual = (loops[0] - 0.06) if loops else None
         cen, low, ons = centroid(body), low_share(body), onset_rate(body)
-        print(f"  {m:10s} {info['key'][:24]:24s} {info['bpm']:4d}  {exp_loop:7.1f} / {('%.1f' % actual) if actual else '  -  ':>6s}   {db(peak):8.1f}  {rms:8.1f}  {clip:4d}  {quiet_s:9.1f} s   {corr:8.2f}  {cen:6.0f} Hz  {low:5.1f}%  {ons:6.1f}")
-        check(f"{m}: peak < -0.5 dBFS", db(peak) < -0.5)
-        check(f"{m}: no clipped samples", clip == 0)
+        print(f"  {tag:10s} {info['key'][:24]:24s} {info['bpm']:4d}  {exp_loop:7.1f} / {('%.1f' % actual) if actual else '  -  ':>6s}   {db(peak):8.1f}  {rms:8.1f}  {clip:4d}  {quiet_s:9.1f} s   {corr:8.2f}  {cen:6.0f} Hz  {low:5.1f}%  {ons:6.1f}")
+        check(f"{tag}: peak <= -1 dBFS", db(peak) <= -1.0)
+        check(f"{tag}: no clipped samples", clip == 0)
         lo_rms = -40 if m in ("death", "bad") else -32
-        check(f"{m}: RMS in range ({lo_rms}..-8 dBFS)", lo_rms < rms < -8, f"{rms:.1f}")
+        check(f"{tag}: RMS in range ({lo_rms}..-8 dBFS)", lo_rms < rms < -8, f"{rms:.1f}")
         allowed_quiet = 8.0 if m in ("death", "bad") else 1.0
-        check(f"{m}: no unintended silence (> {allowed_quiet} s)", quiet_s <= allowed_quiet, f"{quiet_s:.1f} s")
-        check(f"{m}: loop wraps", bool(loops))
+        check(f"{tag}: no unintended silence (> {allowed_quiet} s)", quiet_s <= allowed_quiet, f"{quiet_s:.1f} s")
+        check(f"{tag}: loop wraps", bool(loops))
         if actual and not info["wobble"]:
-            check(f"{m}: loop length matches data", abs(actual - exp_loop) < 0.05, f"{actual:.2f} vs {exp_loop:.2f}")
+            check(f"{tag}: loop length matches data", abs(actual - exp_loop) < 0.05, f"{actual:.2f} vs {exp_loop:.2f}")
         elif actual:
-            check(f"{m}: wobbling loop within ±{info['wobble'][0]:.0%} of nominal", abs(actual / exp_loop - 1) <= info["wobble"][0], f"{actual:.2f} vs {exp_loop:.2f}")
+            check(f"{tag}: wobbling loop within ±{info['wobble'][0]:.0%} of nominal", abs(actual / exp_loop - 1) <= info["wobble"][0], f"{actual:.2f} vs {exp_loop:.2f}")
         if corr == corr:
-            check(f"{m}: loop restart matches the top (spectral sim > 0.95)", corr > 0.95, f"{corr:.2f}")
+            check(f"{tag}: loop restart matches the top (spectral sim > 0.95)", corr > 0.95, f"{corr:.2f}")
 
     print("\nSFX renders")
     print("  sfx           peak dBFS  length(s)")

@@ -1533,8 +1533,287 @@ def run_real_grudge(p):
             goto_node(page, todo[0]["id"], flags={"wronged_" + n: True for n in todo[0]["npcs"]}); shot(page, f"80_real_grudge_{fid}")
     ctx.close(); b.close()
 
+STYLE_STUBS = """() => { const A = WH.Audio = WH.Audio || {};
+  if (typeof A.getStyles !== 'function') {
+    window.__fakeStyles = true;
+    const L = (zh, en) => ({zh, en});
+    A.getStyles = () => [{id: 'chip', name: L('8位芯片', '8-bit chiptune'), desc: L('复古方波', 'Square waves')}, {id: 'dark', name: L('暗黑氛围', 'Dark ambient'), desc: L('低沉的嗡鸣', 'Slow drones')},
+      {id: 'organ', name: L('哥特管风琴', 'Gothic organ'), desc: L('管风琴和弦', 'Pipe organ')}, {id: 'synth', name: L('合成波', 'Synthwave'), desc: L('锯齿贝斯', 'Saw bass')},
+      {id: 'piano', name: L('钢琴弦乐', 'Piano & strings'), desc: L('稀疏钢琴', 'Sparse piano')}];
+    let cur = 'chip'; A.getStyle = () => cur; A.setStyle = (id) => { cur = A.getStyles().some(x => x.id === id) ? id : 'chip'; return cur; };
+    A.previewStyle = (id) => { return id; };
+  }
+  window.__sc = []; window.__pv = [];
+  const so = A.setStyle, po = A.previewStyle;
+  A.setStyle = function (id) { __sc.push(id); return so ? so.apply(A, arguments) : undefined; };
+  if (po) A.previewStyle = function (id) { __pv.push(id); return po.apply(A, arguments); };
+  return A.getStyles().map(x => x.id); }"""
+
+def run_rewind(p):
+    """SPEC §30 on sample data: rewind engine (state + RNG snapshots), UI button/hotkey/ending, achievements guard, saves, off = nothing."""
+    print("\n== v0.3.3 rewind (sample) ==")
+    b, ctx, page = new_ctx(p, tag="rewind")
+    # --- engine level (DOM-free) ---
+    eng = page.evaluate("""() => {
+      const S = (g) => { const o = JSON.parse(JSON.stringify(g.state)); delete o.playMs; return o; };
+      const mk = (opts) => { const g = new WH.Game('sample', Object.assign({rng: WH.RNG(5), rumors: false, echoes: false, rewind: true}, opts || {})); g.start('hive'); return g; };
+      const sans = (o) => { const c = JSON.parse(JSON.stringify(o)); delete c.codex; return JSON.stringify(c); };
+      const out = {};
+      // A → rewind → A (a ROLL choice: same result, same RNG state)
+      let g = mk(); g.choose(0);                                   // smp_001 → smp_002
+      const s0 = S(g), r0 = g.rng.getState(); g.choose(1);          // 偷工减料 (roll)
+      const a1 = S(g), a1r = g.rng.getState(), a1roll = JSON.stringify(g._lastRoll || null);
+      out.rewound = g.rewind(); out.afterRewind = sans(S(g)) === sans(s0) && g.rng.getState() === r0 && g.rewindCount === 1;
+      g.choose(1); out.sameAgain = JSON.stringify(S(g)) === JSON.stringify(a1) && g.rng.getState() === a1r;
+      // same over many seeds: every roll node, repeated picks never differ
+      let allSame = true;
+      for (let seed = 1; seed <= 40; seed++) { const h = mk({rng: WH.RNG(seed)}); h.choose(0); const x0 = h.rng.getState(); h.choose(1); const y = JSON.stringify(S(h)); h.rewind(); h.choose(1); if (JSON.stringify(S(h)) !== y) allSame = false; }
+      out.manySeeds = allSame;
+      // A → rewind → B works
+      g = mk(); g.choose(0); g.choose(0); g.rewind(); const bs = g.choose(1); out.other = g.state.nodeId === 'smp_004' || g.state.nodeId === 'smp_005';
+      // off = no snapshots at all
+      const off = mk({rewind: false}); off.choose(0); off.choose(0); out.off = [off.canRewind(), off.rewind(), off.rewindStack.length];
+      const on = mk(); out.onEmpty = on.canRewind(); on.choose(0); out.onOne = on.canRewind();
+      on.setRewind(false); out.cleared = [on.canRewind(), on.rewindStack.length];
+      // the forced "you die" choice does not push a snapshot (rewinding from a death goes back to the last real choice)
+      const d = mk(); d.choose(0); d.state.nodeId = 'smp_006'; d.state.stats.hp = 20; d.choose(1);        // → smp_007 whose entry effect (hp −35) kills: deathPending
+      const depthBefore = d.rewindStack.length, pend = d.state.deathPending; d.choose(0);                   // the forced "you die" button
+      const ended = d.state.ended, depthAfter = d.rewindStack.length; d.rewind();
+      out.forced = [pend, depthAfter === depthBefore, ended, d.state.nodeId, d.state.ended, d.state.deathPending];
+      // depth limit 30 (synthetic loop faction)
+      const f = {id: 'loopy', name: {zh: '环', en: 'Loop'}, startNode: 'l_a', startStats: {hp: 100, sanity: 100, corruption: 0, renown: 0}, startDate: {year: 1, mill: 42},
+        deathNodes: {hp: 'l_d', sanity: 'l_d', corruption: 'l_d'}, chapters: {1: {zh: '一', en: 'One'}},
+        nodes: {l_a: {chapter: 1, text: {zh: 'a', en: 'a'}, choices: [{text: {zh: '去', en: 'go'}, next: 'l_b'}]}, l_b: {chapter: 1, text: {zh: 'b', en: 'b'}, choices: [{text: {zh: '回', en: 'back'}, next: 'l_a'}]},
+                l_d: {text: {zh: '死', en: 'dead'}, ending: {kind: 'death', title: {zh: '死', en: 'Dead'}}}}};
+      const d2 = Object.assign({}, WH, {factions: {loopy: f}}), lg = new WH.Game('loopy', {data: d2, rng: WH.RNG(2), rewind: true}); lg.start();
+      for (let i = 0; i < 45; i++) lg.choose(0);
+      out.depth = lg.rewindStack.length; let n = 0; while (lg.rewind()) n++; out.depthRewinds = n; out.depthNode = lg.state.nodeId;
+      // knowledge not rewound: codex unlocked after the snapshot stays
+      g = mk(); g.choose(0); g.choose(0); const cx1 = g.state.codex.slice(); g.rewind(); out.codexKept = cx1.every(id => g.state.codex.includes(id)) && cx1.length > 0;
+      // grudge flags restore; rumour / echo state + streams restore
+      g = mk({rumors: true, rumorChance: 1, echoes: true, echoChance: 1, echoPool: [{runId: 'p1', echo: {faction: 'sample', role: {zh: '工人', en: 'Worker'}, world: {zh: '第七巢都', en: 'Hive Seven'}, cause: {zh: '被处决', en: 'Executed'}, kind: 'death', dateKey: 0, claimedBy: null}}]});
+      g.choose(0); g.state.flags.wronged_vik = true; const fl0 = JSON.stringify(g.state.flags); const rs0 = g.rumorRng.getState(), es0 = g.echoRng.getState();
+      g.choose(0); const after = {rumor: g.state.rumor, echo: g.state.echo && g.state.echo.runId, seen: g.state.seenRumors.slice(), flags: JSON.stringify(g.state.flags), hours: g.state.hours};
+      g.state.flags.wronged_x = true; g.rewind();
+      out.grudgeFlag = JSON.stringify(g.state.flags) === fl0 && g.state.flags.wronged_vik === true && !g.state.flags.wronged_x;
+      out.streams = g.rumorRng.getState() === rs0 && g.echoRng.getState() === es0 && g.state.rumor === null && g.state.echo === null && g.state.seenRumors.length === 0 && g.state.echoRun === null;
+      g.choose(0); out.replayRumor = g.state.rumor === after.rumor && (g.state.echo && g.state.echo.runId) === after.echo && JSON.stringify(g.state.seenRumors) === JSON.stringify(after.seen) && g.state.hours === after.hours;
+      // time warp + event roll restore the clock exactly (smp_005 → smp_006 has a warp time skip and eventRoll)
+      let clockOK = true, evSeen = 0;
+      for (let seed = 1; seed <= 60; seed++) { const h = mk({rng: WH.RNG(seed)}); h.state.nodeId = 'smp_005'; h.state.ended = false; h.state.history = ['smp_005']; h.state.hours = 4242;
+        const hrs = h.state.hours, cs = h.choices(); const st1 = h.choose(0); const snap = JSON.stringify([h.state.hours, h.state.pendingEvent, h.state.nodeId, h.state.seenEvents]);
+        if (h.state.pendingEvent) evSeen++;
+        h.rewind(); if (h.state.hours !== hrs) clockOK = false;
+        h.choose(0); if (JSON.stringify([h.state.hours, h.state.pendingEvent, h.state.nodeId, h.state.seenEvents]) !== snap) clockOK = false; }
+      out.clock = clockOK; out.evSeen = evSeen;
+      // saves: rewinds round-trip, absent when 0
+      g = mk(); g.choose(0); out.recNone = !('rewinds' in g.toRecord()); g.rewind(); g.choose(0); const rec = g.toRecord(); out.recRw = rec.rewinds; const g2 = WH.Game.fromRecord(rec, {rng: WH.RNG(1)}); out.loaded = [g2.rewindCount, g2.canRewind(), JSON.stringify(g2.toRecord().rewinds)];
+      // achievements guard
+      const A = WH.Achievements, st = A.emptyStats();
+      A.applyRun(st, {faction: 'f', origin: 'o', flags: ['x'], resists: 2, visits: 5, kind: 'good', endStats: {hp: 3, sanity: 4}, taint: {khorne: 150, nurgle: 80}, rewinds: 1});
+      const st2 = A.emptyStats(); A.applyRun(st2, {faction: 'f', origin: 'o', flags: ['x'], resists: 2, visits: 5, kind: 'good', endStats: {hp: 3, sanity: 4}, taint: {khorne: 150, nurgle: 80}, rewinds: 0});
+      out.guard = {rw: [st.fastest, st.resists, st.taintMax, Object.keys(st.surviveMin).length, !!st.origins.f, !!st.flags.f.x], clean: [st2.fastest, st2.resists, st2.taintMax, st2.surviveMin.sanity]};
+      return out; }""")
+    check("§30 engine: A → rewind → state restored exactly (stats, flags, clock, RNG), rewindCount counts", eng["rewound"] and eng["afterRewind"], str(eng))
+    check("§30 engine: re-picking the same ROLL choice gives the identical result and RNG state (also over 40 seeds)", eng["sameAgain"] and eng["manySeeds"])
+    check("§30 engine: A → rewind → B works", eng["other"])
+    check("§30 engine: switch off = no snapshots, canRewind false, rewind() false; turning it off drops the stack", eng["off"] == [False, False, 0] and eng["onEmpty"] is False and eng["onOne"] is True and eng["cleared"] == [False, 0], str(eng["off"]))
+    check("§30 engine: the forced death choice pushes no snapshot; rewinding from the death goes back to the last real choice", eng["forced"] == ["hp", True, True, "smp_006", False, None], str(eng["forced"]))
+    check("§30 engine: depth limit 30 (45 choices → 30 rewinds, then false)", eng["depth"] == 30 and eng["depthRewinds"] == 30, str((eng["depth"], eng["depthRewinds"])))
+    check("§30 engine: codex entries unlocked after the snapshot stay unlocked", eng["codexKept"])
+    check("§30 engine: grudge flags, rumour/echo state and both extra RNG streams restore; replay hears the same rumour/echo", eng["grudgeFlag"] and eng["streams"] and eng["replayRumor"], str((eng["grudgeFlag"], eng["streams"], eng["replayRumor"])))
+    check("§30 engine: rewinding across a warp-time node / event roll restores the clock exactly and replays the same event", eng["clock"] and eng["evSeen"] > 0, str(eng["evSeen"]))
+    check("§30 engine: records carry rewinds only when used; fromRecord restores the count (no schema bump), stack empty after load",
+          eng["recNone"] and eng["recRw"] == 1 and eng["loaded"] == [1, False, "1"], str(eng["loaded"]))
+    check("§30 achievements guard: a run with rewinds > 0 never feeds fast / survive / taint peak / resist tally; origin + flags still count",
+          eng["guard"]["rw"] == [None, 0, 0, 0, True, True] and eng["guard"]["clean"] == [5, 2, 230, 4], str(eng["guard"]))
+
+    # --- UI: switch off → nothing anywhere ---
+    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(200)
+    check("§30 UI: default off (settings.rewind false)", page.evaluate("WH.UI.settings.rewind") is False)
+    pick_faction(page, "sample", "hive"); wait_idle(page); finish_text(page)
+    goto_node(page, "smp_002", flags={})
+    page.locator("#choices button", has_text="拼命干活").click(); page.wait_for_timeout(100); pass_conseq(page); wait_idle(page); finish_text(page)
+    page.keyboard.press("z"); page.wait_for_timeout(100)
+    check("§30 UI off: no ↶ button, Z does nothing, no history kept", page.locator("#rewind-btn").count() == 0 and state(page)["nodeId"] == "smp_004"
+          and page.evaluate("WH.UI.game.rewindStack.length") == 0 and page.evaluate("WH.UI.game.canRewind()") is False)
+    # --- turn it on in the settings panel (in game) ---
+    page.locator("#tools button", has_text="设置").click(); page.wait_for_timeout(150)
+    row = page.locator(".modal .rewind-row")
+    check("§30 UI: settings row 允许回到上一个选择 with a hint that names the hotkey", row.count() == 1 and "允许回到上一个选择" in row.inner_text() and "Z" in row.inner_text())
+    row.scroll_into_view_if_needed(); page.wait_for_timeout(100)
+    shot(page, "100_settings_rewind")
+    row.locator("button", has_text="开").click(); page.wait_for_timeout(150)
+    page.keyboard.press("Escape"); page.wait_for_timeout(100)
+    check("§30 UI: turning it on persists and shows a disabled ↶ button (no history yet) next to Home",
+          json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["rewind"] is True and page.locator("#rewind-btn").count() == 1
+          and page.locator("#rewind-btn").is_disabled() and "回到上一个选择" in page.locator("#rewind-btn").inner_text())
+    # --- A → rewind → A identical (UI) ---
+    goto_node(page, "smp_002", flags={})
+    before = page.evaluate("(() => { const s = JSON.parse(JSON.stringify(WH.UI.game.state)); delete s.playMs; return s; })()")
+    page.locator("#choices button", has_text="偷工减料").click(); page.wait_for_timeout(120)
+    check("§30 UI: the ↶ button becomes enabled after a choice (also during the consequence beat)", page.locator("#rewind-btn").is_enabled())
+    pass_conseq(page); wait_idle(page); finish_text(page)
+    st_a = state(page); node_a = st_a["nodeId"]; hours_a = st_a["hours"]
+    shot(page, "101_rewind_button")
+    page.locator("#rewind-btn").click(); page.wait_for_timeout(250); finish_text(page)
+    after = page.evaluate("(() => { const s = JSON.parse(JSON.stringify(WH.UI.game.state)); delete s.playMs; delete s.codex; return s; })()")
+    before.pop("codex", None)
+    check("§30 UI: ↶ returns to the previous choice with the complete state (stats, flags, clock, visited nodes)", state(page)["nodeId"] == "smp_002" and after == before
+          and "偷工减料" in page.locator("#choices").inner_text() and "已回到上一个选择" in page.locator(".toasts").inner_text())
+    check("§30 UI: button disabled again at the start of the stack; hotkey title shows (Z)", page.locator("#rewind-btn").is_disabled() and "(Z)" in (page.locator("#rewind-btn").get_attribute("title") or ""))
+    page.locator("#choices button", has_text="偷工减料").click(); page.wait_for_timeout(120); pass_conseq(page); wait_idle(page); finish_text(page)
+    check("§30 UI: picking the same roll choice again gives the same outcome (no re-rolling)", state(page)["nodeId"] == node_a and state(page)["hours"] == hours_a, f"{state(page)['nodeId']} vs {node_a}")
+    # hotkey Z + A → B
+    page.keyboard.press("z"); page.wait_for_timeout(250); finish_text(page)
+    check("§30 UI: hotkey Z rewinds as well", state(page)["nodeId"] == "smp_002")
+    page.locator("#choices button", has_text="拼命干活").click(); page.wait_for_timeout(120); pass_conseq(page); wait_idle(page); finish_text(page)
+    check("§30 UI: picking another choice after a rewind works normally", state(page)["nodeId"] == "smp_004" and page.evaluate("WH.UI.game.rewindCount") == 2)
+    # --- knowledge is not rewound (codex / lore cards) ---
+    cx = page.evaluate("WH.Save.codexGlobal().length")
+    page.keyboard.press("z"); page.wait_for_timeout(250); finish_text(page)
+    check("§30 UI: codex entries stay unlocked after a rewind, no lore card pops again", page.evaluate("WH.Save.codexGlobal().length") >= cx and page.locator("#lore-overlay").count() == 0)
+    page.locator("#choices button", has_text="拼命干活").click(); page.wait_for_timeout(120); pass_conseq(page); wait_idle(page); finish_text(page)
+    check("§30 UI: re-reaching a node with a codex unlock does not show its lore card again", page.locator("#lore-overlay").count() == 0 and state(page)["nodeId"] == "smp_004")
+    # --- save / load ---
+    page.evaluate("() => WH.Save.write('slot2', WH.UI.game.toRecord())")
+    check("§30 saves: slot record carries rewinds (no schema change)", page.evaluate("WH.Save.read('slot2').rewinds") == 3 and page.evaluate("WH.Save.read('slot2').schema") == 2)
+    page.evaluate("() => { const r = WH.Save.read('slot2'); WH.UI.loadRecord(r); }"); page.wait_for_timeout(250); finish_text(page)
+    check("§30 saves: after load the button is disabled until the next choice and the count is kept", page.locator("#rewind-btn").is_disabled() and page.evaluate("WH.UI.game.rewindCount") == 3)
+    # --- ending rewind ---
+    goto_node(page, "smp_008", flags={})
+    page.locator("#choices button", has_text="带平民撤离").click(); page.wait_for_timeout(120); pass_conseq(page); wait_idle(page); finish_text(page)
+    page.locator("#choices .choice.ending").click(); page.wait_for_timeout(400)
+    runs1 = page.evaluate("WH.Save.runs().map(r => [r.endingId, r.rewinds])")
+    check("§30 ending: the ending screen offers 回到最后一个选择 and the reached ending is recorded (rewinds field present)", page.locator("#rewind-end").count() == 1
+          and "回到最后一个选择" in page.locator("#rewind-end").inner_text() and runs1[0][0] == "smp_end_good_evac" and runs1[0][1] == 3, str(runs1))
+    shot(page, "102_ending_rewind")
+    n_end = page.evaluate("Object.values(WH.Save.endingStats()).reduce((a, e) => a + e.count, 0)")
+    page.locator("#rewind-end").click(); page.wait_for_timeout(400); finish_text(page)
+    check("§30 ending: rewinding from the ending returns to the last choice (node smp_008) with the game screen back", state(page)["nodeId"] == "smp_008" and not state(page)["ended"]
+          and page.locator("#scr-game").is_visible() and page.locator("#scr-ending").is_hidden())
+    check("§30 ending: the old record stays (往生录, endings seen)", page.evaluate("WH.Save.runs().length") == 1 and page.evaluate("Object.values(WH.Save.endingStats()).reduce((a, e) => a + e.count, 0)") == n_end)
+    page.locator("#choices button", has_text="带平民撤离").click(); page.wait_for_timeout(120); pass_conseq(page); wait_idle(page); finish_text(page)
+    page.locator("#choices .choice.ending").click(); page.wait_for_timeout(400)
+    runs2 = page.evaluate("WH.Save.runs().map(r => [r.endingId, r.rewinds, r.runId])")
+    check("§30 ending: continuing writes a NEW record of the same run with rewinds = 4 (rewinds ≥ 1)", len(runs2) == 2 and runs2[0][1] == 4 and runs2[1][1] == 3 and runs2[0][2] == runs2[1][2], str(runs2))
+    page.locator("#scr-ending .ending-fate .run-rw").first.wait_for(timeout=1000)
+    page.evaluate("() => WH.UI.openCodex(null, false, 'records')"); page.wait_for_timeout(250)
+    check("§30 往生录: records of a run that used rewinds show ↶N (newest ↶4, the earlier ending ↶3)", page.locator(".modal .run-row .run-rw").count() == 2 and "↶4" in page.locator(".modal .run-row .run-rw").first.inner_text()
+          and "↶3" in page.locator(".modal .run-row .run-rw").nth(1).inner_text())
+    shot(page, "103_records_rewind")
+    page.keyboard.press("Escape"); page.wait_for_timeout(100)
+    # --- achievements guard through the UI: a run with rewinds never sets achStats.fastest ---
+    check("§30 achievements: runs that used a rewind never set the fast-finish stat; origins still count", page.evaluate("WH.Save.achStats().fastest") is None
+          and page.evaluate("!!(WH.Save.achStats().origins.sample || {}).hive"))
+    # a clean run (fresh game, rewinds 0) finishing right now does set it
+    page.evaluate("() => { WH.UI.startGame('sample', 'hive'); }"); page.wait_for_timeout(300); finish_text(page)
+    goto_node(page, "smp_008", flags={}, rewinds=0)
+    page.locator("#choices button", has_text="带平民撤离").click(); page.wait_for_timeout(120); pass_conseq(page); wait_idle(page); finish_text(page)
+    page.locator("#choices .choice.ending").click(); page.wait_for_timeout(400)
+    check("§30 achievements: a clean run (rewinds 0) feeds the fast-finish stat as before", page.evaluate("WH.Save.runs()[0].rewinds") == 0 and isinstance(page.evaluate("WH.Save.achStats().fastest"), (int, float)))
+    page.evaluate("() => WH.UI.show('title')"); page.wait_for_timeout(100)
+    # --- off again: hides everything incl. the ending button ---
+    page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(150)
+    page.locator(".modal .rewind-row").locator("button", has_text="关").click(); page.wait_for_timeout(150); page.keyboard.press("Escape")
+    check("§30 UI: turning it off removes the button and drops the history", page.locator("#rewind-btn").count() == 0 and page.evaluate("WH.UI.game.rewindStack.length") == 0)
+    # --- English ---
+    page.evaluate("() => { WH.UI.settings.rewind = true; WH.Save.saveSettings(WH.UI.settings); WH.UI.startGame('sample', 'hive'); }"); page.wait_for_timeout(300); finish_text(page)
+    page.locator("#tools button", has_text="EN").click(); page.wait_for_timeout(200)
+    check("§30 en: button label + aria", "Back one choice" in page.locator("#rewind-btn").inner_text() and "hotkey Z" in (page.locator("#rewind-btn").get_attribute("aria-label") or ""))
+    page.locator("#tools button", has_text="Settings").click(); page.wait_for_timeout(150)
+    check("§30 en: settings row", "Allow going back one choice" in page.locator(".modal .rewind-row").inner_text())
+    page.locator(".modal .rewind-row").scroll_into_view_if_needed(); page.wait_for_timeout(100)
+    shot(page, "104_settings_rewind_en")
+    page.keyboard.press("Escape")
+    ctx.close(); b.close()
+    # --- mobile ---
+    b, ctx, page = new_ctx(p, mobile=True, tag="rewind-m")
+    page.evaluate("() => { WH.UI.settings.rewind = true; WH.Save.saveSettings(WH.UI.settings); }")
+    page.locator("#scr-title .menu .btn.primary").tap(); page.wait_for_timeout(200)
+    pick_faction(page, "sample", "hive", tap=True); wait_idle(page); finish_text(page)
+    goto_node(page, "smp_002", flags={})
+    page.locator("#choices button", has_text="拼命干活").tap(); page.wait_for_timeout(120); pass_conseq(page); wait_idle(page); finish_text(page)
+    bx = page.locator("#rewind-btn").bounding_box()
+    check("§30 mobile: ↶ button visible inside the viewport, enabled, no horizontal overflow", bx and bx["x"] >= 0 and bx["x"] + bx["width"] <= 391 and page.locator("#rewind-btn").is_enabled()
+          and page.evaluate("document.documentElement.scrollWidth") <= 391, str(bx))
+    page.screenshot(path=os.path.join(OUT, "m80_rewind.png"))
+    page.locator("#rewind-btn").tap(); page.wait_for_timeout(250); finish_text(page)
+    check("§30 mobile: tapping ↶ rewinds", state(page)["nodeId"] == "smp_002")
+    ctx.close(); b.close()
+
+
+def run_style(p):
+    """SPEC §29 UI wiring: settings.musicStyle, selector with ▶ preview, applied on start-up and on change, in the settings export."""
+    print("\n== v0.3.3 music style selector ==")
+    for mobile in (False, True):
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="style" + ("-m" if mobile else ""))
+        ids = page.evaluate(STYLE_STUBS)
+        fake = page.evaluate("!!window.__fakeStyles")
+        print(f"  styles ({'stub' if fake else 'audio.js'}): {ids}")
+        check(f"§29{' mobile' if mobile else ''}: default settings.musicStyle is chip", page.evaluate("WH.UI.settings.musicStyle") == "chip" and len(ids) >= 1)
+        tap = (lambda loc: loc.tap()) if mobile else (lambda loc: loc.click())
+        tap(page.locator("#scr-title .menu .btn", has_text="设置").first) if page.locator("#scr-title .menu .btn", has_text="设置").count() else page.evaluate("() => WH.UI.openSettings()")
+        page.wait_for_timeout(200)
+        row = page.locator(".modal .style-row")
+        check(f"§29{' mobile' if mobile else ''}: 配乐风格 row with one radio card per style, exactly one checked (chip)", row.count() == 1 and "配乐风格" in row.inner_text()
+              and row.locator('[role="radio"]').count() == len(ids) and row.locator('[aria-checked="true"]').count() == 1 and row.locator('[aria-checked="true"]').get_attribute("data-style") == "chip"
+              and row.locator('[role="radiogroup"]').count() == 1)
+        if mobile:
+            boxes = [row.locator(".style-card").nth(i).bounding_box() for i in range(row.locator(".style-card").count())]
+            check("§29 mobile: cards stacked, inside the viewport, no overflow, ≥ 44px tall", len({round(x["x"]) for x in boxes}) == 1 and all(x["x"] >= 0 and x["x"] + x["width"] <= 391 and x["height"] >= 44 for x in boxes)
+                  and page.evaluate("document.documentElement.scrollWidth") <= 391, str(boxes[:2]))
+            row.scroll_into_view_if_needed(); page.wait_for_timeout(100)
+            page.screenshot(path=os.path.join(OUT, "m81_style.png"))
+        else:
+            row.scroll_into_view_if_needed(); page.wait_for_timeout(100)
+            shot(page, "105_settings_style")
+        if len(ids) > 1:
+            target = ids[1]
+            tap(row.locator(f'.style-pick[data-style="{target}"]'))
+            page.wait_for_timeout(120)
+            check(f"§29{' mobile' if mobile else ''}: choosing a style applies immediately (setStyle), persists, and moves the check mark",
+                  page.evaluate("__sc[__sc.length - 1]") == target and json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["musicStyle"] == target
+                  and row.locator('[aria-checked="true"]').get_attribute("data-style") == target and row.locator(".style-card.on").count() == 1)
+            if not mobile:
+                row.locator(f'.style-pick[data-style="{target}"]').focus(); page.keyboard.press("ArrowDown"); page.wait_for_timeout(100)
+                check("§29 a11y: arrow keys move the selection inside the radio group", row.locator('[aria-checked="true"]').get_attribute("data-style") == (ids[2] if len(ids) > 2 else ids[0])
+                      and page.evaluate("document.activeElement.getAttribute('role')") == "radio")
+                tap(row.locator(f'.style-pick[data-style="{target}"]'))
+        pv = row.locator(".style-prev")
+        if page.evaluate("typeof WH.Audio.previewStyle") == "function":
+            check(f"§29{' mobile' if mobile else ''}: one ▶ 试听 button per style, labelled for screen readers", pv.count() == len(ids) and "试听" in pv.first.inner_text() and "试听" in (pv.first.get_attribute("aria-label") or ""))
+            last = ids[-1]
+            tap(row.locator(f'.style-prev[data-style="{last}"]')); page.wait_for_timeout(100)
+            check(f"§29{' mobile' if mobile else ''}: ▶ preview calls previewStyle(id) and does not change the chosen style", page.evaluate("__pv[__pv.length - 1]") == last
+                  and json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["musicStyle"] == (target if len(ids) > 1 else "chip") and row.locator(".style-prev.playing").count() == 1)
+        # start-up / re-apply uses the stored style; unknown ids fall back to chip
+        page.evaluate("() => { WH.UI.settings.musicStyle = 'dark'; WH.Save.saveSettings(WH.UI.settings); __sc.length = 0; WH.UI.applyAudioSettings(); }")
+        want = "dark" if "dark" in ids else "chip"
+        check(f"§29{' mobile' if mobile else ''}: applyAudioSettings (start-up path) sends the saved style", page.evaluate("__sc[__sc.length - 1]") == want, str(page.evaluate("__sc")))
+        page.evaluate("() => { WH.UI.settings.musicStyle = 'bogus'; __sc.length = 0; WH.UI.applyAudioSettings(); }")
+        check(f"§29{' mobile' if mobile else ''}: an unknown style id falls back to chip", page.evaluate("__sc[__sc.length - 1]") == "chip")
+        page.evaluate("() => { WH.UI.settings.musicStyle = 'dark'; WH.Save.saveSettings(WH.UI.settings); }")
+        check(f"§22/§29{' mobile' if mobile else ''}: musicStyle + rewind are part of the exported settings", page.evaluate("WH.Save.exportAll().data.settings.musicStyle") == "dark" and page.evaluate("'rewind' in WH.Save.exportAll().data.settings"))
+        page.reload(); page.wait_for_selector("#scr-title .title-main")
+        check(f"§29{' mobile' if mobile else ''}: the style survives a reload (settings store)", page.evaluate("WH.UI.settings.musicStyle") == "dark")
+        if not mobile:
+            page.evaluate(STYLE_STUBS); page.evaluate("() => WH.UI.setLang('en')"); page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(200)
+            check("§29 en: row label + card names switch language", "Music style" in page.locator(".modal .style-row").inner_text() and page.locator(".modal .style-pick").count() >= 1
+                  and (not page.evaluate("!!window.__fakeStyles") or "8-bit chiptune" in page.locator(".modal .style-row").inner_text()))
+            page.locator(".modal .style-row").scroll_into_view_if_needed(); page.wait_for_timeout(100)
+            shot(page, "106_settings_style_en")
+        ctx.close(); b.close()
+
 with sync_playwright() as p:
     t0 = time.time()
+    if "--only-v033" in ARGS:                        # SPEC §29/§30 quick loop (sample data)
+        run_rewind(p); run_style(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
     if "--only-grudge" in ARGS:                      # quick loop while working on SPEC §28 (sample: run_grudge, --real: run_real_grudge)
         (run_real_grudge if REAL else run_grudge)(p)
         fails = [r for r in results if not r[1]]
@@ -1552,8 +1831,10 @@ with sync_playwright() as p:
         run_data(p)
         run_v03(p)
         run_grudge(p)
+        run_rewind(p)
     if "--only-v022" not in ARGS: run_five(p)
     run_difficulty(p)
+    run_style(p)
     if REAL:
         run_new_routes(p)
         run_real_v022(p)

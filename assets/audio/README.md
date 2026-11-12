@@ -55,3 +55,4 @@ You can audition every mood in `tools/dev/audio_test.html`.
 - Files play through a looping `<audio>` element. Crossfades use `element.volume` because a `file://` page can't route media elements into Web Audio. Music volume and mute still apply.
 - The loop point is the end of the file. For a seamless loop, trim the file so the end flows into the start.
 - Browsers block sound until the first click or keypress. The game unlocks audio on the first gesture.
+- Music styles (SPEC §29): a file listed in `files.js` for a mood plays in every style, overriding the procedural music of that mood. Without a file, each style (chip / dark / organ / synth / piano) synthesises the mood itself.

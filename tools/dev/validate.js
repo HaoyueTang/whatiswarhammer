@@ -1411,6 +1411,70 @@ for (const r of reports) {
   console.log(`\n§28 grudges: ${gr.length ? gr.map((r) => `${r.id} ${r.st.grudge.grudgeChoices} choice(s)/${r.st.grudge.grudgeLines} line(s)${r.grudgeDeath ? ` death ${r.grudgeDeath.with.toFixed(1)}% (was ${r.grudgeDeath.without.toFixed(1)}%)` : ""}`).join(" · ") : "no route has grudges yet"}`);
 }
 if (reports.some((r) => r.rumorAvg !== undefined)) console.log(`\n§20b rumours overheard per run (target 4–8) · share with score ≥2: ${reports.filter((r) => r.rumorAvg !== undefined).map((r) => `${r.id} ${r.rumorAvg.toFixed(2)} (${r.rumorStrong.toFixed(0)}%)`).join(" · ")}`);
+/* ---------- SPEC §30 rewind determinism self-test (engine only; the simulation above never enables rewind) ---------- */
+function rewindSelfTest(f, seed, nRuns) {
+  const out = {runs: 0, rewinds: 0, replays: 0, mismatches: [], eventsSeen: 0, rolls: 0};
+  const strip = (st) => { const c = JSON.parse(JSON.stringify(st)); delete c.playMs; delete c.codex; return JSON.stringify(c); };
+  const origins = WH.Game.origins(f);
+  for (let r = 0; r < nRuns; r++) {
+    const drv = WH.RNG(seed * 7919 + r * 31 + 5);                   // driver stream: independent of the game's own RNG
+    const g = new WH.Game(f.id, {rng: WH.RNG(seed * 104729 + r), data: WH, rewind: true});
+    let step = g.start(origins[r % origins.length].id), n = 0;
+    out.runs++;
+    while (!g.state.ended && n < 400) {
+      n++;
+      if (step && step.kind === "event") {
+        const open = g.eventChoices().filter((v) => !v.locked);
+        g.eventChoose(open[Math.floor(drv() * open.length)].index);
+        step = g.eventContinue();
+        continue;
+      }
+      const cs = g.choices(), open = cs.map((c, i) => [c, i]).filter(([c]) => !c.locked);
+      if (!open.length) break;
+      const a = open[Math.floor(drv() * open.length)][1];
+      if (!g.state.deathPending && drv() < 0.12) {
+        const pre = strip(g.state), preRng = [g.rng.getState(), g.rumorRng && g.rumorRng.getState(), g.echoRng && g.echoRng.getState()];
+        const wasRoll = !!cs[a].roll;
+        const s1 = g.choose(a);
+        const post1 = strip(g.state), rng1 = [g.rng.getState(), g.rumorRng && g.rumorRng.getState(), g.echoRng && g.echoRng.getState()];
+        if (!g.canRewind() || !g.rewind()) { out.mismatches.push(`${g.state.nodeId}: rewind refused`); break; }
+        out.rewinds++;
+        if (strip(g.state) !== pre) out.mismatches.push(`${g.state.nodeId}: state after rewind differs from before the choice`);
+        if (JSON.stringify([g.rng.getState(), g.rumorRng && g.rumorRng.getState(), g.echoRng && g.echoRng.getState()]) !== JSON.stringify(preRng)) out.mismatches.push(`${g.state.nodeId}: RNG state after rewind differs`);
+        const cs2 = g.choices();
+        if (JSON.stringify(cs2.map((c) => [c.locked, c.roll && c.roll.pEff])) !== JSON.stringify(cs.map((c) => [c.locked, c.roll && c.roll.pEff]))) out.mismatches.push(`${g.state.nodeId}: choices differ after rewind`);
+        // same choice again must give the same step, state and RNG; otherwise another choice must work
+        if (drv() < 0.6 || open.length < 2) {
+          const s2 = g.choose(a);
+          out.replays++;
+          if (wasRoll) out.rolls++;
+          if (strip(g.state) !== post1) out.mismatches.push(`${g.state.nodeId}: replay of choice ${a} gives a different state`);
+          if (JSON.stringify([g.rng.getState(), g.rumorRng && g.rumorRng.getState(), g.echoRng && g.echoRng.getState()]) !== JSON.stringify(rng1)) out.mismatches.push(`${g.state.nodeId}: replay of choice ${a} gives a different RNG state`);
+          if (JSON.stringify(s1 && [s1.kind, s1.roll && s1.roll.success, s1.death, !!s1.event]) !== JSON.stringify(s2 && [s2.kind, s2.roll && s2.roll.success, s2.death, !!s2.event])) out.mismatches.push(`${g.state.nodeId}: replay of choice ${a} gives a different step`);
+          step = s2;
+        } else {
+          const b = open.filter(([, i]) => i !== a)[Math.floor(drv() * (open.length - 1))][1];
+          step = g.choose(b);
+        }
+        if (step && step.kind === "event") out.eventsSeen++;
+        if (out.mismatches.length > 5) return out;
+        continue;
+      }
+      step = g.choose(a);
+    }
+    if (g.rewindStack.length > 30) out.mismatches.push("stack deeper than 30");
+  }
+  return out;
+}
+{
+  const rows = [];
+  for (const fid of factionIds) {
+    const res = rewindSelfTest(WH.factions[fid], SEED, SAMPLE ? 40 : 60);
+    rows.push(`${fid} ${res.rewinds} rewinds / ${res.replays} replays (${res.rolls} rolls)`);
+    res.mismatches.forEach((m) => err(`rewind (SPEC §30) ${fid}: ${m}`));
+  }
+  console.log(`\n§30 rewind determinism (engine, random play with random rewind + same/other choice): ${rows.join(" · ")}`);
+}
 /* ---------- SPEC §24 difficulty levels ---------- */
 if (WH.difficulty && !WRITE_DIFF) {
   const d = WH.difficulty;
