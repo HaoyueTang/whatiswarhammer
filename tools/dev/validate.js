@@ -922,7 +922,215 @@ function checkFaction(f) {
   if (trapped.length) err(`${w}: ${trapped.length} node(s) can never reach an ending (closed loop): ${trapped.join(", ")}`);
   if (!SAMPLE && cons.eff && cons.effWithResult < cons.eff && NEW_ROUTES.includes(f.id))
     warn(`${w}: ${cons.eff - cons.effWithResult} effect/set choice(s) without result (SPEC §11): ${cons.missing.slice(0, 8).join(", ")}${cons.missing.length > 8 ? ", …" : ""}`);
-  return {endings, nodeCount: ids.length, chapters: chapterIds.length, cons};
+  const grudge = checkGrudges(f);                      // SPEC §28
+  return {endings, nodeCount: ids.length, chapters: chapterIds.length, cons, grudge};
+}
+
+/* ---------- SPEC §28 grudges (人际后果) ----------
+ * faction.npcs, choice.grudge, node.grudgeLine, flags wronged_<npc> / forgiven_<npc>. Coherence rules 1–5 + shape + lengths. */
+const GRUDGE_NOTE_ZH = 30, GRUDGE_NOTE_EN = 20, GRUDGE_LINE_ZH = 60, GRUDGE_LINE_EN = 40;
+const GRUDGE_P_MIN = -0.30, GRUDGE_EFF_MAX = 12, GRUDGE_TAINT_MAX = 10, GRUDGE_MAX_NPCS = 4, GRUDGE_MAX_PER_NPC = 3;
+const lc = (s) => String(s || "").toLowerCase();
+/* every name the player could read for this npc: [{zh,en}] (name + aka) */
+function npcNames(def) {
+  const out = [];
+  if (def && def.name) out.push(def.name);
+  if (def && Array.isArray(def.aka)) def.aka.forEach((a) => { if (a && typeof a === "object") out.push(a); });
+  return out;
+}
+const mentions = (names, zh, en) => ({
+  zh: names.some((n) => typeof n.zh === "string" && n.zh && String(zh || "").includes(n.zh)),
+  en: names.some((n) => typeof n.en === "string" && n.en && lc(en).includes(lc(n.en)))});
+function checkGrudges(f) {
+  const w = `faction.${f.id}`, nodes = f.nodes || {}, ids = Object.keys(nodes);
+  const info = {npcs: [], wronged: {}, grudgeChoices: 0, grudgeLines: 0, perNpc: {}, any: false};
+  const hasNpcs = f.npcs !== undefined;
+  let npcs = {};
+  if (hasNpcs) {
+    if (!f.npcs || typeof f.npcs !== "object" || Array.isArray(f.npcs)) err(`${w}.npcs: must be an object {npcId: {name:{zh,en}, aka?:[{zh,en}], sprite?}}`);
+    else npcs = f.npcs;
+  }
+  for (const nid of Object.keys(npcs)) {
+    const d = npcs[nid], nw = `${w}.npcs.${nid}`;
+    if (!/^[a-z][a-z0-9_]*$/.test(nid)) err(`${nw}: npc id must be a short lowercase slug (a-z, 0-9, _)`);
+    if (!d || typeof d !== "object" || Array.isArray(d)) { err(`${nw}: expected {name:{zh,en}, aka?, sprite?}`); continue; }
+    for (const k of Object.keys(d)) if (!["name", "aka", "sprite"].includes(k)) warn(`${nw}: unknown key "${k}"`);
+    checkL(d.name, nw + ".name", 14, 6);
+    if (d.name && typeof d.name.zh === "string" && zhLen(d.name.zh) < 2) warn(`${nw}.name.zh "${d.name.zh}" is a single character — presence matching would be unreliable`);
+    if (d.aka !== undefined) {
+      if (!Array.isArray(d.aka)) err(`${nw}.aka: expected an array of {zh,en}`);
+      else d.aka.forEach((a, i) => checkL(a, `${nw}.aka[${i}]`, 14, 6));
+    }
+    if (d.sprite !== undefined) sprite(d.sprite, nw + ".sprite");
+    info.npcs.push(nid);
+  }
+  /* wronging choices: any choice whose effects.set sets wronged_<npc> */
+  const wrongers = [];            // {node, i, npc}
+  const grudges = [];             // {node, i, npc, g, c}
+  const lines = [];               // {node, npc}
+  const forgivers = new Set();
+  for (const id of ids) {
+    const n = nodes[id], nw = `${f.id}/${id}`;
+    const setFlags = (e) => (e && e.set && typeof e.set === "object") ? Object.keys(e.set).filter((k) => e.set[k]) : [];
+    for (const k of setFlags(n.effects)) {
+      if (k.startsWith("wronged_")) warn(`${nw}: sets ${k} in node effects — SPEC §28 wronging belongs on the harming choice`);
+      if (k.startsWith("forgiven_")) forgivers.add(k.slice(9));
+    }
+    (n.choices || []).forEach((c, i) => {
+      for (const k of setFlags(c.effects)) {
+        if (k.startsWith("wronged_")) wrongers.push({node: id, i, npc: k.slice(8)});
+        if (k.startsWith("forgiven_")) forgivers.add(k.slice(9));
+      }
+      if (c.grudge !== undefined) grudges.push({node: id, i, npc: c.grudge && c.grudge.npc, g: c.grudge, c});
+    });
+    if (n.grudgeLine !== undefined) lines.push({node: id, npc: n.grudgeLine && n.grudgeLine.npc, gl: n.grudgeLine});
+  }
+  for (const e of WH.events) (e.choices || []).forEach((c, i) => { if (c.grudge !== undefined) warn(`event ${e.id}.choice${i + 1}: grudge is only used on node choices (ignored)`); });
+  info.any = !!(wrongers.length || grudges.length || lines.length || Object.keys(npcs).length);
+  if (!info.any) return info;
+
+  // wronged npcs ↔ faction.npcs, bounds (rule 5)
+  const wrongedBy = {};
+  for (const x of wrongers) (wrongedBy[x.npc] = wrongedBy[x.npc] || []).push(x);
+  info.wronged = wrongedBy;
+  for (const npc of Object.keys(wrongedBy)) {
+    if (!npcs[npc]) err(`${w}: flag wronged_${npc} is set (${wrongedBy[npc].map((x) => x.node).join(", ")}) but faction.npcs has no "${npc}"`);
+    const nh = wrongedBy[npc].length;
+    if (nh > GRUDGE_MAX_PER_NPC) warn(`${w}: ${nh} choices wrong "${npc}" (SPEC §28 content target 1–3)`);
+  }
+  if (Object.keys(wrongedBy).length > GRUDGE_MAX_NPCS) err(`${w}: ${Object.keys(wrongedBy).length} distinct wronged_ npcs (max ${GRUDGE_MAX_NPCS}, SPEC §28 rule 5)`);
+  if (Object.keys(npcs).length && (Object.keys(npcs).length < 2 || Object.keys(npcs).length > 4)) note(`${w}: ${Object.keys(npcs).length} npc(s) (SPEC §28 content target 2–4)`);
+  for (const f2 of forgivers) if (!npcs[f2]) warn(`${w}: flag forgiven_${f2} is set but faction.npcs has no "${f2}"`);
+
+  /* graph reachability from a choice's targets (events and goto ignored — SPEC §28 rule 1) */
+  const reachAfter = (nodeId, ci) => {
+    const c = nodes[nodeId].choices[ci], r = new Set(), q = [];
+    for (const t of targetsOf(c)) if (t && nodes[t] && !r.has(t)) { r.add(t); q.push(t); }
+    while (q.length) for (const c2 of nodes[q.shift()].choices || []) for (const t of targetsOf(c2)) if (t && nodes[t] && !r.has(t)) { r.add(t); q.push(t); }
+    return r;
+  };
+  const reachCache = new Map();
+  const reachOf = (x) => { const k = x.node + "#" + x.i; if (!reachCache.has(k)) reachCache.set(k, reachAfter(x.node, x.i)); return reachCache.get(k); };
+  const minChapter = (npc) => {
+    const cs = (wrongedBy[npc] || []).map((x) => nodes[x.node].chapter).filter((c) => typeof c === "number");
+    return cs.length ? Math.min(...cs) : null;
+  };
+
+  /* rule 1 + 4 for a node carrying a grudge choice or a grudgeLine */
+  const place = (npc, nodeId, label) => {
+    const where = `${f.id}/${nodeId}`;
+    if (!npcs[npc]) return false;                          // reported by the caller
+    const wr = wrongedBy[npc] || [];
+    if (!wr.length) { err(`${label} on ${where}: no choice sets wronged_${npc} (SPEC §28 rule 1)`); return true; }
+    if (!wr.some((x) => reachOf(x).has(nodeId))) err(`${label} on ${where}: no path from any wronged_${npc} choice (${wr.map((x) => x.node).join(", ")}) leads here (SPEC §28 rule 1)`);
+    const nc = nodes[nodeId].chapter, mc = minChapter(npc);
+    if (typeof nc === "number" && mc !== null) {
+      if (nc < mc) err(`${label} on ${where}: chapter ${nc} is before the earliest harm to ${npc} (chapter ${mc}; SPEC §28 rule 4)`);
+      else if (nc === mc) warn(`${label} on ${where}: same chapter (${nc}) as the earliest harm to ${npc} (SPEC §28 rule 4)`);
+    }
+    return true;
+  };
+  /* rule 2: the person is plainly there */
+  const present = (npc, nodeId) => {
+    const n = nodes[nodeId], def = npcs[npc] || {}, names = npcNames(def);
+    const tx = n.text || {}, m = mentions(names, tx.zh, tx.en);
+    if (m.zh && m.en) return "text";
+    if (def.sprite && ((n.speaker && n.speaker.sprite === def.sprite) || n.foe === def.sprite)) return "sprite";
+    if (n.speaker && n.speaker.name) { const ms = mentions(names, n.speaker.name.zh, n.speaker.name.en); if (ms.zh && ms.en) return "speaker"; }
+    if (n.grudgeLine && n.grudgeLine.npc === npc && n.grudgeLine.text) return "grudgeLine";
+    return null;
+  };
+
+  const perNpc = {};
+  const bump = (npc, k) => { (perNpc[npc] = perNpc[npc] || {wrong: 0, grudge: 0, line: 0, presence: {}}); if (k) perNpc[npc][k]++; return perNpc[npc]; };
+  for (const npc of Object.keys(wrongedBy)) bump(npc).wrong = wrongedBy[npc].length;
+
+  for (const x of grudges) {
+    const gw = `${f.id}/${x.node}.choice${x.i + 1}.grudge`, g = x.g;
+    if (!g || typeof g !== "object" || Array.isArray(g)) { err(`${gw}: expected {npc, p?, effects?, note}`); continue; }
+    info.grudgeChoices++;
+    for (const k of Object.keys(g)) if (!["npc", "p", "effects", "note"].includes(k)) warn(`${gw}: unknown key "${k}"`);
+    if (typeof g.npc !== "string" || !npcs[g.npc]) { err(`${gw}: npc "${g.npc}" is not in faction.npcs`); continue; }
+    bump(g.npc, "grudge");
+    // shape / bounds (rule 5)
+    checkL(g.note, gw + ".note", GRUDGE_NOTE_ZH, GRUDGE_NOTE_EN);
+    if (g.p !== undefined) {
+      if (typeof g.p !== "number" || !isFinite(g.p)) err(`${gw}.p: not a number`);
+      else {
+        if (g.p < GRUDGE_P_MIN) err(`${gw}.p: ${g.p} < ${GRUDGE_P_MIN} (SPEC §28 rule 5)`);
+        if (g.p > 0) err(`${gw}.p: ${g.p} > 0 — a grudge never helps`);
+        if (!x.c.roll && g.p !== 0) warn(`${gw}.p: choice has no roll, p is ignored`);
+      }
+    }
+    if (g.effects !== undefined) {
+      const e = g.effects;
+      if (!e || typeof e !== "object" || Array.isArray(e)) err(`${gw}.effects: expected {hp?, sanity?, corruption?, renown?, taint?}`);
+      else for (const k of Object.keys(e)) {
+        if (STATS.includes(k)) {
+          const v = e[k];
+          if (typeof v !== "number" || !isFinite(v)) { err(`${gw}.effects.${k}: not a number`); continue; }
+          if (Math.abs(v) > GRUDGE_EFF_MAX) err(`${gw}.effects.${k}: |${v}| > ${GRUDGE_EFF_MAX} (SPEC §28 rule 5)`);
+          if (k === "corruption" ? v < 0 : v > 0) err(`${gw}.effects.${k}: ${v} would help the player — grudge effects only hurt (hp/sanity/renown ≤ 0, corruption ≥ 0)`);
+        } else if (k === "taint") {
+          if (!e.taint || typeof e.taint !== "object" || Array.isArray(e.taint)) { err(`${gw}.effects.taint: expected {god:n}`); continue; }
+          for (const gd of Object.keys(e.taint)) {
+            const v = e.taint[gd];
+            if (!TAINT_GODS.includes(gd) && gd !== "all") err(`${gw}.effects.taint.${gd}: unknown god`);
+            else if (typeof v !== "number" || !isFinite(v)) err(`${gw}.effects.taint.${gd}: not a number`);
+            else if (v < 0 || v > GRUDGE_TAINT_MAX) err(`${gw}.effects.taint.${gd}: ${v} (need 0–${GRUDGE_TAINT_MAX}, SPEC §28)`);
+          }
+        } else err(`${gw}.effects.${k}: only hp/sanity/corruption/renown/taint are allowed in a grudge`);
+      }
+    }
+    if (g.p === undefined && g.effects === undefined) warn(`${gw}: no p and no effects — the grudge only shows its note`);
+    place(g.npc, x.node, "grudge");
+    // rule 2: presence
+    const how = present(g.npc, x.node);
+    if (!how) err(`grudge on ${f.id}/${x.node}: ${g.npc} is not present (name "${(npcs[g.npc].name && npcs[g.npc].name.zh) || g.npc}" missing from the zh+en node text, no speaker/foe sprite match, no grudgeLine) — SPEC §28 rule 2`);
+    else { const p = bump(g.npc).presence; p[how] = (p[how] || 0) + 1; }
+  }
+  // per-npc grudge-choice cap (rule 5)
+  for (const npc of Object.keys(perNpc)) if (perNpc[npc].grudge > GRUDGE_MAX_PER_NPC) err(`${w}: ${perNpc[npc].grudge} grudge choices for "${npc}" (max ${GRUDGE_MAX_PER_NPC}, SPEC §28 rule 5)`);
+
+  // grudgeLine nodes
+  for (const x of lines) {
+    const lw = `${f.id}/${x.node}.grudgeLine`, gl = x.gl;
+    if (!gl || typeof gl !== "object" || Array.isArray(gl)) { err(`${lw}: expected {npc, text:{zh,en}}`); continue; }
+    info.grudgeLines++;
+    for (const k of Object.keys(gl)) if (!["npc", "text"].includes(k)) warn(`${lw}: unknown key "${k}"`);
+    checkL(gl.text, lw + ".text", GRUDGE_LINE_ZH, GRUDGE_LINE_EN);
+    if (typeof gl.npc !== "string" || !npcs[gl.npc]) { err(`${lw}: npc "${gl.npc}" is not in faction.npcs`); continue; }
+    bump(gl.npc, "line");
+    if (nodes[x.node].ending) warn(`${lw}: grudgeLine on an ending node is not shown`);
+    place(gl.npc, x.node, "grudgeLine");
+    if (!grudges.some((g) => g.node === x.node && g.npc === gl.npc)) warn(`${lw}: node has no grudge choice for ${gl.npc} (the line alone changes nothing)`);
+    if (gl.text) {                                                      // the line should show them, so it names them or is plainly about them
+      const m = mentions(npcNames(npcs[gl.npc]), gl.text.zh, gl.text.en);
+      if (!m.zh && !m.en && !(npcs[gl.npc].aka || []).length) note(`${lw}: line does not name ${gl.npc} (fine if it says "he/she")`);
+    }
+  }
+
+  // rule 3: the harming choice names the person (WARN)
+  for (const npc of Object.keys(wrongedBy)) {
+    if (!npcs[npc]) continue;
+    const names = npcNames(npcs[npc]);
+    for (const x of wrongedBy[npc]) {
+      const n = nodes[x.node], c = n.choices[x.i], rr = c.rollResult || {};
+      const zh = [c.text, c.result, rr.success, rr.fail, n.text].map((t) => (t && t.zh) || "").join("\n");
+      const en = [c.text, c.result, rr.success, rr.fail, n.text].map((t) => (t && t.en) || "").join("\n");
+      const m = mentions(names, zh, en);
+      if (!m.zh || !m.en) warn(`${f.id}/${x.node}.choice${x.i + 1}: sets wronged_${npc} but its text/result/node text does not name ${npc} in ${!m.zh && !m.en ? "zh or en" : (!m.zh ? "zh" : "en")} (SPEC §28 rule 3)`);
+      if (c.result === undefined && c.rollResult === undefined) warn(`${f.id}/${x.node}.choice${x.i + 1}: wronging choice has no result text (SPEC §28: the harm must be explicit)`);
+    }
+  }
+  // unused npcs
+  for (const npc of Object.keys(npcs)) {
+    const p = perNpc[npc] || {wrong: 0, grudge: 0};
+    if (!p.wrong) warn(`${w}.npcs.${npc}: no choice wrongs this person (wronged_${npc} is never set)`);
+    else if (!p.grudge && !(p.line)) warn(`${w}.npcs.${npc}: wronged but no grudge choice ever follows`);
+  }
+  info.perNpc = perNpc;
+  return info;
 }
 
 /* static reachability from one origin's start node (+ death nodes + event gotos, which any origin can hit) */
@@ -937,8 +1145,20 @@ function originReach(f, o) {
 }
 
 /* ---------- Monte-Carlo ---------- */
-function simulate(f, seed) {
+/* SPEC §28 baseline: the same faction without any grudge / grudgeLine (for the with/without comparison) */
+function stripGrudges(f) {
+  const nodes = {};
+  for (const [id, n] of Object.entries(f.nodes || {})) {
+    const m = Object.assign({}, n);
+    delete m.grudgeLine;
+    if (n.choices) m.choices = n.choices.map((c) => { if (c.grudge === undefined) return c; const d = Object.assign({}, c); delete d.grudge; return d; });
+    nodes[id] = m;
+  }
+  return Object.assign({}, f, {nodes});
+}
+function simulate(f, seed, data) {
   if (seed === undefined) seed = SEED;
+  if (!data) data = WH;
   const origins = WH.Game.origins(f);
   const res = {runs: RUNS, visits: [], endings: {}, kinds: {good: 0, bad: 0, death: 0}, deathCause: {}, loops: 0, crashes: 0,
                softlocks: new Map(), events: {}, eventsPerRun: [], years: [], visited: new Set(), firstCrash: null, maxRevisit: 0, maxRevisitNode: null,
@@ -946,6 +1166,7 @@ function simulate(f, seed) {
   origins.forEach((o) => { res.perOrigin[o.id] = {runs: 0, visits: [], kinds: {good: 0, bad: 0, death: 0}, endings: new Set()}; });
   res.taint = {khorne: [], nurgle: [], tzeentch: [], slaanesh: []}; res.claims = {}; res.cleanses = 0;
   res.rumors = []; res.rumorIds = {}; res.chrUnlocked = []; res.rumorScores = [];      // SPEC §20 / §20b
+  res.grudge = {shown: [], taken: [], wronged: 0, active: 0, npcRuns: {}, npcTaken: {}, finished: 0};                // SPEC §28
   // SPEC §19 per-god run counts: claim fired ≥1 / fired twice / ended in that god's claim ending / resisted (flag) and not claimed
   res.claimRuns = {}, res.claimTwice = {}, res.claimEnd = {}, res.resisted = {}; res.anyClaimEnd = 0; res.anyClaimFired = 0;
   TAINT_GODS.forEach((gd) => { res.claimRuns[gd] = 0; res.claimTwice[gd] = 0; res.claimEnd[gd] = 0; res.resisted[gd] = 0; });
@@ -953,10 +1174,10 @@ function simulate(f, seed) {
     const rng = WH.RNG(seed * 100003 + r);
     const origin = origins[r % origins.length], po = res.perOrigin[origin.id];
     po.runs++;
-    let g, steps = 0, evCount = 0;
+    let g, steps = 0, evCount = 0, gShown = 0, gTaken = 0;
     const fired = {};
     try {
-      g = new WH.Game(f.id, {rng, data: WH});
+      g = new WH.Game(f.id, {rng, data});
       let step = g.start(origin.id);
       const counts = {};
       while (!g.state.ended && steps < STEP_LIMIT) {
@@ -978,7 +1199,9 @@ function simulate(f, seed) {
         const open = cs.map((c, i) => [c, i]).filter(([c]) => !c.locked);
         if (cs.some((c) => c.fallback)) res.softlocks.set(g.state.nodeId, (res.softlocks.get(g.state.nodeId) || 0) + 1);
         if (!open.length) { res.softlocks.set(g.state.nodeId, (res.softlocks.get(g.state.nodeId) || 0) + 1); break; }
+        if (cs.some((c) => c.grudge && !c.locked)) gShown++;
         step = g.choose(open[Math.floor(rng() * open.length)][1]);
+        if (step && step.grudge) { gTaken++; res.grudge.npcTaken[step.grudge.npc] = (res.grudge.npcTaken[step.grudge.npc] || 0) + 1; }
         if (step && step.death) res.deathCause[step.death] = (res.deathCause[step.death] || 0) + 1;
       }
       res.visited.add(g.state.nodeId);
@@ -998,6 +1221,13 @@ function simulate(f, seed) {
         if (g.state.flags["resisted_" + gd] && cg !== gd) res.resisted[gd]++;
       }
       res.eventsPerRun.push(evCount);
+      {
+        const gr = res.grudge, wn = Object.keys(g.state.flags).filter((k) => k.startsWith("wronged_") && g.state.flags[k]).map((k) => k.slice(8));
+        gr.finished++; gr.shown.push(gShown); gr.taken.push(gTaken);
+        if (wn.length) gr.wronged++;
+        if (gShown) gr.active++;
+        wn.forEach((k) => { gr.npcRuns[k] = (gr.npcRuns[k] || 0) + 1; });
+      }
       const sr = g.state.seenRumors || [];
       res.rumors.push(sr.length);
       sr.forEach((id) => { res.rumorIds[id] = (res.rumorIds[id] || 0) + 1; });
@@ -1135,6 +1365,26 @@ for (const r of reports) {
       r.rumorAvg = ra; r.rumorStrong = s.rumorScores.length ? 100 * strong / s.rumorScores.length : 0;
       if (!SAMPLE && (ra < 4 || ra > 8)) warn(`${r.id}: ${ra.toFixed(2)} rumours overheard per run (SPEC §20b target 4–8)`);
     }
+    // SPEC §28 grudges: wronged npcs, grudge choices, activations per run, death / claim rate with vs without
+    const gi = r.st.grudge;
+    if (gi && gi.any) {
+      const names = Object.keys(gi.perNpc), gr = s.grudge, nf = gr.finished || 1;
+      const base = gi.grudgeChoices || gi.grudgeLines ? simulate(f, SEED, Object.assign({}, WH, {factions: Object.assign({}, WH.factions, {[f.id]: stripGrudges(f)})})) : null;
+      const dWith = 100 * s.kinds.death / (v.length || 1), cWith = 100 * s.anyClaimEnd / (v.length || 1);
+      console.log(`grudges (SPEC §28): npcs ${names.length ? names.map((n) => `${n} (wronged by ${gi.perNpc[n].wrong}, grudge choices ${gi.perNpc[n].grudge}${gi.perNpc[n].line ? ", lines " + gi.perNpc[n].line : ""})`).join(" · ") : "none"} · ` +
+        `grudge choices ${gi.grudgeChoices}, presence lines ${gi.grudgeLines}`);
+      console.log(`  per run: wronged someone ${pct(gr.wronged, nf)} · a grudge choice shown ${pct(gr.active, nf)} · shown/run ${avg(gr.shown).toFixed(2)} · taken/run ${avg(gr.taken).toFixed(2)}` +
+        (Object.keys(gr.npcRuns).length ? ` · wronged: ${Object.entries(gr.npcRuns).map(([k, c]) => `${k} ${pct(c, nf)}`).join(" ")}` : ""));
+      if (base && base.visits.length) {
+        const dBase = 100 * base.kinds.death / base.visits.length, cBase = 100 * base.anyClaimEnd / base.visits.length, dd = dWith - dBase;
+        console.log(`  death rate with grudges ${dWith.toFixed(1)}% · without ${dBase.toFixed(1)}% (${dd >= 0 ? "+" : ""}${dd.toFixed(1)} pts; SPEC §28 target ≤ +3) · claim endings ${cWith.toFixed(1)}% vs ${cBase.toFixed(1)}%`);
+        if (dd > 3) warn(`${r.id}: grudges raise the random-play death rate by ${dd.toFixed(1)} pts (SPEC §28 balance: ≤ 3)`);
+        if (Math.abs(cWith - cBase) > 1.5) warn(`${r.id}: grudges move the claim-ending rate ${cBase.toFixed(1)}% → ${cWith.toFixed(1)}% (SPEC §28: claim bands unchanged)`);
+        r.grudgeDeath = {with: dWith, without: dBase};
+      }
+      if (gi.grudgeChoices && !gr.active) warn(`${r.id}: grudge choices exist but none was ever shown in ${RUNS} random runs`);
+      else if (gi.grudgeChoices && gr.wronged && gr.taken.reduce((a, b) => a + b, 0) === 0) warn(`${r.id}: a grudge was shown but never chosen in ${RUNS} random runs`);
+    }
     console.log(`max visits of one node in a run: ${s.maxRevisit} (${s.maxRevisitNode})`);
     const po = Object.entries(s.perOrigin);
     if (po.length > 1 || (f.origins && f.origins.length)) {
@@ -1156,6 +1406,10 @@ for (const r of reports) {
   }
 }
 
+{
+  const gr = reports.filter((r) => r.st && r.st.grudge && (r.st.grudge.grudgeChoices || r.st.grudge.grudgeLines));
+  console.log(`\n§28 grudges: ${gr.length ? gr.map((r) => `${r.id} ${r.st.grudge.grudgeChoices} choice(s)/${r.st.grudge.grudgeLines} line(s)${r.grudgeDeath ? ` death ${r.grudgeDeath.with.toFixed(1)}% (was ${r.grudgeDeath.without.toFixed(1)}%)` : ""}`).join(" · ") : "no route has grudges yet"}`);
+}
 if (reports.some((r) => r.rumorAvg !== undefined)) console.log(`\n§20b rumours overheard per run (target 4–8) · share with score ≥2: ${reports.filter((r) => r.rumorAvg !== undefined).map((r) => `${r.id} ${r.rumorAvg.toFixed(2)} (${r.rumorStrong.toFixed(0)}%)`).join(" · ")}`);
 /* ---------- SPEC §24 difficulty levels ---------- */
 if (WH.difficulty && !WRITE_DIFF) {

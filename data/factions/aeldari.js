@@ -251,8 +251,8 @@
         E({hp: -15, renown: 5}, "一道绿光擦过你的肩膀，整条胳膊瞬间麻了。埃达回头把你拽进了麦田。",
           "A green bolt grazes your shoulder and the whole arm goes numb. Edda turns back and hauls you into the wheat.")),
       C("扔下阵地就跑", "Abandon the line and run", "eld_o_trooper_5",
-        E({sanity: -5, renown: -3}, "你跑得比任何人都快。身后的枪声一支支停了。",
-          "You run faster than anyone. Behind you, the rifles fall silent one by one."))
+        E({sanity: -5, renown: -3, set: {wronged_edda: true}}, "你跑得比任何人都快。身后，埃达喊了你的名字，枪声一支支停了。",
+          "You run faster than anyone. Behind you Edda shouts your name; the rifles fall silent one by one."))
     ]};
 
   N.eld_o_trooper_5 = {chapter: 1, scene: "burning_city", speaker: null, time: {h: 2},
@@ -290,21 +290,31 @@
     ]};
 
   N.eld_204 = {chapter: 2, scene: "burning_city", speaker: EDDA, foe: "necron_warrior", time: {h: 1},
+    grudgeLine: {npc: "edda", text: L("她抓着你的手臂，指节发白。上一回，你是第一个跑的。", "Her grip on your arm is white-knuckled. Last time, you were the first to run.")},
     text: L("穿梭机歪歪扭扭地升空了。你不敢看它飞了多远。\n防卫军的埃达一把抓住你：“骷髅过来了！帮我守住路口，让最后一批人上山！”\n远处，一排银色的身影正穿过冒烟的麦田。",
             "The shuttle wobbles into the sky. You can't bear to watch how far it gets.\nEdda of the defence force grabs your arm. “Skeletons incoming! Hold the crossroads with me so the last ones reach the hills!”\nA line of silver figures is crossing the smoking wheat."),
     choices: [
-      C("跟埃达守住路口", "Hold the crossroads with Edda", null,
+      C("跟埃达守住路口", "Hold the crossroads with Edda", null, M(
         R(0.5, "hp", "eld_205", "eld_206",
           "你打中了一个。它倒下，站起，又倒下。你们拖住了它们一刻钟——够了。",
           "You hit one. It falls, rises, falls again. You hold them for a quarter hour. It's enough.",
           "一道绿光擦过你的肩膀，整条胳膊瞬间没了知觉。你栽进了水沟。",
-          "A green bolt grazes your shoulder and the whole arm goes dead. You topple into a ditch.")),
-      C("和埃达排成射击线，像操练时那样", "Form a firing line with Edda, like drill", null, M(ONLY("origin_trooper"),
+          "A green bolt grazes your shoulder and the whole arm goes dead. You topple into a ditch."),
+        {grudge: {npc: "edda", p: -0.1, note: L("你扔下过阵地。埃达不敢把背交给你。", "You deserted the line. Edda won't turn her back to you.")}})),
+      C("和埃达排成射击线，像操练时那样", "Form a firing line with Edda, like drill", null, M(M(ONLY("origin_trooper"),
         R(0.75, "hp", "eld_205", "eld_206",
           "“交替射击！”你们一个打一个装，像训练场上一样。骷髅的队形第一次乱了。",
           "“Alternate fire!” One shoots while one reloads, just like the range. For the first time the skeletons' ranks waver.",
           "操练里没有会自己站起来的靶子。一道绿光扫过，你栽进了水沟。",
-          "Drill never had targets that stood back up. A green bolt sweeps you into a ditch."))),
+          "Drill never had targets that stood back up. A green bolt sweeps you into a ditch.")),
+        {grudge: {npc: "edda", p: -0.15, note: L("操练靠信任。她记得你是怎么跑的。", "Drill runs on trust. She remembers how you ran.")}})),
+      C("“这回我不跑。”", "“I won't run this time.”", null, M(M(ONLY("wronged_edda"),
+        R(0.5, "hp", "eld_205", "eld_206",
+          "你站在她身边，一发不漏。埃达没夸你，只往旁边挪了半步，给你让出射击位。",
+          "You stand beside her and waste no shot. Edda says nothing; she just shifts half a step to give you room to fire.",
+          "你守得不够久。一道绿光扫过，你栽进水沟，听见埃达在喊你的名字——这回是叫你回来。",
+          "You don't hold long enough. A green bolt sweeps you into a ditch, and you hear Edda shouting your name, this time to call you back.")),
+        {effects: {sanity: -3, renown: 3, set: {forgiven_edda: true}}})),
       C("往石阵跑", "Run for the stones", "eld_203",
         E({renown: -3}, "你跑出很远才回头。埃达还守在那里，一个人。",
           "You run a long way before looking back. Edda is still holding the crossroads. Alone."))
@@ -315,9 +325,10 @@
             "The skeleton you shot down stands back up, its wound closing like quicksilver.\n“They mend themselves,” Edda pants. “We're just an inconvenience to them.”\nShe gives you her last power pack. “Go to the stones. I hear there's... something else there.”"),
     effects: {renown: 5},
     choices: [
-      C("“一起走！”", "“Come with me!”", "eld_203",
+      C("“一起走！”", "“Come with me!”", "eld_203", M(
         E({sanity: -5}, "她摇头，转身对着骷髅举枪。你跑出很远，还听得见她的枪声。然后听不见了。",
-          "She shakes her head and turns her rifle on the skeletons. You hear her firing a long way off. Then you don't."))
+          "She shakes her head and turns her rifle on the skeletons. You hear her firing a long way off. Then you don't."),
+        {grudge: {npc: "edda", effects: {sanity: -4}, note: L("你扔下过阵地。她不信这句“一起走”。", "You deserted the line. She doesn't believe “come with me”.")}}))
     ]};
 
   N.eld_206 = {chapter: 2, scene: "ruins", speaker: null, foe: "canoptek_scarab", time: {h: 2},
@@ -875,8 +886,8 @@
         E({hp: -10, renown: 5}, "你找了块石头当掩体，一枪一枪地打，像在瓦尔达的路口。这一次，你守住了。",
           "You take cover behind a stone and fire shot by shot, as at Valda's crossroads. This time, you hold."))),
       C("躲进树洞", "Hide in a hollow tree", "eld_610",
-        E({sanity: -8, taint: {nurgle: 10}}, "你在黑暗里捂着嘴，听着外面的一切。你听见米瑞丝在喊你，没有回答。",
-          "In the dark you cover your mouth and listen to everything outside. You hear Mireth calling you. You don't answer."))
+        E({sanity: -8, taint: {nurgle: 10}, set: {wronged_mireth: true}}, "你在黑暗里捂着嘴，听着外面的一切。米瑞丝在喊你的名字，一遍，又一遍。你没有回答。",
+          "In the dark you cover your mouth and listen to everything outside. Mireth calls your name, again and again. You don't answer."))
     ]};
 
   N.eld_609 = {chapter: 6, scene: "maiden_world", speaker: MIRETH, foe: "drukhari_raider", time: {h: 1},
@@ -915,20 +926,25 @@
 
   /* ============ Chapter 7 · She Who Thirsts ============ */
   N.eld_701 = {chapter: 7, scene: "craftworld", speaker: ELLARIS, time: {d: 12},
+    grudgeLine: {npc: "mireth", text: L("艾拉瑞斯没问米瑞丝是怎么死的，只看了你一眼，又移开了。", "Ellaris doesn't ask how Mireth died. He glances at you, then away.")},
     text: L("回到塞卢纳。米瑞丝的灵魂石本该放进无尽回路，和祖先在一起。\n可艾拉瑞斯脸色很差：“墙里的声音在变少。有东西在网道里，一口一口地吃。”\n“它找最新鲜的灵魂。比如，刚死去的。”",
             "Back on Selunar. Mireth's spirit stone should go into the Infinity Circuit, to be with her ancestors.\nBut Ellaris looks grey. “The voices in the walls are thinning. Something in the webway is eating, mouthful by mouthful.”\n“It seeks the freshest souls. The newly dead, for instance.”"),
     effects: {sanity: -5},
     codex: ["eld_infinity_circuit"],
     choices: [
-      C("把米瑞丝的石头交给他", "Give him Mireth's stone", "eld_702", M(ONLY("carryStone"),
+      C("把米瑞丝的石头交给他", "Give him Mireth's stone", "eld_702", M(M(ONLY("carryStone"),
         E({sanity: 5, set: {carryStone: false}}, "艾拉瑞斯把石头贴在额头，唱了一句很短的歌。墙接过了它，像接过一个孩子。",
-          "Ellaris presses the stone to his brow and sings one short phrase. The wall receives it, as if receiving a child."))),
+          "Ellaris presses the stone to his brow and sings one short phrase. The wall receives it, as if receiving a child.")),
+        {grudge: {npc: "mireth", effects: {sanity: -4}, note: L("她最后听见的是你的沉默。墙接过石头时，颤了一下。", "The last thing she heard was your silence. The wall shudders as it takes her.")}})),
       C("把石头留在身边", "Keep the stone with you", "eld_702", M(ONLY("carryStone"),
         E({renown: 5}, "“她让你拿着，”艾拉瑞斯低声说，“那就拿着。灵骨记得谁答应过什么。”",
           "“She asked you to hold it,” Ellaris murmurs. “Then hold it. Wraithbone remembers who promised what.”"))),
       C("“它在吃什么？”", "“What is it eating?”", "eld_702",
         E({sanity: -5}, "“我们的祖先，”艾拉瑞斯说，“还有我们的将来。”他把手按在墙上，墙在他手下发抖。",
-          "“Our ancestors,” Ellaris says. “And our futures.” He lays a hand on the wall. It trembles beneath his palm."))
+          "“Our ancestors,” Ellaris says. “And our futures.” He lays a hand on the wall. It trembles beneath his palm.")),
+      C("对石头说出树洞里的那一夜", "Tell the stone about that night in the hollow tree", "eld_702", M({require: [{flag: "carryStone"}, {flag: "wronged_mireth"}], hideIfLocked: true},
+        E({sanity: 4, set: {forgiven_mireth: true}}, "你对石头说出了那一夜：树洞，黑暗，她喊你的名字。石头很久没有动静。然后，它暖了一度。",
+          "You tell the stone about that night: the hollow tree, the dark, her voice calling your name. It stays silent a long while. Then it warms by one degree.")))
     ]};
 
   N.eld_702 = {chapter: 7, scene: "jungle", speaker: S("sigil_slaanesh", "完美的声音", "A Perfect Voice"), time: {h: 9}, eventRoll: 0.49,
@@ -1011,12 +1027,14 @@
 
   /* ============ Chapter 8 · The Last Dance ============ */
   N.eld_801 = {chapter: 8, scene: "webway", speaker: null, time: {h: 5, warp: true},
+    grudgeLine: {npc: "mireth", text: L("你想起树洞里的那一夜：米瑞丝喊了你一整晚。", "You remember the night in the hollow tree: Mireth calling you, over and over.")},
     text: L("你独自走着。光墙一层层暗下去，空气越来越甜，甜得发腻。\n远处有音乐，不是丑角的——太完美了，每个音都落在你最想听的地方。\n你的口袋里，有什么在发热。",
             "You walk alone. The walls of light dim layer by layer; the air grows sweet, cloyingly sweet.\nFar off there is music—not the Harlequins'. Too perfect: every note lands exactly where you most want it.\nIn your pocket, something grows warm."),
     choices: [
-      C("握住米瑞丝的灵魂石", "Hold Mireth's spirit stone", "eld_802", M(ONLY("carryStone"),
+      C("握住米瑞丝的灵魂石", "Hold Mireth's spirit stone", "eld_802", M(M(ONLY("carryStone"),
         E({sanity: 10, taint: {slaanesh: -10}}, "石头里有一声很轻的叹息，像米瑞丝在你耳边说：别回应叫你名字的东西。",
-          "A faint sigh within the stone, as if Mireth whispers: don't answer anything that calls your name."))),
+          "A faint sigh within the stone, as if Mireth whispers: don't answer anything that calls your name.")),
+        {grudge: {npc: "mireth", effects: {sanity: -6}, note: L("你躲起来，听她喊你。石头只给了你沉默。", "You hid and let her call. The stone gives you only silence.")}})),
       C("握住那枚灵骨麦穗", "Hold the wraithbone wheat-ear", "eld_802", M(ONLY("charm"),
         E({sanity: 5, hp: 5}, "灵骨在你掌心哼起了收割歌，跑调跑得和你一模一样。",
           "The wraithbone hums the harvest song in your palm, off-key exactly the way you sang it."))),
@@ -1042,6 +1060,7 @@
     ]};
 
   N.eld_803 = {chapter: 8, scene: "jungle", speaker: DAEMON, foe: "greater_daemon_slaanesh", time: {h: 1},
+    grudgeLine: {npc: "mireth", text: L("你想起米瑞丝在果园里的喊声。你没有应过。", "You think of Mireth's voice in the orchard. You never answered it.")},
     text: L("它让你看：瓦尔达的麦田完好无损，妮尔长大了在门口等你，四千一百万人都活着。\n“只要你点头，”它温柔地说，“你就永远在那里。完美的，永远的。”\n你的心跳得很快。你从没这么想要过一样东西。",
             "It shows you: Valda's fields untouched; Nell grown, waiting at the door; forty-one million alive.\n“Only nod,” it says tenderly, “and you'll be there forever. Perfect. Forever.”\nYour heart races. You have never wanted anything so much."),
     effects: {corruption: 15, taint: {slaanesh: 25}},
@@ -1050,9 +1069,10 @@
       C("“先让我尝一口。”", "“Just let me taste it first.”", "eld_803",
         E({corruption: 15, sanity: 10, taint: {slaanesh: 25}}, "一口就好。味道完美得让你发抖。它微笑着，又把盘子推近了一点。",
           "Just one bite. It tastes so perfect you tremble. Smiling, it nudges the plate a little closer.")),
-      C("把灵魂石按在心口", "Press the spirit stone to your heart", "eld_804", M(ONLY("carryStone"),
+      C("把灵魂石按在心口", "Press the spirit stone to your heart", "eld_804", M(M(ONLY("carryStone"),
         E({corruption: -15, sanity: 5, taint: {slaanesh: -15}}, "石头烫得像火。你听见米瑞丝在里面喊你的真名。麦田碎了，像一面镜子。",
-          "The stone burns like fire. You hear Mireth inside it calling your true name. The wheat field shatters like a mirror."))),
+          "The stone burns like fire. You hear Mireth inside it calling your true name. The wheat field shatters like a mirror.")),
+        {grudge: {npc: "mireth", effects: {hp: -8, sanity: -4}, note: L("石头记得你躲起来的那一夜，烫得像在惩罚你。", "The stone remembers the night you hid, and burns like a punishment.")}})),
       C("想起妮尔真正的样子", "Remember Nell as she really was", "eld_804",
         E({sanity: -12, renown: 3}, "真正的妮尔牙缝里塞着麦壳，数船总数错。这个完美的妮尔不会数错。你后退了一步。",
           "The real Nell had chaff in her teeth and always miscounted the ships. This perfect Nell never would. You step back."))
@@ -1231,6 +1251,10 @@
     renownLabel: L("命运", "Fate"),
     renownIcon: "icon_fate",
     taintMod: {khorne: 0.9, nurgle: 0.9, tzeentch: 0.9, slaanesh: 1.3},   // SPEC §19: multiplier on positive taint deltas (cleanses unscaled)
+    npcs: {   // SPEC §28 grudges: people this route lets you wrong (flag wronged_<id>); see eld_o_trooper_4 / eld_608
+      edda: {name: L("埃达", "Edda"), sprite: "guardsman"},
+      mireth: {name: L("米瑞丝", "Mireth"), sprite: "aeldari_guardian"}
+    },
     renownHelp: L("命运：先知眼中你这根线有多粗。勇敢、诚实、出人意料的选择让它变粗，退缩与背弃让它变细。命运够高，你就能请先知重看未来、在网道里相信那根线，走向更好的结局。",
                   "Fate: how thick your thread looks to the Farseer. Brave, honest or unexpected choices thicken it; flinching and betrayal thin it. With enough Fate you can ask the Farseer to read the future again, trust the thread in the webway, and reach better endings."),
     origins: [

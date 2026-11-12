@@ -4,6 +4,14 @@ Format follows Keep a Changelog; versions follow SemVer.
 
 ## [Unreleased]
 
+## [0.3.2] — 2026-11-12
+### Added — Grudges (SPEC §28)
+- Hurting a person has later costs, but only where that person is really present. A route declares `faction.npcs`; a harming choice sets `wronged_<npc>`; a later choice carries `grudge:{npc, p?, effects?, note}`; a node can add a presence sentence with `grudgeLine:{npc, text}`. While `wronged_<npc>` is set (and `forgiven_<npc>` is not) the choice shows a ⚠ tag and a small line saying why it is riskier, its roll chance drops by `p` (final clamp 5–95 %), the grudge's own penalties (hp / sanity / renown ≤ 0, corruption ≥ 0, small taint bumps) are added when it is taken, the consequence panel starts with the note, and the node text is followed by the italic `grudgeLine`. Nothing changes while the flag is absent or forgiven (same RNG draws, same results); saves need no new fields.
+- Engine: `Game.choices()[i].grudge`, `Rules.rollChance(roll, stats, extra)`, `Rules.grudgeActive / grudgeOf / mergeEffects`, `Game.grudgeLine()`, `Game.nodeText()`, `Game.activeGrudgeNpcs()`, `step.grudge`, `step.consequence.grudge`.
+- Validator: all §28 coherence rules (npc exists, `wronged_` set by a choice and reachable, presence by name in zh and en text / speaker or foe sprite / grudgeLine, harm named in the choice, never before the harm, bounds), field shapes and length limits, and a per-route report (wronged npcs, grudge choices, activations per run, death and claim rate with vs without grudges; warns above +3 pts death or ±1.5 pts claim).
+- Content: all 8 routes (2–4 people each, 6–11 grudge choices per route, redemption choices where the story allows). Random-play death rate rises 0.3–1.9 points per route (limit 3); claim-ending rates unchanged. A few existing lines were softened where they contradicted a later scene (e.g. "never speaks to you again" → "for a long time").
+- Tests: sample data has two npcs (`vik` present by speaker sprite, `mira` through a `grudgeLine`) and a redemption choice; `smoke_test.py --only-grudge [--real]`.
+
 ## [0.3.1] — 2026-11-12
 ### Changed
 - UI wording: "种族" → "势力" (title "选择势力", back button, codex sort "按势力"); English "Choose your faction" / "Factions" / "By faction". In-world prose that means a real species ("古老种族") is untouched.

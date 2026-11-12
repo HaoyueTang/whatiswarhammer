@@ -66,12 +66,12 @@
     codex: ["imp_psyker"],
     choices: [
       C("替他们保密", "Keep their secret", "imp_104", {effects: {sanity: -5, set: {hidMina: true}}, result: L("你点了点头。从那以后，每次看见执事，你的后颈都会冒冷汗。", "You nod. From then on, the sight of any deacon makes the back of your neck run cold.")}),
-      C("去找执事", "Go and find the deacon", "imp_106", {effects: {renown: 5, set: {reportedMina: true}}, result: L("你在走廊尽头拉住执事的袖子。说出米娜的名字时，你的声音比想象中平静。", "You catch the deacon's sleeve at the end of the hall. When you say Mina's name, your voice is calmer than you expected.")})
+      C("去找执事", "Go and find the deacon", "imp_106", {effects: {renown: 5, set: {reportedMina: true, wronged_mina: true, wronged_pell: true}}, result: L("你在走廊尽头拉住执事的袖子。说出米娜的名字时，你的声音比想象中平静。走廊另一头，佩尔全看见了。", "You catch the deacon's sleeve at the end of the hall. When you say Mina's name, your voice is calmer than you expected. At the far end of the hall, Pell sees it all.")})
     ]};
 
   N.imp_106 = {chapter: 1, scene: "hive_hab", speaker: HALLOW, time: {h: 10},
-    text: L("执事给了你一张口粮券，拍了拍你的头，像奖励一条好狗。\n当晚，一艘不亮灯的黑船悬在尖塔上空。从那以后，佩尔再也没跟你说过一句话。",
-            "The deacon hands you a ration chit and pats your head like a good dog.\nThat night a ship with no lights hangs above the spire. Pell never speaks to you again."),
+    text: L("执事给了你一张口粮券，拍了拍你的头，像奖励一条好狗。\n当晚，一艘不亮灯的黑船悬在尖塔上空。此后很久，佩尔都没跟你说过一句话。",
+            "The deacon hands you a ration chit and pats your head like a good dog.\nThat night a ship with no lights hangs above the spire. For a long time after, Pell doesn't say a word to you."),
     effects: {sanity: -5},
     codex: ["imp_black_ships"],
     choices: [
@@ -359,11 +359,12 @@
     ]};
 
   N.imp_309 = {chapter: 3, scene: "trench", speaker: PELL, time: {h: 5},
+    grudgeLine: {npc: "pell", text: L("他数到一半才看见你，抿紧嘴，把流血的手往身后藏。", "He sees you halfway through counting, presses his lips together and hides the bleeding hand behind him.")},
     text: L("你守着射击位，换了一个又一个电池。兽人退下去时，天已经黑了。\n佩尔坐在空电池堆里掰着手指：“七个。我数了，我打中了七个。”\n他只剩九根手指了。",
             "You hold your firing step, swapping pack after pack. When the orks fall back, it's dark.\nPell sits among the spent cells, counting on his fingers. “Seven. I counted. I hit seven.”\nHe has nine fingers left."),
     effects: {renown: 3, sanity: -5, hp: -5},
     choices: [
-      C("帮他包扎", "Bandage his hand", "imp_311", {effects: {sanity: 5}, result: L("你撕下袖子给他缠手。他一直在数，数到七就从头再来。", "You tear off your sleeve to bind his hand. He keeps counting, starting over every time he reaches seven.")})
+      C("帮他包扎", "Bandage his hand", "imp_311", {effects: {sanity: 5}, grudge: {npc: "pell", effects: {sanity: -4}, note: L("佩尔没忘米娜的事；他任你包扎，却不看你。", "Pell hasn't forgotten Mina. He lets you bind the hand, eyes elsewhere.")}, result: L("你撕下袖子给他缠手。他一直在数，数到七就从头再来。", "You tear off your sleeve to bind his hand. He keeps counting, starting over every time he reaches seven.")})
     ]};
 
   N.imp_311 = {chapter: 3, scene: "barracks", speaker: ARNO, time: {d: 9},
@@ -429,7 +430,7 @@
             "You learn their signs and prayers. By day you clean your rifle; by night you chant the name. Each time, a little more of your mother's face fades.\nOn the fifth night someone whispers: “The Inquisition wants a word. Don't turn around.”"),
     effects: {corruption: 10, sanity: -5, renown: 5, taint: {tzeentch: 15}},
     choices: [
-      C("不回头，跟他走", "Don't turn. Follow.", "imp_412", {effects: {set: {spy: true, inqCoin: true}}, result: L("那人往你手心塞了一枚旧硬币：“天亮前带路。”等你终于回头，巷子里只剩下雨。", "The stranger presses an old coin into your palm. “Lead the way before dawn.” When you finally turn, there's only rain.")})
+      C("不回头，跟他走", "Don't turn. Follow.", "imp_412", {effects: {set: {spy: true, inqCoin: true, wronged_brin: true}}, result: L("那人往你手心塞了一枚旧硬币：“天亮前带路。”等你回头，巷子里只剩下雨。要去的是布琳的地窖。", "The stranger presses an old coin into your palm. “Lead the way before dawn.” When you turn, there's only rain. The place is Brin's cellar.")})
     ]};
 
   N.imp_405 = {chapter: 4, scene: "cathedral", speaker: HAAK, time: {h: 4},
@@ -437,7 +438,7 @@
             "The commissar says nothing. She walks you to the cathedral confessional. The one waiting inside is no priest.\n“Inquisitor Haak.” She turns an old coin across her knuckles. “Tell me about the soup. Slowly. We have all night.”"),
     codex: ["imp_inquisition"],
     choices: [
-      C("全说出来", "Tell her everything", "imp_412", {effects: {renown: 5, taint: {all: -10}, set: {toldInq: true}}, result: L("你说了汤、地窖、那个念不出的名字。哈克一直在转硬币，直到你说完才停。", "You tell her about the soup, the cellar, the name you can't pronounce. Haak spins her coin the whole time, stopping only when you finish.")}),
+      C("全说出来", "Tell her everything", "imp_412", {effects: {renown: 5, taint: {all: -10}, set: {toldInq: true, wronged_brin: true}}, result: L("你说了汤、地窖、布琳的名字，还有那个念不出的名字。哈克一直在转硬币，直到你说完才停。", "You tell her about the soup, the cellar, Brin's name, the name you can't pronounce. Haak spins her coin the whole time, stopping only when you finish.")}),
       C("隐瞒自己喝过的部分", "Leave out the part where you drank it", null, R(0.6, null, "imp_412", "imp_411", L("你讲得滴水不漏。哈克的硬币顿了一下，又接着转。", "Your story is airtight. Haak's coin pauses once, then spins on."), L("讲到一半，那股铁锈味又涌上了喉咙。哈克的硬币停住了。", "Halfway through, the rust taste rises in your throat again. Haak's coin stops spinning.")))
     ]};
 
@@ -462,7 +463,7 @@
     effects: {sanity: -5},
     choices: [
       C("求她再给一次机会", "Beg for one more chance", null, R(0.6, "renown", "imp_412", "imp_end_servitor", L("你把这辈子做过的好事全说了一遍。哈克叹了口气，挥手让神甫们退下。", "You list every good deed of your life. Haak sighs and waves the adepts back."), L("哈克耐心听完，看了看时间。神甫们已经在量你的头围了。", "Haak hears you out patiently, then checks the time. The adepts are already measuring your skull."))),
-      C("供出镜面人的藏身处", "Give up the Mirrored Man's hideout", "imp_412", {effects: {sanity: -10, renown: -5, set: {informer: true}}, result: L("你说出了地窖的位置，还有布琳的名字。说完，你觉得自己轻了一点，也脏了一点。", "You give up the cellar, and Brin's name. Afterward you feel a little lighter, and a little filthier.")})
+      C("供出镜面人的藏身处", "Give up the Mirrored Man's hideout", "imp_412", {effects: {sanity: -10, renown: -5, set: {informer: true, wronged_brin: true}}, result: L("你说出了地窖的位置，还有布琳的名字。说完，你觉得自己轻了一点，也脏了一点。", "You give up the cellar, and Brin's name. Afterward you feel a little lighter, and a little filthier.")})
     ]};
 
   N.imp_end_servitor = {chapter: 4, scene: "ship_interior", speaker: S("servitor", "机仆", "Servitor"), time: {y: 3},
@@ -477,6 +478,7 @@
     codex: ["imp_inquisition"],
     choices: [
       C("搜查祭坛", "Search the altar", "imp_413"),
+      C("趁乱把布琳推出地窖后门", "Shove Brin out the cellar's back door", "imp_415", {require: {flag: "wronged_brin"}, hideIfLocked: true, effects: {sanity: -3, renown: -5, taint: {nurgle: 12}, set: {forgiven_brin: true}}, result: L("你在人群里认出那条旧头巾，把她推向后门。她回头看了你一眼，没说话，也没道谢。", "You spot the old headscarf in the crush and shove her toward the back door. She looks back once. She says nothing, not even thanks.")}),
       C("去追逃散的信徒", "Chase the scattering faithful", "imp_415", {effects: {hp: -10, renown: 3, taint: {khorne: 25}}, result: L("你在雨里追了三条街，胳膊挨了一菜刀。抓到的那个人，嘴里还在念那个名字。", "You chase them three streets through the rain and take a kitchen knife across the arm. The one you catch is still chanting that name.")})
     ]};
 
@@ -678,22 +680,25 @@
     ]};
 
   N.imp_605 = {chapter: 6, scene: "ship_interior", speaker: MINA, time: {d: 3},
+    grudgeLine: {npc: "mina", text: L("她顿了顿：“还有一个梦。你站在执事面前，开了口。”", "She pauses. “Another dream. You, standing before the deacon, opening your mouth.”")},
     text: L("一队灵能者被铁链拴着经过走廊。其中一个女孩蒙着眼，指尖结着霜，却准确地转向了你。\n“你住在三号塔附近，”她说，“我梦见过你。你会回家，但家已经着火了。”",
             "A line of chained psykers shuffles down the corridor. One blindfolded girl, frost on her fingertips, turns straight toward you.\n“You lived near Tower Three,” she says. “I dreamed you. You'll go home. But home is on fire.”"),
     effects: {sanity: -5},
     codex: ["imp_psyker"],
     choices: [
-      C("米娜？佩尔一直在找你", "Mina? Pell's been looking for you", "imp_607", {require: {flag: "sawMina"}, effects: {sanity: 5}, result: L("她的嘴角动了一下，像是想笑。“替我告诉他，我不冷。”", "Her mouth twitches, almost a smile. “Tell him I'm not cold.”")}),
-      C("你看见了什么？", "What did you see?", "imp_607"),
-      C("离我远点，巫婆", "Get away from me, witch", "imp_607", {effects: {renown: 2, sanity: -5}, result: L("押送的士兵笑了，用枪托推了她一把。她踉跄一下，还是朝你伸出了手。", "The escort laughs and shoves her with his rifle butt. She stumbles, but still reaches for you.")})
+      C("米娜？佩尔一直在找你", "Mina? Pell's been looking for you", "imp_607", {require: {flag: "sawMina"}, effects: {sanity: 5, set: {minaMessage: true}}, result: L("她的嘴角动了一下，像是想笑。“替我告诉他，我不冷。”", "Her mouth twitches, almost a smile. “Tell him I'm not cold.”")}),
+      C("你看见了什么？", "What did you see?", "imp_607", {grudge: {npc: "mina", effects: {sanity: -4}, note: L("米娜梦见过是谁向执事说了她的名字。", "Mina dreamed who gave her name to the deacon.")}}),
+      C("离我远点，巫婆", "Get away from me, witch", "imp_607", {effects: {renown: 2, sanity: -5}, grudge: {npc: "mina", effects: {hp: -6}, note: L("你告发过她，还骂她巫婆；她指尖的霜咬了你。", "You reported her, then called her witch. Her frost bites.")}, result: L("押送的士兵笑了，用枪托推了她一把。她踉跄一下，还是朝你伸出了手。", "The escort laughs and shoves her with his rifle butt. She stumbles, but still reaches for you.")}),
+      C("“对不起，米娜。是我说的。”", "“I'm sorry, Mina. It was me.”", "imp_607", {require: {flag: "wronged_mina"}, hideIfLocked: true, effects: {sanity: -5, set: {forgiven_mina: true}}, result: L("她没说原谅。只是把结霜的手，轻轻放在你手背上：“我知道。我梦见过。”", "She doesn't say she forgives you. She only lays a frosted hand on yours. “I know. I dreamed it.”")})
     ]};
 
   N.imp_607 = {chapter: 6, scene: "warp", speaker: S("omen_black_crusade", "幻象", "Vision"), time: {h: 1},
+    grudgeLine: {npc: "mina", text: L("米娜没有松手。结霜的指尖顺着你的手腕往上爬。", "Mina doesn't let go. Frost climbs her fingertips up your wrist.")},
     text: L("她抓住你的手。一瞬间你看见：故乡的黄色天空裂开，一支黑色舰队从裂口落下，旗舰大得像一座倒悬的城市。\n舰桥上站着一个身穿黑甲的人，胸前有一只睁开的眼。",
             "She grips your hand. In an instant you see it: home's yellow sky splitting open, a black fleet falling through the wound, its flagship vast as an upside-down city.\nOn its bridge stands a figure in black armour, an open eye upon his chest."),
     effects: {sanity: -5, corruption: 3},
     choices: [
-      C("挣开她的手", "Wrench your hand free", "imp_608", {result: L("你挣开了手，幻象却没走。之后四天，你一闭眼就看见那只眼睛。", "You pull free, but the vision stays. For four days, every time you close your eyes, you see that eye.")})
+      C("挣开她的手", "Wrench your hand free", "imp_608", {grudge: {npc: "mina", effects: {hp: -5}, note: L("米娜记得是谁说出了她的名字；她的手很冷。", "Mina remembers who named her. Her hand is cold.")}, result: L("你挣开了手，幻象却没走。之后四天，你一闭眼就看见那只眼睛。", "You pull free, but the vision stays. For four days, every time you close your eyes, you see that eye.")})
     ]};
 
   N.imp_608 = {chapter: 6, scene: "ship_interior", speaker: S("guard_sergeant", "舰长", "Ship's Captain"), time: {d: 4},
@@ -706,11 +711,13 @@
     ]};
 
   N.imp_610 = {chapter: 6, scene: "barracks", speaker: PELL, time: {h: 3},
+    grudgeLine: {npc: "pell", text: L("他只给你倒了半杯，没抬头。米娜的事，他一个字也没提。", "He pours you half a cup without looking up. He doesn't say one word about Mina.")},
     text: L("佩尔弄来一瓶机油味的私酿。“我一直想回家，”他说，“但不是这样回去。”\n他掏出一张旧口粮券：“要是我先死，替我在楼梯间卖一天咖啡。免费的。”",
             "Pell has scrounged a bottle of hooch that tastes like engine oil. “I always wanted to go home,” he says. “Not like this.”\nHe pulls out an old ration chit. “If I die first, sell recaff in the stairwell for a day. Free.”"),
     effects: {sanity: 10, hp: -5, set: {pellPromise: true}},
     choices: [
-      C("碰杯", "Clink glasses", "imp_611", {result: L("酒难喝得要命。你们一人喝了半瓶，谁也没提回家以后的事。", "The hooch is vile. You each drink half the bottle, and neither of you mentions what comes after home.")})
+      C("碰杯", "Clink glasses", "imp_611", {grudge: {npc: "pell", effects: {sanity: -4}, note: L("佩尔举杯时没看你；他没原谅米娜的事。", "Pell raises his cup without looking at you. He hasn't forgiven the Mina business.")}, result: L("酒难喝得要命。你们一人喝了半瓶，谁也没提回家以后的事。", "The hooch is vile. You each drink half the bottle, and neither of you mentions what comes after home.")}),
+      C("转告他：米娜说她不冷", "Tell him: Mina says she isn't cold", "imp_611", {require: {flag: "minaMessage"}, hideIfLocked: true, effects: {sanity: 5, set: {forgiven_pell: true}}, result: L("佩尔盯着你，喉结滚了很久。“……她还会说这种话。”他把整瓶酒推给你，肩膀抖了一下，没再说别的。", "Pell stares at you, throat working for a long time. “...She still says things like that.” He pushes the whole bottle over. His shoulders shake once. He says nothing more.")})
     ]};
 
   N.imp_611 = {chapter: 6, scene: "warp", speaker: null, time: {d: 20, warp: true}, eventRoll: 0.56,
@@ -762,14 +769,15 @@
     ]};
 
   N.imp_707 = {chapter: 7, scene: "ruins", speaker: BRIN, time: {h: 8}, eventRoll: 0.42,
+    grudgeLine: {npc: "brin", text: L("她递汤的手停了停：“孩子，你把我的地窖，指给了别人。”", "Her hand stalls. “Child, you showed my cellar to others.”")},
     text: L("夜里，废墟里响起一个熟悉的声音。是布琳——或者是披着布琳样子的东西。\n她捧着一碗冒热气的汤：“你的帝皇没来，孩子。来的是黑色的战帅。他会让活下来的人吃饱。”",
             "At night in the ruins, a familiar voice. Brin—or something wearing Brin.\nShe holds out a steaming bowl of soup. “Your Emperor didn't come, child. The black Warmaster did. He'll feed whoever survives.”"),
     effects: {sanity: -5, corruption: 5},
     codex: ["chaos_gods"],
     choices: [
-      C("喝下那碗汤", "Drink the soup", "imp_708", {effects: {corruption: 20, hp: 30, taint: {nurgle: 65}}, result: L("你接过碗。这一次，你没有问汤里放了什么。", "You take the bowl. This time you don't ask what's in it.")}),
+      C("喝下那碗汤", "Drink the soup", "imp_708", {effects: {corruption: 20, hp: 30, taint: {nurgle: 65}}, grudge: {npc: "brin", effects: {hp: -6}, note: L("你出卖过布琳；汤里有烧焦的味道。", "You betrayed Brin. The soup tastes of smoke.")}, result: L("你接过碗。这一次，你没有问汤里放了什么。", "You take the bowl. This time you don't ask what's in it.")}),
       C("开枪", "Shoot", "imp_709", {effects: {sanity: -5}, result: L("激光穿过她的身体，打在后面的墙上。她没倒，只是叹了口气。", "The las-bolt passes through her and hits the wall behind. She doesn't fall. She only sighs.")}),
-      C("念出阵亡者的名字", "Recite the names of the dead", "imp_709", {effects: {sanity: 10, renown: 3, taint: {all: -10}}, result: L("你从训练营里那个新兵念起。每念一个名字，她就淡一分。", "You begin with the recruit from training camp. With every name you say, she fades a little more.")})
+      C("念出阵亡者的名字", "Recite the names of the dead", "imp_709", {effects: {sanity: 10, renown: 3, taint: {all: -10}}, grudge: {npc: "brin", effects: {sanity: -4}, note: L("布琳不在你的名单里；她正看着你。", "Brin isn't on your list. She is watching you.")}, result: L("你从训练营里那个新兵念起。每念一个名字，她就淡一分。", "You begin with the recruit from training camp. With every name you say, she fades a little more.")})
     ]};
 
   N.imp_708 = {chapter: 7, scene: "ruins", speaker: BRIN, time: {h: 1},
@@ -827,11 +835,12 @@
     ]};
 
   N.imp_714 = {chapter: 7, scene: "burning_city", speaker: PELL, time: {d: 5}, eventRoll: 0.42,
+    grudgeLine: {npc: "pell", text: L("说完楼梯间，他的目光落在你脸上，又轻轻叫了一声：“米娜。”", "After the stairwell, his eyes settle on your face and he softly says one more word: “Mina.”")},
     text: L("第五天。你已经不记得上次睡觉是什么时候。\n佩尔被流弹击中，倒在你怀里，把一张旧口粮券塞进你手心：“楼梯间……免费的……”\n远处，一个巨大的黑影降落在巢都尖顶。",
             "Day five. You can't remember the last time you slept.\nA stray round takes Pell. He falls into your arms and presses an old ration chit into your hand. “The stairwell... free...”\nIn the distance, a vast black shape lands atop the hive spire."),
     effects: {sanity: -5, set: {pellDead: true}},
     choices: [
-      C("抱着他直到最后", "Hold him until it's over", "imp_801", {effects: {sanity: 5}, result: L("你抱着他，直到他的手变凉。那张口粮券被你攥出了汗。", "You hold him until his hand goes cold. The ration chit is damp in your fist.")}),
+      C("抱着他直到最后", "Hold him until it's over", "imp_801", {effects: {sanity: 5}, grudge: {npc: "pell", effects: {sanity: -5}, note: L("佩尔临终叫的是米娜，目光落在你身上。", "Pell dies saying Mina's name, his eyes on you.")}, result: L("你抱着他，直到他的手变凉。那张口粮券被你攥出了汗。", "You hold him until his hand goes cold. The ration chit is damp in your fist.")}),
       C("放下他，回到阵地", "Lay him down and go back to the line", "imp_801", {effects: {renown: 5, sanity: -5, taint: {khorne: 25}}, result: L("你合上他的眼睛，把他放在沙袋后面。回到阵地，你的枪比以前更准了。", "You close his eyes and lay him behind the sandbags. Back on the line, your aim is better than ever.")})
     ]};
 
@@ -971,6 +980,11 @@
     tagline: L("一万亿人之一，被帝皇选中", "One in a trillion, chosen by the Emperor"),
     role: L("巢都工人", "Hive worker"),
     world: L("奥雷克斯二号", "Aurex Secundus"),   // SPEC §27 home world (all three origins grew up on Aurex)
+    npcs: {   // SPEC §28 grudges: people the route lets you wrong
+      mina: {name: L("米娜", "Mina")},
+      pell: {name: L("佩尔", "Pell")},
+      brin: {name: L("布琳", "Brin"), aka: [L("布琳婆婆", "Old Brin")]}
+    },
     playerSprite: "player_imperium",
     color: "#c9a227",
     startNode: "imp_101",

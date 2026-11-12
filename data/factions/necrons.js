@@ -6,6 +6,10 @@
  *          X(effects,zh,en) {effects,result} · R(p,stat,success,fail, RR(szh,sen,fzh,fen)) roll + rollResult ·
  *          O(...objs) merge (e.g. require + X).
  * Taint (SPEC §18) is hidden: never mentioned in text.
+ * Grudges (SPEC §28): G(npc,zh,en,p,effects) -> {grudge}; GL(npc,zh,en) -> grudgeLine. Three people can be wronged:
+ *   Magos Vektrix-9 (lexmechanic origin: lies / leaks his data in ch.1 — he is still a cyborg magos in ch.7, nec_701 shows him alive),
+ *   Overlord Sekhrat (bolting from his gift, nec_404), Inquisitor Mordane (giving the camp's weak posts away, nec_705).
+ *   Humans of the dig (Marrow, Kaal, Oriel, Hollis) are NOT given grudges: centuries pass in stasis and the text never keeps them alive.
  */
 (function () {
   function L(zh, en) { return {zh: zh, en: en}; }
@@ -21,6 +25,8 @@
   function RR(szh, sen, fzh, fen) { return {success: {zh: szh, en: sen}, fail: {zh: fzh, en: fen}}; }
   function R(p, stat, success, fail, rr) { var o = {roll: {p: p, stat: stat, success: success, fail: fail}}; if (rr) o.rollResult = rr; return o; }
   function Q(req, hide) { var o = {require: req}; if (hide) o.hideIfLocked = true; return o; }
+  function G(npc, zh, en, p, eff) { var g = {npc: npc, note: {zh: zh, en: en}}; if (p) g.p = p; if (eff) g.effects = eff; return {grudge: g}; }
+  function GL(npc, zh, en) { return {npc: npc, text: {zh: zh, en: en}}; }
 
   var MARROW  = S("dig_leader", "玛罗教授", "Professor Marrow");
   var VEKTRIX = S("explorator", "维克崔斯-9贤者", "Magos Vektrix-9");
@@ -197,18 +203,18 @@
       C("导入纹路", "Load the patterns", "nec_o_lexmech_3", X({sanity: -5, renown: 3, set: {translator: true}, taint: {tzeentch: 20}},
         "纹路流进你的脑子，冷得像薄荷。有几个符号，你突然懂了它们的意思。",
         "The patterns flow in, cold as mint. A few symbols suddenly make sense.")),
-      C("假装导入，偷偷断开", "Fake the upload, unplug quietly", "nec_o_lexmech_3", X({renown: -2},
-        "你拔下插头。贤者的眼镜头转了一圈，记下了一个“传输异常”。",
-        "You pull the plug. The magos's lens rotates once and logs a “transmission fault.”"))
+      C("假装导入，偷偷断开", "Fake the upload, unplug quietly", "nec_o_lexmech_3", X({renown: -2, set: {wronged_vektrix: true}},
+        "你骗了贤者，悄悄拔下插头。他的镜头转了一圈，记下一个“传输异常”。",
+        "You lie to the magos and quietly pull the plug. His lens rotates once and logs a “transmission fault.”"))
     ]};
 
   N.nec_o_lexmech_3 = {chapter: 1, scene: "dig_site", speaker: MARROW, time: {d: 2},
     text: L("玛罗教授堵住了你。“贤者的数据，先给我一份。”\n“这是机械神教的财产，”你说。\n“这是我的发现。”她把一张口粮券塞进你口袋，“你的合同里可没写不许交朋友。”",
             "Professor Marrow corners you. “A copy of the magos's data. Me first.”\n“It's Mechanicus property,” you say.\n“It's my discovery.” She slips a ration chit into your pocket. “Your contract doesn't forbid making friends.”"),
     choices: [
-      C("把数据拷给她", "Copy her the data", "nec_o_lexmech_4", X({hp: 5, renown: -2, set: {marrowCopy: true}},
-        "教授拍拍你的脸，像拍一只听话的伺服颅骨。那天你多吃了一顿。",
-        "She pats your cheek like an obedient servo-skull. You eat an extra meal that day.")),
+      C("把数据拷给她", "Copy her the data", "nec_o_lexmech_4", X({hp: 5, renown: -2, set: {marrowCopy: true, wronged_vektrix: true}},
+        "你把贤者的数据拷给了教授。她拍拍你的脸，像拍一只听话的伺服颅骨。那天你多吃了一顿。",
+        "You copy the magos's data to the Professor. She pats your cheek like an obedient servo-skull. You eat an extra meal that day.")),
       C("把口粮券还给她", "Hand back the chit", "nec_o_lexmech_4", X({renown: 3},
         "教授的笑僵了一下。“忠心，”她说，“多可惜。”",
         "Her smile stiffens. “Loyal,” she says. “What a waste.”"))
@@ -525,9 +531,9 @@
       C("“带我走，但放了我的同伴。”", "“Take me, but free my companions.”", "nec_406", O(Q({stat: "renown", min: 30}), X({renown: -5, set: {freedColleagues: true}},
         "霸主想了想，挥挥手。“好。害虫多的是。”",
         "The overlord considers, then waves a hand. “Fine. Vermin are plentiful.”"))),
-      C("趁交接时逃进墓道", "Bolt into the tomb corridors", null, R(0.4, "hp", "nec_407", "nec_408",
-        RR("你钻进一条维修通道，身后的门自己合上了。", "You squeeze into a maintenance duct; the door seals itself behind you.",
-           "你才跑出十步，地板就伸出了手。", "Ten steps, and the floor grows hands.")))
+      C("趁交接时逃进墓道", "Bolt into the tomb corridors", null, O({effects: {set: {wronged_sekhrat: true}}}, R(0.4, "hp", "nec_407", "nec_408",
+        RR("你钻进维修通道。霸主刚送出的回礼，当着使者的面跑了。门在身后合上。", "You squeeze into a duct. The overlord's return gift bolts in front of his guest. The door seals behind you.",
+           "你才跑出十步，地板就伸出了手。塞赫拉特叹气，像看一件摔坏的礼物。", "Ten steps, and the floor grows hands. Sekhrat sighs, as at a gift dropped in transit."))))
     ]};
 
   N.nec_405 = {chapter: 4, scene: "tomb_interior", speaker: IMHET, time: {h: 1},
@@ -813,6 +819,8 @@
 
   /* ============ Chapter 7 · Return to the Tomb ============ */
   N.nec_701 = {chapter: 7, scene: "dig_site", speaker: VEKTRIX, time: {d: 1}, eventRoll: 0.35,
+    grudgeLine: GL("vektrix", "他的镜头在你耳后停了一下，像在核对一个旧序列号。",
+                   "His lens pauses behind your ear, as if checking an old serial number."),
     text: L("你穿着过时几百年的外套走进营地。没人拦你，你太像档案照片了。\n一个几乎全是机械的贤者转过来，镜头对焦。\n“考察队员，失踪于113.M42，”维克崔斯-9说，“你没有变老。有意思。”",
             "You walk into the camp in an expedition coat centuries out of fashion. No one stops you; you look too much like the archive picts.\nAn almost entirely mechanical magos turns, lenses focusing.\n“Expedition member, lost 113.M42,” says Vektrix-9. “You have not aged. Interesting.”"),
     codex: ["imp_mechanicus"],
@@ -820,22 +828,30 @@
       C("说实话", "Tell the truth", "nec_703", X({set: {toldTruth: true}},
         "贤者听完，什么也没说，只是发出一串短促的二进制。几分钟后，一位审判官到了。",
         "The magos hears you out, says nothing, and emits a short burst of binary. Minutes later an Inquisitor arrives.")),
-      C("说你是那名队员的后代", "Claim to be that member's descendant", null, R(0.5, null, "nec_704", "nec_703",
+      C("说你是那名队员的后代", "Claim to be that member's descendant", null, O(R(0.5, null, "nec_704", "nec_703",
         RR("贤者扫描了你的脸，点点头。“遗传得真好。”", "The magos scans your face and nods. “Remarkable heredity.”",
-           "贤者扫描了你的脸，又扫描了一遍，然后叫来了审判官。", "The magos scans your face, then again, then sends for the Inquisitor."))),
+           "贤者扫描了你的脸，又扫描了一遍，然后叫来了审判官。", "The magos scans your face, then again, then sends for the Inquisitor.")),
+        G("vektrix", "他的日志存着你的植入体序列号，还有那次“传输异常”。",
+          "His logs still hold your implant's serial number and that old “transmission fault.”", -0.15))),
       C("“合同还剩二十九年，贤者。”", "“Twenty-nine years left on my contract, Magos.”", "nec_704", O(Q({flag: "origin_lexmech"}, true), X({renown: 3},
         "贤者的镜头转了三圈。“契约书记！欢迎归队。你的工资，我们稍后再算。”",
-        "The magos's lens spins three times. “My lexmechanic! Welcome back. We'll discuss back pay later.”")))
+        "The magos's lens spins three times. “My lexmechanic! Welcome back. We'll discuss back pay later.”"),
+        G("vektrix", "他要先审计你的植入体：一次传输异常，一份外泄的拷贝。",
+          "He audits your implant first: one transmission fault, one leaked copy.", null, {sanity: -8})))
     ]};
 
   N.nec_702 = {chapter: 7, scene: "tomb_interior", speaker: SEKHRAT, time: {d: 1},
+    grudgeLine: GL("sekhrat", "他顿了顿：“上回交接，礼物自己跑了。礼数，是有账的。”",
+                   "He pauses. “At the last handover, the gift ran off by itself. Etiquette keeps accounts.”"),
     text: L("塞赫拉特还在王座上，身后多了一面萨特克王朝的绿色雷纹旗。\n“最后我还是向风暴领主臣服了，”他说，“他比我想的有礼貌。”\n他认出了你：“我的礼物！收藏家把你转送回来了？多庸俗。”",
             "Sekhrat is still on his throne, the Sautekh Dynasty's green lightning banner now behind it.\n“I submitted to the Stormlord in the end,” he says. “He was more courteous than expected.”\nHe recognises you. “My gift! The Collector re-gifted you? How vulgar.”"),
     codex: ["nec_imotekh", "nec_dynasties"],
     choices: [
-      C("“我是来帮您的。”", "“I've come to help you.”", "nec_705", X({renown: 5},
+      C("“我是来帮您的。”", "“I've come to help you.”", "nec_705", O(X({renown: 5},
         "霸主满意地嗡了一声。“礼物懂得感恩。罕见。”",
-        "The overlord hums with satisfaction. “A grateful gift. Rare.”")),
+        "The overlord hums with satisfaction. “A grateful gift. Rare.”"),
+        G("sekhrat", "霸主记得那件跑掉的礼物，你的话分量轻了。",
+          "The overlord remembers the gift that ran; your words weigh less.", null, {renown: -4}))),
       C("“我是来救我的人的。”", "“I've come for my people.”", "nec_705", X({sanity: 5},
         "“你的人？”霸主想了想，“哦，地面上那些。他们比你吵。”",
         "“Your people?” The overlord considers. “Ah, the ones on the surface. Louder than you.”"))
@@ -867,10 +883,12 @@
     choices: [
       C("“让我去劝他们撤离。”", "“Let me persuade them to leave.”", "nec_707", O(Q({stat: "renown", min: 40}), X({set: {truce: true}},
         "霸主想了很久。“一个太阳日。之后，礼数就结束了。”",
-        "The overlord thinks a long time. “One solar day. After that, etiquette ends.”"))),
-      C("告诉他营地的防御弱点", "Tell him the camp's weak points", "nec_707", X({renown: 8, sanity: -10, set: {betrayed: true}, taint: {khorne: 40}},
-        "你在沙盘上点了三个地方。霸主满意地嗡了一声。你的手指在抖。",
-        "You point to three places on the sand-table. The overlord hums contentedly. Your finger trembles.")),
+        "The overlord thinks a long time. “One solar day. After that, etiquette ends.”"),
+        G("sekhrat", "霸主要你先为当年逃走的事，行满一套赔礼。",
+          "He first makes you perform the full apology rite for your old flight.", null, {sanity: -6}))),
+      C("告诉他营地的防御弱点", "Tell him the camp's weak points", "nec_707", X({renown: 8, sanity: -10, set: {betrayed: true, wronged_mordane: true}, taint: {khorne: 40}},
+        "你在沙盘上点了三处：莫丹审判官哨位最薄的三处。霸主满意地嗡了一声。你的手指在抖。",
+        "You mark three spots on the sand-table: the thinnest posts in Inquisitor Mordane's line. The overlord hums contentedly. Your finger trembles.")),
       C("“碎片比人类危险得多。”", "“The shard is far more dangerous.”", "nec_707", X({renown: 3},
         "塞赫拉特沉默了。“对。”这是他第一次没纠正你的发音。",
         "Sekhrat goes silent. “Yes.” For the first time, he doesn't correct your pronunciation."))
@@ -907,6 +925,8 @@
     ]};
 
   N.nec_706 = {chapter: 7, scene: "tomb_interior", speaker: SHARD, time: {h: 6},
+    grudgeLine: GL("vektrix", "维克崔斯-9站在钻机旁，镜头不时转向你耳后的接口。",
+                   "Vektrix-9 stands by the drill, his lens drifting now and then to the socket behind your ear."),
     text: L("钻探区尽头，就是那座光编的笼子。贤者的钻头已经咬穿了三层光。\n碎片在里面翻了个身。你感到它在微笑。\n“小学者，你开过我的门一次。再开一次吧。我会让你永远不怕死。”",
             "At the end of the drill zone hangs the cage of woven light. The magos's drill has chewed through three layers.\nThe shard turns over inside. You feel it smile.\n“Little scholar. You opened my door once. Open it again. I'll make you never fear death.”"),
     effects: {sanity: -10, corruption: 5},
@@ -920,7 +940,9 @@
         "While it speaks, your wounds stop hurting. You forget why you were afraid. That frightens you.")),
       C("黑进钻机的思考机", "Hack the drill's cogitator", "nec_801", O(Q({flag: "origin_lexmech"}, true), X({renown: 5, set: {drillStalled: true}},
         "你耳后的接口还认得这台机器。钻头卡住了一小时，够技师们准备好了。",
-        "The socket behind your ear still knows this machine. The drill seizes for an hour: enough for the crypteks to get ready."))),
+        "The socket behind your ear still knows this machine. The drill seizes for an hour: enough for the crypteks to get ready."),
+        G("vektrix", "贤者早改了钻机的权限码，旧接口会反灼你。",
+          "The magos changed the drill's access codes long ago; your old socket will burn you.", null, {hp: -8}))),
       C("要贤者停钻", "Demand the magos stop drilling", "nec_801", X({hp: -10},
         "贤者把你推开，力气大得不像老人。“信仰不需要你的同意。”",
         "The magos shoves you aside, far too strong for an old man. “Faith does not require your consent.”"))
@@ -1024,14 +1046,19 @@
     ]};
 
   N.nec_808 = {chapter: 8, scene: "dig_site", speaker: MORDANE, time: {h: 4},
+    grudgeLine: GL("mordane", "她手里压着一张哨位图：死灵先扑向的三处，正是她最薄的三处。那点歉意，不是对你的。",
+                   "Under her hand lies a picket map: the three posts the necrons hit first were her thinnest. The apology in her tone is not meant for you."),
     text: L("碎片的事结束了，至少暂时。莫丹审判官带着风暴兵堵住了墓道口。\n“这颗星球会被净化，”她说，“知道这颗星球的人，也一样。”\n她的枪口很稳，语气里甚至有一点歉意。",
             "The shard is dealt with, for now. Inquisitor Mordane and her storm-troopers block the tunnel mouth.\n“This world will be purged,” she says. “So will everyone who knows of it.”\nHer aim is steady. Her tone is almost apologetic."),
     codex: ["imp_inquisition", "imp_exterminatus"],
     choices: [
       C("带着报告冲向穿梭机", "Run for a shuttle with the report", null, O(Q({flag: "records"}), R(0.65, null, "nec_end_truth", "nec_809",
         RR("子弹擦着你的耳朵飞过。舱门在你身后合上。", "A round clips past your ear. The hatch seals behind you.",
-           "一发子弹打穿了你的腿。你滚回墓道，墓门替你合上了。", "A round goes through your leg. You roll back into the tunnel; the tomb door seals for you.")))),
-      C("退回墓穴深处", "Retreat into the tomb", "nec_809"),
+           "一发子弹打穿了你的腿。你滚回墓道，墓门替你合上了。", "A round goes through your leg. You roll back into the tunnel; the tomb door seals for you.")),
+        G("mordane", "她的枪手认得你：那三处哨位的死者，人人记得。",
+          "Her riflemen know your face; every one remembers the dead at those three posts.", -0.15))),
+      C("退回墓穴深处", "Retreat into the tomb", "nec_809", G("mordane", "她早叫人瞄着墓道口，专等背对枪口的人。",
+        "Her riflemen already cover the tunnel mouth, waiting for anyone who turns his back.", null, {hp: -8})),
       C("放下一切，投降", "Drop everything and surrender", "nec_end_inquisition", X({sanity: 5},
         "你把素描簿放在沙地上。莫丹弯腰捡起来，翻了一页，叹了口气。",
         "You lay your sketchbook on the sand. Mordane picks it up, turns one page, and sighs."))
@@ -1052,7 +1079,9 @@
         "A claw reaches from the shadows, careful, as if asking you to dance."))),
       C("请霸主让你在墓室里避一避", "Ask to shelter in the crypts", "nec_end_chronicler", O(Q({stat: "renown", min: 30}), X({sanity: 5},
         "霸主想了想。“客人躲进主人的地窖，有失体面。不过——你可以替我记账。”",
-        "The overlord considers. “A guest hiding in the host's cellar is undignified. However, you may keep my records.”")))
+        "The overlord considers. “A guest hiding in the host's cellar is undignified. However, you may keep my records.”"),
+        G("sekhrat", "逃过一次的礼物，霸主会派朝臣整夜“陪”着。",
+          "A gift that once ran gets courtiers “keeping it company” all night.", null, {sanity: -6})))
     ]};
 
   /* ============ Endings ============ */
@@ -1181,6 +1210,11 @@
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("价值", "Worth"),
     renownIcon: "icon_worth",
+    npcs: {   // SPEC §28 — people a run can wrong (flag wronged_<id>); grudges sit on later choices where they are really present
+      mordane: {name: L("莫丹审判官", "Inquisitor Mordane"), aka: [L("莫丹", "Mordane"), L("审判官", "the Inquisitor")], sprite: "inquisitor"},
+      vektrix: {name: L("维克崔斯-9贤者", "Magos Vektrix-9"), aka: [L("维克崔斯-9", "Vektrix-9"), L("贤者", "the magos")], sprite: "explorator"},
+      sekhrat: {name: L("塞赫拉特霸主", "Overlord Sekhrat"), aka: [L("塞赫拉特", "Sekhrat"), L("霸主", "the overlord")], sprite: "necron_lord"}
+    },
     taintMod: {khorne: 0.5, nurgle: 0.5, tzeentch: 0.5, slaanesh: 0.5},   // SPEC §19: multiplier on positive taint deltas (cleanses unscaled)
     renownHelp: L("价值是你在死灵眼中作为“藏品”的分量。读懂符文、守住礼数、讲好故事让它上升；失礼、无趣、逃跑会让它下降。价值够高，霸主和收藏家才肯听你开口，更好的结局才会敞开。",
                   "Worth is how much you matter to the necrons, as a specimen. Reading their glyphs, keeping their etiquette and telling a good story raise it; rudeness, dullness and escape attempts lower it. High Worth makes the overlord and the Collector listen, and opens better endings."),

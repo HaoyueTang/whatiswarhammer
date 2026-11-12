@@ -39,6 +39,7 @@ The eight sides share one sector (Arcosa, 111–115.M42), so one story's world c
 ### What's inside
 - **Choices with a price.** Health, Sanity, Corruption and a faction stat. Run out of the first two, or max out the third, and it's over. Every choice shows you what it cost.
 - **Many endings.** Good ones, bad ones, and a lot of ways to die. Each ending records how long you survived and what killed you.
+- **People remember.** Betray, rob or abandon someone and they may turn up again, and the choice you make next to them gets more dangerous. A ⚠ mark tells you why. Nobody holds a grudge from somewhere they aren't.
 - **The gods are watching.** Khorne, Nurgle, Tzeentch and Slaanesh make you offers. Some are very generous. You won't see what they take until the end.
 - **Time doesn't behave.** Hours, days, sometimes years pass between scenes. Warp travel is worse.
 - **Difficulty.** Skulls on each side and origin tell you how deadly it is.
@@ -97,6 +98,7 @@ Warhammer 40,000 and associated names are trademarks of Games Workshop Limited. 
 ### 游戏内容
 - **每个选择都有代价。** 生命、理智、腐化，加一个阵营属性。前两个归零，或者腐化满了，就结束了。每次选择后你都会看到它的后果。
 - **多结局。** 好结局、坏结局，还有很多种死法。每个结局都会记下你活了多久、死于什么。
+- **人会记仇。** 背叛、抢劫或抛下过某个人，他可能会再出现，你在他面前的下一个选择会更危险。选项上的 ⚠ 会告诉你原因。没有人会隔着不在场的地方记仇。
 - **诸神在注视。** 恐虐、纳垢、奸奇、色孽会给你开条件。有些条件非常慷慨。它们拿走了什么，要到结局你才知道。
 - **时间不老实。** 场景之间可能过去几小时、几天，有时是几年。亚空间航行更糟。
 - **难度。** 每个阵营和出身上的骷髅数告诉你它有多致命。

@@ -26,6 +26,13 @@
   function RR(szh, sen, fzh, fen) { return {success: {zh: szh, en: sen}, fail: {zh: fzh, en: fen}}; }
   function R(p, stat, success, fail, rr) { var o = {roll: {p: p, stat: stat, success: success, fail: fail}}; if (rr) o.rollResult = rr; return o; }
   function Q(req, hide) { var o = {require: req}; if (hide) o.hideIfLocked = true; return o; }
+  /* SPEC §28 grudge: G(npc, noteZh, noteEn[, p][, effects]) — only on later choices where that person is plainly present */
+  function G(npc, zh, en, p, effects) {
+    var g = {npc: npc, note: {zh: zh, en: en}};
+    if (p) g.p = p;
+    if (effects) g.effects = effects;
+    return {grudge: g};
+  }
 
   var TEO     = S("gsc_neophyte", "提奥", "Teo");
   var OSSA    = S("medicae", "奥莎大娘", "Ma Ossa");
@@ -96,9 +103,9 @@
       C("向他道歉", "Apologise to him", "gsc_105", X({sanity: -3, renown: 5},
         "提奥摆摆手。“谁都会跑。家里人不记这种账。”你不知道他说的“家里人”是谁。",
         "Teo waves it off. “Anyone would run. Family doesn't keep that kind of ledger.” You don't know whose family he means.")),
-      C("什么也没说，转身走了", "Say nothing and walk away", "gsc_105", X({sanity: -5},
-        "那一夜你睡不着，耳朵里一直是石头落下的声音。",
-        "You don't sleep that night. Your ears are full of falling stone."))
+      C("对提奥一言不发，转身走开", "Say nothing to Teo and walk away", "gsc_105", X({sanity: -5, set: {wronged_teo: true}},
+        "提奥还在等你开口。你把他丢在塌方里，现在连一句话也不肯给。那一夜你睡不着，耳朵里全是落石声。",
+        "Teo waits for you to speak. You left him in the rockfall, and now you won't give him a word. You don't sleep; your ears are full of falling stone."))
     ]};
 
   N.gsc_105 = {chapter: 1, scene: "hive_hab", speaker: GANT, time: {d: 2}, codex: ["imp_imperium"],
@@ -278,8 +285,8 @@
     ]};
 
   N.gsc_202 = {chapter: 2, scene: "mine_shaft", speaker: VASK, foe: "enforcer", time: {d: 5},
-    text: L("甘特又扣了一轮工分，矿工们在升降口坐下罢工。\n瓦斯克执法官带着一队人赶到，电击棍噼啪作响。\n“三秒钟，”他说，“回去干活，或者躺着回去。”",
-            "Gant docks another round of tallies, and the miners sit down at the lift-head in strike.\nEnforcer-Captain Vask arrives with a squad, shock-mauls crackling.\n“Three seconds,” he says. “Back to work, or carried back.”"),
+    text: L("甘特又扣了一轮工分，提奥带着表兄弟们在升降口坐下罢工。\n瓦斯克执法官带着一队人赶到，电击棍噼啪作响。\n“三秒钟，”他说，“回去干活，或者躺着回去。”",
+            "Gant docks another round of tallies, and Teo leads the cousins in sitting down at the lift-head in strike.\nEnforcer-Captain Vask arrives with a squad, shock-mauls crackling.\n“Three seconds,” he says. “Back to work, or carried back.”"),
     codex: ["imp_arbites"],
     choices: [
       C("和罢工的人坐在一起", "Sit with the strikers", null, R(0.5, "hp", "gsc_204", "gsc_203",
@@ -288,9 +295,9 @@
       C("悄悄溜走", "Slip away quietly", "gsc_204", X({sanity: -5, renown: -3},
         "你躲在矿车后面，听着棍子落下的声音，一下，又一下。",
         "You hide behind an ore cart and listen to the mauls come down. Again. Again.")),
-      C("向执法官指认带头的人", "Point out the ringleaders to Vask", "gsc_204", X({renown: -10, set: {informer: true}},
-        "瓦斯克点点头，塞给你一张口粮券。你转身时，看见一个戴兜帽的人正看着你。",
-        "Vask nods and slips you a ration chit. As you turn, a hooded figure is watching you."))
+      C("向执法官指认带头的提奥", "Point out Teo as the ringleader to Vask", "gsc_204", X({renown: -10, set: {informer: true, wronged_teo: true}},
+        "瓦斯克塞给你一张口粮券。电击棍落在提奥肩上，他没喊，只抬头看了你一眼。",
+        "Vask slips you a ration chit. The maul comes down on Teo's shoulder. He doesn't cry out. He only looks up at you."))
     ]};
 
   N.gsc_203 = {chapter: 2, scene: "hive_hab", speaker: OSSA, time: {d: 1},
@@ -435,9 +442,13 @@
       C("数着走过的层数", "Count the levels as you go", "gsc_302", X({sanity: -4, set: {counted: true}},
         "第十九层以下，地图上就没有了。第二十六层，你听见了很多人的呼吸声。",
         "Below level nineteen there are no maps. At level twenty-six you hear many people breathing.")),
-      C("握紧提奥的手", "Hold Teo's hand tight", "gsc_302", X({sanity: 5, renown: 3},
+      C("握紧提奥的手", "Hold Teo's hand tight", "gsc_302", O(X({sanity: 5, renown: 3},
         "他的手心有一层薄薄的硬皮，像甲壳。你没有松开。",
-        "His palm has a thin, hard skin, like shell. You don't let go."))
+        "His palm has a thin, hard skin, like shell. You don't let go."),
+        G("teo", "你伤过提奥，他的手在你掌心里一动不动。", "You wronged Teo. His hand lies motionless in yours.", 0, {sanity: -4}))),
+      C("“提奥，从前是我对不住你。”", "“Teo, I wronged you once. I'm sorry.”", "gsc_302", O(Q({flag: "wronged_teo"}, true), X({renown: 3, set: {forgiven_teo: true}},
+        "提奥怔了怔，用掌心的硬皮蹭了蹭你的手背。“早就不记了，”他说，“走吧。”",
+        "Teo blinks, then rubs the hard skin of his palm over the back of your hand. “Long forgotten,” he says. “Come on.”")))
     ]};
 
   N.gsc_302 = {chapter: 3, scene: "cult_shrine", speaker: PRIMUS, foe: "gsc_neophyte", time: {h: 3},
@@ -652,9 +663,9 @@
             "Vask is older now, and harder. He pins you to the interrogation chair.\n“Twenty crates of military explosive. Who gave them to you? Names, and you go home.”\nThe wall clock ticks slowly."),
     effects: {hp: -12},
     choices: [
-      C("说出雷恩的名字", "Give him Wren's name", "gsc_408", X({renown: -20, sanity: -8, set: {traitor: true}},
-        "你说了。瓦斯克放了你。那一夜，嗡鸣里有几百个声音同时沉默了一下。",
-        "You say it. Vask lets you go. That night, hundreds of voices in the hum fall silent for a moment, all at once.")),
+      C("说出雷恩的名字", "Give him Wren's name", "gsc_408", X({renown: -20, sanity: -8, set: {traitor: true, wronged_wren: true}},
+        "你说出了雷恩的名字。瓦斯克放了你，抓人的却扑了空：嗡鸣早一步传开了。那一夜，几百个声音同时沉默。",
+        "You say Wren's name. Vask lets you go, but the arrest team finds nothing: the hum spread it first. That night hundreds of voices fall silent at once.")),
       C("咬紧牙关，一个字也不说", "Clench your teeth. Not one word", "gsc_408", X({hp: -10, renown: 10},
         "三天后，一个看守打开了门，左手戴着手套。“家里人让我来接你。”",
         "Three days later a guard unlocks the door, left hand gloved. “The family sent me for you.”"))
@@ -668,9 +679,9 @@
       C("“天变紫以后，发生了什么？”", "“What happened when the sky turned purple?”", "gsc_409", X({sanity: -5, set: {heardBrann: true}},
         "布兰把一块旧数据板塞给你。“我表亲最后寄来的。我不敢看第二遍。”",
         "Brann presses an old data-slate on you. “The last thing my cousin sent. I couldn't look twice.”")),
-      C("把他的话告诉家里人", "Tell the family what he said", "gsc_409", X({renown: 6, sanity: -4, set: {soldBrann: true}},
-        "大人们谢谢你。一个星期后，布兰的铺位空了，被子叠得整整齐齐。",
-        "The elders thank you. A week later Brann's bunk is empty, the blanket folded neatly.")),
+      C("把他的话告诉家里人", "Tell the family what he said", "gsc_409", X({renown: 6, sanity: -4, set: {soldBrann: true, wronged_brann: true}},
+        "你把布兰的话告诉了大人们。他们谢谢你。一个星期后，布兰的铺位空了，被子叠得整整齐齐。",
+        "You repeat Brann's words to the elders. They thank you. A week later his bunk is empty, the blanket folded neatly.")),
       C("陪他去黑肺病房坐坐，那里暖和", "Sit with him in the warm black-lung ward", "gsc_409", O(Q({taint: "nurgle", min: 30}, true), X({hp: 5, sanity: 3, taint: {nurgle: 60}},
         "病房里又暖又潮，咳嗽声像摇篮曲。布兰说了什么，你没听进去。你睡得很香，醒来身上一股甜味。",
         "The ward is warm and damp; the coughing is a lullaby. Whatever Brann says, you don't hear it. You sleep soundly and wake smelling sweet."))),
@@ -693,16 +704,19 @@
 
   /* ============ Chapter 5 · The Call ============ */
   N.gsc_501 = {chapter: 5, scene: "gsc_chapel", speaker: MAGUS, time: {y: 3},
+    grudgeLine: {npc: "brann", text: L("歌声里多了一个老人，是布兰。他笑得和所有人一样，眼睛却一直盯着你。", "Among the singers is an old man: Brann. He smiles like everyone else, but his eyes never leave you.")},
     text: L("三年来，每天夜里，粮仓地下都在唱。几百个声音合成一个，从地底冲上天空。\n主祭站在中间，眼睛亮得像两盏紫灯。\n唱完以后，你的头总要疼到天亮。",
             "For three years, every night, the vault under the grain store sings. Hundreds of voices become one and rush up from the deep into the sky.\nThe Magus stands at the centre, eyes lit like two violet lamps.\nAfterward your head aches until dawn."),
     codex: ["gsc_broodmind"],
     choices: [
-      C("放开嗓子，用心去唱", "Sing with your whole heart", "gsc_502", X({corruption: 8, renown: 5, taint: {slaanesh: 50}},
+      C("放开嗓子，用心去唱", "Sing with your whole heart", "gsc_502", O(X({corruption: 8, renown: 5, taint: {slaanesh: 50}},
         "你唱到浑身发抖，觉得自己大得能装下整片天空。那一刻太美了，美得什么都不再重要。",
-        "You sing till you shake, vast enough to hold the whole sky. The moment is so beautiful that nothing else matters.")),
-      C("跟着哼，心里想着别的事", "Hum along, thinking of other things", "gsc_502", X({sanity: -5},
+        "You sing till you shake, vast enough to hold the whole sky. The moment is so beautiful that nothing else matters."),
+        G("brann", "你出卖过布兰。他就站在你身边，每个音都像在念你的名字。", "You gave Brann up. He stands beside you, and every note sounds like your name.", 0, {sanity: -4}))),
+      C("跟着哼，心里想着别的事", "Hum along, thinking of other things", "gsc_502", O(X({sanity: -5},
         "你在心里背矿井的层号，一层一层。嗡鸣从层号之间的缝里钻进来。",
-        "You recite shaft levels in your head, one by one. The hum seeps in between the numbers.")),
+        "You recite shaft levels in your head, one by one. The hum seeps in between the numbers."),
+        G("brann", "你出卖过布兰。他就站在你身边，每个音都像在念你的名字。", "You gave Brann up. He stands beside you, and every note sounds like your name.", 0, {sanity: -4}))),
       C("唱下去，再也不想停", "Sing on. Never stop", "gsc_502", O(Q({taint: "slaanesh", min: 30}, true), X({sanity: 4, corruption: 4, taint: {slaanesh: 65}},
         "天亮了，别人都散了，你还在唱。那种被几百颗心一起爱着的感觉，你一刻也舍不得放下。",
         "Dawn comes and the others leave, and you are still singing. To be loved by hundreds of hearts at once: you can't let go of it for a moment."))),
@@ -809,9 +823,10 @@
             "Teo finishes the slate and sits a long time. He's old now; the hard skin on his hands has thickened.\n“If this is true,” he says, “then all these decades...”\nHe doesn't finish. Far off, the chapel begins to sing, and his lips move along without meaning to."),
     effects: {sanity: -5},
     choices: [
-      C("“帮我救孩子们。”", "“Help me save the children.”", "gsc_510", X({renown: 4, set: {teoKnows: true}},
+      C("“帮我救孩子们。”", "“Help me save the children.”", "gsc_510", O(X({renown: 4, set: {teoKnows: true}},
         "提奥抹了把脸。“孩子们，”他重复，像抓住一根绳子，“对。先救孩子们。”",
-        "Teo wipes his face. “The children,” he repeats, like grabbing a rope. “Yes. The children first.”")),
+        "Teo wipes his face. “The children,” he repeats, like grabbing a rope. “Yes. The children first.”"),
+        G("teo", "提奥想起你当年对他做的事，迟迟才点头。", "Teo remembers what you once did to him, and is slow to nod.", 0, {sanity: -4}))),
       C("“忘了吧。”", "“Forget it.”", "gsc_510", X({sanity: -4},
         "他点点头，好像松了口气。第二天他照常唱歌，只是唱错了一句。",
         "He nods, almost relieved. Next day he sings as always, only he gets one line wrong."))
@@ -860,9 +875,9 @@
       C("制造混乱，让她跑", "Cause a scene so she can run", "gsc_605", X({hp: -12, renown: 6},
         "你掀翻了检验台。枪托砸在你背上，可内尔已经钻进了人群。",
         "You overturn the testing table. A rifle butt hits your back, but Nell has already slipped into the crowd.")),
-      C("转过头，不看", "Turn away. Don't look", "gsc_606", X({renown: -15, sanity: -10, set: {nellTaken: true}},
-        "你听见仪器响了一声，听见有人喊。你没有回头。嗡鸣里有几百个声音在哭。",
-        "You hear the machine chime, hear a shout. You don't turn. In the hum, hundreds of voices are weeping."))
+      C("转过头，不看", "Turn away. Don't look", "gsc_606", X({renown: -15, sanity: -10, set: {nellTaken: true, wronged_nell: true}},
+        "你听见仪器响了一声，听见有人喊“内尔”。你没有回头。嗡鸣里有几百个声音在哭。",
+        "You hear the machine chime, hear someone shout “Nell!” You don't turn. In the hum, hundreds of voices are weeping."))
     ]};
 
   N.gsc_603 = {chapter: 6, scene: "underhive", speaker: THORNE, time: {h: 6},
@@ -918,12 +933,13 @@
     ]};
 
   N.gsc_608 = {chapter: 6, scene: "cult_shrine", speaker: PRIMUS, time: {h: 1},
-    text: L("整个洞窟安静下来。几千双眼睛看着你。\n你把赫斯珀的画面说了出来：紫色的天，迎接的家人，没有停下的牙。\n哈斯克首领慢慢走到你面前。",
-            "The whole cavern goes still. Thousands of eyes on you.\nYou tell them about Hesper: the purple sky, the family welcoming, the teeth that did not stop.\nPrimus Hask walks slowly up to you."),
+    text: L("整个洞窟安静下来。提奥也在人群里，几千双眼睛看着你。\n你把赫斯珀的画面说了出来：紫色的天，迎接的家人，没有停下的牙。\n哈斯克首领慢慢走到你面前。",
+            "The whole cavern goes still. Teo is in the crowd too, among thousands of eyes on you.\nYou tell them about Hesper: the purple sky, the family welcoming, the teeth that did not stop.\nPrimus Hask walks slowly up to you."),
     choices: [
-      C("迎着他的目光", "Meet his gaze", null, R(0.45, "renown", "gsc_609", "gsc_610",
-        RR("首领没有说话。人群里，提奥第一个站到了你身边，然后是雷恩。", "The Primus says nothing. In the crowd, Teo is first to step to your side. Then Wren.",
-           "首领只说了一个字：“病。”几只手同时抓住了你。", "The Primus says one word: “Sick.” Several hands seize you at once.")))
+      C("迎着他的目光", "Meet his gaze", null, O(R(0.45, "renown", "gsc_609", "gsc_610",
+        RR("首领没有说话。人群里，提奥走了出来，站到你身边。然后，又有几个人。", "The Primus says nothing. From the crowd Teo steps out and stands beside you. Then a few more.",
+           "首领只说了一个字：“病。”几只手同时抓住了你。", "The Primus says one word: “Sick.” Several hands seize you at once.")),
+        G("teo", "提奥没忘你对他做的事，站在人群里，迟迟没有动。", "Teo has not forgotten what you did to him. He stands in the crowd and does not move.", -0.15)))
     ]};
 
   N.gsc_609 = {chapter: 6, scene: "cult_shrine", speaker: TEO, time: {h: 3},
@@ -931,9 +947,10 @@
             "The Primus neither seizes you nor believes you. He simply turns away.\nAfterward, Teo and Wren find you in the dark.\n“We don't believe the Star Children would eat us,” Wren says. “But what if? Someone has to get the children out.”"),
     effects: {renown: 5},
     choices: [
-      C("“矿船，‘忍耐号’。”", "“The hauler. The Patient Mercy.”", "gsc_701", X({set: {arkPlan: true}},
+      C("“矿船，‘忍耐号’。”", "“The hauler. The Patient Mercy.”", "gsc_701", O(X({set: {arkPlan: true}},
         "雷恩点头：“星港是我们的人在守。我去安排。”提奥只是握紧了你的手。",
-        "Wren nods. “Our people are holding the port. I'll arrange it.” Teo only grips your hand."))
+        "Wren nods. “Our people are holding the port. I'll arrange it.” Teo only grips your hand."),
+        G("wren", "雷恩没忘是谁报了她的名字，答话时没有看你。", "Wren has not forgotten who gave up her name. She does not look at you as she answers.", 0, {sanity: -4})))
     ]};
 
   N.gsc_610 = {chapter: 6, scene: "cult_shrine", speaker: MAGUS, time: {h: 4},
@@ -992,15 +1009,20 @@
     ]};
 
   N.gsc_704 = {chapter: 7, scene: "hive_hab", speaker: NELL, time: {h: 1},
+    grudgeLine: {npc: "nell", text: L("内尔是前两天夜里被家人从检查站抢回来的。她不肯看你。", "The family snatched Nell back from the checkpoint two nights ago. She won't look at you.")},
     text: L("霍林家空了，只剩内尔和十几个最小的孩子。\n“大人们说，在街上等，”内尔说，“等星之子来接我们。”\n孩子们穿着最好的衣服，排着队，像要去过节。",
             "The Hollin house is empty but for Nell and a dozen of the smallest children.\n“The grown-ups said wait in the street,” Nell says, “for the Star Children to come for us.”\nThe children wear their best clothes, lined up as if for a festival."),
     choices: [
-      C("把孩子们带进地窖", "Take the children down to the cellar", "gsc_705", X({sanity: 3, renown: -3, set: {withNell: true, hidKids: true}},
-        "孩子们不太愿意，内尔帮你哄。地窖门关上的时候，外面传来了第一声欢呼。",
-        "The children are reluctant; Nell helps coax them. As the cellar door shuts, the first cheer rises outside.")),
-      C("牵着他们，去街上迎接", "Lead them out to welcome the Star Children", "gsc_705", X({renown: 5, corruption: 5},
-        "孩子们欢天喜地。内尔握着你的手，越握越紧。",
-        "The children are overjoyed. Nell holds your hand, tighter and tighter."))
+      C("把孩子们带进地窖", "Take the children down to the cellar", "gsc_705", O(X({sanity: 3, renown: -3, set: {withNell: true, hidKids: true}},
+        "孩子们不太愿意，一个个被你哄下了地窖。门关上的时候，外面传来了第一声欢呼。",
+        "The children are reluctant; you coax them down one by one. As the cellar door shuts, the first cheer rises outside."),
+        G("nell", "内尔记得检查站那天，不肯先走。耽搁间，碎砖砸中了你。", "Nell remembers the checkpoint and won't go first. In the delay, falling brick hits you.", 0, {hp: -6}))),
+      C("牵着他们，去街上迎接", "Lead them out to welcome the Star Children", "gsc_705", X({renown: 5, corruption: 5, set: {wronged_nell: true}},
+        "你把孩子们领进了等着天空的人群。内尔握着你的手，越握越紧。",
+        "You lead the children into the crowd waiting on the sky. Nell holds your hand, tighter and tighter.")),
+      C("“检查站那天，我转过了头。对不起。”", "“At the checkpoint, I turned away. I'm sorry.”", "gsc_705", O(Q({flag: "wronged_nell"}, true), X({sanity: 3, set: {forgiven_nell: true, withNell: true, hidKids: true}},
+        "内尔没说话，伸手握住了你的手。“我知道，”她说，“嗡鸣里都有。”你们一起把孩子们带进了地窖。",
+        "Nell says nothing, only takes your hand. “I know,” she says. “It was all in the hum.” Together you take the children down to the cellar.")))
     ]};
 
   N.gsc_705 = {chapter: 7, scene: "spore_sky", speaker: STARS, time: {h: 30},
@@ -1115,10 +1137,11 @@
     ]};
 
   N.gsc_805 = {chapter: 8, scene: "hive_spire", speaker: PRIMUS, foe: "gaunt", time: {h: 4},
+    grudgeLine: {npc: "wren", text: L("雷恩带着防卫军出身的几个人守着舷梯，看见你，什么也没说。", "Wren and a few ex-PDF kin hold the ramp. She sees you and says nothing.")},
     text: L("星港上，哈斯克首领带着最后几十个家人守着“忍耐号”。\n他的枪管打红了。他看着天，脸上第一次出现了不知道该怎么办的表情。\n“家人第一，”他说，“把孩子们弄上船。”",
             "At the starport Primus Hask and the last few dozen kin hold the Patient Mercy.\nHis gun barrel glows red. He looks at the sky, and for the first time his face doesn't know what to do.\n“Family first,” he says. “Get the children aboard.”"),
     choices: [
-      C("带孩子们登船", "Lead the children aboard", "gsc_806", Q({stat: "renown", min: 25})),
+      C("带孩子们登船", "Lead the children aboard", "gsc_806", O(Q({stat: "renown", min: 25}), G("wren", "雷恩没忘是谁报了她的名字，把你排在队尾，等着挨流弹。", "Wren has not forgotten who gave up her name. She puts you last in line, under the stray fire.", 0, {hp: -6}))),
       C("“雷恩都安排好了。走！”", "“Wren arranged it. Go!”", "gsc_806", O(Q({flag: "arkPlan"}, true), X({renown: 5},
         "雷恩在舷梯口点名，一个都没少。她自己没有上船。",
         "Wren calls the roll at the ramp. Not one child missing. She does not board herself."))),
@@ -1144,8 +1167,9 @@
         "你也听得见它们。你牵着内尔走下舷梯，回头对孩子们笑了笑。舱门在你们身后合上。",
         "You can hear them too. You lead Nell down the ramp and smile back at the children. The hatch closes behind you."))),
       C("把她拽上船", "Drag her aboard", "gsc_end_seed", O(Q({stat: "renown", min: 40}), X({renown: 10},
-        "她没有挣扎，因为她信你。她靠在你肩上，轻声说：“你会后悔的。”你不在乎。",
-        "She doesn't struggle, because she trusts you. She leans on your shoulder and whispers, “You'll regret this.” You don't care.")))
+        "最后她不再挣扎，靠在你肩上，轻声说：“你会后悔的。”你不在乎。",
+        "In the end she stops struggling, leans on your shoulder, and whispers, “You'll regret this.” You don't care."),
+        G("nell", "你辜负过内尔，她死死抓住舷梯，不肯被你拖走。", "You failed Nell once. She clings to the ramp and will not be dragged.", 0, {hp: -10})))
     ]};
 
   N.gsc_807 = {chapter: 8, scene: "spore_sky", speaker: PRIMUS, foe: "hive_tyrant", time: {h: 1},
@@ -1443,6 +1467,13 @@
     taintMod: {khorne: 0.6, nurgle: 0.6, tzeentch: 0.6, slaanesh: 0.6},   // SPEC §19/§26: the Shadow in the Warp muffles the gods
     renownHelp: L("血亲是霍林家对你的信任和爱。替家人撒谎、守秘、出力会让它上升；怀疑、告密、拒绝会让它下降。血亲够高，家人才会跟你走，最后的船上才有你说话的份。",
                   "Kinship is the Hollin family's trust and love for you. Lying for them, keeping their secrets and pulling your weight raise it; doubt, informing and refusal lower it. High Kinship means the family will follow your lead, and your word counts at the very end."),
+    /* SPEC §28: people the route lets you wrong. Only present in later scenes where the text puts them there. */
+    npcs: {
+      teo:   {name: L("提奥", "Teo")},
+      nell:  {name: L("内尔", "Nell"), aka: [L("小内尔", "Little Nell")]},
+      wren:  {name: L("雷恩", "Wren"), aka: [L("小雷恩", "Little Wren")]},
+      brann: {name: L("布兰", "Brann"), aka: [L("老布兰", "Old Brann")]}
+    },
     deathNodes: {hp: "gsc_death_hp", sanity: "gsc_death_sanity", corruption: "gsc_death_corruption"},
     origins: [
       {id: "miner", name: L("九号矿井矿工", "Shaft Nine miner"),

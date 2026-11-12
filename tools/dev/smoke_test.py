@@ -3,6 +3,7 @@
 
     python3 tools/dev/smoke_test.py            # sample data (index.html?sample=1)
     python3 tools/dev/smoke_test.py --real     # real data/ + assets/ (skips sample-specific checks)
+    python3 tools/dev/smoke_test.py --only-grudge [--real]   # just the SPEC §28 grudge checks
     options: --chrome /usr/bin/google-chrome   --out tools/dev/screenshots   --headed
 
 Boots index.html via file://, asserts no console errors, plays through: race → origin select, choices with
@@ -11,7 +12,7 @@ type tabs, search, sort, NEW badges), settings, lore-card modes, ⌂ Home, an en
 (desktop + mobile) and — with --real — any new route whose data exists; takes desktop (1280x720) and mobile
 (390x844) screenshots.
 """
-import json, os, sys, time, random
+import json, os, re, sys, time, random
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -1379,8 +1380,168 @@ def run_real_v03(p):
     check("real: language toggle back to zh persists", json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["lang"] == "zh")
     ctx.close(); b.close()
 
+def run_grudge(p):
+    """SPEC §28 on sample data: wrong an NPC → the grudge node shows ⚠ tag + note, a changed roll chance, the consequence note and
+    (where the person is only implied) the grudgeLine; nothing shows while the flag is absent or forgiven."""
+    print("\n== v0.3.2 grudges (sample) ==")
+    b, ctx, page = new_ctx(p, tag="grudge")
+    # --- engine level (DOM-free rules) ---
+    eng = page.evaluate("""() => { const R = WH.Rules, rc = R.rollChance;
+      const mk = (node, flags, seed) => { const g = new WH.Game('sample', {rng: WH.RNG(seed || 3), rumors: false, echoes: false}); g.start('hive');
+        g.state.nodeId = node; g.state.flags = flags; g.state.ended = false; g.state.stats.hp = 80; return g; };
+      const strip = (g) => { const f = g.faction, nodes = {}; for (const [id, n] of Object.entries(f.nodes)) { const m = Object.assign({}, n); delete m.grudgeLine;
+          if (m.choices) m.choices = m.choices.map(c => { const d = Object.assign({}, c); delete d.grudge; return d; }); nodes[id] = m; }
+        const d2 = Object.assign({}, WH, {factions: Object.assign({}, WH.factions, {sample: Object.assign({}, f, {nodes})})}); return d2; };
+      // identical behaviour while no grudge is active (every choice of every node that carries a grudge)
+      let same = true, n = 0;
+      for (const node of ['smp_007', 'smp_008']) for (let i = 0; i < 4; i++) for (const fl of [{}, {forgiven_vik: true, wronged_vik: true, forgiven_mira: true, wronged_mira: true}]) {
+        const a = mk(node, Object.assign({}, fl), 11), c = mk(node, Object.assign({}, fl), 11);
+        const d2 = strip(a); const g2 = new WH.Game('sample', {rng: WH.RNG(11), data: d2, rumors: false, echoes: false}); g2.start('hive'); g2.state.nodeId = node; g2.state.flags = Object.assign({}, fl); g2.state.ended = false; g2.state.stats.hp = 80;
+        const ca = a.choices(), cb = g2.choices(); if (ca.length !== cb.length || i >= ca.length || ca[i].locked) continue;
+        if (ca.some(x => x.grudge)) same = false;
+        if (JSON.stringify(ca.map(x => x.roll)) !== JSON.stringify(cb.map(x => x.roll))) same = false;
+        const sa = a.choose(i), sb = g2.choose(i); n++;
+        if (sa.nodeId !== sb.nodeId || JSON.stringify(a.state.stats) !== JSON.stringify(g2.state.stats) || a.rng() !== g2.rng()) same = false; if (sa.grudge) same = false; }
+      const g = mk('smp_007', {wronged_vik: true}), cs = g.choices(), base = mk('smp_007', {}).choices();
+      const fire = cs.find(x => x.choice.roll), fire0 = base.find(x => x.choice.roll);
+      const st = g.choose(cs.indexOf(fire));
+      const h = mk('smp_008', {wronged_mira: true}), hc = h.choices().find(x => x.grudge), line = h.grudgeLine(), nt = h.nodeText();
+      const k = mk('smp_007', {wronged_vik: true}), hp0 = k.state.stats.hp, san0 = k.state.stats.sanity;
+      const ks = k.choose(k.choices().findIndex(x => !x.choice.roll && x.grudge));
+      return {same, n, rc: [rc({p: 0.1}, null, -0.3), Math.round(rc({p: 0.9, stat: 'hp'}, {hp: 100}, -0.15) * 1000) / 1000, rc({p: 0.5}, null, 0), rc({p: 0.5, stat: 'hp'}, {hp: 50})],
+        pen: Math.round((fire0.roll.pEff - fire.roll.pEff) * 100) / 100, grudge: fire.grudge && {npc: fire.grudge.npc, p: fire.grudge.p, hp: fire.grudge.effects.hp},
+        stepGrudge: st.grudge && st.grudge.npc, cqGrudge: !!(st.consequence && st.consequence.grudge && st.consequence.grudge.note), show: st.consequence && st.consequence.show,
+        miraTag: hc && hc.grudge.npc, line: line && line.npc, nt: nt, base: h.node().text.zh,
+        merged: [-ks.choiceDeltas.hp, -ks.choiceDeltas.sanity], actives: h.activeGrudgeNpcs()}; }""")
+    check("§28 engine: with no active grudge (absent or forgiven) every choice behaves exactly as without grudge data", eng["same"] and eng["n"] >= 8, str(eng["n"]))
+    check("§28 engine: rollChance extra p clamps to 0.05–0.95, no extra = unchanged", eng["rc"] == [0.05, 0.8, 0.5, 0.5], str(eng["rc"]))
+    check("§28 engine: active grudge lowers the displayed roll chance by p (−0.15) and exposes {npc,p,effects}",
+          abs(eng["pen"] - 0.15) < 0.011 and eng["grudge"] == {"npc": "vik", "p": -0.15, "hp": -4}, str(eng["pen"]) + str(eng["grudge"]))
+    check("§28 engine: choose() records step.grudge + consequence.grudge (consequence now has something to show)", eng["stepGrudge"] == "vik" and eng["cqGrudge"] and eng["show"])
+    check("§28 engine: grudge effects merge into the choice's own effects (hold the line: hp −60 from the choice, sanity −6 from the grudge)", eng["merged"] == [60, 6], str(eng["merged"]))
+    check("§28 engine: grudgeLine + nodeText only while active; activeGrudgeNpcs", eng["line"] == "mira" and eng["nt"]["zh"] == eng["base"] + "撤离的队伍里，米拉抬起头，认出了你。" and eng["actives"] == ["mira"], str(eng["nt"]))
+    # --- UI: nothing without the flag ---
+    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(200)
+    pick_faction(page, "sample", "hive"); wait_idle(page); finish_text(page)
+    goto_node(page, "smp_007", flags={})
+    base_pct = page.evaluate("Math.round(WH.UI.game.choices()[0].roll.pEff * 100)")
+    check("§28 UI: flag absent → no ⚠ tag, no note, no presence line, no aria 旧怨", page.locator(".choice.grudge").count() == 0 and page.locator(".choice .gnote").count() == 0
+          and page.locator(".choice .grudge-tag").count() == 0 and page.locator("#dlg-grudge").is_hidden() and "旧怨" not in page.locator("#choices").inner_html())
+    goto_node(page, "smp_008", flags={})
+    check("§28 UI: smp_008 without wronged_mira → no presence line, no ⚠", page.locator("#dlg-grudge").is_hidden() and page.locator(".choice.grudge").count() == 0)
+    goto_node(page, "smp_008", flags={"wronged_mira": True, "forgiven_mira": True})
+    check("§28 UI: forgiven_<npc> switches the grudge off", page.locator("#dlg-grudge").is_hidden() and page.locator(".choice.grudge").count() == 0)
+    # --- wrong Vik through the UI, reach the grudge node ---
+    goto_node(page, "smp_006", flags={})
+    page.locator("#choices button", has_text="偷走老兵维克的水壶").click(); page.wait_for_timeout(120)
+    check("§28 UI: the harming choice shows its result (consequence panel), flag set after", page.locator("#conseq").count() == 1 and state(page)["flags"].get("wronged_vik") is True)
+    pass_conseq(page); wait_idle(page); finish_text(page)
+    check("§28 UI: reaches smp_007 with the grudge active", state(page)["nodeId"] == "smp_007")
+    gc = page.locator(".choice.grudge")
+    check("§28 UI: ⚠ tag + note on exactly the two Vik grudge choices", gc.count() == 2 and page.locator(".choice .grudge-tag").count() == 2 and page.locator(".choice .gnote").count() == 2
+          and "维克记着水壶的事" in gc.nth(0).inner_text() and "⚠" in gc.nth(0).inner_text())
+    check("§28 UI: Vik is present by his speaker sprite, so there is no extra presence line", page.locator("#dlg-grudge").is_hidden())
+    fire = page.locator("#choices button", has_text="开火")
+    shown = int(re.search(r"(\d+)%", fire.locator(".badge:not(.grudge-tag)").inner_text()).group(1))
+    exp = page.evaluate("Math.round(WH.UI.game.choices().find(c => c.choice.roll).roll.pEff * 100)")
+    base_here = page.evaluate("""() => { const g = WH.Game.fromRecord(WH.UI.game.toRecord()); g.state.flags = {}; return Math.round(g.choices().find(c => c.choice.roll).roll.pEff * 100); }""")
+    check("§28 UI: the ⚠ choice's risk badge shows the changed chance (−15 points)", shown == exp and base_here - shown == 15, f"{shown} vs {base_here}")
+    check("§28 UI: aria-label carries the grudge note (screen readers), tooltip title too", "旧怨" in (fire.get_attribute("aria-label") or "") and "维克" in (fire.get_attribute("title") or ""))
+    check("§28 UI: the unaffected choices (flee / return canteen) carry no ⚠", page.locator("#choices button", has_text="逃跑").locator(".grudge-tag").count() == 0
+          and page.locator("#choices button", has_text="水壶还给").count() == 1 and page.locator("#choices button", has_text="水壶还给").locator(".grudge-tag").count() == 0)
+    shot(page, "99_grudge_choices")
+    # EN toggle re-renders the note
+    page.locator("#tools button", has_text="EN").click(); page.wait_for_timeout(200)
+    check("§28 UI: note re-renders in English", "canteen" in page.locator(".choice .gnote").first.inner_text() and "Grudge" in (page.locator(".choice.grudge").first.get_attribute("aria-label") or ""))
+    page.locator("#tools button", has_text="中").click(); page.wait_for_timeout(200)
+    # take the ⚠ roll choice → the note is the FIRST line of the consequence panel
+    page.locator("#choices button", has_text="开火").click(); page.wait_for_timeout(150)
+    cq = page.locator("#conseq")
+    check("§28 UI: consequence panel opens with the grudge note as its first line", cq.count() == 1 and cq.locator(":scope > *").first.get_attribute("class") == "cq-grudge"
+          and "维克记着水壶的事" in cq.locator(".cq-grudge").inner_text())
+    finish_text(page)
+    check("§28 UI: the grudge's hp −4 shows in the delta line and the roll uses the lowered chance",
+          "生命" in cq.locator(".cq-deltas").inner_text() and page.evaluate("WH.UI.conseq.step.choiceDeltas.hp") == -4
+          and page.evaluate("WH.UI.conseq.step.roll.pEff") < exp / 100 + 0.2)
+    shot(page, "99b_grudge_consequence")
+    page.locator("#tools button", has_text="EN").click(); page.wait_for_timeout(200)
+    check("§28 UI: panel note switches language", "canteen" in page.locator("#conseq .cq-grudge").inner_text() and "Vik" in page.locator("#conseq .cq-grudge").inner_text())
+    page.locator("#tools button", has_text="中").click(); page.wait_for_timeout(150)
+    pass_conseq(page); wait_idle(page); finish_text(page)
+    # --- redemption: forgive Vik (choice sets forgiven_vik) ---
+    goto_node(page, "smp_007", flags={"wronged_vik": True})
+    page.locator("#choices button", has_text="水壶还给").click(); page.wait_for_timeout(120); pass_conseq(page); wait_idle(page); finish_text(page)
+    check("§28 UI: returning the canteen sets forgiven_vik → the grudge is off", state(page)["flags"].get("forgiven_vik") is True
+          and page.evaluate("WH.UI.game.activeGrudgeNpcs().length") == 0)
+    # --- Mira: shown only through the grudgeLine ---
+    goto_node(page, "smp_008", flags={"wronged_mira": True})
+    gl = page.locator("#dlg-grudge")
+    box_t, box_g = page.locator("#dlg-text").bounding_box(), gl.bounding_box()
+    check("§28 UI: presence line visible, italic, after the node text", gl.is_visible() and "米拉抬起头" in gl.inner_text()
+          and page.evaluate("getComputedStyle(document.querySelector('#dlg-grudge em')).fontStyle") == "italic" and box_g["y"] >= box_t["y"] + box_t["height"] - 2, str(box_g))
+    ev = page.locator("#choices button", has_text="带平民撤离")
+    check("§28 UI: the evacuate choice is ⚠-tagged with Mira's note", "米拉认出了你" in ev.inner_text() and ev.locator(".grudge-tag").count() == 1)
+    shot(page, "99c_grudge_line")
+    page.locator("#tools button", has_text="EN").click(); page.wait_for_timeout(200)
+    check("§28 UI: presence line re-renders in English", "Mira looks up" in gl.inner_text())
+    page.locator("#tools button", has_text="中").click(); page.wait_for_timeout(150)
+    # --- a save/load keeps it (flags persist; line + tags restored) ---
+    goto_node(page, "smp_008", flags={"wronged_mira": True})
+    page.evaluate("() => { WH.Save.write('slot1', WH.UI.game.toRecord()); }")
+    page.reload(); page.wait_for_selector("#scr-title .title-main")
+    page.evaluate("() => { const r = WH.Save.read('slot1'); if (r) { WH.UI.show('game'); WH.UI.loadRecord(r); } }"); page.wait_for_timeout(250); finish_text(page)
+    check("§28 UI: a loaded save restores the grudge line and tags (flags persisted, no schema change)", page.locator("#dlg-grudge").is_visible() and page.locator(".choice.grudge").count() == 1
+          and page.evaluate("WH.SAVE_SCHEMA") == 2)
+    ctx.close(); b.close()
+    # --- mobile ---
+    b, ctx, page = new_ctx(p, mobile=True, tag="grudge-m")
+    page.locator("#scr-title .menu .btn.primary").tap(); page.wait_for_timeout(200)
+    pick_faction(page, "sample", "hive", tap=True); wait_idle(page); finish_text(page)
+    goto_node(page, "smp_008", flags={"wronged_mira": True})
+    check("§28 mobile: presence line + ⚠ note visible, no horizontal overflow", page.locator("#dlg-grudge").is_visible() and page.locator(".choice .gnote").count() == 1
+          and page.evaluate("document.documentElement.scrollWidth") <= 391)
+    page.screenshot(path=os.path.join(OUT, "m70_grudge.png"))
+    goto_node(page, "smp_007", flags={"wronged_vik": True})
+    check("§28 mobile: two ⚠ choices with notes inside the viewport", page.locator(".choice.grudge").count() == 2 and page.evaluate("document.documentElement.scrollWidth") <= 391)
+    page.screenshot(path=os.path.join(OUT, "m71_grudge_choices.png"))
+    ctx.close(); b.close()
+
+def run_real_grudge(p):
+    """--real: every route that already has grudges (text writers land them one by one) renders them; routes without are untouched"""
+    print("\n== v0.3.2 grudges (real data) ==")
+    b, ctx, page = new_ctx(p, tag="realgrudge", seed=17)
+    fids = page.evaluate("Object.keys(WH.factions).filter(id => Object.values(WH.factions[id].nodes).some(n => n.grudgeLine || (n.choices || []).some(c => c.grudge)))")
+    print("  routes with grudges:", fids or "none yet")
+    check("real: no grudge data → nothing changes (or routes listed above pass)", True)
+    for fid in fids:
+        todo = page.evaluate("""(f) => { const out = []; for (const [id, n] of Object.entries(WH.factions[f].nodes)) { const gs = (n.choices || []).filter(c => c.grudge).map(c => c.grudge.npc);
+            if (gs.length || n.grudgeLine) out.push({id, npcs: Array.from(new Set(gs.concat(n.grudgeLine ? [n.grudgeLine.npc] : []))), line: !!n.grudgeLine}); } return out; }""", fid)
+        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(120)
+        pick_faction(page, fid); wait_idle(page); finish_text(page); dismiss_lore(page)
+        bad = []
+        for t in todo:
+            flags = {"wronged_" + n: True for n in t["npcs"]}
+            goto_node(page, t["id"], flags=flags)
+            want = page.evaluate("WH.UI.game.choices().filter(c => c.grudge && !c.locked).length")
+            got = page.locator(".choice.grudge").count()
+            line_ok = (not t["line"]) or page.locator("#dlg-grudge").is_visible()
+            if got != want or page.locator(".choice .gnote").count() != want or not line_ok: bad.append(f'{t["id"]}:{got}/{want}/{line_ok}')
+            goto_node(page, t["id"], flags={})
+            if page.locator(".choice.grudge").count() or not page.locator("#dlg-grudge").is_hidden(): bad.append(t["id"] + ":leaks-without-flag")
+        check(f"real {fid}: all {len(todo)} grudge/presence node(s) render ⚠ + notes + lines with the flag and nothing without it", not bad, ", ".join(bad[:5]))
+        if todo: 
+            goto_node(page, todo[0]["id"], flags={"wronged_" + n: True for n in todo[0]["npcs"]}); shot(page, f"80_real_grudge_{fid}")
+    ctx.close(); b.close()
+
 with sync_playwright() as p:
     t0 = time.time()
+    if "--only-grudge" in ARGS:                      # quick loop while working on SPEC §28 (sample: run_grudge, --real: run_real_grudge)
+        (run_real_grudge if REAL else run_grudge)(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
     if "--only-v022" not in ARGS: run_desktop(p)
     if "--only-v022" not in ARGS: run_mobile(p)
     if "--only-v022" not in ARGS: run_no_storage(p)
@@ -1390,12 +1551,14 @@ with sync_playwright() as p:
         run_egg(p)
         run_data(p)
         run_v03(p)
+        run_grudge(p)
     if "--only-v022" not in ARGS: run_five(p)
     run_difficulty(p)
     if REAL:
         run_new_routes(p)
         run_real_v022(p)
         run_real_v03(p)
+        run_real_grudge(p)
     fails = [r for r in results if not r[1]]
     print(f"\nconsole/page errors: {len(errors)}")
     for e in errors: print("  " + e)

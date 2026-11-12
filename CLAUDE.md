@@ -28,6 +28,7 @@ Read this first in every session on this project. Keep it short and current; his
 - IP: original prose; original pixel archetypes; no likeness of named canon characters (use `omen_*` images); no GW logos/icons. Fan-made, non-commercial; disclaimer in footer.
 - Saves: localStorage, 3 slots + autosave + JSON export/import, schema-versioned.
 - Audio: original procedural chiptune via WebAudio (`src/js/audio.js`), mood auto-picked per node; real CC0 files can override via `assets/audio/files.js`.
+- Grudges (§28): only when the person is really in the scene (name in zh+en text / speaker sprite / `grudgeLine`); never before the harm; route death rate may rise ≤3 pts; effects are harmful-only. Howie's rule: context must be coherent first.
 - Lore cards pop up on first codex unlock (skippable / can be turned off); codex names are linked in dialogue; ending lists chaos gods met.
 
 ## Commands
@@ -38,7 +39,7 @@ Read this first in every session on this project. Keep it short and current; his
 - Audition music/SFX: open `tools/dev/audio_test.html`.
 
 ## Status
-- v0.3.1 (2026-11-12, dev) — UI "种族" → "势力" (Howie's decision; data key `race` unchanged); date audit tool.
+- v0.3.2 (2026-11-12) — grudges (§28): hurting a named NPC sets `wronged_<id>`; later choices where that person is *present* (validator-enforced) get ⚠ + lower roll chance / extra cost; all 8 routes, +0.3–1.9 pts death. v0.3.1 — UI "种族" → "势力" (data key `race` unchanged); `tools/dev/date_audit.js` (text dates vs clock: all consistent).
 - v0.3.0 released 2026-11-12 — + 3 routes (Orks, Genestealer Cult, Mechanicus; 8 total, 24 origins), 60 achievements (§25), Arcosa Sector echoes (§27), relevance-gated rumours (§20b), music/art for new routes. Gates: validate 0 errors; smoke --real 129/129; audio_check OK.
 - v0.2.3 released 2026-11-11 — + claim endings (0.2.1), rumours/Chronicle, Tzeentch egg, origin caps, progress preservation (0.2.2), skull difficulty (0.2.3).
 - v0.2.0 released 2026-11-11 — 5 routes (Imperium, Chaos, T'au, Aeldari, Necrons) × 3 origins, consequence panel, codex v2 (race × type, search, NEW), hidden chaos-god taint, lore-card modes, Home button, faction-stat tips. v0.1.0 same day.

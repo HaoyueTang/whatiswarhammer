@@ -12,6 +12,9 @@
  * v0.2.2 (SPEC §20): 3 chronicle entries (tags ["chronicle"], date, sortKey; M31 + M41; no cat / sprite on purpose → seal on the
  * lore card) and 3 rumours with SPEC §20b `when`: cadia (smp_004, score 2), wall (trench/ork, smp_007) and never (matches no
  * node, so chr_sample_heresy stays locked).
+ * v0.3.2 (SPEC §28 grudges): faction.npcs {vik (sprite guardsman), mira (no sprite)}; smp_006 can wrong Vik (steals his canteen), smp_005 can
+ * wrong Mira (plants the token on her); smp_007 carries two Vik grudges (roll p −0.15 + hp, effects only) — Vik is present through his
+ * speaker sprite — and a "return the canteen" redemption (forgiven_vik); smp_008 carries a Mira grudge shown through a `grudgeLine`.
  */
 WH.registerCodex({
   smp_commissar:  {cat: "leader", faction: "imperium", race: "imperium", type: "unit", sprite: "commissar",
@@ -161,6 +164,10 @@ WH.registerFaction({
                en: "Faith is your devotion and standing before the Emperor. Prayer, obedience and courage raise it; doubt and flight lower it. High Faith unlocks leadership choices and better endings."},
   deathNodes: {hp: "smp_death_hp", sanity: "smp_death_sanity", corruption: "smp_death_corruption"},
   world: {zh: "第七巢都", en: "Hive Seven"},                        // SPEC §27 home world (echo text)
+  npcs: {                                                           // SPEC §28 people the route lets you wrong
+    vik:  {name: {zh: "维克", en: "Vik"}, aka: [{zh: "老兵", en: "the veteran"}], sprite: "guardsman"},
+    mira: {name: {zh: "米拉", en: "Mira"}}
+  },
   learn: {leaders: ["smp_emperor", "smp_commissar"], enemies: ["smp_ork", "smp_cultist"], boss: ["smp_abaddon"]},
   origins: [
     {id: "hive", name: {zh: "巢都工人", en: "Hive worker"}, desc: {zh: "十六小时一班，配额永远在涨。", en: "Sixteen-hour shifts, and the quota always rises."},
@@ -242,7 +249,10 @@ WH.registerFaction({
         {text: {zh: "认命", en: "Accept it"}, next: "smp_006"},
         {text: {zh: "[拾荒者] 钻进通风管", en: "[Scavenger] Slip into the vents"}, next: "smp_006", require: {flag: "origin_scav"}, hideIfLocked: true,
          effects: {renown: 5}, result: {zh: "你熟悉这种管道。执法者的手电光从你脚下扫过。", en: "You know these ducts. The enforcers' lamps sweep beneath your boots."}},
-        {text: {zh: "[腐化≤30] 坦白铁片", en: "[Corruption≤30] Confess the token"}, next: "smp_006", require: [{flag: "token"}, {stat: "corruption", max: 30}], effects: {renown: 10, unset: ["token"]}}
+        {text: {zh: "[腐化≤30] 坦白铁片", en: "[Corruption≤30] Confess the token"}, next: "smp_006", require: [{flag: "token"}, {stat: "corruption", max: 30}], effects: {renown: 10, unset: ["token"]}},
+        {text: {zh: "[铁片] 把铁片塞进米拉的铺位", en: "[Token] Plant the token in Mira's bunk"}, next: "smp_006", require: {flag: "token"}, hideIfLocked: true,
+         effects: {renown: -8, unset: ["token"], set: {wronged_mira: true}},
+         result: {zh: "执法者在米拉的铺位下搜出了铁片。她回头看你，一个字也没说。", en: "The enforcers find the token under Mira's bunk. She looks back at you and says nothing."}}
       ]},
     smp_006: {chapter: 3, scene: "ship_interior", speaker: {sprite: "psyker", name: {zh: "被缚的灵能者", en: "Bound Psyker"}},
       time: {d: 30, warp: true}, eventRoll: 0.4,
@@ -252,7 +262,9 @@ WH.registerFaction({
         {text: {zh: "盯着舷窗", en: "Stare out the viewport"}, next: "smp_007", effects: {sanity: -30, corruption: 10},
          result: {zh: "颜色回望着你。你忘了眨眼，也忘了为什么要眨眼。", en: "The colours look back. You forget to blink, then forget why anyone would."}},
         {text: {zh: "闭眼背诵祷文", en: "Close your eyes, recite the litany"}, next: "smp_007", effects: {renown: 5}},
-        {text: {zh: "和灵能者说话", en: "Talk to the psyker"}, roll: {p: 0.35, stat: "renown", success: "smp_007", fail: "smp_death_sanity"}}
+        {text: {zh: "和灵能者说话", en: "Talk to the psyker"}, roll: {p: 0.35, stat: "renown", success: "smp_007", fail: "smp_death_sanity"}},
+        {text: {zh: "偷走老兵维克的水壶", en: "Steal Veteran Vik's canteen"}, next: "smp_007", effects: {renown: -5, set: {wronged_vik: true}},
+         result: {zh: "维克睡着了。你把他最后半壶水倒进了自己的水壶。", en: "Vik is asleep. You pour the last of his water into your own canteen."}}
       ]},
     smp_007: {chapter: 4, scene: "trench", speaker: {sprite: "guardsman", name: {zh: "老兵维克", en: "Veteran Vik"}}, foe: "ork",
       time: {y: 2},
@@ -260,18 +272,25 @@ WH.registerFaction({
       effects: {hp: -35}, codex: ["smp_ork"],
       choices: [
         {text: {zh: "开火", en: "Open fire"}, roll: {p: 0.55, stat: "hp", success: "smp_008", fail: "smp_end_bad_trench"},
+         grudge: {npc: "vik", p: -0.15, effects: {hp: -4}, note: {zh: "维克记着水壶的事，不会替你补枪。", en: "Vik remembers the canteen and will not cover your shots."}},
          rollResult: {success: {zh: "激光枪烫得握不住。冲在最前的绿皮倒进泥里。", en: "The lasgun grows too hot to hold. The lead greenskin drops into the mud."},
                       fail: {zh: "扳机咔哒一声。什么也没发生。", en: "The trigger clicks. Nothing happens."}}},
-        {text: {zh: "固守", en: "Hold the line"}, next: "smp_008", effects: {hp: -60}},
-        {text: {zh: "逃跑", en: "Flee"}, next: "smp_end_bad_coward"}
+        {text: {zh: "固守", en: "Hold the line"}, next: "smp_008", effects: {hp: -60},
+         grudge: {npc: "vik", effects: {sanity: -6}, note: {zh: "维克的目光钉在你背上，你不敢回头。", en: "Vik's eyes are on your back and you dare not turn round."}}},
+        {text: {zh: "逃跑", en: "Flee"}, next: "smp_end_bad_coward"},
+        {text: {zh: "[偷过水壶] 把水壶还给维克", en: "[Stole it] Give Vik his canteen back"}, next: "smp_008", require: {flag: "wronged_vik"}, hideIfLocked: true,
+         effects: {renown: 3, set: {forgiven_vik: true}},
+         result: {zh: "维克看了你很久，把水壶收了回去，什么也没说。", en: "Vik studies you for a long moment, takes the canteen back and says nothing."}}
       ]},
     smp_008: {chapter: 4, scene: "burning_city", speaker: null, foe: "omen_black_crusade",
       time: {h: 30},
+      grudgeLine: {npc: "mira", text: {zh: "撤离的队伍里，米拉抬起头，认出了你。", en: "In the evacuation line, Mira looks up and recognises you."}},
       text: {zh: "天空裂开。黑色的舰队压下来——黑色远征来了。", en: "The sky splits. A black fleet descends — the Black Crusade has come."},
       effects: {sanity: -10}, codex: ["smp_abaddon"],
       choices: [
         {text: {zh: "守住大教堂", en: "Defend the cathedral"}, next: "smp_end_good_saint", require: {stat: "renown", min: 25}},
-        {text: {zh: "带平民撤离", en: "Evacuate the civilians"}, next: "smp_end_good_evac"},
+        {text: {zh: "带平民撤离", en: "Evacuate the civilians"}, next: "smp_end_good_evac",
+         grudge: {npc: "mira", effects: {sanity: -8}, note: {zh: "米拉认出了你，队伍里没人愿意跟着你走。", en: "Mira knows what you did; nobody in the line wants to follow you."}}},
         {text: {zh: "拾起染血的链锯剑", en: "Lift the bloodied chainsword"}, next: "smp_end_bad_trench", require: {taint: "khorne", min: 50}, hideIfLocked: true,
          effects: {taint: {khorne: 20}}, result: {zh: "剑在你手里活了过来。你笑了，却想不起为什么。", en: "The blade wakes in your hands. You laugh, and cannot remember why."}},
         {text: {zh: "向远征军投降", en: "Surrender to the crusade"}, next: "smp_death_corruption", effects: {corruption: 100}}

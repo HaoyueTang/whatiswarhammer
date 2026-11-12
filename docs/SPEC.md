@@ -356,7 +356,7 @@ Requested by Howie 2026-11-12: if the player does something harmful to a person 
 - **Grudge on a later choice.** `choice.grudge = {npc:"<npcId>", p?:-0.15, effects?:{hp:-6,…}, note:{zh,en}}`:
   - active only when `state.flags["wronged_"+npc]` is set (and not `state.flags["forgiven_"+npc]`);
   - `p` (−0.30…0, roll choices only) is added to the roll's success chance after stat adjustment (final clamp 0.05–0.95);
-  - `effects` (non-positive stat deltas only, magnitudes ≤ 12; may add `taint` bumps ≤ 10) are merged into the choice's effects when it is taken;
+  - `effects` (harmful deltas only: hp / sanity / renown ≤ 0, corruption ≥ 0, magnitudes ≤ 12; may add `taint` bumps 0–10) are merged into the choice's effects when it is taken;
   - `note` (≤ 30 zh / ≤ 20 en words) explains WHY it is riskier, shown on the choice (tooltip/small ⚠ tag, only while active) and as the first line of the consequence panel.
 - **Presence line.** `node.grudgeLine = {npc, text:{zh,en}}` (≤ 60 zh chars): extra sentence appended to the node text only while the grudge is active — the person is visibly there (looks at you, stands at the door, is in the queue). Use it wherever the node's base text alone would not make their presence obvious.
 - **Redemption (optional).** A choice may set `forgiven_<npcId>` (an apology, a repaid debt, a saved life), which switches the grudge off.

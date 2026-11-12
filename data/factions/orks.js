@@ -253,9 +253,9 @@
       C("照实念", "Read it straight", "ork_108", X({renown: 5},
         "“……警告：反应堆过热时请勿……”瓦兹格布听完大笑，把铭牌拧下来当了锅盖。",
         "“…Warning: when the reactor overheats do not…” Wazgob laughs, twists the plate off and uses it as a pot lid.")),
-      C("编一句吓唬他", "Make something up to scare him", "ork_108", X({renown: -3, sanity: 5},
-        "“上面说，碰它会爆炸。”瓦兹格布立刻碰了它。没炸。他盯着你看了很久。",
-        "“It says touch it and it blows.” Wazgob touches it at once. Nothing. He stares at you a long while.")),
+      C("编一句吓唬他", "Make something up to scare him", "ork_108", X({renown: -3, sanity: 5, set: {wronged_wazgob: true}},
+        "“上面说，碰它会爆炸。”瓦兹格布立刻碰了它。没炸。他盯着你看了很久，一扳手敲在你头上：“骗俺！”",
+        "“It says touch it and it blows.” Wazgob touches it at once. Nothing. He stares at you a long while, then cracks a spanner on your head. “LIED to me!”")),
       C("问他能给你什么", "Ask what's in it for you", "ork_108", X({renown: 3, hp: -5},
         "他用扳手敲了你一下，不重。“给你？命。有用的话，再给颗牙。”",
         "He taps you with a spanner. Not hard. “For you? Livin'. Be useful, get a toof.”"))
@@ -278,13 +278,14 @@
 
   /* ============ Chapter 2 · Da Mek's 'Umie ============ */
   N.ork_201 = {chapter: 2, scene: "manufactorum", speaker: WAZ, time: {d: 3},
+    grudgeLine: {npc: "wazgob", text: L("瓦兹格布一边敲，一边斜着眼瞪你：“上回骗俺那句，俺记着呢。”", "Wazgob hammers on, glaring sideways at you. “Dat lie you told me. I remember.”")},
     text: L("瓦兹格布在造“大亮闪”：一副比房子还高的动力甲，给要当老大的那位穿。\n他不画图纸，他敲。敲不响就换个地方敲，敲响了就算修好。\n怪就怪在，它真的越敲越好。",
             "Wazgob is building Da Big Shiny: a suit of armour taller than a house, for whoever means to be boss.\nNo plans. He hits things. If it won't ring, he hits somewhere else. If it rings, it's fixed.\nThe strange part: it keeps getting better."),
     codex: ["ork_mega_armour"],
     choices: [
-      C("递给他正确的扳手", "Hand him the right spanner", "ork_202", X({renown: 3},
+      C("递给他正确的扳手", "Hand him the right spanner", "ork_202", O({grudge: {npc: "wazgob", effects: {hp: -4}, note: L("瓦兹格布记着你骗过他，连递扳手都要先挨一下。", "Wazgob remembers your lie. Even handing him a spanner costs you a knock.")}}, X({renown: 3},
         "他看都没看就接了过去。“好人仔。”这是你头一回被兽人夸，感觉很怪。",
-        "He takes it without looking. “Good 'umie.” Your first compliment from an ork. It feels strange.")),
+        "He takes it without looking. “Good 'umie.” Your first compliment from an ork. It feels strange."))),
       C("指出他接错了线", "Point out he's wired it wrong", "ork_203", X({renown: -2, taint: {tzeentch: 15}},
         "他瞪着你，又瞪着线。“错了？”他想了想，“那它咋能用？”",
         "He glares at you, then at the wires. “Wrong?” He thinks. “Den why's it work?”")),
@@ -316,16 +317,17 @@
     ]};
 
   N.ork_204 = {chapter: 2, scene: "manufactorum", speaker: SNAG, time: {d: 2},
+    grudgeLine: {npc: "wazgob", text: L("机械佬就睡在三步外，一只眼睁着，脚还压着罐盖。", "The Mek sleeps three paces away with one eye open and a foot on the jar lid.")},
     text: L("斯纳吉特把你拉到角落：“机械佬的牙罐子就在工作台底下。拿一点，他数不清。他只会数到‘好多’。”\n地精仔眼睛发亮。在兽人底下活着的东西，都学会了偷。",
             "Snaggit drags you into a corner. “Mek's teef jar is under da bench. Take a few, he can't count. Only counts up to ‘loads’.”\nThe grot's eyes gleam. Everything that lives under orks learns to steal."),
     codex: ["ork_teef"],
     choices: [
-      C("跟他一起偷", "Steal with him", null, R(0.55, null, "ork_205", "ork_206",
+      C("跟他一起偷", "Steal with him", null, O({grudge: {npc: "wazgob", p: -0.15, note: L("瓦兹格布记着你骗过他，最近把牙罐子盯得更紧。", "Wazgob remembers your lie and has been watching his teef jar closer.")}}, R(0.55, null, "ork_205", "ork_206",
         RR("你们得手了。罐子里的牙少了一把，罐子看起来还是“好多”。",
            "You pull it off. A handful gone, and the jar still looks like ‘loads’.",
            "你的手刚伸进罐子，一只绿色的大手就按住了你的手。",
-           "Your hand is barely in the jar when a big green hand closes over it."))),
-      C("告诉机械佬", "Tell the Mek", "ork_207", X({renown: 5, set: {snitchedSnag: true}},
+           "Your hand is barely in the jar when a big green hand closes over it.")))),
+      C("告诉机械佬", "Tell the Mek", "ork_207", X({renown: 5, set: {snitchedSnag: true, wronged_snaggit: true}},
         "瓦兹格布一脚把斯纳吉特踢出了窗户。地精仔落地，爬起来，回头看了你一眼。",
         "Wazgob boots Snaggit out the window. The grot lands, picks himself up, and looks back at you.")),
       C("不掺和", "Stay out of it", "ork_207", X({hp: -5},
@@ -545,7 +547,10 @@
         "“You need it more.” Edna looks at you, eyes wet for a moment. “The Emperor saw that.”")),
       C("“帝皇在哪儿？”", "“Where is the Emperor?”", "ork_401", X({sanity: -5, taint: {tzeentch: 20}},
         "埃德娜没有回答。她继续拣弹壳，嘴唇一直在动。",
-        "Edna doesn't answer. She goes on picking up casings, lips moving all the while."))
+        "Edna doesn't answer. She goes on picking up casings, lips moving all the while.")),
+      C("一把抢走她手里的面包", "Snatch the bread out of her hand", "ork_401", X({hp: 8, set: {wronged_edna: true}},
+        "面包很硬。老埃德娜没喊，只把空了的手慢慢缩回袖子里。周围的奴隶都看着你，没人说话。",
+        "The bread is hard. Old Edna doesn't cry out; she draws her empty hand slowly into her sleeve. The slaves all watch you. Nobody speaks."))
     ]};
 
   /* ============ Chapter 4 · Da Green Tide ============ */
@@ -602,13 +607,13 @@
     text: L("斯纳吉特睁开一只眼。\n他看看你手里的钳子，又看看被你剪断的线。\n“俺啥都没看见，”他慢慢地说，“不过俺的嘴，要三颗牙才能闭得更紧。”",
             "Snaggit opens one eye.\nHe looks at the pliers in your hand, then at the cut line.\n“I didn't see nuffin',” he says slowly. “But my mouth shuts tighter for free teef.”"),
     choices: [
-      C("给他牙", "Pay him", "ork_404", O(Q({stat: "renown", min: 5}), X({renown: -5},
+      C("给他牙", "Pay him", "ork_404", O(Q({stat: "renown", min: 5}), {grudge: {npc: "snaggit", effects: {renown: -6}, note: L("斯纳吉特还记着你告过他的状，封口费要翻倍。", "Snaggit remembers you snitched on him. The hush price doubles.")}}, X({renown: -5, set: {forgiven_snaggit: true}},
         "斯纳吉特把牙一颗颗咬过，满意地翻了个身。“晚安，人仔。”",
         "Snaggit bites each toof in turn and rolls over, satisfied. “Night, 'umie.”"))),
       C("求他", "Beg him", "ork_404", O(Q({flag: "snagFriend"}, true), X({sanity: 5},
         "斯纳吉特叹了口气：“你给过俺吃的。”他闭上眼，“俺打呼噜很响，听不见剪东西。”",
         "Snaggit sighs. “You fed me once.” He shuts his eyes. “I snore loud. Can't hear no snippin'.”"))),
-      C("威胁他", "Threaten him", "ork_404", X({hp: -10, set: {snagGrudge: true}},
+      C("威胁他", "Threaten him", "ork_404", X({hp: -10, set: {snagGrudge: true, wronged_snaggit: true}},
         "你们扭在一起，他咬你，你掐他。最后他跑了，留下一句：“地精会记仇的！”",
         "You grapple; he bites, you throttle. At last he flees, shouting: “Grots remember!”"))
     ]};
@@ -678,7 +683,7 @@
       C("按下按钮", "Press it", "ork_501", X({hp: -10, renown: 5},
         "反应堆轰地活了。你被震飞三米，眉毛没了。瓦兹格布抱着盔甲跳舞。",
         "The reactor roars alive. You're thrown three metres and lose your eyebrows. Wazgob dances with the armour.")),
-      C("让斯纳吉特去按", "Make Snaggit do it", "ork_501", X({renown: 3, sanity: -5},
+      C("让斯纳吉特去按", "Make Snaggit do it", "ork_501", X({renown: 3, sanity: -5, set: {wronged_snaggit: true}},
         "斯纳吉特按了，飞了，落地，爬起来骂了一整天。反应堆运转良好。",
         "Snaggit presses it, flies, lands, and swears all day. The reactor runs fine.")),
       C("按之前悄悄调低读数", "Quietly detune it first", "ork_501", O(Q({flag: "hotReactor"}, true), X({hp: -5, set: {shinyDead: true}},
@@ -885,13 +890,14 @@
     ]};
 
   N.ork_607 = {chapter: 6, scene: "ork_scrapyard", speaker: SNAG, time: {d: 3},
+    grudgeLine: {npc: "snaggit", text: L("斯纳吉特死盯着你，手里攥着一颗牙，像在数你欠的账。", "Snaggit glares at you, clutching a toof, as if counting up what you owe.")},
     text: L("斯纳吉特在开会。几十个地精仔挤在油桶后面，商量怎么推翻兽人。\n“俺们人多！”斯纳吉特说，“人仔也来，人仔聪明。”\n就在这时，一个兽人打着哈欠走了过来。",
             "Snaggit is holding a meeting. Dozens of grots crowd behind an oil drum, plotting to overthrow the orks.\n“We got numbers!” Snaggit says. “'Umie too. 'Umie's clever.”\nJust then an ork wanders past, yawning."),
     codex: ["ork_gretchin"],
     choices: [
-      C("给它们出个主意", "Give them a plan", "ork_608", X({renown: 3, set: {snagFriend: true}},
+      C("给它们出个主意", "Give them a plan", "ork_608", O({grudge: {npc: "snaggit", effects: {hp: -4}, note: L("斯纳吉特记着旧账，转头就把你的计划报给了路过的兽人。", "Snaggit remembers the old score and tells a passing ork your plan.")}}, X({renown: 3, set: {snagFriend: true}},
         "你的计划很周密。兽人走过来时，所有地精假装在擦靴子，包括擦你的靴子。",
-        "Your plan is thorough. When the ork arrives, every grot pretends to polish boots, yours included.")),
+        "Your plan is thorough. When the ork arrives, every grot pretends to polish boots, yours included."))),
       C("一起假装擦靴子", "Pretend to polish boots too", "ork_608", X({sanity: 5},
         "兽人看了看一圈擦靴子的地精和一个人仔，挠挠头，走了。会议改天再开。",
         "The ork eyes a ring of boot-polishing grots and one 'umie, scratches his head and leaves. Meeting postponed.")),
@@ -905,15 +911,15 @@
     text: L("红甲巨人来过以后，奴隶圈少了一半人。老埃德娜病了，咳得直不起腰，还在拣弹壳。\n“孩子，”她说，“我要是走了，替我把这本祷文书给下一个人。”\n书很薄，边角全被翻烂了。",
             "Since the red giants came, the slave pen holds half as many. Old Edna is sick, coughing double, still picking up casings.\n“Child,” she says, “if I go, give this prayer book to the next one.”\nIt's thin, its corners worn soft."),
     choices: [
-      C("把你的口粮给她", "Give her your rations", "ork_701", X({hp: -10, sanity: 5, taint: {all: -10}},
+      C("把你的口粮给她", "Give her your rations", "ork_701", O({grudge: {npc: "edna", effects: {sanity: -4}, note: L("埃德娜还记得被你抢走的面包，推开了你的手。", "Edna remembers the bread you snatched and pushes your hand away.")}}, X({hp: -10, sanity: 5, taint: {all: -10}, set: {forgiven_edna: true}},
         "她吃得很慢，很仔细。那天夜里她没再咳。你饿着肚子，睡得很好。",
-        "She eats slowly, carefully. That night she doesn't cough. You go hungry and sleep well.")),
+        "She eats slowly, carefully. That night she doesn't cough. You go hungry and sleep well."))),
       C("求医生佬看看她", "Beg the Dok to look at her", "ork_701", O(Q({stat: "renown", min: 20}), X({renown: -8, hp: -5},
         "医生佬收了牙，往她嘴里灌了一勺绿东西。她第二天能站起来了，只是总想打架。",
         "The Dok takes your teef and spoons something green into her. Next day she can stand. She keeps wanting to fight, though."))),
-      C("收下书，说不出话", "Take the book, unable to speak", "ork_701", X({sanity: -5},
+      C("收下书，说不出话", "Take the book, unable to speak", "ork_701", O({grudge: {npc: "edna", effects: {sanity: -4}, note: L("埃德娜不肯把书交给抢过她面包的人，你是从她手里拿走的。", "Edna won't hand the book to the one who stole her bread. You take it from her.")}}, X({sanity: -5},
         "你把书揣进怀里。第三天，奴隶圈的角落空了。",
-        "You tuck the book inside your coat. On the third day, her corner of the pen is empty."))
+        "You tuck the book inside your coat. On the third day, her corner of the pen is empty.")))
     ]};
 
   /* ============ Chapter 7 · Da 'Umies Strike Back ============ */
@@ -1127,7 +1133,7 @@
     text: L("大亮闪跪下了，胸口冒火。格鲁卡把斯卡巴德从盔甲里拽出来，扔出了坑外。\n然后他转过头，看着坑边的瓦兹格布。看着你。\n“这堆破烂，谁造的？”",
             "Da Big Shiny drops to its knees, chest ablaze. Grukka drags Skarbad out of the armour and flings him from the pit.\nThen he turns to look at Wazgob at the rim. At you.\n“'OO built dis junk?”"),
     choices: [
-      C("指着瓦兹格布", "Point at Wazgob", "ork_809", X({renown: -10, sanity: -10, set: {blamedMek: true}},
+      C("指着瓦兹格布", "Point at Wazgob", "ork_809", X({renown: -10, sanity: -10, set: {blamedMek: true, wronged_wazgob: true}},
         "瓦兹格布看了你一眼，没生气，好像早就知道。格鲁卡把他拎了起来。",
         "Wazgob glances at you, not angry, as if he always knew. Grukka hoists him up.")),
       C("“我造的！”跳进坑里", "“I did!” Jump into the pit", "ork_810", X({taint: {khorne: 15}},
@@ -1488,6 +1494,11 @@
     tagline: L("在兽人的废铁场里，做个有用的人仔", "In an ork scrapyard, be a useful 'umie"),
     role: L("废品贩子", "Scrap-trader"),
     world: L("伊斯卡隆", "Iskaron"),
+    npcs: {   // SPEC §28 grudges: people the route lets you wrong
+      wazgob: {name: L("瓦兹格布", "Wazgob"), aka: [L("机械佬", "Mek")], sprite: "ork_mek"},
+      snaggit: {name: L("斯纳吉特", "Snaggit"), sprite: "gretchin"},
+      edna: {name: L("老埃德娜", "Old Edna"), aka: [L("埃德娜", "Edna")], sprite: "preacher"}
+    },
     playerSprite: "player_orks",
     color: "#6aa84f",
     startNode: "ork_101",
