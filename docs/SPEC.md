@@ -373,3 +373,26 @@ Requested by Howie 2026-11-12: if the player does something harmful to a person 
 **Balance.** Grudges are a tax on harmful play, not a trap: with random play the route death rate may rise ≤ 3 points vs before; origins stay within ±6 of the route average (§23); claim-rate bands (§19) unchanged. Validator reports per route: wronged npcs, grudge choices, activations per run, death rate with/without.
 
 **Content targets.** 2–4 npcs per route; each has 1–3 harmful choices that set `wronged_*` and 1–3 later grudge choices in nodes where the person is plainly present. Prefer people who already matter in the story; add a `grudgeLine` rather than inventing coincidences. Original prose only (no canon likenesses).
+
+## 29. Music styles (配乐风格, v0.3.3)
+Requested by Howie 2026-11-12: more soundtrack choices. All music stays original and procedural (WebAudio, no assets, no network).
+- **Styles.** `WH.Audio.styles = [{id, name:{zh,en}, desc:{zh,en}}…]`. `chip` = today's 8-bit chiptune (default, unchanged). New, each covering all 16 moods (calm/tense/battle/death/joy/…, see §15) and keeping the per-node mood auto-pick:
+  - `dark` 暗黑氛围 / Dark ambient — slow detuned drones and pads, sparse metallic hits and bells, sub-bass pulses only in combat.
+  - `organ` 哥特管风琴 / Gothic organ — pipe-organ chords, choir-like vowel pads, slow arpeggios, timpani-like drums in combat.
+  - `synth` 合成波 / Synthwave — saw bass arpeggios, gated pads, four-on-the-floor in combat, shimmering leads for joy.
+  - `piano` 钢琴弦乐 / Piano & strings — sparse piano motifs with slow string pads; battle = driving ostinato strings.
+  (The audio writer may swap one for a better idea, but ≥ 3 new styles, each clearly different, each original.)
+- **API** (contract with the UI): `Audio.getStyles()`, `Audio.getStyle()`, `Audio.setStyle(id)` (crossfades the current mood into the new style within ~1.5 s; unknown id → `chip`), `Audio.previewStyle(id)` (~8 s sample: a calm phrase then a short tense one; stops itself, never overlaps the running mood; the previous style and mood resume afterwards).
+- **Setting.** `settings.musicStyle` (string, default `"chip"`, kept by the UI in the normal settings store; unknown value → `chip`). Settings panel: a "配乐风格 / Music style" selector (radio cards or select) with a ▶ preview button per style; works on mobile; changing it applies immediately.
+- **Real files** (`assets/audio/files.js`) keep working: a file mapped to a mood overrides the procedural music of any style, as before.
+- **Quality.** `audio_check.js` renders every style × mood: no NaN, peak ≤ −1 dBFS, no DC offset, loop seam click-free, ≥ 40 s before obvious repetition; `audio_test.html` gets a style dropdown; zero console errors.
+
+## 30. Rewind — back to the previous choice (回到上一个选择, v0.3.3)
+Requested by Howie 2026-11-12: a switch that lets the player go back to the previous choice.
+- **Setting** `settings.rewind` (bool, default **false**): "允许回到上一个选择 / Allow going back one choice", in the settings panel (title screen and in-game). While off: no button, no history is kept (zero overhead, behaviour identical to 0.3.2).
+- **When on:** a "↶ 回到上一个选择 / Back one choice" button next to Home during play (also a hotkey that does not clash with existing ones, shown in the hint). It restores the **complete engine state** from just before the last choice: stats, flags, taint, clock, visited nodes, rumours/echo state, event state and **the RNG states** — so picking the same roll choice again gives the same result (no re-rolling a gamble), while picking another choice works normally. History = in-memory stack of 30 snapshots; not persisted (after a reload the button is disabled until the next choice).
+- **Knowledge is not rewound:** codex entries, lore cards already shown, chronicle unlocks, achievements and the Tzeentch collection stay unlocked.
+- **Endings and death:** with the switch on, the ending/death screen also offers "回到最后一个选择 / Rewind to the last choice". The ending that was reached stays recorded (往生录, endings seen, death counters) — the player did see it. Continuing creates a new record for the same run with `rewinds` = number of rewinds used (shown as ↶N in 往生录).
+- **Fairness:** run records carry `rewinds`. Achievements that reward a single clean run (no-death / low-stat / no-harm / fast-finish style conditions) only count runs with `rewinds == 0`; cumulative counters (times reached, endings seen, codex %) are unaffected. The web writer audits `data/achievements.js` and lists which conditions got the guard.
+- **Engine API:** `Game.canRewind()`, `Game.rewind()` → true/false; `Game.rewindCount`. Saves: slots/autosave store `rewinds`; no schema break (§22).
+- **Tests:** choose A → rewind → choose A again = identical state and roll outcome; A → rewind → B works; depth limit; ending rewind keeps the old record and adds a new one with `rewinds ≥ 1`; switch off hides everything; mobile layout; zh/en; save/load; achievements guard.
