@@ -28,6 +28,10 @@
  *   includes p, final clamp 0.05–0.95); choose() merges grudge.effects into the applied effects and sets step.grudge = {npc, note}
  *   (also step.consequence.grudge); g.grudgeLine() → {npc, text} of the current node while active; g.nodeText() → node text + that line.
  *   No extra RNG draws, no new state: runs/saves without an active grudge behave exactly as before.
+ *   SPEC §30 rewind: new WH.Game(fid, {rewind:true}) or g.rewindEnabled = true. While enabled, choose() pushes a snapshot of the COMPLETE state
+ *   (deep copy of g.state + the three RNG states) before applying a choice (not for the forced "you die" choice); max 30 deep, in memory only.
+ *   g.canRewind() / g.rewind() → true|false pops one snapshot and restores it (same RNG → re-picking a roll gives the same result); g.rewindCount =
+ *   rewinds used this run (saved as rec.rewinds). Knowledge is not rewound: state.codex stays a superset, playMs keeps running. Off = no snapshots.
  *   g.toRecord() / WH.Game.fromRecord(rec)
  */
 (function (root) {
@@ -243,6 +247,9 @@
     this.echoChance = typeof opts.echoChance === "number" ? opts.echoChance : ECHO_P;
     this.echoRng = opts.echoRng || RNG((seed0 ^ 0x6A09E667) >>> 0);
     this.echoPool = opts.echoPool || [];
+    this.rewindEnabled = opts.rewind === true;                       // SPEC §30
+    this.rewindStack = [];
+    this.rewindCount = 0;
   }
 
   Game.STATS = STATS;
@@ -641,6 +648,7 @@
       step.death = st.deathPending;
       return this._enter(this.deathNodeId(st.deathPending), step);
     }
+    if (this.rewindEnabled) this._pushSnapshot();                             // SPEC §30: state + RNG before the choice
     var c = v.choice, gr = v.grudge || null;
     if (gr) step.grudge = {npc: gr.npc, note: gr.note};                       // SPEC §28
     step.choiceDeltas = this._applyEffects(gr ? mergeEffects(c.effects, gr.effects) : c.effects, step.deltas);
@@ -661,6 +669,32 @@
     step = this._goTo(target, step);
     step.consequence = consequenceOf(c, step);
     return step;
+  };
+
+  /* ---------- rewind (SPEC §30) ---------- */
+  var REWIND_MAX = 30;
+  function rngState(r) { return r && typeof r.getState === "function" ? r.getState() : null; }
+  function rngRestore(r, v) { if (v !== null && r && typeof r.setState === "function") r.setState(v); }
+  Game.prototype._pushSnapshot = function () {
+    this.rewindStack.push({st: JSON.parse(JSON.stringify(this.state)), rng: rngState(this.rng), rumorRng: rngState(this.rumorRng), echoRng: rngState(this.echoRng)});
+    if (this.rewindStack.length > REWIND_MAX) this.rewindStack.shift();
+  };
+  Game.prototype.setRewind = function (on) {
+    this.rewindEnabled = !!on;
+    if (!on) this.rewindStack = [];                                  // off = nothing kept
+  };
+  Game.prototype.canRewind = function () { return !!(this.rewindEnabled && this.state && this.rewindStack.length); };
+  /* back to just before the last choice: complete state + all three RNG streams. Codex entries unlocked since stay unlocked
+   * (state.codex only grows), and real play time keeps counting. Returns true if a snapshot was restored. */
+  Game.prototype.rewind = function () {
+    if (!this.canRewind()) return false;
+    var snap = this.rewindStack.pop(), cur = this.state, st = snap.st;
+    st.playMs = cur.playMs;
+    for (var i = 0; i < cur.codex.length; i++) if (st.codex.indexOf(cur.codex[i]) < 0) st.codex.push(cur.codex[i]);
+    this.state = st;
+    rngRestore(this.rng, snap.rng); rngRestore(this.rumorRng, snap.rumorRng); rngRestore(this.echoRng, snap.echoRng);
+    this.rewindCount++;
+    return true;
   };
 
   Game.prototype.eligibleEvents = function (chapter) {
@@ -790,6 +824,7 @@
       eventChoice: st.eventChoice, eventDeath: st.eventDeath, deathPending: st.deathPending,
       history: st.history.slice(), visits: st.visits, playMs: Math.round(st.playMs), ended: st.ended
     };
+    if (this.rewindCount) rec.rewinds = this.rewindCount;                                  // SPEC §30 (absent = 0, no schema change)
     if (extra) for (var k in extra) rec[k] = extra[k];
     // SPEC §22: fields this version doesn't know (written by a newer/older build) survive a load → save round trip
     if (this.extraFields) for (var x in this.extraFields) if (!has(rec, x)) rec[x] = this.extraFields[x];
@@ -797,7 +832,7 @@
   };
   var RECORD_KEYS = ["schema", "gameVersion", "savedAt", "faction", "origin", "runId", "nodeId", "chapter", "max", "stats", "flags", "codex",
     "seenEvents", "seenRumors", "rumor", "rumorLog", "echo", "echoRun", "hours", "taint", "claims", "pendingEvent", "pendingNext", "eventChoice", "eventDeath",
-    "deathPending", "history", "visits", "playMs", "ended", "lang"];
+    "deathPending", "history", "visits", "playMs", "ended", "lang", "rewinds"];
 
   Game.fromRecord = function (rec, opts) {
     var g = new Game(rec.faction, opts);
@@ -835,6 +870,7 @@
     st.ended = !!rec.ended;
     if (st.pendingEvent && !g.event(st.pendingEvent)) { st.pendingEvent = null; }
     g.state = st;
+    g.rewindCount = Math.max(0, Math.floor(+rec.rewinds || 0));
     g.extraFields = {};
     for (var rk in rec) if (has(rec, rk) && RECORD_KEYS.indexOf(rk) < 0) g.extraFields[rk] = JSON.parse(JSON.stringify(rec[rk]));
     if (!rec.claims) st.seenEvents.forEach(function (id) {             // pre-§19 saves: each claim event fired once
@@ -928,6 +964,9 @@
     if (!run) return st;
     if (run.faction && run.origin) { st.origins[run.faction] = st.origins[run.faction] || {}; st.origins[run.faction][run.origin] = 1; }
     if (run.faction && Array.isArray(run.flags)) { st.flags[run.faction] = st.flags[run.faction] || {}; run.flags.forEach(function (x) { st.flags[run.faction][x] = 1; }); }
+    /* SPEC §30: what rewards one clean run (fast finish, low stats at a good ending, a taint peak) and the per-run resist tally (a continued run
+     * writes several records, which would count the same resists twice) only count runs that never used a rewind */
+    if (run.rewinds > 0) return st;
     if (typeof run.resists === "number") st.resists = (st.resists || 0) + run.resists;
     if (typeof run.visits === "number" && run.visits > 0 && (st.fastest === null || st.fastest === undefined || run.visits < st.fastest)) st.fastest = run.visits;
     if (run.kind === "good" && run.endStats) ["hp", "sanity"].forEach(function (k) {

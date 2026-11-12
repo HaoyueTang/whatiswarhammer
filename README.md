@@ -46,7 +46,8 @@ The eight sides share one sector (Arcosa, 111–115.M42), so one story's world c
 - **Achievements.** 60 of them, from the sensible to the unwise. Keep an eye on the ones with question marks.
 - **Echoes.** Sometimes you'll hear, in passing, about someone who died on another route. Not every time, and not always kindly.
 - **Codex.** Every leader, monster, god and place you meet gets a short card, explained by what people do, not by lectures.
-- **Pixel art and chiptune.** Original art and music; the soundtrack changes with the mood.
+- **Pixel art and music.** Original art and music; the soundtrack changes with the mood. Five styles to choose from in Settings: 8-bit chiptune (default), dark ambient, gothic organ, synthwave, and piano with strings.
+- **Take it back (optional).** Settings → Allow going back one choice adds a ↶ button (hotkey Z). It undoes your last choice, dice included: choose the same thing again and you get the same roll. What you've learned (codex, rumours, achievements) stays. Off by default; some achievements won't count a run that used it.
 - **Saves.** Three slots plus autosave. Updates never wipe your saves or records. Progress lives in your browser at the address you play from (local file, website…); use Settings → Data to export it and carry it elsewhere.
 
 ### Tips (no spoilers)
@@ -105,7 +106,8 @@ Warhammer 40,000 and associated names are trademarks of Games Workshop Limited. 
 - **成就。** 60 个，从明智到不明智都有。留意那些带问号的。
 - **回响。** 偶尔你会路过地听说，另一条路线里有人死了。不是每次都有，也不总是善意的。
 - **图鉴。** 遇到的每个领袖、怪物、神祇和地点都有一张短卡片——靠人物的言行来讲，不靠说教。
-- **像素美术与芯片音乐。** 全部原创，配乐随剧情情绪变化。
+- **像素美术与配乐。** 全部原创，配乐随剧情情绪变化。设置里可选五种风格：8 位芯片音乐（默认）、暗黑氛围、哥特管风琴、合成波、钢琴弦乐。
+- **后悔药（可选）。** 设置 → 允许回到上一个选择，会多出一个 ↶ 按钮（快捷键 Z），撤销上一步选择，骰子也一并撤销：再选同一项，结果相同。你学到的东西（图鉴、传闻、成就）不会被收回。默认关闭；部分成就不计入用过它的那一局。
 - **存档。** 三个存档位加自动存档。版本更新不会清掉你的存档和记录。进度保存在你玩游戏的浏览器和地址里（本地文件、网页……），想换地方玩，用 设置 → 数据 导出再导入。
 
 ### 小提示（无剧透）

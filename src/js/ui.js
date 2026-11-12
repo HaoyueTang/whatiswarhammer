@@ -21,7 +21,22 @@
     au("setMusicVolume", (s.musicVol === undefined ? 60 : s.musicVol) / 100);
     au("setSfxVolume", (s.sfxVol === undefined ? 80 : s.sfxVol) / 100);
     au("mute", !!s.muted);
+    au("setStyle", currentStyle());                                      // SPEC §29 (no-op until audio.js has styles)
   }
+  /* ---------- music styles (SPEC §29): WH.Audio.getStyles()/setStyle()/previewStyle() are optional ---------- */
+  var FALLBACK_STYLES = [{id: "chip", name: {zh: "8位芯片", en: "8-bit chiptune"},
+    desc: {zh: "复古游戏机的方波与噪声。", en: "Square waves and noise, straight from an old console."}}];
+  function styleList() {
+    var A = WH.Audio, list = null;
+    try { list = A ? (typeof A.getStyles === "function" ? A.getStyles() : A.styles) : null; } catch (e) { list = null; }
+    if (!Array.isArray(list) || !list.length) return FALLBACK_STYLES;
+    return list.filter(function (x) { return x && typeof x.id === "string" && x.id; });
+  }
+  function currentStyle() {
+    var id = UI.settings && UI.settings.musicStyle;
+    return styleList().some(function (x) { return x.id === id; }) ? id : "chip";
+  }
+  function canPreviewStyle() { return !!(WH.Audio && typeof WH.Audio.previewStyle === "function"); }
   function nodeMood() {
     var g = UI.game;
     if (!g) return "title";
@@ -287,6 +302,8 @@
     cx: {race: "all", type: "all", q: "", sort: "disc", placeRace: "all"}, cxNew: {},
     accent: null, debug: /[?&]debug=1(&|$)/.test(location.search), eggForce: null, eggForcedShown: {}, jokeTimer: null
   };
+
+  UI.applyAudioSettings = applyAudioSettings;
 
   UI.init = function () {
     try { UI.bootCheck = WH.Save.bootCheck(); } catch (e) { UI.bootCheck = null; console.warn("bootCheck", e); }   // SPEC §22: before anything writes
@@ -734,13 +751,49 @@
     tools.appendChild(b(null, t("settings"), openSettings));
     tools.appendChild(soundButton());
     tools.appendChild(b("icon_lang", t("lang_toggle"), toggleLang, t("language") + ": " + t("lang_toggle")));
+    if (UI.settings.rewind === true) {                                   // SPEC §30: only while the switch is on
+      var rw = b(null, "\u21B6 " + t("rewind_btn"), function () { rewindStep(); }, t("rewind_aria"));
+      rw.id = "rewind-btn"; rw.classList.add("rewind-btn");
+      rw.setAttribute("aria-keyshortcuts", "Z");
+      rw.title = t("rewind_btn") + " (Z)";
+      tools.appendChild(rw);
+    }
     var home = b(null, "⌂ " + t("home"), goHome, t("home_aria"));
     home.classList.add("home-btn");
     home.setAttribute("aria-keyshortcuts", "H");
     home.title = t("home") + " (H)";
     tools.appendChild(home);
     updateCodexBadge();
+    updateRewindBtn();
   }
+
+  /* ---------- rewind (SPEC §30) ---------- */
+  function updateRewindBtn() {
+    var b = $("rewind-btn"), g = UI.game;
+    if (!b) return;
+    b.disabled = !(g && g.canRewind && g.canRewind());
+  }
+  /* back to just before the last choice (also from the ending screen). The reached ending stays recorded. */
+  function rewindStep() {
+    var g = UI.game;
+    if (!g || UI.settings.rewind !== true || !g.canRewind || !g.canRewind()) return false;
+    if (UI.busy || UI.modals.length || UI.cardDone || UI.lore) return false;
+    if (UI.screen !== "game" && UI.screen !== "ending") return false;
+    var fromEnding = UI.screen === "ending";
+    if (g.state.ended) { WH.Save.addCodexGlobal(g.state.codex); recordRun(); }      // the player did see this ending: record it first
+    if (!g.rewind()) return false;
+    UI.lastRun = null; UI.rumorCodex = null; UI.rumorHeard = false;
+    sfx("click");
+    if (fromEnding) enterGameScreen();
+    else { closeConseq(); closeEventOverlay(); }
+    renderNode({instant: true});
+    renderHud();
+    applyStateFx();
+    try { WH.Save.write("auto", g.toRecord({lang: WH.lang})); } catch (e) { /* reported by Save */ }
+    toast("\u21B6 " + t("rewound"));
+    return true;
+  }
+  UI.rewindStep = rewindStep;
 
   /* ⌂ Home: autosave first, then an in-UI confirm, then the title screen (Continue resumes the autosave) */
   function goHome() {
@@ -795,6 +848,7 @@
   function renderHud(skipDate) {
     var g = UI.game;
     if (!g) return;
+    updateRewindBtn();
     var view = UI.conseq && UI.conseq.view;          // during a consequence beat: stats before the next node's own effects
     var s = view ? view.stats : g.state.stats;
     WH.Rules.STATS.forEach(function (k) {
@@ -955,7 +1009,7 @@
       .map(function (r) { return {runId: r.runId, endingId: r.endingId, echo: r.echo}; });
   }
   function gameOpts() {
-    return {rng: newRng(), rumors: UI.settings.rumors !== false, echoes: UI.settings.echoes !== false, echoPool: echoPool()};
+    return {rng: newRng(), rumors: UI.settings.rumors !== false, echoes: UI.settings.echoes !== false, echoPool: echoPool(), rewind: UI.settings.rewind === true};
   }
   function revealRumor() {
     var el = $("dlg-rumor");
@@ -1064,6 +1118,11 @@
     var isDeath = step.ending && step.ending.kind === "death";
     UI.rumorCodex = step.rumorCodex && step.rumorCodex.length ? step.rumorCodex.slice() : null;
     UI.rumorHeard = !!step.rumor && UI.settings.rumors !== false;      // SPEC §25 global rumours-heard counter
+    if (UI.rumorHeard) {                                               // SPEC §30: hearing the same rumour again after a rewind does not count twice
+      var hk = g.state.runId + ":" + step.rumor.id;
+      UI.heardRumors = UI.heardRumors || {};
+      if (UI.heardRumors[hk]) UI.rumorHeard = false; else UI.heardRumors[hk] = 1;
+    }
     var pre = (step.chapterChanged && !isDeath) ? chapterCard(g.state.chapter) : Promise.resolve();
     pre.then(function () {
       renderNode();
@@ -1690,7 +1749,7 @@
   function survivedHours(g) { return Math.max(0, g.state.hours - WH.Rules.startHours(g.faction)); }
   function recordRun() {
     var g = UI.game, f = g.faction, node = g.node(), end = node.ending || {kind: "bad"};
-    if (UI.lastRun && UI.lastRun.run.runId === g.state.runId && UI.lastRun.run.endingId === g.state.nodeId) return UI.lastRun;
+    if (UI.lastRun && UI.lastRun.run.runId === g.state.runId && UI.lastRun.run.endingId === g.state.nodeId && (UI.lastRun.run.rewinds || 0) === (g.rewindCount || 0)) return UI.lastRun;
     var run = {
       runId: g.state.runId, at: new Date().toISOString(), faction: f.id,
       origin: g.state.origin, originName: (g.origin() || {}).name || f.role,
@@ -1704,7 +1763,8 @@
       resists: WH.Rules.GODS.filter(function (gd) { return g.state.flags && g.state.flags["resisted_" + gd]; }).length,
       claims: JSON.parse(JSON.stringify(g.state.claims || {})), claimedBy: WH.Rules.claimGodOf(g.state.nodeId),
       chosen: /_end_claim_(khorne|nurgle|tzeentch|slaanesh)_chosen$/.test(g.state.nodeId),
-      endStats: {hp: g.state.stats.hp, sanity: g.state.stats.sanity}, rumorsHeard: (g.state.seenRumors || []).length
+      endStats: {hp: g.state.stats.hp, sanity: g.state.stats.sanity}, rumorsHeard: (g.state.seenRumors || []).length,
+      rewinds: g.rewindCount || 0                                  // SPEC §30: clean-run achievements only count rewinds == 0
     };
     if (end.kind === "bad" || end.kind === "death") {      // SPEC §27: a later run may overhear this one
       var og = g.origin() || {};
@@ -1834,6 +1894,8 @@
     s.appendChild(h("div", {class: "bg"}, art("scene", node.scene || "void")));
     s.appendChild(h("div", {class: "corner"}, soundButton(), langButton()));
     var again = h("button", {class: "btn primary px", type: "button", onclick: function () { startGame(f.id, g.state.origin); }}, "↻ " + t("again"));
+    var back = UI.settings.rewind === true && g.canRewind() ?              // SPEC §30
+      h("button", {class: "btn px rewind-end", type: "button", id: "rewind-end", "aria-keyshortcuts": "Z", title: t("rewind_end") + " (Z)", onclick: function () { rewindStep(); }}, "\u21B6 " + t("rewind_end")) : null;
     s.appendChild(h("div", {class: "ending-wrap"},
       h("div", {class: "ending-panel px", role: "region", "aria-label": L(end.title)},
         h("div", {class: "ending-head"},
@@ -1844,7 +1906,8 @@
         h("div", {class: "ending-fate " + end.kind},
           end.kind !== "good" ? h("div", {class: "fate"}, h("span", {class: "k"}, t("cause")), h("span", {class: "v cause"}, L(causeOf(f, g.state.nodeId, node)))) : null,
           h("div", {class: "fate"}, h("span", {class: "k"}, t("survived")), h("span", {class: "v"}, WH.fmtDur(surv))),
-          rr && rr.newRecord ? h("span", {class: "new-record"}, "★ " + t("new_record")) : null),
+          rr && rr.newRecord ? h("span", {class: "new-record"}, "★ " + t("new_record")) : null,
+          g.rewindCount > 0 ? h("span", {class: "run-rw", title: t("rewinds_title", {n: g.rewindCount})}, "\u21B6" + g.rewindCount) : null),
         h("div", {class: "ending-stats"},
           h("div", null, h("div", {class: "k"}, t("final_date")), h("div", {class: "v"}, WH.fmtDate(g.date()))),
           h("div", null, h("div", {class: "k"}, t("play_time")), h("div", {class: "v"}, WH.fmtPlay(g.state.playMs))),
@@ -1871,6 +1934,7 @@
           }))),
         h("div", {class: "ending-btns"},
           again,
+          back,
           h("button", {class: "btn px", type: "button", onclick: function () { show("select"); }}, t("other_faction")),
           h("button", {class: "btn px home-btn", type: "button", onclick: function () { show("title"); }}, "⌂ " + t("home"))))));
     var firstShow = UI.screen !== "ending";
@@ -2183,6 +2247,7 @@
           h("span", {class: "kind sm " + r.kind}, t("ending_" + r.kind)),
           h("b", {class: "run-title"}, L(r.title)),
           h("span", {class: "run-fac"}, L((f && f.name) || r.facName) + " · " + (f ? originLabel(f, r.origin, r.originName) : L(r.originName || r.role))),
+          r.rewinds > 0 ? h("span", {class: "run-rw", title: t("rewinds_title", {n: r.rewinds}), "aria-label": t("rewinds_title", {n: r.rewinds})}, "\u21B6" + r.rewinds) : null,
           h("span", {class: "run-at"}, fmtSavedAt(r.at))),
         h("div", {class: "run-grid"},
           cell(t("cause"), r.kind === "good" ? t("ending_good") : L(r.cause)),
@@ -2326,6 +2391,51 @@
     inp.addEventListener("change", function () { WH.Save.saveSettings(st); if (key === "sfxVol") sfx("click"); });
     return h("span", {class: "vol-wrap"}, inp, out);
   }
+  /* SPEC §29: "配乐风格" selector — radio cards with a ▶ preview each; applies immediately, kept in settings.musicStyle */
+  function styleRow() {
+    var st = UI.settings, list = styleList(), cur = currentStyle(), prev = canPreviewStyle(), playing = null, timer = null;
+    var cards = list.map(function (sty) {
+      var pick = h("button", {class: "style-pick", type: "button", role: "radio", "aria-checked": String(sty.id === cur), "data-style": sty.id,
+        tabindex: sty.id === cur ? 0 : -1},
+        h("span", {class: "sn"}, L(sty.name)), sty.desc ? h("span", {class: "sd"}, L(sty.desc)) : null);
+      var pv = prev ? h("button", {class: "btn small px style-prev", type: "button", "data-style": sty.id, "aria-pressed": "false",
+        "aria-label": t("style_preview_aria", {x: L(sty.name)}), title: t("style_preview_aria", {x: L(sty.name)})}, "\u25B6 " + t("style_preview")) : null;
+      var card = h("div", {class: "style-card" + (sty.id === cur ? " on" : ""), "data-style": sty.id}, pick, pv);
+      return {card: card, pick: pick, pv: pv, id: sty.id};
+    });
+    var choose = function (id, focus) {
+      st.musicStyle = id; WH.Save.saveSettings(st);
+      au("setStyle", id);
+      cards.forEach(function (c) {
+        var on = c.id === id;
+        c.card.classList.toggle("on", on); c.pick.setAttribute("aria-checked", String(on)); c.pick.tabIndex = on ? 0 : -1;
+        if (on && focus) c.pick.focus();
+      });
+    };
+    var stopMark = function () {
+      if (timer) { clearTimeout(timer); timer = null; }
+      cards.forEach(function (c) { if (c.pv) { c.pv.setAttribute("aria-pressed", "false"); c.pv.classList.remove("playing"); } });
+      playing = null;
+    };
+    cards.forEach(function (c, i) {
+      c.pick.addEventListener("click", function () { choose(c.id, false); });
+      c.pick.addEventListener("keydown", function (e) {
+        var d = (e.key === "ArrowDown" || e.key === "ArrowRight") ? 1 : (e.key === "ArrowUp" || e.key === "ArrowLeft") ? -1 : 0;
+        if (!d) return;
+        e.preventDefault(); e.stopPropagation();
+        choose(cards[(i + d + cards.length) % cards.length].id, true);
+      });
+      if (c.pv) c.pv.addEventListener("click", function () {
+        stopMark();
+        au("previewStyle", c.id);
+        playing = c.id; c.pv.setAttribute("aria-pressed", "true"); c.pv.classList.add("playing");
+        timer = setTimeout(stopMark, 8500);                           // the preview stops itself after ~8 s
+      });
+    });
+    return h("div", {class: "setrow style-row"},
+      h("span", {class: "k", id: "style-label"}, t("music_style")),
+      h("div", {class: "style-list", role: "radiogroup", "aria-labelledby": "style-label"}, cards.map(function (c) { return c.card; })));
+  }
   function openSettings(replace) {
     var st = UI.settings;
     var save = function () { WH.Save.saveSettings(st); };
@@ -2355,6 +2465,14 @@
           if (UI.game) { UI.game.rumors = v; if (UI.screen === "game" && !UI.conseq) renderRumor(v ? UI.game.currentRumor() : null, !UI.typer.active); }
           openSettings(true);
         })),
+      h("div", {class: "setrow rewind-row"}, h("span", {class: "k"}, t("rewind_set")),
+        seg([[true, t("on")], [false, t("off")]], st.rewind === true, function (v) {
+          st.rewind = v; save();
+          if (UI.game) UI.game.setRewind(v);                          // off: the snapshot stack is dropped (zero overhead)
+          buildTools(); updateRewindBtn();
+          openSettings(true);
+        }), h("p", {class: "set-hint"}, t("rewind_hint"))),
+      styleRow(),
       eggDone("planned") ? h("div", {class: "setrow tz-row"}, h("span", {class: "k"}, t("tz_joke")),
         seg([[true, t("on")], [false, t("off")]], st.tzeentchJoke !== false, function (v) { st.tzeentchJoke = v; save(); openSettings(true); })) : null,
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("lore_cards")),
@@ -2496,6 +2614,10 @@
     if (UI.modals.length || e.ctrlKey || e.metaKey || e.altKey) return;
     if ((k === "h" || k === "H") && UI.screen === "game" && UI.game && !/^(INPUT|TEXTAREA|SELECT)$/.test(tag) && !(e.target && e.target.isContentEditable)) {
       e.preventDefault(); goHome(); return;
+    }
+    if ((k === "z" || k === "Z") && UI.settings.rewind === true && UI.game && (UI.screen === "game" || UI.screen === "ending")
+        && !/^(INPUT|TEXTAREA|SELECT)$/.test(tag) && !(e.target && e.target.isContentEditable)) {
+      e.preventDefault(); rewindStep(); return;                        // SPEC §30
     }
     if (UI.eventOpen && UI.event) {
       var ecq = UI.event.cq;

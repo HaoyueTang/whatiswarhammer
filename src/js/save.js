@@ -114,6 +114,8 @@
     return {ok: true, rec: rec};
   }
 
+  /* a finished run is counted once per (run, ending); records written after a SPEC §30 rewind carry rewinds ≥ 1 and get their own key */
+  function runKey(r) { return r.runId + ":" + r.endingId + (r.rewinds > 0 ? ":r" + Math.floor(r.rewinds) : ""); }
   var Save = {
     PREFIX: PREFIX, SLOTS: SLOTS,
     isPersistent: function () { return persistent; },
@@ -142,7 +144,7 @@
     /* settings */
     defaultSettings: function () {
       var nav = (root.navigator && (root.navigator.language || "")) || "";
-      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true};
+      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true, rewind: false, musicStyle: "chip"};
     },
     loadSettings: function () {
       var d = Save.defaultSettings(), s = getJSON("settings") || {};
@@ -150,6 +152,8 @@
       if (s.lang !== "zh" && s.lang !== "en") s.lang = d.lang;
       if (s.loreCards === "auto" || ["new", "all", "codex"].indexOf(s.loreCards) < 0) s.loreCards = "new";   // v0.1 "auto" → "new"
       if (s.knownHint !== "silent") s.knownHint = "toast";
+      s.rewind = s.rewind === true;                                        // SPEC §30 (default off)
+      if (typeof s.musicStyle !== "string" || !/^[a-z0-9_-]{1,24}$/i.test(s.musicStyle)) s.musicStyle = "chip";   // SPEC §29 (audio.js maps unknown ids to chip)
       return s;
     },
     saveSettings: function (s) { set("settings", JSON.stringify(s)); },
@@ -218,7 +222,7 @@
     endingStats: function () { var s = getJSON("endingStats"); return (s && typeof s === "object") ? s : {}; },
     /* returns {added, newRecord, run}; each runId+ending is counted once (reload / re-render safe) */
     addRun: function (run) {
-      var key = run.runId + ":" + run.endingId;
+      var key = runKey(run);
       var seen = getJSON("runsSeen");
       if (!Array.isArray(seen)) seen = [];
       if (seen.indexOf(key) >= 0) return {added: false, newRecord: false, run: run};
@@ -346,10 +350,10 @@
       if (Array.isArray(d.runs)) {
         var seen = getJSON("runsSeen"); if (!Array.isArray(seen)) seen = [];
         var runs = Save.runs(), st = Save.runStats(), fresh = !(st.runs > 0), have = {};
-        runs.forEach(function (r) { have[r.runId + ":" + r.endingId] = 1; });
+        runs.forEach(function (r) { have[runKey(r)] = 1; });
         d.runs.forEach(function (r) {
           if (!r || !r.runId) return;
-          var key = r.runId + ":" + r.endingId;
+          var key = runKey(r);
           if (have[key]) return;
           var counted = seen.indexOf(key) >= 0;
           have[key] = 1; runs.push(r); sum.runs++;

@@ -10,6 +10,7 @@
  *   moodFor(node, state, faction) -> mood string (rules in moodFor below)
  *   current()                     mood currently playing (or null); wanted() = last requested mood
  *   moods, sfxNames, songInfo(mood)
+ *   styles / getStyles() / getStyle() / setStyle(id) / previewStyle(id) — music styles (SPEC §29): chip (default), dark, organ, synth, piano
  * Optional real audio files: define WH.audioFiles = {battle:"assets/audio/battle.ogg", …} (assets/audio/files.js);
  * a mood with a file plays it through an <audio> element (looped, crossfaded); on load error it falls back to the synth.
  * Everything is original music written for this game. Runs from file:// (no fetch, no deps).
@@ -471,9 +472,10 @@
   var PC = {C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11};
   var QUAL = {"": [0, 4, 7], m: [0, 3, 7], dim: [0, 3, 6], aug: [0, 4, 8], sus2: [0, 2, 7], sus4: [0, 5, 7],
               "7": [0, 4, 7, 10], m7: [0, 3, 7, 10], maj7: [0, 4, 7, 11], dim7: [0, 3, 6, 9], m7b5: [0, 3, 6, 10],
-              "6": [0, 4, 7, 9], m6: [0, 3, 7, 9], "5": [0, 7]};
+              "6": [0, 4, 7, 9], m6: [0, 3, 7, 9], "5": [0, 7],
+              add9: [0, 4, 7, 14], madd9: [0, 3, 7, 14], maj9: [0, 4, 7, 11, 14], m9: [0, 3, 7, 10, 14]};   // 9ths: styles only
   var RESERVED = {chords: 1, drums: 1, from: 1, tr: 1, inst: 1, vol: 1};
-  var DRUM_KEYS = {k: 1, s: 1, h: 1, H: 1, t: 1, T: 1, c: 1, m: 1, w: 1, z: 1, a: 1, i: 1};
+  var DRUM_KEYS = {k: 1, s: 1, h: 1, H: 1, t: 1, T: 1, c: 1, m: 1, w: 1, z: 1, a: 1, i: 1, b: 1, g: 1, p: 1};
   var VEL = {X: 1, x: 0.75, o: 0.4};
 
   function pcOf(s) {
@@ -487,7 +489,7 @@
     return 12 * (+m[3] + 1) + PC[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0);
   }
   function parseChord(tok, meter) {
-    var m = /^([A-G][#b]?)(m7b5|maj7|dim7|sus2|sus4|dim|aug|m7|m6|m|7|6|5)?(?:\/([A-G][#b]?))?(?::(\d+))?$/.exec(tok);
+    var m = /^([A-G][#b]?)(m7b5|maj7|maj9|madd9|add9|dim7|sus2|sus4|dim|aug|m7|m6|m9|m|7|6|5)?(?:\/([A-G][#b]?))?(?::(\d+))?$/.exec(tok);
     if (!m) return null;
     var q = m[2] || "";
     return {pc: pcOf(m[1]), iv: QUAL[q], q: q, name: m[1] + q + (m[3] ? "/" + m[3] : ""),
@@ -531,7 +533,7 @@
       if (seen[pc]) return; seen[pc] = 1;
       out.push(base + ((pc - 5 + 12) % 12));
     });
-    return out.sort(function (a, b) { return a - b; }).slice(0, 4);
+    return out.sort(function (a, b) { return a - b; }).slice(0, 5);
   }
   function expandPattern(chords, spec, errs, where) {
     var out = [], p = spec.p || "", r = spec.r || 1, o = spec.o == null ? 4 : spec.o;
@@ -566,14 +568,15 @@
   function merge(a, b) { var o = {}, k; for (k in a || {}) o[k] = a[k]; for (k in b || {}) o[k] = b[k]; return o; }
 
   var compiled = {};
-  function compileSong(id) {
-    if (compiled[id]) return compiled[id];
-    var S = SONGS[id], errs = [], meter = S.meter || 16, secIdx = {}, sections = [];
+  function compileSong(id, style) {
+    var key = style && style !== "chip" ? style + ":" + id : id;
+    if (compiled[key]) return compiled[key];
+    var S = songOf(id, style), errs = [], meter = S.meter || 16, secIdx = {}, sections = [];
     var names = (S.intro || []).concat(S.order);
     Object.keys(S.sections).forEach(function (n) { if (names.indexOf(n) < 0) names.push(n); });
     names.forEach(function (name) {
       if (secIdx[name] != null) return;
-      var where = id + "." + name, sec = resolveSection(S, name, errs);
+      var where = key + "." + name, sec = resolveSection(S, name, errs);
       if (!sec) return;
       var cp = parseChords(sec.chords, meter, errs, where), len = cp.len, bars = len / meter;
       if (!len) errs.push(where + ": no chords");
@@ -585,17 +588,18 @@
         if (RESERVED[key] || sec[key] == null) continue;
         var spec = sec[key], inst = S.ch[key], w2 = where + "." + key;
         if (!inst) { errs.push(w2 + ": no instrument '" + key + "' in song.ch"); continue; }
-        var notes;
+        var notes, literal = typeof spec === "string" || Array.isArray(spec);   // array = ready-made notes [{s, d, m}] (styles)
         if (typeof spec === "string") {
           var lit = parseLiteral(spec, meter, errs, w2);
           if (lit.len !== len) errs.push(w2 + ": " + lit.len + " steps but chords span " + len);
           notes = lit.notes;
-        } else notes = expandPattern(cp.list, spec, errs, w2);
+        } else if (literal) notes = spec;
+        else notes = expandPattern(cp.list, spec, errs, w2);
         var tr = (inst.tr || 0) + ((sec.tr || {})[key] || 0), ov = (sec.inst || {})[key];
         notes.forEach(function (nt) {
           var m = Array.isArray(nt.m) ? nt.m.map(function (x) { return x + tr; }) : nt.m + tr;
           add(nt.s, {c: key, m: m, d: nt.d, w: ov && ov.w, v: vol});
-          if (typeof spec === "string") {          // melody statistics for the checker
+          if (literal) {                           // melody statistics for the checker
             stat.notes++; stat.lo = Math.min(stat.lo, m); stat.hi = Math.max(stat.hi, m);
             if (nt.s % 4 === 0) {
               var chd = chordAt(cp.list, nt.s);
@@ -614,11 +618,11 @@
           for (var dk in pat) {
             if (!DRUM_KEYS[dk]) { errs.push(where + ": drum pattern " + pn + " has unknown instrument '" + dk + "'"); continue; }
             var str = pat[dk];
-            if (str.length !== meter) errs.push(id + ".drums." + pn + "." + dk + ": length " + str.length + " (expected " + meter + ")");
+            if (str.length !== meter) errs.push(key + ".drums." + pn + "." + dk + ": length " + str.length + " (expected " + meter + ")");
             for (var i = 0; i < str.length && i < meter; i++) {
               var ch = str.charAt(i);
               if (ch === ".") continue;
-              if (!VEL[ch]) { errs.push(id + ".drums." + pn + "." + dk + ": bad char '" + ch + "'"); continue; }
+              if (!VEL[ch]) { errs.push(key + ".drums." + pn + "." + dk + ": bad char '" + ch + "'"); continue; }
               add(b * meter + i, {k: dk, v: VEL[ch] * vol});
             }
           }
@@ -632,14 +636,313 @@
     var stepSec = 60 / S.bpm / 4;
     var introSteps = 0, loopSteps = 0, introN = (S.intro || []).length;
     seq.forEach(function (si, i) { if (i < introN) introSteps += sections[si].len; else loopSteps += sections[si].len; });
-    var c = compiled[id] = {id: id, bpm: S.bpm, key: S.key, meter: meter, stepSec: stepSec, sections: sections, seq: seq,
+    var c = compiled[key] = {id: id, style: style || "chip", bpm: S.bpm, key: S.key, meter: meter, stepSec: stepSec, sections: sections, seq: seq,
       loopFrom: introN, introSec: introSteps * stepSec, loopSec: loopSteps * stepSec,
       loopBars: loopSteps / meter, introBars: introSteps / meter, errors: errs};
-    if (errs.length && root.console) console.warn("[audio] " + id + ": " + errs.length + " data errors", errs);
+    if (errs.length && root.console) console.warn("[audio] " + key + ": " + errs.length + " data errors", errs);
     return c;
   }
   function chordAt(list, s) { for (var i = 0; i < list.length; i++) if (s >= list[i].s && s < list[i].s + list[i].d) return list[i]; return null; }
   function chordPcs(ch) { return ch.iv.map(function (x) { return (ch.pc + x) % 12; }); }
+
+  /* =====================================================================================
+   * 2b. MUSIC STYLES (SPEC §29). `chip` = SONGS above. The other styles re-arrange the same 16 mood themes (same keys and
+   * progressions, so every mood keeps its identity and the per-node mood pick is untouched) with a different instrument set,
+   * tempo, harmonic rhythm / colour and drum language. buildStyleSong() turns a chip song into a song object in the very same
+   * format (compiled and played by the same code), section by section:  STYLES[id].sec(ctx) -> {chords, <channel>: notes|pattern, drums}.
+   * ctx: {cls, idx (-1 = intro, 0..3 = A B A2 B2: the arrangement builds up), cp (chord list), len, root, minor, lead (source melody
+   * notes), rnd}.   cls: cm calm · sc sacred/solemn · tn tense/uneasy · dr drive (combat) · jy bright · en ending.
+   * ===================================================================================== */
+  var STYLE_LIST = [
+    {id: "chip", name: {zh: "8位芯片", en: "8-bit chiptune"},
+     desc: {zh: "复古游戏机的方波与噪声（默认）。", en: "Square waves and noise, straight from an old console (default)."}},
+    {id: "dark", name: {zh: "暗黑氛围", en: "Dark ambient"},
+     desc: {zh: "缓慢失谐的长音与垫底，稀疏的金属声与钟声；只有战斗时才有低频脉冲。", en: "Slow detuned drones and pads, sparse metal and bells; sub-bass pulses only in combat."}},
+    {id: "organ", name: {zh: "哥特管风琴", en: "Gothic organ"},
+     desc: {zh: "管风琴和弦、人声般的长音与缓慢琶音；战斗时有定音鼓。", en: "Pipe-organ chords, choir-like pads and slow arpeggios; timpani in combat."}},
+    {id: "synth", name: {zh: "合成波", en: "Synthwave"},
+     desc: {zh: "锯齿波贝斯与琶音、门控长音；战斗时四四拍重鼓。", en: "Saw bass arpeggios and gated pads; four-on-the-floor drums in combat."}},
+    {id: "piano", name: {zh: "钢琴弦乐", en: "Piano & strings"},
+     desc: {zh: "稀疏的钢琴动机配缓慢弦乐铺底；战斗时弦乐急促推进。", en: "Sparse piano motifs over slow string pads; driving string ostinatos in combat."}}
+  ];
+  var HOLD = new Array(64).join("-"), PCN = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  function pat(p, o, r) { return {p: p, o: o, r: r || 1}; }                    // chord pattern spec
+  function hold(m, len) { return [{s: 0, d: len, m: m}]; }                  // one note for the whole section
+  function hashStr(s) { var h = 7; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; }
+  function chordStr(list, qf) {                                             // chord list -> chord string; qf(chord) may change the quality
+    return list.map(function (c) { return PCN[c.pc] + (qf ? qf(c) : c.q) + (c.bass != null ? "/" + PCN[c.bass] : "") + ":" + c.d; }).join(" ");
+  }
+  function merge2(list) {                                                   // halve the harmonic rhythm: a pair of equal chords' slots -> the first chord
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var c = list[i], n = list[i + 1];
+      if (n && n.d === c.d && c.s % (2 * c.d) === 0 && c.d <= 16) { out.push({pc: c.pc, q: c.q, bass: c.bass, d: c.d * 2, s: c.s}); i++; }
+      else out.push(c);
+    }
+    return out;
+  }
+  function thin(notes, o, rnd, len) {                                       // melody -> fewer / longer notes: keep notes on a grid (+ some others), optional hold
+    var out = [];
+    notes.forEach(function (n) { if (n.s % (o.grid || 16) === 0 || (o.keep && rnd() < o.keep)) out.push({s: n.s, d: o.d || n.d, m: n.m + (o.sh || 0)}); });
+    if (o.hold) out.forEach(function (n, i) { n.d = Math.max(2, Math.min(o.cap || 32, (i + 1 < out.length ? out[i + 1].s : len) - n.s)); });
+    return out;
+  }
+  function pick(a, t) { return a[Math.min(t, a.length - 1)]; }
+  function cellOr(c, p, o, r) { return c.cell ? pat(c.cell.p, o, c.cell.r) : pat(p, o, r); }   // the mood's own ostinato cell (from its chip arrangement) keeps each mood's rhythmic identity
+
+  var STYLES = {
+    /* ---------- dark ambient: pedal drone + slowly shifting clusters, ghostly one-note-a-bar melody, bells, gongs, sub boom in combat ---------- */
+    dark: {
+      lift: ["glass", "choir"], dly: [1.5, 0.5], trim: {title: 6.1, calm: 0.4, holy: 5.9, tense: -4.4, battle: -1.2, boss: -2.2, warp: 2.8, tau: 1.7, aeldari: 2.3, necron: -1.6, orks: 0.3, gsc: 5.7, mechanicus: 0.8, happy: 0.8, death: 3.8, bad: 5.0},
+      moods: {title: "sc 56", calm: "cm 60", holy: "sc 50", tense: "tn 66", battle: "dr 104", boss: "dr 112", warp: "tn 58 w", tau: "cm 72",
+              aeldari: "cm 54", necron: "tn 64", orks: "dr 100", gsc: "sc 52", mechanicus: "tn 72", happy: "jy 66", death: "en 46", bad: "en 44"},
+      ch: {
+        drone: {w: "saw", v: 0.15, env: [3, 1, 1, 3.5], lp: 240, uni: 13, vib: [0.13, 16, 0], rev: 0.3, gate: 1},
+        fifth: {w: "saw", v: 0.09, env: [4, 1, 1, 4], lp: 380, uni: 17, vib: [0.09, 20, 0], rev: 0.4, gate: 1, pan: 0.2},
+        pad:   {w: "p25", v: 0.075, env: [2.4, 1, 0.9, 3.2], lp: 850, uni: 22, vib: [0.3, 24, 0], rev: 0.6, gate: 1, pan: -0.2},
+        pad2:  {w: "p25", v: 0.075, env: [0.5, 0.6, 0.9, 0.8], lp: 850, uni: 22, vib: [0.3, 24, 0], rev: 0.5, gate: 1, pan: -0.2},       // combat: chords change every bar, so a short tail
+        choir: {w: "saw", v: 0.19, env: [1.6, 1, 0.85, 2.6], fmt: [[520, 7, 1], [1040, 8, 0.55], [2500, 6, 0.2]], uni: 8, vib: [4.4, 14, 0.6], rev: 0.7, gate: 1},
+        glass: {w: "sine", v: 0.10, env: [0.5, 1, 0.7, 2.2], vib: [3.8, 14, 0.8], stack: [12], echo: 0.45, rev: 0.65},
+        bell:  {w: "sine", v: 0.09, env: [0.002, 3, 0, 1.8], stack: [17.5], echo: 0.4, rev: 0.7, pan: 0.3},
+        grind: {w: "saw", v: 0.10, env: [0.004, 0.12, 0.5, 0.1], lp: 600, fe: [9, 2.2, 0.14], rev: 0.1}
+      },
+      drums: {v: 0.55, pats: {
+        W: {w: "x..............."}, G: {g: "x...............", w: "x..............."}, M: {m: "..........o....."}, N: {m: "....o...........", a: "..............o."},
+        S: {b: "x..............."}, C1: {b: "x...x...x...x...", m: "..o...o...o...o."}, C2: {b: "x...x...x...x...", T: "..x.......x.....", m: "..o...o...o...o.", a: "............o..."},
+        C3: {b: "x.x.x.x.x.x.x.x.", T: "....X.......X...", m: "o.o.o.o.o.o.o.o."}, CF: {b: "x...x...x...x...", T: "..x.x.xxxxXxXXXX", c: "x..............."}}},
+      sec: function (c) {
+        var o = {}, t = Math.max(c.idx, 0), cls = c.cls, L = c.len, rn = c.rnd, B = 36 + c.root, sus = {"": "sus2", "6": "sus2", maj7: "sus2", add9: "sus2", "7": "sus4"};
+        o.chords = chordStr(cls === "dr" ? c.cp : merge2(c.cp), function (x) { return cls === "jy" || cls === "dr" ? x.q : sus[x.q] || x.q; });
+        o.drone = hold(B, L);
+        if (cls !== "cm" || t > 0) o.fifth = hold(B + (cls === "tn" ? (t > 1 ? 6 : 1) : 7) + 12, L);
+        if (cls !== "cm" || t > 0) o[cls === "dr" ? "pad2" : "pad"] = pat("c" + HOLD, 3);
+        if (cls === "sc" || cls === "en") o.choir = thin(c.lead, {grid: t > 0 || c.idx < 0 ? 16 : 32, hold: 1, cap: 32, sh: -12}, rn, L);
+        else if (cls === "tn") { if (t > 0) o.glass = thin(c.lead, {grid: 16, keep: 0.1, hold: 1, cap: 16}, rn, L); }
+        else if (cls === "dr") { if (t > 0) o.choir = thin(c.lead, {grid: 8, hold: 1, cap: 16, sh: -12}, rn, L); }
+        else if (t > 0) o.glass = thin(c.lead, {grid: cls === "jy" ? 8 : 16, hold: 1, cap: 24}, rn, L);
+        if (cls === "dr" ? t > 1 : (t >= 2 || cls === "jy" || t === 0 || cls === "en")) o.bell = thin(c.lead, {grid: 99, keep: cls === "dr" ? 0.08 : cls === "jy" ? 0.4 : t === 0 ? 0.12 : 0.25, sh: 12, d: 8}, rn, L);
+        if (cls === "dr") {
+          o.grind = pat(pick(["R---------------", "R---R---R---R---", "R-R-R-R-R-R-R-R-", "R-RRR-RRR-RRR-RR"], t), 2);
+          o.drums = pick(["S C1 C1 C1 C1 C1 C1 CF", "C1 C1 C1 C1 C2 C2 C2 CF", "C2 C2 C2 C2 C3 C3 C3 CF", "C3 C3 C3 C3 C3 C3 C3 CF"], t);
+        } else if (cls === "tn") o.drums = pick(["W - - - - - - -", "W - M - - - N -", "G - M - N - M -", "W - N M - N - M"], t);
+        else o.drums = pick(["W - - - - - - -", "W - - - M - - -", "G - - - M - - W", "W - M - - - G -"], t);
+        return o;
+      }
+    },
+
+    /* ---------- gothic organ: block chords on a pedal, reed melody (parallel fifths in the solemn moods), slow flute arpeggios, timpani ---------- */
+    organ: {
+      lift: ["lead", "lead5", "flute"], dly: [0.75, 0.3], trim: {title: 0.2, calm: -3.5, holy: -1.0, tense: -8.3, battle: -3.6, boss: -4.5, warp: -0.3, tau: -1.6, aeldari: -1.1, necron: -5.4, orks: -2.2, gsc: -1.0, mechanicus: -2.5, happy: -2.0, death: -3.2, bad: -1.7},
+      moods: {title: "sc 66", calm: "cm 72", holy: "sc 58", tense: "tn 78", battle: "dr 126", boss: "dr 138", warp: "tn 66 w", tau: "cm 88",
+              aeldari: "cm 62", necron: "tn 76", orks: "dr 118", gsc: "sc 58", mechanicus: "tn 84", happy: "jy 96", death: "en 52", bad: "en 50"},
+      ch: {
+        full:  {w: "organ", v: 0.07, env: [0.06, 0.2, 0.95, 0.35], lp: 3200, rev: 0.5, gate: 1},
+        ped:   {w: "organ", v: 0.22, env: [0.04, 0.2, 0.95, 0.4], lp: 420, stack: [12], rev: 0.25, gate: 1},
+        lead:  {w: "reed", v: 0.085, env: [0.05, 0.2, 0.8, 0.35], lp: 2600, vib: [5, 10, 0.4], rev: 0.5, echo: 0.15},
+        lead5: {w: "reed", v: 0.07, env: [0.06, 0.2, 0.8, 0.4], lp: 2300, vib: [4.8, 10, 0.4], stack: [7, 12], rev: 0.55, echo: 0.15},
+        flute: {w: "flute", v: 0.08, env: [0.01, 0.4, 0.1, 0.4], echo: 0.3, rev: 0.5, pan: -0.25},
+        choir: {w: "saw", v: 0.12, env: [0.7, 0.7, 0.9, 1.3], fmt: [[700, 6, 1], [1100, 7, 0.6], [2800, 6, 0.25]], uni: 9, vib: [4.5, 12, 0], rev: 0.65, gate: 1, pan: 0.15},
+        toc:   {w: "organ", v: 0.055, env: [0.003, 0.07, 0.45, 0.05], lp: 3400, pan: -0.2},
+        stab:  {w: "organ", v: 0.06, env: [0.004, 0.1, 0.5, 0.12], lp: 3000, rev: 0.3}
+      },
+      drums: {v: 0.6, pats: {
+        G: {g: "x...............", c: "x..............."}, T1: {T: "x.......x......."}, T2: {T: "x...x...x...x..."}, T3: {T: "X...x...X.x.x...", g: "X..............."},
+        TR: {T: "xoxoxoxoxoxoxoxo"}, TF: {T: "X.x.x.xxxxXxXXXX", c: "x..............."}, Z: {w: "x..............."}}},
+      sec: function (c) {
+        var o = {}, t = Math.max(c.idx, 0), cls = c.cls, L = c.len, rn = c.rnd, odd = t % 2 === 1, cl = c.cp.slice(), lastc = cl[cl.length - 1];
+        if ((cls === "tn" || cls === "dr") && odd && lastc.d === 16 && (lastc.q === "" || lastc.q === "7"))      // Toccata colour: the last bar goes through a diminished seventh
+          cl[cl.length - 1] = {pc: (lastc.pc + 4) % 12, q: "dim7", bass: null, d: 16, s: lastc.s};
+        o.chords = chordStr(cl);
+        o.full = pat("c" + HOLD, 3);
+        o.ped = (t === 2 && cls !== "dr") ? hold(24 + c.root + 12, L) : pat("R" + HOLD, 2);                    // A2: a tonic pedal under the moving chords
+        if (cls === "cm" || cls === "jy") {
+          if (t > 0 || c.idx < 0) o.lead = thin(c.lead, {grid: cls === "jy" ? 2 : 8, hold: 1, cap: 16}, rn, L);
+          if (t > 0) o.flute = cellOr(c, pick(["0-2-4-2-", "0-2-4-2-", "0242024202420242", "0-2-4-5-"], t), 4, cls === "jy" ? 1 : 2);
+          if (t > 1) o.choir = pat("c" + HOLD, 4);
+          o.drums = pick(["G - - - - - - -", "G - - - - - - -", "G - - - - - - T1", "G - T1 - T1 - T1 -"], t);
+          if (cls === "jy") o.drums = pick(["G - - - T1 - - -", "G - T1 - T1 - T1 -", "G T1 T1 T1 T1 T1 T1 T1", "G T2 T2 T2 T2 T2 T2 T3"], t);
+        } else if (cls === "sc" || cls === "en") {
+          if (t > 0 || c.idx < 0) o.lead5 = thin(c.lead, {grid: 4, hold: 1, cap: 24}, rn, L);
+          o.choir = pat("c" + HOLD, 4);
+          if (t > 0) o.flute = cellOr(c, t > 2 ? "0242" : "0-2-4-2-", 4, 2);
+          o.drums = pick(["Z - - - - - - -", "G - - - - - - -", "G - - - T1 - - -", "Z - - T1 - - T1 -"], t);
+        } else if (cls === "tn") {
+          o.lead = thin(c.lead, {grid: 8, keep: 0.2, hold: 1, cap: 12}, rn, L);
+          o.toc = t > 0 ? cellOr(c, pick(["0.0.0.0.0.0.0.0.", "0.1.0.1.0.2.0.1.", "0.0.1.0.0.1.2.1.", "0123210123210123"], t), 4) : pat("0.0.0.0.0.0.0.0.", 4);
+          o.drums = pick(["Z - - - - - - -", "T1 - - - T1 - - -", "G - T1 - T1 - T1 -", "T1 T1 T2 T1 T2 T1 T3 T1"], t);
+        } else {                                                                                                // dr: toccata arpeggios + timpani march
+          o.lead = thin(c.lead, {grid: 2, hold: 1, cap: 8}, rn, L);
+          o.toc = cellOr(c, pick(["0123", "0121", "0123210123210123", "0123"], t), 4);
+          o.stab = pat("c-..c-..c-..c-..", 3);
+          o.ped = pat(pick(["R-------R-------", "R-R-R-R-R-R-R-R-", "R-R-O-R-R-R-O-R-", "R-RRR-RRR-RRR-RR"], t), 2);
+          o.drums = pick(["G T2 T2 T2 T2 T2 T2 TF", "T2 T2 T2 T2 T2 T2 T2 TF", "G T3 T3 T3 T3 T3 T3 TF", "T3 T3 T3 T3 T3 T3 T3 TF"], t);
+        }
+        return o;
+      }
+    },
+
+    /* ---------- synthwave: saw bass, plucky arpeggios, gated pads, saw leads with a dotted echo, four-on-the-floor in combat ---------- */
+    synth: {
+      lift: ["lead"], dly: [0.75, 0.38], trim: {title: -0.1, calm: -4.6, holy: -1.4, tense: -1.2, battle: 1.7, boss: 1.0, warp: 6.3, tau: 4.1, aeldari: -1.6, necron: 1.9, orks: 3.1, gsc: -1.5, mechanicus: 3.0, happy: 3.5, death: -3.4, bad: -1.8},
+      moods: {title: "sc 100", calm: "cm 92", holy: "sc 84", tense: "tn 108", battle: "dr 142", boss: "dr 154", warp: "tn 96 w", tau: "jy 116",
+              aeldari: "cm 90", necron: "tn 104", orks: "dr 132", gsc: "sc 86", mechanicus: "dr 118", happy: "jy 124", death: "en 66", bad: "en 62"},
+      ch: {
+        bass: {w: "saw", v: 0.2, env: [0.004, 0.12, 0.6, 0.06], fe: [14, 5, 0.15], gate: 0.8},
+        sub:  {w: "sine", v: 0.26, env: [0.02, 0.2, 0.9, 0.2], gate: 1},
+        arp:  {w: "p25", v: 0.06, env: [0.002, 0.1, 0.15, 0.08], lp: 3800, echo: 0.4, rev: 0.2, pan: -0.25},
+        pad:  {w: "saw", v: 0.05, env: [0.02, 0.15, 0.55, 0.1], lp: 1700, uni: 14, rev: 0.3, pan: 0.2},
+        wash: {w: "saw", v: 0.045, env: [0.9, 0.6, 0.85, 1.2], lp: 1300, uni: 16, rev: 0.5, gate: 1},
+        lead: {w: "saw", v: 0.08, env: [0.01, 0.2, 0.7, 0.2], lp: 3600, uni: 12, vib: [5.5, 11, 0.25], echo: 0.35, rev: 0.25},
+        shim: {w: "tri", v: 0.07, env: [0.005, 0.3, 0.3, 0.5], stack: [12, 19], uni: 8, vib: [6, 14, 0.2], echo: 0.45, rev: 0.5, pan: 0.15}
+      },
+      drums: {v: 0.55, pats: {
+        L: {k: "x.......x.......", h: "..x...x...x...x."}, F: {k: "x...x...x...x...", p: "....x.......x...", h: "..x...x...x...x."},
+        F2: {k: "x...x...x...x...", p: "....x.......x...", h: "..xoxox.x.xoxox.", H: "..............o."}, K: {k: "x...............", h: "..o...o...o...o."},
+        FF: {k: "x...x...x...x...", p: "....x...x.x.xxxx", T: "............x.x.", c: "x..............."}, C: {c: "x..............."}, H: {h: "..o...o...o...o."}}},
+      sec: function (c) {
+        var o = {}, t = Math.max(c.idx, 0), cls = c.cls, L = c.len, rn = c.rnd, X7 = {"": "maj7", m: "m7"};
+        o.chords = chordStr(c.cp, function (x) { return cls === "dr" ? x.q : X7[x.q] || x.q; });
+        if (cls === "cm") {
+          o.sub = pat("R" + HOLD, 2);                                                                              // slow bass, shimmering arps, pad wash, a lazy kick
+          o.bass = t > 0 ? pat("R-R-O-R-R-R-O-R-", 2) : null;
+          o.arp = t > 0 ? cellOr(c, pick(["0.1.2.1.", "0-1-2-1-", "0123210123210123", "0.1.2.3.2.1.0.1."], t), 4, t === 1 ? 2 : 1) : null;
+          o.wash = pat("c" + HOLD, 3);
+          o.lead = thin(c.lead, {grid: 2, hold: 0}, rn, L);
+          if (t === 0) o.lead = null;
+          o.drums = pick(["K - - - - - - -", "L L L L L L L L", "L L L L L L L F", "L L L L L L L F2"], t);
+        } else if (cls === "sc") {
+          o.sub = pat("R" + HOLD, 2); o.wash = pat("c" + HOLD, 3);
+          o.arp = t > 0 ? cellOr(c, pick(["0.1.2.1.", "0.1.2.1.", "0-2-4-2-", "0-1-2-3-"], t), 4, 2) : null;
+          o.lead = t > 0 || c.idx < 0 ? thin(c.lead, {grid: 4, hold: 1, cap: 16}, rn, L) : null;
+          o.drums = pick(["K - - - - - - -", "K - - - K - - -", "L - L - L - L -", "L L L L L L L L"], t);
+        } else if (cls === "tn") {
+          o.bass = pat(pick(["R.R.R.R.R.R.R.R.", "R.RR.RR.R.RR.RR.", "R.RR.RR.R.RR.RR.", "RRRR.RRRRRRR.RRR"], t), 2);
+          o.arp = t > 0 ? cellOr(c, pick(["0.1.2.1.", "0.1.2.1.", "0120121201201210", "0.2.1.2.0.2.1.2."], t), 4, t === 1 ? 2 : 1) : null;
+          o.pad = t > 1 ? pat("c.c.c.c.c.c.c.c.", 3) : null; o.wash = pat("c" + HOLD, 3);
+          o.lead = t > 0 ? thin(c.lead, {grid: 8, keep: 0.2, hold: 1, cap: 8}, rn, L) : null;
+          o.drums = pick(["K - - - - - - -", "K K K K K K K K", "L L L L L L L L", "L L L L L L L F"], t);
+        } else if (cls === "dr") {
+          o.bass = pat(pick(["R-R-R-R-R-R-R-R-", "R.RRR.RRR.RRR.RR", "RRRRRRRRRRRRRRRR", "R-RRR-RRO-RRR-RR"], t), 2);
+          o.arp = cellOr(c, pick(["0.1.2.1.", "0123", "0123210123210123", "0123"], t), 4);
+          o.pad = pat(pick(["c-..c-..c-..c-..", "c--c--c-c--c--c-", "c-c-c-c-c-c-c-c-", "c--c--c-c--c--c-"], t), 3);
+          o.lead = t > 0 ? thin(c.lead, {grid: 2, hold: 0}, rn, L) : null;
+          o.drums = pick(["C F F F F F F FF", "F F F F F F F FF", "C F2 F2 F2 F2 F2 F2 FF", "F2 F2 F2 F2 F2 F2 F2 FF"], t);
+        } else if (cls === "jy") {
+          o.bass = pat(pick(["R-O-R-O-R-O-R-O-", "R-O-R-O-R-O-R-O-", "R-O-2-O-R-O-2-O-", "R-O-2-O-R-O-2-O-"], t), 2);
+          o.arp = cellOr(c, pick(["0.1.2.1.", "0123", "0123210123210123", "0123"], t), 4, t === 0 ? 2 : 1);
+          o.pad = pat(pick(["c-c-c-c-c-c-c-c-", "c--c--c-c--c--c-", "c-c-c-c-c-c-c-c-", "c--c--c-c--c--c-"], t), 3);
+          o.lead = t > 0 || c.idx < 0 ? thin(c.lead, {grid: 2, hold: 0}, rn, L) : null;
+          if (t > 1) o.shim = thin(c.lead, {grid: 8, hold: 1, cap: 12, sh: 12}, rn, L);
+          o.drums = pick(["F F F F F F F F", "F F F F F F F FF", "C F2 F2 F2 F2 F2 F2 FF", "F2 F2 F2 F2 F2 F2 F2 FF"], t);
+        } else {                                                                                                // en
+          o.sub = pat("R" + HOLD, 2); o.wash = pat("c" + HOLD, 3);
+          o.arp = t > 0 ? pat("0-2-4-2-", 4, 2) : null;
+          o.lead = thin(c.lead, {grid: 8, hold: 1, cap: 24}, rn, L);
+          if (t > 2) o.shim = thin(c.lead, {grid: 8, hold: 1, cap: 16, sh: 12}, rn, L);
+          o.drums = pick(["- - - - - - - -", "K - - - - - - -", "K - - - K - - -", "K - - K - - K -"], t);
+        }
+        for (var k in o) if (o[k] == null) delete o[k];
+        return o;
+      }
+    },
+
+    /* ---------- piano & strings: sparse piano motifs with a broken-chord left hand, slow string pads; battle = driving string ostinato ---------- */
+    piano: {
+      lift: ["piano", "vln"], dly: [0.75, 0.3], trim: {title: 4.8, calm: 3.8, holy: 3.7, tense: -3.5, battle: -1.3, boss: -2.2, warp: 3.5, tau: 2.6, aeldari: 6.5, necron: -1.2, orks: 0.4, gsc: 3.7, mechanicus: 1.6, happy: 2.1, death: 2.2, bad: 3.6},
+      moods: {title: "sc 60", calm: "cm 66", holy: "sc 54", tense: "tn 80", battle: "dr 132", boss: "dr 148", warp: "tn 64 w", tau: "jy 96",
+              aeldari: "cm 62", necron: "tn 76", orks: "dr 120", gsc: "sc 56", mechanicus: "tn 92", happy: "jy 108", death: "en 52", bad: "en 50"},
+      ch: {
+        piano: {w: "pno", v: 0.19, env: [0.003, 1.2, 0, 0.7], fe: [14, 3, 0.4], echo: 0.15, rev: 0.4, pan: -0.1},
+        lh:    {w: "pno", v: 0.2, env: [0.004, 1.6, 0, 0.9], fe: [9, 2.5, 0.5], rev: 0.35, pan: 0.1},
+        oct:   {w: "pno", v: 0.1, env: [0.003, 0.9, 0, 0.6], fe: [14, 3, 0.4], stack: [-12], rev: 0.35},
+        str:   {w: "saw", v: 0.075, env: [0.9, 0.6, 0.85, 1.3], lp: 1600, uni: 13, vib: [5.3, 9, 0.7], rev: 0.55, gate: 1, pan: 0.2},
+        vln:   {w: "saw", v: 0.09, env: [0.15, 0.3, 0.75, 0.6], lp: 2400, uni: 9, vib: [5.5, 16, 0.4], rev: 0.5, pan: -0.15},
+        cello: {w: "saw", v: 0.19, env: [0.1, 0.3, 0.8, 0.4], lp: 700, vib: [5, 10, 0.3], rev: 0.3, gate: 1},
+        ost:   {w: "saw", v: 0.07, env: [0.004, 0.07, 0.4, 0.04], lp: 2300, uni: 6, pan: -0.2},
+        stab:  {w: "saw", v: 0.05, env: [0.005, 0.12, 0.45, 0.1], lp: 2000, uni: 10, rev: 0.25, pan: 0.2}
+      },
+      drums: {v: 0.6, pats: {
+        W: {w: "x..............."}, C: {c: "x..............."}, T1: {T: "x.......x......."}, T2: {T: "x...x...x...x..."}, T3: {T: "X...x...X.x.x...", c: "x..............."},
+        TF: {T: "X.x.x.xxxxXxXXXX", c: "x..............."}, S: {T: "x..............."}}},
+      sec: function (c) {
+        var o = {}, t = Math.max(c.idx, 0), cls = c.cls, L = c.len, rn = c.rnd, X9 = {"": "add9", m: "madd9"};
+        o.chords = chordStr(c.cp, function (x) { return cls === "dr" ? x.q : X9[x.q] || x.q; });
+        if (cls === "cm" || cls === "jy") {
+          o.lh = cellOr(c, pick(["02420242", "02420242", "0242024202420242", "02420242"], t), 3, 2);
+          o.piano = (t > 0 || c.idx < 0) ? thin(c.lead, {grid: cls === "jy" ? 4 : 8, keep: cls === "jy" ? 0.6 : 0.2}, rn, L) : null;
+          o.str = t > 0 ? pat("c" + HOLD, 3) : null;
+          if (t > 1) o.vln = thin(c.lead, {grid: 8, hold: 1, cap: 16, sh: 12}, rn, L);
+          o.drums = pick(["W - - - - - - -", "- - - - - - - -", "- - - - - - - -", "C - - - - - - -"], t);
+          if (cls === "jy" && t > 1) o.drums = "T1 - T1 - T1 - T1 -";
+        } else if (cls === "sc" || cls === "en") {
+          o.lh = cellOr(c, pick(["0-2-4-2-", "0-2-4-2-", "02420242", "02420242"], t), 3, 2);
+          o.piano = thin(c.lead, {grid: 8, keep: 0.15}, rn, L);
+          o.str = pat("c" + HOLD, 3); o.cello = pat("R" + HOLD, 2);
+          if (t > 0) o.vln = thin(c.lead, {grid: 16, hold: 1, cap: 32, sh: 12}, rn, L);
+          o.drums = pick(["W - - - - - - -", "- - - - - - - -", "S - - - - - - -", "W - - - - - - -"], t);
+        } else if (cls === "tn") {
+          o.lh = pat(pick(["0.....2.......0.", "0...2...0...2...", "0.2.0.2.0.2.0.2.", "0.2.4.2.0.2.4.2."], t), 3);
+          o.piano = thin(c.lead, {grid: 8, keep: 0.25}, rn, L);
+          o.str = pat("c" + HOLD, 3); o.cello = pat("R" + HOLD, 2);
+          if (t > 1) o.ost = cellOr(c, pick(["", "", "0.0.0.0.0.0.0.0.", "0.0.0.0.0.0.0.2."], t), 4);
+          o.drums = pick(["W - - - - - - -", "S - - - - - - -", "S - - - S - - -", "S - - S - - S -"], t);
+        } else {                                                                                                // dr: driving string ostinato, octave piano, timpani
+          o.ost = pat(pick(["R-R-R-R-R-R-R-R-", "RRRRRRRRRRRRRRRR", "R.RRR.RRR.RRR.RR", "RORORORORORORORO"], t), 3);
+          o.cello = pat(pick(["R---R---R---R---", "R-R-R-R-R-R-R-R-", "R-R-R-R-R-R-R-R-", "R-RRR-RRR-RRR-RR"], t), 2);
+          o.stab = pat("c---------------", 3);
+          o.oct = thin(c.lead, {grid: 2, hold: 0}, rn, L);
+          if (t > 1) o.vln = thin(c.lead, {grid: 4, hold: 1, cap: 8, sh: 12}, rn, L);
+          o.drums = pick(["C T2 T2 T2 T2 T2 T2 TF", "T2 T2 T2 T2 T2 T2 T2 TF", "C T3 T3 T3 T3 T3 T3 TF", "T3 T3 T3 T3 T3 T3 T3 TF"], t);
+        }
+        for (var k in o) if (o[k] == null || o[k] === "") delete o[k];
+        if (o.ost && !o.ost.p) delete o.ost;
+        return o;
+      }
+    }
+  };
+  var STYLE_IDS = STYLE_LIST.map(function (s) { return s.id; });
+  STYLE_LIST.forEach(function (s) { if (STYLES[s.id]) STYLES[s.id].name = s.name.en; });
+
+  var styleSongs = {};
+  function songOf(id, style) {
+    if (!style || style === "chip") return SONGS[id];
+    var k = style + ":" + id;
+    return styleSongs[k] || (styleSongs[k] = buildStyleSong(style, id));
+  }
+  function buildStyleSong(style, mood) {
+    var ST = STYLES[style], src = SONGS[mood], mv = ST.moods[mood].split(" "), errs = [], cls = mv[0];
+    var rs0 = resolveSection(src, src.order[0], errs), cp0 = parseChords(rs0.chords, 16, errs, mood).list[0];
+    var root = cp0.pc, minor = cp0.iv[1] === 3, loopBars = 0, plan = [];
+    (src.intro || []).forEach(function (n) { plan.push({name: n, from: n, idx: -1}); });
+    src.order.forEach(function (n, i) { loopBars += parseChords(resolveSection(src, n, errs).chords, 16, errs, mood).len / 16; });
+    var short = loopBars < 16;                          // a loop of < 16 bars (death) is played twice, the second time with every layer
+    src.order.forEach(function (n, i) { plan.push({name: n + "." + i, from: n, idx: short ? i + 1 : i}); });   // own name per position: the chip order may repeat a section (A B A2 B)
+    if (short) src.order.forEach(function (n, i) { plan.push({name: n + "." + (i + src.order.length), from: n, idx: i + 3}); });
+    var secs = {}, used = {}, intro = [], order = [];
+    plan.forEach(function (it, pi) {
+      var rs = resolveSection(src, it.from, errs), cp = parseChords(rs.chords, 16, errs, mood), lead = [];
+      var ls = rs.lead || rs.chant || rs.lead2 || rs.bell, cell = null;
+      if (typeof ls === "string") lead = parseLiteral(ls, 16, [], "").notes;
+      ["arp", "harp", "ost", "pulse", "data", "glint"].some(function (k) { var v = rs[k]; if (v && typeof v === "object" && v.p) { cell = {p: v.p, r: v.r || 1}; return true; } });
+      var sec = ST.sec({cls: cls, mood: mood, idx: it.idx, cp: cp.list, len: cp.len, root: root, minor: minor, lead: lead, cell: cell, rnd: rng(hashStr(style + mood) + pi * 977)});
+      if (it.idx >= 2) {                                // A2 / B2 (and the second pass of a short loop): the melody answers an octave higher
+        sec.tr = {};
+        ST.lift.forEach(function (k) {
+          if (Array.isArray(sec[k])) sec[k] = sec[k].map(function (n) { return {s: n.s, d: n.d, m: n.m + (n.m < 84 ? 12 : 0)}; });   // not above ~C7
+          else if (sec[k]) sec.tr[k] = 12;
+        });
+      }
+      secs[it.name] = sec;
+      for (var k in sec) if (!RESERVED[k]) used[k] = 1;
+      (it.idx < 0 ? intro : order).push(it.name);
+    });
+    var ch = {};
+    for (var k in used) ch[k] = ST.ch[k];
+    var db = Math.pow(10, (ST.trim[mood] || 0) / 20);
+    var song = {key: ST.name + " · " + src.key, bpm: +mv[1], meter: 16, ch: ch, drums: ST.drums, sections: secs, order: order, intro: intro, dly: ST.dly, trim: db};
+    if (mv[2] === "w" && src.wobble) { song.wobble = src.wobble; song.rnd = src.rnd; }
+    return song;
+  }
 
   /* =====================================================================================
    * 3. SYNTH ENGINE (works on a live AudioContext or an OfflineAudioContext)
@@ -656,6 +959,15 @@
     [["p12", 0.125], ["p25", 0.25], ["p50", 0.5]].forEach(function (d) {
       var n = 48, re = new Float32Array(n), im = new Float32Array(n);
       for (var k = 1; k < n; k++) re[k] = (2 / (k * Math.PI)) * Math.sin(k * Math.PI * d[1]);
+      E.waves[d[0]] = ctx.createPeriodicWave(re, im);
+    });
+    [["organ", [1, 0.55, 0.38, 0.3, 0.12, 0.2, 0, 0.12]],               // pipe organ: 8' + 4' + 2 2/3' + 2' + mixture partials
+     ["reed", [1, 0.5, 0.75, 0.3, 0.5, 0.2, 0.3, 0.12, 0.18, 0.08]],     // reed stop: strong odd partials
+     ["flute", [1, 0.2, 0.07, 0.02]],                                      // soft flute
+     ["pno", [1, 0.62, 0.38, 0.22, 0.13, 0.08, 0.05, 0.03]]               // hammer-struck string (the per-note filter does the decay)
+    ].forEach(function (d) {
+      var re = new Float32Array(d[1].length + 1), im = new Float32Array(d[1].length + 1);
+      d[1].forEach(function (a, k) { im[k + 1] = a; });
       E.waves[d[0]] = ctx.createPeriodicWave(re, im);
     });
     var sr = ctx.sampleRate, nb = ctx.createBuffer(1, sr, sr), nd = nb.getChannelData(0);
@@ -695,7 +1007,7 @@
     var curve = new Float32Array(1024);
     for (i = 0; i < 1024; i++) { var x = i / 511.5 - 1; curve[i] = Math.tanh(x * 4); }
     E.curve = curve;
-    E.pools = {music: [], drum: [], sfx: []};
+    E.pools = {music: [], drum: [], sfx: []}; E.drops = {};            // drops: notes refused by the polyphony caps (checked by audio_check)
     E.caps = {music: 40, drum: 14, sfx: 24};
     E.setMusic(opts.music == null ? 0.5 : opts.music, 0);
     E.setSfx(opts.sfx == null ? 0.7 : opts.sfx, 0);
@@ -710,7 +1022,7 @@
   Engine.prototype.voiceOk = function (pool, t, end) {      // polyphony cap by scheduled time span
     var P = this.pools[pool], n = 0;
     for (var i = P.length - 1; i >= 0; i--) if (P[i] <= t) P.splice(i, 1); else n++;
-    if (n >= this.caps[pool]) return false;
+    if (n >= this.caps[pool]) { this.drops[pool] = (this.drops[pool] || 0) + 1; return false; }
     P.push(end); return true;
   };
   Engine.prototype.osc = function (w) {
@@ -730,9 +1042,10 @@
   };
 
   /* ---------- Player: one per mood, cached; nodes reused across plays ---------- */
-  function Player(E, id) {
-    var P = this, ctx = E.ctx, S = SONGS[id];
-    P.E = E; P.id = id; P.S = S; P.song = compileSong(id); P.active = false; P.stopAt = null;
+  function Player(E, id, style) {
+    var P = this, ctx = E.ctx, S = songOf(id, style);
+    P.E = E; P.id = id; P.style = style || "chip"; P.S = S; P.song = compileSong(id, style); P.active = false; P.stopAt = null;
+    P.trim = S.trim || 1;                                  // per-song loudness trim (styles are calibrated against chip)
     P.out = ctx.createGain(); P.out.gain.value = 0; P.out.connect(E.musicBus);
     P.wet = ctx.createGain(); P.wet.gain.value = 0; P.wet.connect(E.musicWet);
     var beat = 60 / S.bpm, dl = S.dly || [0.75, 0.32];
@@ -746,6 +1059,14 @@
       c.inp = ctx.createGain(); c.inp.gain.value = I.v;
       var tail = c.inp;
       if (I.lp) { c.lp = ctx.createBiquadFilter(); c.lp.type = "lowpass"; c.lp.frequency.value = I.lp; c.lp.Q.value = 0.5; tail.connect(c.lp); tail = c.lp; }
+      if (I.fmt) {                                         // formant bank (vowel-like "choir"): parallel band-passes [Hz, Q, gain]
+        var mx = ctx.createGain();
+        I.fmt.forEach(function (F) {
+          var bp = ctx.createBiquadFilter(), fg = ctx.createGain(); bp.type = "bandpass"; bp.frequency.value = F[0]; bp.Q.value = F[1]; fg.gain.value = F[2];
+          tail.connect(bp); bp.connect(fg); fg.connect(mx);
+        });
+        tail = mx;
+      }
       var pn = E.panner(I.pan); if (pn) { tail.connect(pn); tail = pn; }
       tail.connect(P.out);
       if (I.echo) { c.echo = ctx.createGain(); c.echo.gain.value = I.echo; tail.connect(c.echo); c.echo.connect(P.dly); }
@@ -760,9 +1081,9 @@
     P.f = {s: filt("bandpass", 1900, 0.8), h: filt("highpass", 7500), c: filt("highpass", 3500), m: filt("bandpass", 3000, 1.5)};
     P.rand = rng(id.length * 7919 + 17);
   }
-  Player.prototype.start = function (t, fade) {
+  Player.prototype.start = function (t, fade, seqIdx) {
     var P = this, E = P.E;
-    P.seqIdx = 0; P.step = 0; P.nextTime = t + 0.06; P.t0 = P.nextTime; P.stopAt = null; P.active = true; P.loops = [];
+    P.seqIdx = seqIdx || 0; P.step = 0; P.nextTime = t + 0.06; P.t0 = P.nextTime; P.stopAt = null; P.active = true; P.loops = []; P.marks = [];
     Object.keys(P.ch).forEach(function (k) {
       var c = P.ch[k];
       if (c.lfoAmt && !c.lfo) { c.lfo = E.ctx.createOscillator(); c.lfo.frequency.value = c.I.vib[0]; c.lfo.connect(c.lfoAmt); c.lfo.start(t); }
@@ -770,9 +1091,10 @@
     P.fadeTo(1, fade, t);
   };
   Player.prototype.fadeTo = function (v, fade, t) {
+    var tv = v * this.trim;
     [this.out.gain, this.wet.gain].forEach(function (g) {
       g.cancelScheduledValues(t); g.setValueAtTime(g.value, t);
-      g.linearRampToValueAtTime(v, t + Math.max(0.01, fade));
+      g.linearRampToValueAtTime(tv, t + Math.max(0.01, fade));
     });
   };
   Player.prototype.stop = function (t, fade) { if (!this.active) return; this.stopAt = t + Math.max(0.01, fade); this.fadeTo(0, fade, t); };
@@ -798,7 +1120,7 @@
       }
       P.nextTime += sd;
       if (++P.step >= sec.len) {
-        P.step = 0;
+        P.step = 0; P.marks.push(P.nextTime);          // section boundary times (offline checks compare the loop seam with them)
         if (++P.seqIdx >= song.seq.length) { P.seqIdx = song.loopFrom; P.loops.push(P.nextTime); }
       }
     }
@@ -817,8 +1139,12 @@
     g.gain.linearRampToValueAtTime(peak, t + a);
     g.gain.setTargetAtTime(peak * env[2], t + a, Math.max(0.005, env[1] / 3));
     g.gain.setTargetAtTime(0, t + len, Math.max(0.005, r / 4));
-    g.connect(c.inp);
-    var f = mtof(midi), oscs = [], rnd = P.S.rnd ? (P.rand() * 2 - 1) * P.S.rnd : 0;
+    var f = mtof(midi), oscs = [], rnd = P.S.rnd ? (P.rand() * 2 - 1) * P.S.rnd : 0, nf = null;
+    if (I.fe) {                                            // per-note low-pass sweep, cutoff = multiple of the pitch: [start x, end x, time constant s]
+      nf = ctx.createBiquadFilter(); nf.type = "lowpass"; nf.Q.value = I.fq || 0.8;
+      nf.frequency.setValueAtTime(Math.min(ctx.sampleRate * 0.45, f * I.fe[0]), t); nf.frequency.setTargetAtTime(Math.max(120, f * I.fe[1]), t, I.fe[2]);
+      g.connect(nf); nf.connect(c.inp);
+    } else g.connect(c.inp);
     var mk = function (freq, det, gain) {
       var o = E.osc(wv); o.frequency.value = freq; o.detune.value = det + rnd;
       if (gain !== 1) { var gg = ctx.createGain(); gg.gain.value = gain; o.connect(gg); gg.connect(g); oscs.push(gg); } else o.connect(g);
@@ -836,12 +1162,12 @@
     }
     main.forEach(function (o) { o.start(t); o.stop(end); });
     main[0].onended = function () {
-      try { g.disconnect(); oscs.forEach(function (n) { n.disconnect(); }); if (vg) { c.lfoAmt.disconnect(vg); vg.disconnect(); } } catch (e) {}
+      try { g.disconnect(); if (nf) nf.disconnect(); oscs.forEach(function (n) { n.disconnect(); }); if (vg) { c.lfoAmt.disconnect(vg); vg.disconnect(); } } catch (e) {}
     };
   };
   Player.prototype.drumHit = function (k, t, vel) {
     var P = this, E = P.E, ctx = E.ctx;
-    var end = t + (k === "c" ? 1.5 : k === "w" ? 2.6 : k === "z" ? 0.6 : k === "a" ? 0.8 : k === "T" ? 0.6 : 0.4);
+    var end = t + (k === "c" ? 1.5 : k === "w" ? 2.6 : k === "z" ? 0.6 : k === "a" ? 0.8 : k === "T" ? 0.6 : k === "g" ? 3.8 : k === "b" ? 0.7 : 0.4);
     if (!E.voiceOk("drum", t, end)) return;
     var g = ctx.createGain(), src, o, extra = null;
     var env = function (peak, decay) { g.gain.setValueAtTime(peak, t); g.gain.exponentialRampToValueAtTime(0.0008, t + decay); };
@@ -870,6 +1196,25 @@
       ag.gain.setValueAtTime(vel * 0.3, t); ag.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
       an.connect(ag); ag.connect(P.f.m); an.start(t, P.rand()); an.stop(t + 0.04);
       parts.push(an, ag); extra = parts;
+    } else if (k === "b") {             // sub-bass boom (dark style combat): slow sine drop, no click
+      o = ctx.createOscillator(); o.type = "sine"; o.frequency.setValueAtTime(64, t); o.frequency.exponentialRampToValueAtTime(37, t + 0.3);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vel * 0.9, t + 0.012); g.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+      o.connect(g); g.connect(P.drum); o.start(t); o.stop(t + 0.65); src = o;
+    } else if (k === "g") {             // gong / tam-tam: low inharmonic partials, slow shimmer
+      var gp = [], gb = 92 * (0.97 + P.rand() * 0.06);
+      g.gain.value = vel * 0.2; g.connect(P.drum); g.connect(P.wet);
+      [[1, 1, 3.6], [1.52, 0.7, 3.1], [2.31, 0.5, 2.6], [2.96, 0.35, 2.2], [4.13, 0.2, 1.6]].forEach(function (pr, j) {
+        var po = ctx.createOscillator(), pg = ctx.createGain(); po.type = "sine"; po.frequency.value = gb * pr[0];
+        pg.gain.setValueAtTime(0.0001, t); pg.gain.linearRampToValueAtTime(pr[1], t + (j ? 0.05 : 0.02)); pg.gain.exponentialRampToValueAtTime(0.001, t + pr[2]);
+        po.connect(pg); pg.connect(g); po.start(t); po.stop(t + pr[2] + 0.05); if (j === 0) src = po; else gp.push(po); gp.push(pg);
+      });
+      extra = gp;
+    } else if (k === "p") {             // clap: three quick band-passed noise bursts + a short tail
+      src = E.noiseSrc(); var cb = ctx.createBiquadFilter(); cb.type = "bandpass"; cb.frequency.value = 1500; cb.Q.value = 1.1;
+      g.gain.setValueAtTime(0.0001, t);
+      [0, 0.011, 0.023].forEach(function (dt, j) { g.gain.setValueAtTime(vel * (j < 2 ? 0.55 : 0.8), t + dt); g.gain.exponentialRampToValueAtTime(0.02, t + dt + 0.009); });
+      g.gain.setValueAtTime(vel * 0.45, t + 0.032); g.gain.exponentialRampToValueAtTime(0.0008, t + 0.2);
+      src.connect(cb); cb.connect(g); g.connect(P.drum); src.start(t, P.rand()); src.stop(t + 0.22); extra = cb;
     } else if (k === "i") {             // insect chitter: 3–5 tiny band-passed clicks at irregular spacing
       src = E.noiseSrc(); var bpi = ctx.createBiquadFilter(); bpi.type = "bandpass"; bpi.Q.value = 4; bpi.frequency.value = 4200 + P.rand() * 2000;
       var nc = 3 + Math.floor(P.rand() * 3), tc = t, lvl = vel * 0.9;
@@ -1080,6 +1425,10 @@
    * 5. LIVE CONTROLLER (WH.Audio)
    * ===================================================================================== */
   var ctx = null, E = null, unlocked = false, players = {}, curMood = null, curKind = null, wantMood = null;
+  var curStyle = "chip", curPKey = null, preview = null;       // music style (SPEC §29); players are cached per style + mood (chip keeps the plain mood name)
+  function pkey(style, mood) { return style === "chip" ? mood : style + ":" + mood; }
+  function playerFor(style, mood) { var k = pkey(style, mood); return players[k] || (players[k] = new Player(E, mood, style)); }
+  function knownStyle(id) { return STYLE_IDS.indexOf(id) >= 0 ? id : "chip"; }
   var lastSwitch = -1e9, pendingTimer = null, timer = null, lastType = 0, lastHover = 0;
   var musicVol = 0.5, sfxVol = 0.7, muted = false, failed = {}, files = {}, fileTimer = null;
   try { var saved = JSON.parse(root.localStorage.getItem(LS_KEY) || "{}"); muted = !!saved.muted; } catch (e) {}
@@ -1143,7 +1492,7 @@
   function stopCurrent(fadeSec) {
     if (!curMood) return;
     if (curKind === "file" && files[curMood]) { files[curMood].target = 0; files[curMood].fade = fadeSec; }
-    else if (players[curMood]) players[curMood].stop(ctx.currentTime, fadeSec);
+    else if (curPKey && players[curPKey]) players[curPKey].stop(ctx.currentTime, fadeSec);
   }
   function apply(mood, fadeMs) {
     if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
@@ -1155,11 +1504,52 @@
     if (!mood) { curKind = null; return; }
     var url = fileUrl(mood);
     if (url && startFile(mood, url, fadeSec)) { curKind = "file"; return; }
-    curKind = "synth";
-    var p = players[mood] || (players[mood] = new Player(E, mood));
+    curKind = "synth"; curPKey = pkey(curStyle, mood);
+    startPlayer(playerFor(curStyle, mood), fadeSec);
+  }
+  function startPlayer(p, fadeSec, seqIdx) {
     if (p.active && p.stopAt != null) p.halt();          // was fading out: restart from the top
-    if (!p.active) p.start(ctx.currentTime, fadeSec);
+    if (!p.active) p.start(ctx.currentTime, fadeSec, seqIdx);
     kick();
+  }
+
+  /* ---------- music styles (SPEC §29): setStyle crossfades the running mood; previewStyle plays a short sample ---------- */
+  function setStyle(id) {
+    id = knownStyle(id);
+    if (id === curStyle) return id;
+    curStyle = id;                                       // the module does not persist this; the UI keeps settings.musicStyle
+    if (E && unlocked && !preview && curMood && curKind === "synth") {
+      stopCurrent(1.5);                                  // old style fades out while the new one fades in (same mood, from the top)
+      curPKey = pkey(id, curMood);
+      startPlayer(playerFor(id, curMood), 1.5);
+    }
+    return id;
+  }
+  function endPreview(resume) {
+    if (!preview) return;
+    preview.timers.forEach(clearTimeout);
+    preview.players.forEach(function (p) { if (p.active) p.stop(ctx.currentTime, 0.3); });
+    preview = null;
+    if (resume && wantMood && !curMood && unlocked) apply(wantMood, 700);
+  }
+  function previewStyle(id) {
+    id = knownStyle(id);
+    if (!unlock() || muted) return false;
+    var had = !!preview;
+    endPreview(false);
+    if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
+    if (curMood) { stopCurrent(had ? 0.05 : 0.3); curMood = null; curKind = null; curPKey = null; }
+    var pv = preview = {timers: [], players: []};
+    var phrase = function (mood, secs, fade) {           // one phrase = the fullest section (A2) of that style's mood
+      var p = playerFor(id, mood);
+      if (p.active) p.halt();
+      p.start(ctx.currentTime, 0.12, 2); pv.players.push(p);
+      pv.timers.push(setTimeout(function () { if (preview === pv) p.stop(ctx.currentTime, fade); }, secs * 1000));
+    };
+    pv.timers.push(setTimeout(function () { if (preview === pv) phrase("calm", 3.9, 0.5); }, 350));
+    pv.timers.push(setTimeout(function () { if (preview === pv) phrase("tense", 3.8, 0.5); }, 4150));
+    pv.timers.push(setTimeout(function () { if (preview === pv) endPreview(true); }, 8700));   // ~8 s of sample, then the old style / mood resume
+    return true;
   }
 
   function setMood(mood, opts) {
@@ -1167,6 +1557,7 @@
     if (!mood || !SONGS[mood]) return false;
     wantMood = mood;
     if (!unlocked) return true;                          // will start on unlock()
+    if (preview) return "deferred";                      // the style preview never overlaps the running mood; wantMood resumes after it
     if (mood === curMood) { if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; } return true; }
     var since = nowMs() - lastSwitch;
     if (!opts.force && !URGENT[mood] && curMood && since < HYSTERESIS_MS) {
@@ -1189,7 +1580,7 @@
     }
     unlocked = true;
     if (!muted && !hidden() && ctx.state !== "running") { try { ctx.resume(); } catch (e) {} }
-    if (wantMood && !curMood) apply(wantMood, 800);
+    if (wantMood && !curMood && !preview) apply(wantMood, 800);
     return true;
   }
   function onVisibility() {
@@ -1254,11 +1645,11 @@
 
   /* ---------- offline rendering (tests: tools/dev/audio_render.py) ---------- */
   function OAC() { return root.OfflineAudioContext || root.webkitOfflineAudioContext; }
-  function renderMood(mood, seconds, sampleRate) {
+  function renderMood(mood, seconds, sampleRate, style) {
     var sr = sampleRate || 22050, C = OAC(), oc = new C(2, Math.ceil(sr * seconds), sr);
     var e = new Engine(oc, {music: 1, sfx: 1, seed: 99}); e.offline = true;
-    var p = new Player(e, mood); p.start(0, 0.01); p.pump(seconds);
-    return oc.startRendering().then(function (buf) { return {buffer: buf, loops: p.loops.slice(), info: songInfo(mood)}; });
+    var p = new Player(e, mood, style); p.start(0, 0.01); p.pump(seconds);
+    return oc.startRendering().then(function (buf) { return {buffer: buf, loops: p.loops.slice(), marks: p.marks.slice(), info: songInfo(mood, style), drops: e.drops}; });
   }
   function renderSfx(name, seconds, sampleRate) {
     var sr = sampleRate || 22050, C = OAC(), oc = new C(2, Math.ceil(sr * (seconds || 2.5)), sr);
@@ -1266,16 +1657,16 @@
     SFX[name](e, 0.01, {});
     return oc.startRendering();
   }
-  function songInfo(mood) {
-    var c = compileSong(mood);
-    return {mood: mood, key: c.key, bpm: c.bpm, loopBars: c.loopBars, introBars: c.introBars, loopSec: c.loopSec, introSec: c.introSec,
-            wobble: SONGS[mood].wobble || null, errors: c.errors.slice()};
+  function songInfo(mood, style) {
+    var c = compileSong(mood, style);
+    return {mood: mood, style: c.style, key: c.key, bpm: c.bpm, loopBars: c.loopBars, introBars: c.introBars, loopSec: c.loopSec, introSec: c.introSec,
+            wobble: songOf(mood, style).wobble || null, errors: c.errors.slice()};
   }
 
   WH.Audio = {
     unlock: unlock,
     setMood: setMood,
-    stop: function (opts) { wantMood = null; if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; } if (E) { stopCurrent(((opts && opts.fade) || 1000) / 1000); curMood = null; curKind = null; } },
+    stop: function (opts) { wantMood = null; endPreview(false); if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; } if (E) { stopCurrent(((opts && opts.fade) || 1000) / 1000); curMood = null; curKind = null; } },
     sfx: sfx,
     setMusicVolume: function (v) { musicVol = Math.max(0, Math.min(1, +v || 0)); if (E) E.setMusic(musicVol); return musicVol; },
     setSfxVolume: function (v) { sfxVol = Math.max(0, Math.min(1, +v || 0)); if (E) E.setSfx(sfxVol); return sfxVol; },
@@ -1290,8 +1681,14 @@
     moods: MOODS.slice(),
     sfxNames: SFX_NAMES.slice(),
     songInfo: songInfo,
+    styles: STYLE_LIST,
+    getStyles: function () { return STYLE_LIST.map(function (s) { return {id: s.id, name: {zh: s.name.zh, en: s.name.en}, desc: {zh: s.desc.zh, en: s.desc.en}}; }); },
+    getStyle: function () { return curStyle; },
+    setStyle: setStyle,
+    previewStyle: previewStyle,
+    isPreviewing: function () { return !!preview; },
     // internals for tools/dev (not for game code)
-    _songs: SONGS, _sfx: SFX, _compile: compileSong, _render: renderMood, _renderSfx: renderSfx,
+    _songs: SONGS, _styleSong: songOf, _sfx: SFX, _compile: compileSong, _render: renderMood, _renderSfx: renderSfx,
     _ctx: function () { return ctx; }, _players: function () { return players; }
   };
 })(typeof window !== "undefined" ? window : globalThis);
