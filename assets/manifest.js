@@ -139,7 +139,15 @@ WH.registerScenes({
   gsc_chapel: {"src": "assets/scenes/gsc_chapel.png", "w": 192, "h": 108, "name": {"zh": "地下礼拜堂", "en": "Underground Chapel"}},
   forge_floor: {"src": "assets/scenes/forge_floor.png", "w": 192, "h": 108, "name": {"zh": "锻造车间", "en": "Forge Floor"}},
   mars_vista: {"src": "assets/scenes/mars_vista.png", "w": 192, "h": 108, "name": {"zh": "火星远景", "en": "Mars Vista"}},
-  tech_vault: {"src": "assets/scenes/tech_vault.png", "w": 192, "h": 108, "name": {"zh": "科技宝库", "en": "Archeotech Vault"}}
+  tech_vault: {"src": "assets/scenes/tech_vault.png", "w": 192, "h": 108, "name": {"zh": "科技宝库", "en": "Archeotech Vault"}},
+  end_eld_end_lost: {"src": "assets/endings/eld_end_lost.png", "w": 192, "h": 108, "name": {"zh": "迷失网道", "en": "Lost in the Webway"}},
+  end_gsc_end_claim_tzeentch: {"src": "assets/endings/gsc_end_claim_tzeentch.png", "w": 192, "h": 108, "name": {"zh": "影子里的缝", "en": "The Crack in the Shadow"}},
+  end_imp_end_hold: {"src": "assets/endings/imp_end_hold.png", "w": 192, "h": 108, "name": {"zh": "防线未破", "en": "The Line Held"}},
+  end_imp_end_claim_khorne: {"src": "assets/endings/imp_end_claim_khorne.png", "w": 192, "h": 108, "name": {"zh": "无名的冲锋", "en": "The Endless Charge"}},
+  end_imp_death_hp: {"src": "assets/endings/imp_death_hp.png", "w": 192, "h": 108, "name": {"zh": "无名之墓", "en": "Unmarked Grave"}},
+  end_mech_death_hp: {"src": "assets/endings/mech_death_hp.png", "w": 192, "h": 108, "name": {"zh": "耗材", "en": "Consumables"}},
+  end_nec_end_truth: {"src": "assets/endings/nec_end_truth.png", "w": 192, "h": 108, "name": {"zh": "活着的抄本", "en": "The Living Copy"}},
+  end_ork_end_grot: {"src": "assets/endings/ork_end_grot.png", "w": 192, "h": 108, "name": {"zh": "大地精", "en": "Big Grot"}}
 });
 
 WH.registerUI({

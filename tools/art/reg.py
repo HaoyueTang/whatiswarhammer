@@ -2,6 +2,7 @@
 SPRITES = {}   # key -> dict(fn, w, h, zh, en, group)
 SCENES = {}    # key -> dict(fn, zh, en)
 UI = {}        # key -> dict(fn)
+ENDINGS = {}   # ending id -> dict(fn, module)   (SPEC §31; filled by endings_<route>.py)
 
 _order = []
 
@@ -25,5 +26,15 @@ def scene(key, zh, en):
 def ui(key):
     def deco(fn):
         UI[key] = dict(fn=fn)
+        return fn
+    return deco
+
+
+def ending(eid):
+    """Register an ending illustration (SPEC §31): the function receives an endkit.End context
+    (e.c canvas 192x108, e.rnd / e.rng(name) / e.noise(k) seeded from the ending id, e.kind, e.route)
+    and draws on e.c; it may also return a PIL image / Canvas instead.  The builder quantises to <= 32 colours."""
+    def deco(fn):
+        ENDINGS[eid] = dict(fn=fn, module=fn.__module__)
         return fn
     return deco
