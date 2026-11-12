@@ -13,7 +13,8 @@
   var CLAIM_GOTO = {};
   ["khorne", "nurgle", "tzeentch", "slaanesh"].forEach(function (g) {
     CLAIM_GOTO[g] = {imperium: "imp_end_claim_" + g, chaos: "cha_claim_" + g, tau: "tau_end_claim_" + g,
-                     aeldari: "eld_end_claim_" + g, necrons: "nec_end_claim_" + g};
+                     aeldari: "eld_end_claim_" + g, necrons: "nec_end_claim_" + g,
+                     orks: "ork_end_claim_" + g, gsc: "gsc_end_claim_" + g, mechanicus: "mech_end_claim_" + g};
   });
   function A(c, g) { c.require = {notFlag: "resisted_" + g}; c.hideIfLocked = true; c.goto = CLAIM_GOTO[g]; return c; }
   function B(c, g) { c.require = {notFlag: "resisted_" + g}; c.hideIfLocked = true; return c; }
