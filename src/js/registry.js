@@ -4,7 +4,7 @@
  */
 (function (root) {
   var WH = root.WH = root.WH || {};
-  WH.VERSION = "0.3.0";
+  WH.VERSION = "0.3.1";
   WH.SAVE_SCHEMA = 2;
 
   WH.factions = WH.factions || {};   // id -> faction object (see SPEC §3)
