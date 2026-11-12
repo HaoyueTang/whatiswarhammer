@@ -20,7 +20,7 @@
 
   if (/[?&]sample=1(&|$)/.test(location.search)) {
     WH.SAMPLE = true;
-    WH.factions = {}; WH.events = []; WH.codex = {}; WH.rumors = [];
+    WH.factions = {}; WH.events = []; WH.codex = {}; WH.rumors = []; WH.achievements = []; delete WH.difficulty;
     window.WH_LOAD_ERRORS = [];
     var s = document.createElement("script");
     s.src = "tools/dev/sample_data.js";

@@ -10,7 +10,8 @@
  * ending), resist (taint −40, resisted_khorne) and a forced second-time choice (require flag resisted_khorne, goto); smp_end_claim_khorne.
  * v0.2.2 (SPEC §23): origin caps — scav max hp 125 / sanity 85 (starts hp 115, below its cap on purpose), clerk max hp 85; budgets −5 / 0.
  * v0.2.2 (SPEC §20): 3 chronicle entries (tags ["chronicle"], date, sortKey; M31 + M41; no cat / sprite on purpose → seal on the
- * lore card) and 2 rumours (one route-only, one "*" with a chapter window) that unlock two of them; chr_sample_heresy stays locked.
+ * lore card) and 3 rumours with SPEC §20b `when`: cadia (smp_004, score 2), wall (trench/ork, smp_007) and never (matches no
+ * node, so chr_sample_heresy stays locked).
  */
 WH.registerCodex({
   smp_commissar:  {cat: "leader", faction: "imperium", race: "imperium", type: "unit", sprite: "commissar",
@@ -74,12 +75,31 @@ WH.registerCodex({
 /* SPEC §20 rumours (normally data/rumors.js) */
 WH.registerRumors([
   {id: "smp_rum_cadia", factions: ["sample"], minChapter: 2,
+   when: {sprites: ["commissar", "guardsman"], keywords: {zh: ["政委", "卡迪亚"], en: ["Commissar", "Cadia"]}},     // smp_004: sprite + keyword = 2
    speaker: {zh: "独臂老兵", en: "One-armed veteran"},
    text: {zh: "“卡迪亚没倒，”他把杯子扣在桌上，“是星球先碎的。人还站着。”", en: "\"Cadia didn't fall,\" he says, slamming his cup down. \"The planet broke first. We were still standing.\""},
    codex: ["chr_sample_cadia"]},
-  {id: "smp_rum_wall", factions: ["*"], minChapter: 2, maxChapter: 3, speaker: null,
+  {id: "smp_rum_wall", factions: ["*"], minChapter: 2, maxChapter: 4, speaker: null,
+   when: {scenes: ["trench"], sprites: ["ork", "ork_boss"], keywords: {zh: ["兽人", "绿皮"], en: ["Ork"]}},      // smp_007 (trench + ork)
    text: {zh: "墙上的炭笔字：记住阿玛迦顿。绿皮总会回来。", en: "Charcoal on the wall: REMEMBER ARMAGEDDON. THE GREENSKINS ALWAYS COME BACK."},
-   codex: ["chr_sample_armageddon"]}
+   codex: ["chr_sample_armageddon"]},
+  /* matches no sample node (craftworld scene / seer sprite / "灵族") — must never appear; maxChapter 3 tests the window */
+  {id: "smp_rum_never", factions: ["sample"], minChapter: 1, maxChapter: 3, speaker: {zh: "陌生的吟游者", en: "A strange singer"},
+   when: {scenes: ["craftworld"], sprites: ["aeldari_seer"], keywords: {zh: ["灵族"], en: ["Aeldari"]}},
+   text: {zh: "她唱着一个星球如何一夜之间被欲望吞没。", en: "She sings of a world swallowed by desire in a single night."},
+   codex: ["chr_sample_heresy"]}
+]);
+
+/* SPEC §25 sample achievements (normally data/achievements.js) — one per interesting cond type */
+WH.registerAchievements([
+  {id: "ach_smp_first", tier: "bronze", icon: "icon_clock", hidden: false, name: {zh: "第一条命", en: "First Life"}, desc: {zh: "完成一局。", en: "Finish a run."}, cond: {runs: {count: 1}}},
+  {id: "ach_smp_runs3", tier: "silver", icon: "icon_save", hidden: false, name: {zh: "三条命", en: "Three Lives"}, desc: {zh: "完成三局。", en: "Finish three runs."}, cond: {runs: {count: 3}}},
+  {id: "ach_smp_good", tier: "bronze", icon: "omen_emperor", hidden: false, name: {zh: "活着", en: "Alive"}, desc: {zh: "达成好结局。", en: "Reach a good ending."}, cond: {endingKind: {kind: "good", count: 1}}},
+  {id: "ach_smp_evac", tier: "silver", icon: "commissar", hidden: false, name: {zh: "三百人", en: "Three Hundred"}, desc: {zh: "带平民撤离。", en: "Evacuate the civilians."}, cond: {ending: {id: "smp_end_good_evac"}}},
+  {id: "ach_smp_hp", tier: "bronze", icon: "icon_hp", hidden: false, name: {zh: "血流尽了", en: "Bled Dry"}, desc: {zh: "因伤死去一次。", en: "Die of wounds once."}, cond: {deaths: {count: 1, cause: "hp", faction: "sample"}}},
+  {id: "ach_smp_codex", tier: "silver", icon: "icon_codex", hidden: false, name: {zh: "略知一二", en: "A Little Learning"}, desc: {zh: "解锁一半图鉴。", en: "Unlock half the codex."}, cond: {codexPct: {pct: 50}}},
+  {id: "ach_smp_all", tier: "gold", icon: "omen_black_crusade", hidden: false, name: {zh: "全部结局", en: "Every Ending"}, desc: {zh: "看完测试阵营的全部结局。", en: "See every sample ending."}, cond: {endingsAll: {faction: "sample"}}},
+  {id: "ach_smp_taint", tier: "gold", icon: "sigil_undivided", hidden: true, name: {zh: "四神都在看", en: "All Four Watching"}, desc: {zh: "以总污染≥200结束一局。", en: "End a run with total taint ≥ 200."}, cond: {taintSum: {min: 200}}}
 ]);
 
 WH.registerEvents([
@@ -140,6 +160,7 @@ WH.registerFaction({
   renownHelp: {zh: "信仰代表你对帝皇的虔诚与名声。祈祷、服从、勇敢会提高它；怀疑和逃避会降低它。信仰够高时，能解锁领导众人的选项与更好的结局。",
                en: "Faith is your devotion and standing before the Emperor. Prayer, obedience and courage raise it; doubt and flight lower it. High Faith unlocks leadership choices and better endings."},
   deathNodes: {hp: "smp_death_hp", sanity: "smp_death_sanity", corruption: "smp_death_corruption"},
+  world: {zh: "第七巢都", en: "Hive Seven"},                        // SPEC §27 home world (echo text)
   learn: {leaders: ["smp_emperor", "smp_commissar"], enemies: ["smp_ork", "smp_cultist"], boss: ["smp_abaddon"]},
   origins: [
     {id: "hive", name: {zh: "巢都工人", en: "Hive worker"}, desc: {zh: "十六小时一班，配额永远在涨。", en: "Sixteen-hour shifts, and the quota always rises."},

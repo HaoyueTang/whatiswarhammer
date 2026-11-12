@@ -30,8 +30,11 @@ and in about an hour you'll know who rules, who they fight, and what is coming f
 | **T'au Empire** | a human colonist living under the Greater Good | the Ethereals, the castes, Farsight, and something hungry from beyond the stars |
 | **Aeldari** | a survivor of a world the farseers chose to let die | the Farseers, the Path, the webway, and She Who Thirsts |
 | **Necrons** | an archaeologist on a dig that was never dead | the Silent King, the dynasties, the collector, and a star god in a cage |
+| **Orks** | a human scrap-trader who is useful, for now, in an ork scrapyard | Warbosses, Meks, Weirdboyz, Gork and Mork, and why the green tide never stops |
+| **Genestealer Cult** | a miner whose family gives him soup and a violet sky | the Patriarch, the Magus, the Brood, and what the star children are waiting for |
+| **Adeptus Mechanicus** | a forge-world menial one red mark away from servitude | the Omnissiah, the Fabricator-General, tech-heresy, and the things in the machines |
 
-Each side has **three origins** to start from — a different prologue, different strengths, and a few choices only you will see.
+The eight sides share one sector (Arcosa, 111–115.M42), so one story's world can show up in another's. Each side has **three origins** to start from — a different prologue, different strengths, and a few choices only you will see.
 
 ### What's inside
 - **Choices with a price.** Health, Sanity, Corruption and a faction stat. Run out of the first two, or max out the third, and it's over. Every choice shows you what it cost.
@@ -39,6 +42,8 @@ Each side has **three origins** to start from — a different prologue, differen
 - **The gods are watching.** Khorne, Nurgle, Tzeentch and Slaanesh make you offers. Some are very generous. You won't see what they take until the end.
 - **Time doesn't behave.** Hours, days, sometimes years pass between scenes. Warp travel is worse.
 - **Difficulty.** Skulls on each side and origin tell you how deadly it is.
+- **Achievements.** 60 of them, from the sensible to the unwise. Keep an eye on the ones with question marks.
+- **Echoes.** Sometimes you'll hear, in passing, about someone who died on another route. Not every time, and not always kindly.
 - **Codex.** Every leader, monster, god and place you meet gets a short card, explained by what people do, not by lectures.
 - **Pixel art and chiptune.** Original art and music; the soundtrack changes with the mood.
 - **Saves.** Three slots plus autosave. Updates never wipe your saves or records. Progress lives in your browser at the address you play from (local file, website…); use Settings → Data to export it and carry it elsewhere.
@@ -49,7 +54,7 @@ Each side has **three origins** to start from — a different prologue, differen
 - Dying is part of learning. The codex keeps what you discovered.
 
 ### Coming soon
-Orks, the Genestealer Cult, and more.
+More sides and more stories.
 
 ### Disclaimer
 Unofficial, non-commercial fan project, not affiliated with or endorsed by Games Workshop.
@@ -83,8 +88,11 @@ Warhammer 40,000 and associated names are trademarks of Games Workshop Limited. 
 | **钛帝国** | 生活在"大义"之下的人类殖民者 | 以太族、种姓、远见，以及从群星之外饿来的东西 |
 | **灵族** | 一颗被先知判了死刑的星球上的幸存者 | 先知、道途、网道，以及"渴求者" |
 | **死灵** | 一处"从未死去"的考古现场里的考古学家 | 寂静之王、王朝、收藏家，以及笼中的星神 |
+| **兽人** | 在兽人废铁场里暂时"有用"的人类废品贩子 | 战酋、机械师、怪小子、格克和莫克，以及绿潮为什么停不下来 |
+| **基因窃取者教派** | 家人给他一碗汤和一片紫色天空的矿工 | 始祖、大贤者、血脉，以及星之子在等什么 |
+| **机械神教** | 离沦为机仆只差一次红的铸造世界杂役 | 万机之神、总主管、科技异端，以及机器里的东西 |
 
-每个阵营都有**三种出身**可选——不同的序章、不同的长处，以及只有你能看到的选项。
+八个阵营共用同一片星区（阿尔科萨，111–115.M42），所以一条故事里的世界会出现在另一条里。每个阵营都有**三种出身**可选——不同的序章、不同的长处，以及只有你能看到的选项。
 
 ### 游戏内容
 - **每个选择都有代价。** 生命、理智、腐化，加一个阵营属性。前两个归零，或者腐化满了，就结束了。每次选择后你都会看到它的后果。
@@ -92,6 +100,8 @@ Warhammer 40,000 and associated names are trademarks of Games Workshop Limited. 
 - **诸神在注视。** 恐虐、纳垢、奸奇、色孽会给你开条件。有些条件非常慷慨。它们拿走了什么，要到结局你才知道。
 - **时间不老实。** 场景之间可能过去几小时、几天，有时是几年。亚空间航行更糟。
 - **难度。** 每个阵营和出身上的骷髅数告诉你它有多致命。
+- **成就。** 60 个，从明智到不明智都有。留意那些带问号的。
+- **回响。** 偶尔你会路过地听说，另一条路线里有人死了。不是每次都有，也不总是善意的。
 - **图鉴。** 遇到的每个领袖、怪物、神祇和地点都有一张短卡片——靠人物的言行来讲，不靠说教。
 - **像素美术与芯片音乐。** 全部原创，配乐随剧情情绪变化。
 - **存档。** 三个存档位加自动存档。版本更新不会清掉你的存档和记录。进度保存在你玩游戏的浏览器和地址里（本地文件、网页……），想换地方玩，用 设置 → 数据 导出再导入。
@@ -102,7 +112,7 @@ Warhammer 40,000 and associated names are trademarks of Games Workshop Limited. 
 - 死亡是学习的一部分。图鉴会留住你发现过的东西。
 
 ### 即将推出
-兽人、基因窃取者教派，以及更多内容。
+更多阵营，更多故事。
 
 ### 声明
 非官方、非商业的粉丝作品，与 Games Workshop 无关，也未获其认可。

@@ -110,6 +110,7 @@
     if (rec.max !== undefined && (!rec.max || typeof rec.max !== "object" || Array.isArray(rec.max))) return {ok: false, error: "err_schema"};
     if (rec.max === undefined) rec.max = {hp: 100, sanity: 100};
     if (rec.rumor !== undefined && rec.rumor !== null && typeof rec.rumor !== "string") return {ok: false, error: "err_schema"};
+    if (rec.rumorLog !== undefined && !Array.isArray(rec.rumorLog)) return {ok: false, error: "err_schema"};   // SPEC §20b
     return {ok: true, rec: rec};
   }
 
@@ -141,7 +142,7 @@
     /* settings */
     defaultSettings: function () {
       var nav = (root.navigator && (root.navigator.language || "")) || "";
-      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true, rumors: true, tzeentchJoke: true};
+      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true};
     },
     loadSettings: function () {
       var d = Save.defaultSettings(), s = getJSON("settings") || {};
@@ -186,6 +187,18 @@
       Save.codexSeen().forEach(function (id) { seen[id] = 1; });
       return Save.codexGlobal().filter(function (id) { return !seen[id]; });
     },
+
+    /* SPEC §25 achievements: whatiswh.achievements = {id: ISO date unlocked}; whatiswh.achStats = per-run extras that
+     * endingStats can't give (resists, rumours heard, origins/flags finished, fastest run, lowest stat at a good end, max taint) */
+    achievements: function () { var o = getJSON("achievements"); return (o && typeof o === "object" && !Array.isArray(o)) ? o : {}; },
+    markAchievements: function (ids) {
+      var o = Save.achievements(), added = [], now = new Date().toISOString();
+      (ids || []).forEach(function (id) { if (!o[id]) { o[id] = now; added.push(id); } });
+      if (added.length) set("achievements", JSON.stringify(o));
+      return added;
+    },
+    achStats: function () { var o = getJSON("achStats"); return (o && typeof o === "object" && !Array.isArray(o)) ? o : null; },
+    setAchStats: function (o) { set("achStats", JSON.stringify(o)); },
 
     /* SPEC §21: Tzeentch easter-egg tiers already triggered (whatiswh.eggTiers = {tierId: ISO date}) */
     eggTiers: function () { var o = getJSON("eggTiers"); return (o && typeof o === "object" && !Array.isArray(o)) ? o : {}; },
@@ -319,7 +332,16 @@
       };
       sum.codex = union("codexGlobal");
       union("codexSeen");
-      mergeObj("tipsSeen"); mergeObj("eggTiers");
+      mergeObj("tipsSeen"); mergeObj("eggTiers"); mergeObj("achievements");
+      if (d.achStats && typeof d.achStats === "object") {          // SPEC §25 counters: max / union / min — never lowered
+        var a = Save.achStats() || {}, b = d.achStats;
+        ["resists", "rumorsHeard", "taintMax"].forEach(function (k) { if ((+b[k] || 0) > (+a[k] || 0)) a[k] = +b[k]; });
+        if (typeof b.fastest === "number" && (typeof a.fastest !== "number" || b.fastest < a.fastest)) a.fastest = b.fastest;
+        ["origins", "flags"].forEach(function (k) { a[k] = a[k] || {}; for (var f in (b[k] || {})) { a[k][f] = a[k][f] || {}; for (var x in b[k][f]) a[k][f][x] = 1; } });
+        a.surviveMin = a.surviveMin || {};
+        for (var sk in (b.surviveMin || {})) if (typeof b.surviveMin[sk] === "number" && (typeof a.surviveMin[sk] !== "number" || b.surviveMin[sk] < a.surviveMin[sk])) a.surviveMin[sk] = b.surviveMin[sk];
+        Save.setAchStats(a);
+      }
       // run records
       if (Array.isArray(d.runs)) {
         var seen = getJSON("runsSeen"); if (!Array.isArray(seen)) seen = [];
@@ -371,7 +393,7 @@
       });
       if (d.settings && get("settings") === null) set("settings", JSON.stringify(d.settings));
       // any other key we don't know: copy only if missing here
-      var known = ["codexGlobal", "codexSeen", "tipsSeen", "eggTiers", "runs", "runsSeen", "runStats", "endingStats", "settings", "lastVersion"].concat(SLOTS);
+      var known = ["codexGlobal", "codexSeen", "tipsSeen", "eggTiers", "achievements", "achStats", "runs", "runsSeen", "runStats", "endingStats", "settings", "lastVersion"].concat(SLOTS);
       for (var k in d) {
         if (known.indexOf(k) >= 0 || k.indexOf("corrupt.") === 0 || get(k) !== null) continue;
         set(k, typeof d[k] === "string" ? d[k] : JSON.stringify(d[k])); sum.keys++;

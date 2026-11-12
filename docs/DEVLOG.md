@@ -493,3 +493,163 @@ Newest at the bottom. Format: `## YYYY-MM-DD · role` then short bullets (what c
 - v0.2.2 = stable §20–§23 snapshot (committed from a copy while §24 was in progress). v0.2.3 = §24 skulls + origin-card delta baseline (neutral 100/100/0/10) + fresh-install toast fix.
 - Gates: validate PASS (0 err), smoke real 87/87, sample 253/253, 0 console errors.
 - Public README gained the progress-per-browser note and difficulty line.
+- **text-lore follow-up (SPEC §20b, relevance):** every rumour in `data/rumors.js` now has a `when` (helper `W(scenes, sprites, codex, zh[], en[], flags)`). Each `when` points at the rumour's topic using scene and sprite keys, codex ids and words that actually occur in that route's nodes. Some examples:
+  - Armageddon ↔ ork sprites, trench, "兽人".
+  - Damocles ↔ tau_water_caste, place_damocles_gulf, "海湾".
+  - The Fall ↔ aeldari_guardian, eld_the_fall, "陨落/色孽".
+  - War in Heaven ↔ cryptek, nec_ctan, "星神/天堂之战".
+  - Gallery placards ↔ stasis_gallery, omen_collector.
+  - Bug words use 虫子/虫群/虫族/虫潮, not 虫, because 虫 also matches the necrons' 甲虫.
+- **Shared rumours** now list only the routes where their topic actually appears, instead of `["*"]` (0 remain as `"*"`). As a result, `validate.js` counts them as route rumours and prints the "8–12 per route" / "0 shared" warnings. Those warnings are a counting artefact.
+- **Text changes:** some chapter windows were widened or moved (e.g. the Cadia graffiti now ch6–8, where the Black Crusade is), and 5 speakers were renamed to fit their trigger scenes. No rumour text was changed.
+- **Coverage:** every rumour matches 3.2–15.8% of its route's nodes; none are unreachable, none are too generic. `validate.js` simulation: 6.3–7.8 rumours per run on every route (target 4–8), and 54–68% of them match on ≥2 criteria.
+
+## 2026-11-11 · text (achievements, §25)
+- **New file:** `data/achievements.js` with 60 achievements: 18 bronze, 26 silver, 16 gold; 15 are hidden. All 19 §25 condition types are used.
+- **Themes:**
+  - Milestones (5).
+  - Every ending on each of the 8 routes (gold).
+  - All origins on each of the 8 routes.
+  - Gods (10): 4 claims, Ork-route Khorne claim, claimAll, chosen, resist ×2, taintSum. All hidden, because taint is a secret mechanic.
+  - Deaths (14): 1/25/100, each cause, one per route.
+  - Grit/speed (2).
+  - Hidden moments (3): servitor ending, savedBaby, namedDrone.
+  - Knowledge (8): codex 25/50/100, places, deities, Tyranids, chronicle, rumours.
+  - Tzeentch egg 50/100.
+- **Registry fallback:** if `WH.registerAchievements` is missing, the file pushes into `WH.achievements` (array). The registry and `index.html` still need the real API and a `<script src="data/achievements.js">` after the data files (web/lead).
+- **v0.3 routes:** `orks` / `gsc` / `mechanicus` achievements use only faction-level conditions plus `ork_end_claim_khorne`. Their icons are the fixed §26 keys `player_orks`, `player_gsc`, `player_mechanicus`, `omen_waaagh`, `omen_four_armed` and `omen_omnissiah`, which are not yet in the manifest.
+- **Semantics assumed (engine to confirm):**
+  - `endingKind.count` / `deaths.count` / `runs.count` count occurrences, not distinct endings. The descriptions are worded as "N times".
+  - `egg.tier` uses the §21 thresholds (50/100).
+  - `fast.maxNodes` counts story nodes visited, including the start node.
+- **Check:** a /tmp vm checker (registry + manifest + all data + stub) reports 0 errors and 16 warnings. Every warning is about a pending v0.3 faction, an icon key or a claim ending.
+
+## 2026-11-11 · audio (v0.3)
+- **New moods** (original, 32-bar A/B/A2/B2 like the others; calm-type, so they get the 8 s hysteresis):
+  - `orks` "Scrap-Heap Stomp": G minor with blues colour, 140 bpm, 55 s loop. A runs a Gm–Gm/F#–Gm/F–C/E line-cliché into Eb–Db (the b5 chord)–D7. B is half-time Cm–Bb–Ab–G…Db–C–D. A brassy 50 % square lead doubled an octave down, offbeat horn stabs on the claps, a "grot" kazoo (12.5 % pulse, 45-cent 11 Hz vibrato) heckling in A2/B2, stomp-stomp-clap drums, big floor toms and scrap clanks.
+  - `gsc` "Hymn Under the Mine": an F major hymn that keeps going wrong, 66 bpm, 116 s loop. iv minor (Bbm), bII (Gb) instead of V before the final F, bVI (Db). Organ chords, a flute-organ hymn voice, and a toll bell whose octave is flattened a semitone (stack 11). In A2/B2 the hymn moves to `lead2`, which adds a quiet detuned tritone shadow beneath every note (organum at the "wrong" interval), and the organ thins to 12.5 %. Insect chitter clicks grow denser on each pass.
+  - `mechanicus` "Canticle of the Cogitator": F# aeolian with a C# major turn, 100 bpm, 77 s loop. A detuned choir-pulse chant in parallel fifths (stack 7) on a reciting tone in even 8th syllables. A 12.5 % "data" ostinato whose root/octave pattern spells a different binary word per section. A slow choir pad, machine kick, metal ticks, forge-anvil clangs on 2 & 4, and a glitch scan (z) in A2/B2.
+- **Engine** (data-driven, backwards compatible): new drum keys `T` (big floor tom 118→50 Hz with a skin thwack), `a` (anvil: four inharmonic free-bar partials 1 / 2.76 / 5.4 / 8.93 plus a metallic transient) and `i` (insect chitter: 3–5 band-passed noise clicks 4.2–6.2 kHz at irregular 12–28 ms spacing). Drum cleanup now accepts a node list.
+- **moodFor, new order:** … necron scenes → **v0.3 route scenes** (`ork_scrapyard ork_fort` → orks, `mine_shaft gsc_chapel` → gsc, `forge_floor mars_vista tech_vault` → mechanicus) → tense / sanity < 30 → faction default (**`orks`, `gsc`, `mechanicus`**) → calm. New boss-class foes: `ork_nob gsc_patriarch gsc_primus daemon_engine kastelan_robot dark_mechanicus`. Battle, boss, ending, warp and `node.music` keep priority.
+- **Tests:**
+  - `audio_check.js`: 16 moods, 17 SFX, 70 `moodFor` cases (31 new). New-mood checks: tempo window (orks 130–150, gsc 60–72, mechanicus 90–104), ≥ 75 % on-beat chord tones, A/B/A2/B2 order, 32 bars, signature drum voices actually played (orks T/k/s, gsc i, mechanicus a/m) and signature stacks (gsc 11 and −6, mechanicus 7). orks 100 %, gsc 96 %, mechanicus 100 % on-beat chord tones. The story-data tally now loads each faction file separately, so a half-written file only warns for itself. 0 errors.
+  - `audio_render.py`: live checks that ork_scrapyard/gsc_chapel/forge_floor → new mood plays. New stats columns: share of spectral magnitude below 200 Hz and onsets/s.
+    - orks: peak −2.0 dBFS, RMS −15.4, centroid ≈ 1890 Hz, 4.4 onsets/s.
+    - gsc: peak −4.2, RMS −14.5, ≈ 790 Hz, 0.2 onsets/s.
+    - mechanicus: peak −3.5, RMS −15.9, ≈ 1110 Hz, 2.4 onsets/s.
+    - All three have 0 clipped samples, no gaps, exact loop length and loop-restart similarity ≥ 0.99. 0 failed checks.
+  - `audio_test.html`: the scene row gains the 10 v0.3 scene/faction buttons.
+- Still needs a human listen (`tools/dev/audio_test.html`), especially the gsc tritone shadow and the orks grot kazoo.
+
+## 2026-11-11 · continuity editor (§27 shared sector + echoes)
+- **New `data/sector.js`** (already loaded by index.html/validator after easter_tzeentch):
+  - codex `place_arcosa` (阿尔科萨星区 / The Arcosa Sector; race imperium, scene void; text 38 zh, more 84 zh). Unlocked at imp_701, cha_501, tau_601, eld_201, nec_106 (each a node every run passes).
+  - Every existing route world already had a place entry, so none were duplicated: place_aurex, place_dustfall, place_vessel, place_hesper, place_carcharos, place_aldrin, place_dalnor, place_valda, place_thessa_null.
+  - `WH.sector.worlds` is a plain lookup table (name, codex id, routes). New routes can add themselves from their faction file with `WH.sector.worlds.<id> = {...}`; sector.js merges, so load order doesn't matter.
+  - `WH.echoGods` maps each god to its {god} name.
+  - `WH.echoTemplates`: 14 framings, 10 normal and 4 `claim:true`. Fields: `factions`, which works like rumours (["*"] = any route).
+    - Normal: vox, casualty list, tavern, graffiti, sermon, Choir, xenos, T'au statistics, cryptek catalogue, seer.
+    - Claim: whisper, graffiti, xenos, Choir.
+    - Eligible per route (normal/claim): imperium 5/2, chaos 5/3, tau 7/3, aeldari 7/3, necrons 7/3. Future routes get the 4 generic normal templates and 2 generic claim ones.
+  - Templates need only a plain string replace.
+    - en: {role} and {cause} always start a fragment, so their capitals read right and there are no articles.
+    - Claim templates don't use {cause}.
+    - Filled with every current origin role/world and every bad/death cause, the longest is 47 zh / 24 en words, which leaves 3–11 zh spare for longer future world names.
+- **World fields.** imperium Aurex Secundus · chaos Carcharos · tau Dal'nor · aeldari Valda · necrons Thessa Null (zh 忒萨零号, as in codex_necrons — SPEC §27 says 塞莎零号).
+  - Origin override: the necrons convict → Carcharos.
+  - The Imperium farmer's-child origin is **not** Hesper: the text puts the farm on Aurex's ash plains, with the hive recruiting station.
+- **Cross-references.** All new lines are results on choices that had none, except the three marked as node-text edits, which stay ≤90 zh.
+  - **Imperium**
+    - imp_209: Vosk says scattered orks drift toward the Gulf.
+    - imp_603: Hesper burned; Valda's grain ships missing a year.
+    - imp_710 "hold the cathedral": refugees from Carcharos.
+  - **Chaos**
+    - cha_105, cha_o_deserter_4, cha_o_scribe_4: the tithe sends a regiment to Dustfall.
+    - cha_610: after Aldrin the Warmaster's main host goes to Aurex.
+  - **T'au**
+    - tau_301 (node text): the ork rock came from the direction of Dustfall; unlocks place_dustfall.
+    - tau_601 (node text): the biomass is bearing from Hesper; unlocks place_hesper.
+    - tau_o_trader_1: Aurex Manufactorum Six power cells under the counter.
+  - **Aeldari**
+    - eld_101 "threshing yard": tithe sacks stamped for Aurex, no ship.
+    - eld_o_pilgrim_2: a holy medal from Aldrin.
+  - **Necrons**
+    - nec_o_convict_1 (node text): the governor of Carcharos sold the convicts; unlocks place_carcharos.
+    - nec_106 "say nothing": a forge world paid for the dig (unnamed until the Mechanicus route names its world).
+    - nec_309 / nec_310: crypteks mention another tomb harvesting Valda.
+- **Cause strings that read badly in third person:** nec_end_metal "Lost your soul to the metal" and nec_end_inquisition "Executed for what you knew". Suggested: "Soul lost to the metal" / "Executed for knowing too much". The zh is fine.
+
+## 2026-11-11 · art (v0.3: SPEC §26 Orks · Genestealer Cult · Mechanicus)
+- All §26 art delivered: 19 character sprites + 7 omens (26 sprite keys), 7 scenes, 3 icons. Totals are now 102 sprites, 34 scenes and 15 UI icons. `assets/manifest.js` (with `name {zh,en}`) and `tools/art/contact_sheet.png` are regenerated. `build_all.py --check` now covers §7 + §14 + §26 (`SPEC26_*` lists, appended so existing manifest order is unchanged).
+- All 116 pre-existing PNGs are **byte-identical** (md5 against a pre-build snapshot). The manifest differs only by the appended entries: stripping the new keys gives the old file's md5 exactly.
+- New modules, all registered in `build_all.MODULES`:
+  - `chars_orks.py`: player_orks, ork_mek, ork_weirdboy, ork_nob(64), gretchin(32), squig(32). It reuses `chars_xenos.ork_head` and adds a `grin()` helper (open toothy grin with tusks) and `hazard_band()`.
+  - `chars_gsc.py`: player_gsc, gsc_neophyte, gsc_acolyte, gsc_magus, gsc_primus(64), gsc_patriarch(96). It adds `ridged_scalp()` / `bald_head()` (a swollen bald cranium with bony ribs) and `KNOT5`, the original cult mark.
+  - `chars_mechanicus.py`: player_mechanicus, skitarius, magos(64), electro_priest, kastelan_robot(64), dark_mechanicus(64), daemon_engine(96). It adds a `cog()` helper (plain gear; `broken=` leaves teeth off for the corrupted one).
+  - `omens_v3.py`: the 7 omens, reusing `omens.frame`.
+  - `scenes_v3.py`: the 7 scenes, reusing `scenes.corridor` for the mine shaft. It also adds `junk_heap`, `plate_wall`, `hazard_stripe` and a `gear()` with edge highlights.
+  - `icons_v3.py`: icon_teef, icon_kinship, icon_grace.
+- Palettes:
+  - Orks: skin greens (`#5f8a34` family), rust, hazard `#d4b02a`/near-black, copper `#b8642e` for the weirdboy, squig `#d8542a`.
+  - GSC: ochre work-suits `#b8902e`, cult purple `#5a2a6e`, hybrid skin from lilac-pale `#bfa6aa` (neophyte) to violet `#a587b0` (acolyte, primus) to deep purple `#8a4aa0` (patriarch), blue-violet carapace `#3e2a6a`.
+  - Mechanicus: forge red `#8a1e1e`, brass, cable black, lens green `#5aff7a`. Dark Mechanicum is black `#26222a` with dark brass, red and violet lenses. The furnace is `#ff7a1e`.
+- Facing:
+  - Face **right**: all three players, ork_mek, ork_weirdboy, gretchin, every GSC sprite, skitarius, magos, electro_priest, kastelan_robot.
+  - Face **left** (foe slot): ork_nob, squig, dark_mechanicus, daemon_engine.
+  - gsc.js uses the patriarch mostly as a speaker ("The Grandsire") and once as `foe`, and the neophyte twice as `foe`. They keep facing right. Flipping a sprite is one decorator argument (`face="L"`).
+- Character notes:
+  - The neophyte is nearly human (pale, bald, faint ribs). The acolyte has a chitin-plated third arm with three bone talons. The magus is a gold-trimmed hood over a shadowed face with violet eyes, and carries a staff topped by the cult knot. The primus has a big ridged cranium, scars, a brass sight and a bone sword with a violet edge. The patriarch is a swept-back carapace-crowned cranium with slit eyes and a fanged maw. Its talons hook over a rock throne, and darkness swallows its lower body.
+  - The electro-priest is deliberately **unhooded** (bald, circuit-tattoos, brass blindfold, blue arcs). That keeps him from being a third red hood next to the skitarius and the existing tech_priest.
+- IP:
+  - Every design is original. There are no named characters: no Ghazghkull, no Cawl, the boss nob is generic, and Cawl appears only as an empty workshop.
+  - There is no GW iconography. Ork banners are a black/white check or a crude slash, not real glyphs. Cogs are plain gears with no skull-cog.
+  - The cult mark (`KNOT5`, icon_kinship, the omen_four_armed / gsc_chapel emblem) is our own design: a halo ring, a lozenge and four curved clawed arms, two raised and two lowered. It is bilateral, not a pinwheel, and is not the published wyrm-form.
+- Omens have no figures or faces:
+  - omen_gork_mork is two green cloud-masses, one broad and one lean with a hooked crest.
+  - omen_four_armed is a painted icon panel holding the abstract emblem, with candles.
+  - omen_cawl is a workshop with an archeotech ring, manipulator arms and cable shadows, and no people.
+- Colour caps:
+  - Every new character sprite is ≤12 colours.
+  - Icons are 8 colours.
+  - Omens are 16–31 colours. They stay exempt from the cap, as in v0.1/v0.2.
+- Every scene keeps its lower third calm with `calm_lower`.
+- Build time is now about 12 s.
+
+## 2026-11-11 · text-gsc — Genestealer Cult route (v0.3)
+- Files: `data/factions/gsc.js` (route, 7 route events incl. 5 taint, 11 rumours, `WH.sector.worlds.kessin`), `data/codex_gsc.js` (17 entries).
+- World (§27): **凯辛三号 / Kessin Tertius**, mining world of the Arcosa Sector; Shaft Nine, the Hollin house, the chapel under the grain store, Shaft Thirteen. `faction.world` set; registered in `WH.sector.worlds.kessin` (codex `place_kessin`).
+- Timeline: starts **100.M42** (deliberately before the §27 window) because the route needs generations — two skips (12 y, 3 y) put Hesper's burning (112.M42, per place_hesper/sector.js) in ch.4 and the Day of Ascension in **115.M42**, inside the window. The bad ending `gsc_end_seed` is 30 years later (145.M42), so its echo will rarely/never surface — intended.
+- Sector cross-refs: ore to Aurex Secundus (ch.1, rumour, `gsc_end_seed` = cult reaches Aurex's underhive); Hesper as the warning nobody heeded (Brann, the data-slate, rumour); rumours of Carcharos refugees and of drills sold to the Thessa Null dig.
+- Structure: 8 chapters, 78 story nodes + 8 prologue (origins `miner` default / `warden` enforcer's child / `kin` fourth-gen "plain one"), endings: good 4 (ark, shadow, witness, lastshift) / bad 6 + 4 claims / death 3. Hidden taint on 14 choices, 8 of them `require:{taint:…}` hidden escalations so claims stay rare but reachable.
+- Claims (§19): `gsc_end_claim_<god>`, written as the Shadow in the Warp muffling the gods (rage leaking under the Shadow; even the swarm passes a Nurgle-blessed body; a crack in the Shadow for Tzeentch; longing echoing in the empty chapel for Slaanesh). **Lead: `data/events_taint.js` CLAIM_GOTO needs `gsc: "gsc_end_claim_" + g`** — until then the 4 claim endings are unreachable (validator ERROR) and claims resume the pending node.
+- Sim (2000 runs, seed 1, validator copy with the CLAIM_GOTO entry injected): avg 47.0 nodes · good 15.8 / bad 59.7 / death 24.4 % · claims 4.0 % (band 3–8 ✓) · rumours 6.9/run · origins death miner 27.3 / warden 22.3 / kin 23.7 (all within ±6).
+- Codex `faction` field uses existing values (xenos / imperium) so the old field stays valid; race/type per §13. Reused shared ids: xenos_tyranid, xenos_hive_mind, xenos_hive_tyrant, xenos_genestealer, xenos_shadow_in_warp, imp_imperium, imp_inquisition, imp_arbites, imp_ecclesiarchy, place_hesper, place_aurex, place_carcharos, place_thessa_null, place_arcosa.
+
+## 2026-11-11 · text-mechanicus (v0.3 Adeptus Mechanicus route, SPEC §26/§27)
+- **Files (mine):** `data/factions/mechanicus.js` (route + 5 taint events + 2 route events + 10 rumours + sector world), `data/codex_mechanicus.js` (25 entries incl. 4 places and `chr_schism_of_mars`).
+- **World (§27):** 格拉维克斯 / Gravex, the Arcosa Sector's only forge world (`world`, `place_gravex`, `WH.sector.worlds.gravex`). Cross-refs: Gravex paid for the Thessa Null dig, Vektrix-9 "has still not returned" (mech_309, rumour); lasguns to Aurex Secundus (mech_209, rumour); Valda's grain ships stopped (mech_103, rumour). Orks "drifted in from the sector's edge" (no named world, to avoid contradicting the Ork route).
+- **Shape:** 8 chapters, 81 spine nodes + 8 prologue (savant 4, conscript 4). Endings: good 3 (magos / explorator / keeper), bad 5 (servitor, pure thought, heretek, purged, looted) + 4 claim (`mech_end_claim_<god>`), death 3. eventRoll on 7 nodes.
+- **Lore choices:** the Dark Mechanicum boss is an original heretek "warsmith" (Syrredin), daemon engine via `daemon_engine`; Cawl only as a data-packet (`omen_cawl`) and rumour; Omnissiah as a vision (`omen_omnissiah`), Mars as a broadcast (`omen_mars`). Schism of Mars dated only "early M31 / early Heresy" (Lexicanum gives no firm year), sortKey 31005.5.
+- **Claims:** taintMod per §26; Tzeentch dominates by design (forbidden knowledge); Khorne/Nurgle/Slaanesh claims are rare (~0.1–0.4%). Safety net at the end of mechanicus.js fills a missing `mechanicus` key in the claim events' goto maps (never overrides) — lead may add mechanicus to `CLAIM_GOTO` in events_taint.js and drop it.
+- **Sim (2000 runs, seeds 1/5/9):** avg nodes 45.3–46.1, deaths 27.1–28.6% (hp ~15.6, sanity ~8–10), good ~22%, claim endings 11.3–12.3% (band 8–14 ✓); origins menial/savant/conscript within ±3.5 of route avg. Rumours ~6.9/run, all 10 heard. Known: `mech_death_corruption` not hit by random play (corruption sources are few: heresy choices + claim resists).
+- References `ork_belief_tech` (codex_orks.js) at mech_504 — if the Ork writer renames it, update that node.
+
+## 2026-11-12 · text-orks (Ork route)
+- Files: `data/factions/orks.js` (97 nodes = 85 spine + 12 prologue; 8 chapters; endings 3 good / 7 bad incl. 4 claim / 3 death; 7 eventRoll nodes; 19 rolls all with `rollResult`; 169/169 effect choices with `result`), `data/codex_orks.js` (24 entries).
+- World (SPEC §27): **Iskaron 伊斯卡隆**, ship-breaking world of the Arcosa Sector (`place_iskaron`; `place_arcosa` unlocked in ork_101). Cross-refs: wreck of the Valda tithe ship (never reached Aurex; `place_valda_wreck`), the Great Waaagh!'s next stop is Aurex Secundus (ork_806, ork_end_evacuated, rumour), Carcharos refugee rumour.
+- Cast: Wazgob da Mek, Snaggit (grot), Zograk (weirdboy), Warboss Grukka (boss), Nob Skarbad, Dok Buzzgob, Kaptin Redgob (Freebooterz), Commissar Hale, Sgt Voss, Old Edna. Ghazghkull / Gork & Mork only via `omen_waaagh` / `omen_gork_mork` / rumours. Chinese voice: 兽人腔 (俺, 人仔, 小子们, 揍扁, 突突, 红的跑得快); English: classic orky spelling.
+- Origins: scrap 105/95 ren 10 · guard 115/95 ren 0 (ork_o_guard_1–4) · ganger 95/95 ren 20 (ork_o_ganger_1–4); all budget +0, prologues merge at ork_106.
+- Taint: taintMod khorne 1 / others 0.6; 5 route taint events (tzeentch, khorne, slaanesh, nurgle, cleanse) + 2 route events (squig race, grot heist); ~20 hidden-taint choices (mostly Khorne). Claim rate 6.4% (Khorne ≈ 6.1%, Tzeentch 0.3%; Nurgle/Slaanesh claim endings exist but are rare by design — ork-land is a Khorne feast, the others seldom bother).
+- Rumours: 12 `rum_ork_*` registered in the faction file (Prophet/Armageddon/Beast/Ullanor/Octarius/Rift/Valda/Carcharos/Aurex…), 6.7 heard per run.
+- Sim (3000 runs): avg 47.7 nodes, deaths 33.8%; origins scrap 31.0 / guard 35.3 / ganger 35.2%.
+- Balance notes: first draft killed 60%+ (chapters 5–6); fixed with healing time-skips (+hp on ork_301/401/601/701), a market→Dok funnel (ork_303), ork_608/711/811 beats, and halved Khorne deltas. Causes kept ≤9 zh so the echo templates stay ≤50 zh.
+- Corruption death node exists but is practically unreachable in random play (as on Necrons); `ork_end_claim_nurgle/slaanesh` likewise <0.1%.
+
+## 2026-11-12 · web (v0.3.0: SPEC §20b relevance rumours · §25 achievements · §26 8-route picker · §27 echoes)
+- **§20b rumours**: `when:{scenes,sprites,codex,flags,keywords}` scored per node (`nodeContext`, `rumorScore`); p 0.6 for score >= 2, else 0.35; `RUMOR_GAP` 3 nodes, `RUMOR_PER_CHAPTER` 2; own RNG stream (`rumorRng`, seed ^ 0x2545F491) so turning rumours off never changes a run. Validator reports coverage (rumours/run 4–8, share with score >= 2, never-heard).
+- **§25 achievements**: `WH.Achievements` (DOM-free, shared with `validate.js`): 19 condition types, `evaluate(cond, ctx) -> {ok, n, t}`, `applyRun` updates `achStats` (origins, flags, fastest nodes, taint sums). Storage `whatiswh.achievements` ({id: date}) + `whatiswh.achStats`; both in `Save.exportAll/importAll` (merge: union / max / min, never lowers) and in the `bootCheck` known-keys list, so version updates never touch them (§22). UI: title `★ 成就 n/t`, grid with tier colours, `???` for hidden, progress bars, toast on run end / codex unlock; boot re-check is silent.
+- **§26**: index.html loads codex_{orks,gsc,mechanicus} and factions/{orks,gsc,mechanicus} (all `onerror`); picker uses a `.grid` layout from 6 races up (4 x 2 on desktop, stacked on mobile); FACTION_ORDER / colours / icons for the new routes (glyph fallbacks if an icon is missing); validator PREFIX, taint guide, claim-rate bands (orks 5–10, gsc 3–8, mechanicus 8–14).
+- **§27 echoes**: `echoPool` = earlier bad/death run records with `run.echo = {faction, role, world, cause, kind, dateKey, claimedBy}`; <= 1 per run, p 0.15, from chapter 2, >= 3 nodes after a rumour, never dated after the current `Rules.dateKey`; templates `WH.echoTemplates` / `WH.echoGods` from data/sector.js. Footer `✝ 前世死讯` shares the rumour footer, click opens 往生录 at that run (`openCodex(null,false,"records",{run})`). Setting 设置 -> 前世死讯. Own RNG stream (`echoRng`, seed ^ 0x6A09E667).
+- **Version** bumped to 0.3.0 (`WH.VERSION`); CHANGELOG 0.3.0 entry added (audio writer's bullets kept under "Audio").
+- **Tests**: smoke `--real` now starts every origin of all 8 routes from the picker, plays aeldari/necrons/orks/gsc/mechanicus to an ending, opens the achievements page and toggles zh/en (`run_real_v03`).
+- **Not done / open**: `data/difficulty.js` still lacks orks/gsc/mechanicus (lead runs `--write-difficulty`); `release/README.public.md` lacks the §22 note; writer-owned warnings remain (see validator output).
