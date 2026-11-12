@@ -62,19 +62,25 @@
         "Twenty hours at the furnace. Your number turns yellow. Your palms turn black.")),
       C("求他宽限几天", "Beg him for a few days' grace", "mech_104", X({sanity: -5},
         "格里斯笑着在你的数字旁画了个小齿轮。“宽限已记录。利息另算。”",
-        "Gries laughs and draws a tiny cog beside your number. “Grace logged. Interest extra.”"))
+        "Gries laughs and draws a tiny cog beside your number. “Grace logged. Interest extra.”")),
+      C("趁他转身，顺走格里斯腰带上的口粮券", "While his back is turned, lift the ration chits from Gries's belt", "mech_104", X({hp: 5, renown: -2, set: {wronged_gries: true}},
+        "你摸走了格里斯腰带上的两张券。他回头摸了摸空腰带，目光在整条线上扫了一圈，在你的数字上停了一下。",
+        "You palm two chits from Overseer Gries's belt. He turns, pats the empty loop, sweeps his eyes down the line, and pauses on your number."))
     ]};
 
   N.mech_103 = {chapter: 1, scene: "forge_floor", speaker: TOBINMAN, time: {h: 1},
     text: L("托宾把半块口粮掰给你。“瓦尔达的粮船再没来过，口粮又减了。”\n他咳得很厉害，数字和你一样红。\n“要是我先进转化线，”他说，“记得我会哼什么歌。”",
             "Tobin breaks you half a ration bar. “The grain ships from Valda stopped coming. Rations cut again.”\nHe coughs hard. His number is as red as yours.\n“If I go to the line first,” he says, “remember what song I hum.”"),
     choices: [
-      C("把口粮推回给他", "Push the ration back to him", "mech_104", X({hp: -5, sanity: 5, set: {tobinFriend: true}},
+      C("把口粮推回给他", "Push the ration back to him", "mech_104", X({hp: -5, sanity: 5, set: {tobinFriend: true, knowsTobin: true}},
         "他推辞两次，第三次收下了，然后哼起那首歌，跑调跑得很认真。",
         "He refuses twice and accepts the third time, then hums the song, earnestly off-key.")),
-      C("收下，记住那首歌", "Take it, and learn the song", "mech_104", X({hp: 5, set: {tobinFriend: true}},
+      C("收下，记住那首歌", "Take it, and learn the song", "mech_104", X({hp: 5, set: {tobinFriend: true, knowsTobin: true}},
         "口粮是灰的，有机油味。那首歌只有四个音，你记住了。",
-        "The bar is grey and tastes of oil. The song has four notes. You remember them."))
+        "The bar is grey and tastes of oil. The song has four notes. You remember them.")),
+      C("趁托宾咳嗽，把他那份口粮也拿走", "While Tobin coughs, take his share of the ration too", "mech_104", X({hp: 5, sanity: -5, set: {knowsTobin: true, wronged_tobin: true}},
+        "托宾弯着腰咳，没有拦你。你嚼着他那份口粮，味道像机油，也像你欠他的什么。",
+        "Tobin is doubled over coughing and doesn't stop you. You chew his share of the bar. It tastes of oil, and of something you owe him."))
     ]};
 
   N.mech_104 = {chapter: 1, scene: "manufactorum", speaker: RUMM, time: {h: 6}, eventRoll: 0.3,
@@ -131,7 +137,10 @@
            "你背错了一个音。神甫连头都没抬。", "You get one syllable wrong. The priest doesn't even look up."))),
       C("把前面那人往后拽", "Pull the man ahead back out of line", "mech_109", X({hp: -10, sanity: -5, set: {pulledTobin: true}},
         "你拽住他的袖子。护教军把你们分开，像拆开两根缠住的电线。",
-        "You grab his sleeve. The Skitarii pull you apart like two tangled cables."))
+        "You grab his sleeve. The Skitarii pull you apart like two tangled cables.")),
+      C("把托宾往前推，抢出十分钟", "Shove Tobin ahead of you and buy ten minutes", "mech_109", O(Q({flag: "knowsTobin"}, true), X({sanity: -5, set: {wronged_tobin: true}},
+        "你把托宾往前一推。他回头看你，没生气，像早就料到，然后继续哼歌。你多出了十分钟，他多出了一张台。",
+        "You shove Tobin forward. He glances back, not angry, as if he expected it, and goes on humming. You gain ten minutes. He gains a table.")))
     ]};
 
   N.mech_109 = {chapter: 1, scene: "manufactorum", speaker: OSSIA, time: {h: 1},
@@ -190,7 +199,10 @@
         "Gries doesn't deny it. He just has you haul slag all night. Next day your number is red.")),
       C("装作没看见", "Pretend you saw nothing", "mech_o_savant_3", X({sanity: -5},
         "你低头继续数。数字很准，良心不太准。",
-        "You lower your head and keep counting. The numbers are accurate. Your conscience, less so."))
+        "You lower your head and keep counting. The numbers are accurate. Your conscience, less so.")),
+      C("匿名举报格里斯克扣配额", "Report Gries's skimming anonymously", "mech_o_savant_3", X({renown: 3, set: {wronged_gries: true}},
+        "巡查书记查了格里斯的账，罚了他三个月的烙铁津贴。他认得那手字：整座熔炉，只有你那样写小数点。",
+        "The inspecting clerk audits Gries's books and docks his branding-rod allowance for three months. He knows the hand: on this furnace, nobody else writes decimals that way."))
     ]};
 
   N.mech_o_savant_3 = {chapter: 1, scene: "tech_vault", speaker: OSSIA, time: {d: 2},
@@ -259,7 +271,7 @@
             "They pull your wafer. All the fear comes back at once, with ten days' interest.\nYou're added to a file of menials, marched to the conversion line.\nSomeone in the file is coughing and humming a song. Four notes."),
     effects: {sanity: -5},
     choices: [
-      C("问他叫什么", "Ask his name", "mech_107", X({set: {tobinFriend: true}},
+      C("问他叫什么", "Ask his name", "mech_107", X({set: {tobinFriend: true, knowsTobin: true}},
         "“托宾，”他说，“要是我先进去，记住这首歌。”",
         "“Tobin,” he says. “If I go in first, remember the song.”")),
       C("低头走路", "Keep your head down", "mech_107")
@@ -280,13 +292,16 @@
     ]};
 
   N.mech_202 = {chapter: 2, scene: "forge_floor", speaker: TOBIN, time: {h: 4},
+    grudgeLine: {npc: "gries", text: L("这是格里斯监工管的炉子。他叉着手站在炉口，目光钉在你身上。", "This is Overseer Gries's furnace. He stands arms folded at the furnace mouth, eyes fixed on you.")},
     text: L("一台机仆在熔炉边搬钢锭，编号牌上写着T-0B1N。是转化线上排在你前面的那个人。\n它的嘴不会说话了，喉咙里却在哼一首歌。四个音，跑调跑得很认真。\n它没有看你。",
             "A servitor hauls ingots by the furnace. Its plate reads T-0B1N. It is the man who stood ahead of you on the line.\nIts mouth no longer speaks, but its throat hums a song. Four notes, earnestly off-key.\nIt doesn't look at you."),
     codex: ["mech_menials"],
     choices: [
-      C("跟着哼", "Hum along", "mech_203", X({sanity: 5, set: {tobinSong: true, keeper: true}},
+      C("跟着哼", "Hum along", "mech_203", O({grudge: {npc: "gries", effects: {hp: -6},
+          note: L("格里斯在场：你在他的炉前偷懒，他会罚你多搬钢锭。", "Gries is watching: loitering at his furnace, you'll be docked extra ingots.")}},
+        X({sanity: 5, set: {tobinSong: true, keeper: true}},
         "你哼第二遍时，它的手停了半秒。只有半秒。然后钢锭继续往前走。",
-        "On your second time through, its hands stop for half a second. Only half. Then the ingots move on.")),
+        "On your second time through, its hands stop for half a second. Only half. Then the ingots move on."))),
       C("别过脸去", "Look away", "mech_203", X({sanity: -5},
         "歌声一直跟着你，直到被熔炉的轰鸣吞掉。",
         "The humming follows you until the furnace's roar swallows it.")),
@@ -319,7 +334,7 @@
       C("劝她熔掉它", "Urge her to melt it down", "mech_205", X({set: {ossiaWarned: true}},
         "她沉默很久，把扳手放进抽屉。没熔，也没再拿出来。",
         "She's silent a long time, then puts it in a drawer. Not melted. Not taken out again.")),
-      C("报告瓦伦贤者", "Report it to Magos Vallen", "mech_206", X({renown: 10, sanity: -10, set: {reportedOssia: true}},
+      C("报告瓦伦贤者", "Report it to Magos Vallen", "mech_206", X({renown: 10, sanity: -10, set: {reportedOssia: true, wronged_ossia: true}},
         "贤者听完，只说了一个词：“确认。”那晚圣库的门第一次在你身后锁上。",
         "The Magos listens and says one word: “Confirmed.” That night the Vault door locks behind you for the first time."))
     ]};
@@ -335,9 +350,9 @@
       C("“是我做的。”", "“I made it.”", "mech_207", X({hp: -15, renown: -5, set: {tookBlame: true, ossiaFriend: true}},
         "电鞭抽了你十二下，每下都很准。奥西娅在旁边看着，指甲掐进手心。",
         "The electro-flail strikes twelve times, each exact. Ossia watches, nails digging into her palms.")),
-      C("看向奥西娅", "Look at Ossia", "mech_206", X({sanity: -5},
-        "你什么也没说，只是看了一眼。对凯什来说，一眼就够了。",
-        "You say nothing. You only glance. For Kesh, a glance is enough."))
+      C("看向奥西娅，把她交出去", "Look at Ossia, giving her up", "mech_206", X({sanity: -5, set: {wronged_ossia: true}},
+        "你什么也没说，只是看了奥西娅一眼。对凯什来说，一眼就够了。",
+        "You say nothing. You only glance at Ossia. For Kesh, a glance is enough."))
     ]};
 
   N.mech_206 = {chapter: 2, scene: "tech_vault", speaker: VALLEN, time: {d: 1},
@@ -710,6 +725,7 @@
     ]};
 
   N.mech_506 = {chapter: 5, scene: "forge_floor", speaker: KESH, time: {d: 2},
+    grudgeLine: {npc: "gries", text: L("格里斯监工提着账本站在尸堆旁：清点死人归他管。", "Overseer Gries stands among the dead with his ledger; counting the dead is his job.")},
     text: L("兽人被打退了，带走了能带走的一切：三座发电站、半个铸造厂，还有那块STC残片。\n凯什丢了一条腿，拄着一根管子站岗。\n“损失已记录，”她说，“悲伤未记录。没有那个字段。”",
             "The orks are driven off with everything they could carry: three power plants, half a foundry, and that STC fragment.\nKesh has lost a leg. She stands guard propped on a pipe.\n“Losses logged,” she says. “Grief not logged. There is no field for it.”"),
     effects: {hp: 10},
@@ -717,9 +733,11 @@
       C("帮凯什修腿", "Repair Kesh's leg", "mech_508", X({renown: 5, hp: -5, set: {keshRepair: true}},
         "你用冲压机的连杆给她做了条新腿。不太合规，但她站得很稳。",
         "You make her a new leg from a press linkage. Not quite canonical, but she stands firm.")),
-      C("去点算死去的杂役", "Go and count the dead menials", "mech_508", X({sanity: -5, renown: 3},
-        "三百四十一个。你把每个编号都念了一遍，没人要求你这么做。",
-        "Three hundred and forty-one. You read every number aloud. Nobody asked you to.")),
+      C("去点算死去的杂役", "Go and count the dead menials", "mech_508", O({grudge: {npc: "gries", effects: {sanity: -6},
+          note: L("格里斯拿着账本在场：他逼你把每个编号念两遍，错一个重来。", "Gries is there with his ledger: he makes you recite every number twice, and restart on any slip.")}},
+        X({sanity: -5, renown: 3},
+        "三百四十一个。你把每个编号都念了一遍，一个不落。",
+        "Three hundred and forty-one. You read every number aloud, not one skipped."))),
       C("去熔炉边找T-0B1N", "Look for T-0B1N by the furnace", "mech_508", O(Q({flag: "tobinSong"}, true), X({sanity: 8},
         "它还在搬钢锭，浑身是灰，喉咙里还在哼那四个音。你从没觉得一首歌这么好听。",
         "It's still hauling ingots, covered in ash, still humming the four notes. No song ever sounded better.")))
@@ -756,10 +774,13 @@
             "It's Ossia. Her robe is scorched; one hand has been replaced with a model you've never seen, one joint too many.\n“Gravex is closing doors,” she says. “I'm opening them.”\nBehind her, scrapcode climbs the mortar like ivy."),
     codex: ["mech_dark_mechanicum"],
     choices: [
-      C("听她说下去", "Let her talk", "mech_602", X({sanity: -5, set: {heardOssia: true}, taint: {tzeentch: 20}},
+      C("听她说下去", "Let her talk", "mech_602", O({grudge: {npc: "ossia", effects: {sanity: -6},
+          note: L("奥西娅记得是你把她交了出去，每个字都扎在你身上。", "Ossia remembers who gave her up; every word she says lands on you.")}},
+        X({sanity: -5, set: {heardOssia: true}, taint: {tzeentch: 20}},
         "她说得很快，用了很多你没听过的概念。每一个都像一扇刚推开的门。",
-        "She speaks fast, using concepts you've never heard. Each one is like a door just pushed open.")),
-      C("“回来吧，奥西娅。”", "“Come back, Ossia.”", "mech_602", O(Q({flag: "ossiaFriend"}), X({sanity: 5},
+        "She speaks fast, using concepts you've never heard. Each one is like a door just pushed open."))),
+      C("“回来吧，奥西娅。”", "“Come back, Ossia.”", "mech_602", O(Q({flag: "ossiaFriend"}), {grudge: {npc: "ossia", effects: {sanity: -8},
+          note: L("她记得你的背叛，这声“回来吧”只换来冷笑。", "She remembers your betrayal; “come back” earns only a cold laugh.")}}, X({sanity: 5},
         "她的笑僵了一下。“你还记得那把扳手。”她摇头，“回不去了。”",
         "Her smile falters. “You remember the spanner.” She shakes her head. “There's no going back.”"))),
       C("呼叫凯什", "Call Kesh", "mech_603", X({renown: 5},
@@ -908,15 +929,20 @@
     ]};
 
   N.mech_704 = {chapter: 7, scene: "forge_floor", speaker: TOBIN, time: {h: 3},
+    grudgeLine: {npc: "tobin", text: L("废码掀开了手术刀盖住的一层：它想起了你，想起了你亏欠它的那一次。", "Scrapcode has peeled back what the surgeons laid over it: it remembers you, and what you owed it.")},
     text: L("熔炉边，T-0B1N停下了。废码爬进了它的脑子，那首歌倒着唱，四个音全错了。\n它慢慢转向你，手里还握着一根烧红的钢锭。\n它从来没有看过你。现在它在看。",
             "By the furnace, T-0B1N has stopped. Scrapcode has crept into its head; the song runs backward, all four notes wrong.\nIt turns slowly toward you, a red-hot ingot still in its grip.\nIt has never looked at you. Now it does."),
     choices: [
-      C("把那首歌正着唱给它听", "Sing it the song the right way round", "mech_705", O(Q({flag: "tobinSong"}, true), X({sanity: 10, set: {tobinSaved: true}},
+      C("把那首歌正着唱给它听", "Sing it the song the right way round", "mech_705", O(Q({flag: "tobinSong"}, true), {grudge: {npc: "tobin", effects: {hp: -8},
+          note: L("托宾想起了你对他做过的事，握着烧红的钢锭朝你走来。", "Tobin remembers what you did to him, and comes at you with the red-hot ingot.")}},
+        X({sanity: 10, set: {tobinSaved: true, forgiven_tobin: true}},
         "第一个音，它停住了。第四个音，它放下钢锭，跟着你哼了起来。还是跑调。",
         "First note: it stops. Fourth: it sets down the ingot and hums along. Still off-key."))),
-      C("关掉它", "Shut it down", "mech_705", X({sanity: -8},
+      C("关掉它", "Shut it down", "mech_705", O({grudge: {npc: "tobin", effects: {hp: -6},
+          note: L("它想起了你，被按下开关前死死抓住了你的手腕。", "It remembers you, and grips your wrist hard before the switch goes down.")}},
+        X({sanity: -8},
         "你按下它后颈的开关。它倒下时很轻，像一件终于脱下的外套。",
-        "You press the switch at its neck. It falls lightly, like a coat finally taken off.")),
+        "You press the switch at its neck. It falls lightly, like a coat finally taken off."))),
       C("让锈接管它", "Let the rust take it", "mech_705", X({sanity: -5, taint: {nurgle: 40}},
         "锈从它的关节里开出花来，橙色的，很暖。它又能动了，比以前更有耐心。",
         "Rust blooms from its joints, orange and warm. It moves again, more patient than before."))
@@ -1292,6 +1318,11 @@
     taintMod: {khorne: 0.8, nurgle: 0.8, tzeentch: 1.1, slaanesh: 0.8},   // SPEC §26: forbidden knowledge tempts
     renownHelp: L("机眷是神教眼中你离万机之神有多近。仪式做对、计算精准、虔诚求知让它上升；怀疑、意气用事、留恋血肉让它下降。机眷够高，贤者才肯听你说话，更好的结局才会敞开。",
                   "Grace is how close the Cult thinks you stand to the Omnissiah. Correct rites, exact calculation and devout pursuit of knowledge raise it; doubt, sentiment and clinging to flesh lower it. High Grace makes the Magi listen, and opens better endings."),
+    npcs: {
+      tobin: {name: L("托宾", "Tobin"), aka: [L("T-0B1N", "T-0B1N")]},
+      gries: {name: L("格里斯", "Gries"), aka: [L("监工格里斯", "Overseer Gries")]},
+      ossia: {name: L("奥西娅", "Ossia"), aka: [L("书记神甫奥西娅", "Lexmechanic Ossia")]}
+    },
     deathNodes: {hp: "mech_death_hp", sanity: "mech_death_sanity", corruption: "mech_death_corruption"},
     origins: [
       {id: "menial", name: L("铸造世界杂役", "Forge-world menial"),

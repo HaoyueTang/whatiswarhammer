@@ -12,9 +12,10 @@
     if (extra) for (var k in extra) c[k] = extra[k];
     return c;
   }
-  function R(p, stat, success, fail, rr) {
+  function R(p, stat, success, fail, rr, extra) {
     var o = {roll: {p: p, stat: stat, success: success, fail: fail}};
     if (rr) o.rollResult = rr;
+    if (extra) for (var k in extra) o[k] = extra[k];
     return o;
   }
   function RR(ok, ko) { return {success: ok, fail: ko}; }   // per-outcome consequence beats (SPEC §11)
@@ -53,7 +54,7 @@
     codex: ["chaos_mutant"],
     choices: [
       C("道谢，陪他聊会儿", "Thank him and stay a while", "cha_104", {effects: {sanity: 5, hp: 5, set: {whistleFriend: true}}, result: L("水有铁锈味，却是你喝过最干净的。哨子吹了支小调，说是他妈妈教的。", "The water tastes of rust, and it's the cleanest you've ever had. Whistle whistles a little tune his mother taught him.")}),
-      C("趁他转身偷走水桶", "Steal his bucket when he turns", "cha_104", {effects: {hp: 15, corruption: 3, set: {robbedWhistle: true}}, result: L("你抱着水桶狂奔，喝到呛咳。身后，哨音拉得又尖又长，像在哭。", "You bolt with the bucket and drink till you choke. Behind you a whistle rises, thin and long, like crying.")})
+      C("趁他转身偷走水桶", "Steal his bucket when he turns", "cha_104", {effects: {hp: 15, corruption: 3, set: {robbedWhistle: true, wronged_whistle: true}}, result: L("你抱着水桶狂奔，喝到呛咳。身后，哨子的哨音拉得又尖又长，像在哭。", "You bolt with the bucket and drink till you choke. Behind you Whistle's note rises, thin and long, like crying.")})
     ]};
 
   N.cha_104 = {chapter: 1, scene: "underhive", speaker: KADE, time: {h: 4},
@@ -64,7 +65,7 @@
     choices: [
       C("拉着蒂卡钻进管道", "Drag Tikka into the pipes", "cha_105", {result: L("管道又窄又臭。你们挤在黑暗里，听着外面火焰嘶嘶作响，蒂卡一直在咳。", "The pipe is narrow and foul. You huddle in the dark, listening to the flamers hiss, Tikka coughing into your shoulder.")}),
       C("替哨子引开执法官", "Draw the enforcers away from Whistle", "cha_106", {require: {flag: "whistleFriend"}, hideIfLocked: true}),
-      C("指认哨子，换赏金", "Point out Whistle for the bounty", "cha_105", {effects: {hp: 10, corruption: 4, sanity: -10, set: {betrayedWhistle: true}}, result: L("你伸手一指。凯德扔给你一张口粮券，看都没看你。远处，哨音断了。", "You point. Kade flicks you a ration chit without looking at you. Somewhere in the dark, a whistle cuts short.")})
+      C("指认哨子，换赏金", "Point out Whistle for the bounty", "cha_105", {effects: {hp: 10, corruption: 4, sanity: -10, set: {betrayedWhistle: true, wronged_whistle: true}}, result: L("你伸手一指。凯德扔给你一张口粮券，看都没看你。远处，哨音断了。", "You point. Kade flicks you a ration chit without looking at you. Somewhere in the dark, a whistle cuts short.")})
     ]};
 
   N.cha_106 = {chapter: 1, scene: "underhive", speaker: KADE, time: {h: 1},
@@ -266,7 +267,7 @@
     effects: {sanity: -5},
     choices: [
       C("交一个名字", "Hand in a name", "cha_301", {effects: {corruption: 4, renown: 5, sanity: -5, taint: {tzeentch: 5}}, result: L("你说出隔壁老鞋匠的名字。第二天他不见了。第三天，礼拜堂里多了一个唱得很响的声音。", "You give the old cobbler next door. Next day he's gone. The day after, the chapel has one more very loud voice.")}),
-      C("交上凯德的名字", "Hand in Kade's name", "cha_301", {require: {flag: "kadeKnows"}, hideIfLocked: true, effects: {renown: 8}, result: L("维勒姆把这个名字念了两遍，笑出了声：“执法官？好孩子，太好了。”", "Vellum reads the name twice and laughs aloud. “An enforcer? Good child. Very good.”")}),
+      C("交上凯德的名字", "Hand in Kade's name", "cha_301", {require: {flag: "kadeKnows"}, hideIfLocked: true, effects: {renown: 8, set: {wronged_kade: true}}, result: L("维勒姆把这个名字念了两遍，笑出了声：“执法官？好孩子，太好了。”", "Vellum reads the name twice and laughs aloud. “An enforcer? Good child. Very good.”")}),
       C("编一个不存在的人", "Make up someone who doesn't exist", "cha_301", {effects: {sanity: 5, set: {fakeName: true}}, result: L("你编了个名字：“老锈”。蒂卡认真记下。后来好几天，诗班的人都在污池里找老锈。", "You invent one: “Old Rust.” Tikka writes it down carefully. For days afterward, the Choir combs the Sump for him.")})
     ]};
 
@@ -293,12 +294,13 @@
     ]};
 
   N.cha_303 = {chapter: 3, scene: "barracks", speaker: WHISTLE, time: {h: 2},
+    grudgeLine: {npc: "whistle", text: L("那个长音很快断了。他靠着牢墙，只是看着你的手。", "The long note soon breaks off. He leans against the cell wall, only watching your hands.")},
     text: L("监狱里关的全是“欠税的人”。你撬开一扇扇门，放出来的人没一个回家，全都走向火光。\n最后一间牢房里蹲着哨子。他看见你，鳃轻轻开合，吹出一个很长的音。",
             "The prison holds people who “owed the tithe.” You pry open door after door. Not one of the freed goes home; all walk toward the fire.\nIn the last cell crouches Whistle. He sees you. His gills flutter and let out one long note."),
     choices: [
-      C("“对不起。”", "“I'm sorry.”", "cha_305", {require: {flag: "betrayedWhistle"}, hideIfLocked: true, effects: {sanity: -5, set: {whistleJoined: true}}, result: L("哨子看了你很久，吹了个短音，伸手让你拉他起来。他什么都没说，这比骂你更难受。", "Whistle looks at you a long time. Then one short note, and he reaches for your hand. He says nothing. That's worse than cursing.")}),
-      C("“走，跟我们走。”", "“Come on. Come with us.”", "cha_305", {effects: {sanity: 5, set: {whistleJoined: true}}, result: L("哨子的鳃一张一合，像在笑。他跟上你，一路吹着诗班的调子，跑了两个音。", "Whistle's gills flutter like laughter. He follows, whistling the Choir's hymn, two notes off.")}),
-      C("锁上门，离开", "Lock the door and leave", "cha_305", {effects: {corruption: 4, sanity: -10}, result: L("锁舌咔哒一声。你走出很远，那个长音还在身后，一直没停。", "The lock clicks. You're far down the corridor and that long note is still behind you, never stopping.")})
+      C("“对不起。”", "“I'm sorry.”", "cha_305", {require: {flag: "wronged_whistle"}, hideIfLocked: true, effects: {sanity: -5, set: {whistleJoined: true, forgiven_whistle: true}}, result: L("哨子看了你很久，吹了个短音，伸手让你拉他起来。他什么都没说，这比骂你更难受。", "Whistle looks at you a long time. Then one short note, and he reaches for your hand. He says nothing. That's worse than cursing.")}),
+      C("“走，跟我们走。”", "“Come on. Come with us.”", "cha_305", {effects: {sanity: 5, set: {whistleJoined: true}}, grudge: {npc: "whistle", effects: {sanity: -6}, note: L("哨子记得你对他做过的事，沉默地跟着你。", "Whistle remembers what you did to him and follows in silence.")}, result: L("哨子的鳃一张一合。他跟上你，一路吹着诗班的调子，跑了两个音。", "Whistle's gills flutter. He follows, whistling the Choir's hymn, two notes off.")}),
+      C("锁上门，离开", "Lock the door and leave", "cha_305", {effects: {corruption: 4, sanity: -10, set: {wronged_whistle: true}}, result: L("锁舌咔哒一声。你走出很远，那个长音还在身后，一直没停。", "The lock clicks. You're far down the corridor and that long note is still behind you, never stopping.")})
     ]};
 
   N.cha_304 = {chapter: 3, scene: "hive_spire", speaker: S("daemon_slaanesh", "镜中的你", "You, in the Mirror"), time: {h: 2},
@@ -323,12 +325,13 @@
     ]};
 
   N.cha_306 = {chapter: 3, scene: "burning_city", speaker: KADE, time: {h: 8},
+    grudgeLine: {npc: "kade", text: L("他的左袖烧焦了。“诗班点了我的名，”他说，“哨所也烧了。”", "His left sleeve is scorched. “The Choir named me,” he says. “Burned my post, too.”")},
     text: L("一道激光打穿了你的大腿。你倒在闸门前，被后面的人踩了过去。\n醒来时，你被铐在囚车里。凯德坐在对面，在擦他的火焰喷射器。\n“又见面了，”他说。",
             "A las-bolt punches through your thigh. You fall at the gate and the crowd tramples over you.\nYou wake shackled in a prison wagon. Kade sits opposite, polishing his flamer.\n“We meet again,” he says."),
     effects: {hp: -20},
     choices: [
-      C("一言不发", "Say nothing", "cha_308", {result: L("凯德等了一会儿，耸耸肩，继续擦枪。囚车颠了一整夜。", "Kade waits, shrugs, and goes back to polishing. The wagon jolts on all night.")}),
-      C("朝他吐口水", "Spit at him", "cha_308", {effects: {renown: 5, hp: -5}, result: L("口水落在他的护目镜上。凯德慢慢擦掉，然后用枪托回了你一下。", "It lands on his visor. Kade wipes it off slowly, then answers with the butt of his flamer.")})
+      C("一言不发", "Say nothing", "cha_308", {grudge: {npc: "kade", effects: {hp: -6}, note: L("诗班点过凯德的名字；他猜得到是谁递的。", "The Choir named Kade. He can guess who passed it on.")}, result: L("凯德等了一会儿，耸耸肩，继续擦枪。囚车颠了一整夜。", "Kade waits, shrugs, and goes back to polishing. The wagon jolts on all night.")}),
+      C("朝他吐口水", "Spit at him", "cha_308", {effects: {renown: 5, hp: -5}, grudge: {npc: "kade", effects: {hp: -4}, note: L("你把他的名字递给了诗班；他下手更重。", "You handed his name to the Choir. He hits harder.")}, result: L("口水落在他的护目镜上。凯德慢慢擦掉，然后用枪托回了你一下。", "It lands on his visor. Kade wipes it off slowly, then answers with the butt of his flamer.")})
     ]};
 
   N.cha_308 = {chapter: 3, scene: "cathedral", speaker: STRAND, time: {h: 5},
@@ -336,7 +339,7 @@
             "The wagon stops beneath a white tower. A woman in a grey greatcoat waits: white gloves, spotless cuffs.\n“Inquisitor Strand,” Kade murmurs. For the first time, he sounds afraid.\n“One question,” she says. “Who taught you that song?”"),
     codex: ["imp_inquisition"],
     choices: [
-      C("说出维勒姆的名字", "Give up Vellum's name", "cha_309", {effects: {sanity: -10, renown: -5, set: {namedVellum: true}}, result: L("斯特兰德把名字记进本子，像记一笔小账。“谢谢，”她说，“你可以休息了。”", "Strand writes the name in her notebook, like noting a small debt. “Thank you,” she says. “You may rest now.”")}),
+      C("说出维勒姆的名字", "Give up Vellum's name", "cha_309", {effects: {sanity: -10, renown: -5, set: {namedVellum: true, wronged_vellum: true}}, result: L("斯特兰德把名字记进本子，像记一笔小账。“谢谢，”她说，“你可以休息了。”", "Strand writes the name in her notebook, like noting a small debt. “Thank you,” she says. “You may rest now.”")}),
       C("咬紧牙关", "Clench your jaw", null, R(0.5, "hp", "cha_309", "cha_end_pyre", RR(L("她问了一整夜。天亮时，你咬碎了一颗牙，一个名字也没出口。", "She asks all night. By dawn you've cracked a tooth, and not one name has left your mouth."), L("你一个字也没说。斯特兰德看着你，像看一份已经读完的档案。", "You say nothing. Strand regards you like a file she has finished reading."))))
     ]};
 
@@ -354,11 +357,12 @@
     ]};
 
   N.cha_307 = {chapter: 3, scene: "burning_city", speaker: VELLUM, time: {h: 6},
+    grudgeLine: {npc: "vellum", text: L("维勒姆望了你一眼，笑了笑。他什么都知道，什么也没问。", "Vellum glances at you and smiles. He knows everything and asks nothing.")},
     text: L("天亮了。起义成了一半：中巢是你们的，上巢的闸门仍然紧闭。\n街上满是灰烬和唱哑了的人。维勒姆站在大教堂台阶上望着天，像在等谁回信。",
             "Dawn. Half the uprising has worked: the mid-hive is yours, but the spire gates stay shut.\nThe streets are full of ash and people who have sung their voices raw. Vellum stands on the cathedral steps, watching the sky as if awaiting a reply."),
     choices: [
-      C("问他在等谁", "Ask who he's waiting for", "cha_310", {effects: {corruption: 3}, result: L("“等回信，”维勒姆说，“我们烧了这么多，总该有人看见。”他没说是谁。", "“A reply,” Vellum says. “We've burned so much. Someone must have noticed.” He doesn't say who.")}),
-      C("找个地方睡一觉", "Find somewhere to sleep", "cha_310", {effects: {hp: 10, sanity: 5}, result: L("你在一辆烧空的车里睡着了。梦里没有门，也没有声音。很久没睡得这么好了。", "You fall asleep in a burnt-out car. No door in your dreams, no voices. The best sleep in a long time.")})
+      C("问他在等谁", "Ask who he's waiting for", "cha_310", {effects: {corruption: 3}, grudge: {npc: "vellum", effects: {sanity: -4}, note: L("维勒姆不责怪你，反而比责怪更重。", "Vellum doesn't blame you. That weighs more than blame.")}, result: L("“等回信，”维勒姆说，“我们烧了这么多，总该有人看见。”他没说是谁。", "“A reply,” Vellum says. “We've burned so much. Someone must have noticed.” He doesn't say who.")}),
+      C("找个地方睡一觉", "Find somewhere to sleep", "cha_310", {effects: {hp: 10, sanity: 5}, grudge: {npc: "vellum", effects: {sanity: -5}, note: L("你说出过他的名字；梦里他一直在笑。", "You gave up his name. In your dreams he keeps smiling.")}, result: L("你在一辆烧空的车里睡着了。梦里没有门，也没有声音。很久没睡得这么好了。", "You fall asleep in a burnt-out car. No door in your dreams, no voices. The best sleep in a long time.")})
     ]};
 
   N.cha_310 = {chapter: 3, scene: "burning_city", speaker: null, foe: "astartes", time: {d: 6},
@@ -372,11 +376,12 @@
     ]};
 
   N.cha_311 = {chapter: 3, scene: "underhive", speaker: VELLUM, time: {h: 10},
+    grudgeLine: {npc: "vellum", text: L("他忽然不哼了，又轻声补了一句：“我不怪你说出我的名字。”", "He stops humming and adds, softly: “I don't blame you for giving my name.”")},
     text: L("你背着维勒姆往下爬。他很轻，轻得像一捆干柴，一路都在哼诗班的歌。\n身后的管道一根接一根被烧红。\n“别怕，”他在你耳边说，“诸神最喜欢的，就是这种时候。”",
             "You carry Vellum down on your back. He's light as a bundle of kindling, humming the Choir's hymn the whole way.\nBehind you, pipe after pipe glows red with flame.\n“Don't be afraid,” he whispers in your ear. “The gods love moments like this best.”"),
     effects: {hp: -5},
     choices: [
-      C("继续往下爬", "Keep climbing down", "cha_401", {result: L("他的哼唱越来越轻，你的背越来越沉。", "His humming grows fainter. Your back grows heavier.")}),
+      C("继续往下爬", "Keep climbing down", "cha_401", {grudge: {npc: "vellum", effects: {sanity: -6}, note: L("维勒姆原谅了你，你的背却越来越沉。", "Vellum forgives you, and your back grows heavier.")}, result: L("他的哼唱越来越轻，你的背越来越沉。", "His humming grows fainter. Your back grows heavier.")}),
       C("把他放下，自己逃", "Set him down and save yourself", "cha_401", {effects: {hp: 10, sanity: -10, renown: -5}, result: L("你把他靠在管道边，独自往下爬。三天后，在最深处，你又看见了他。你永远不知道他是怎么下来的。", "You prop him against a pipe and climb on alone. Three days later, at the very bottom, there he is again. You never learn how.")})
     ]};
 
@@ -434,7 +439,7 @@
             "Day four. Enforcers and the blue giants begin purging the Sump level by level. The hiss of flamers draws closer.\nKade's voice echoes through the pipes: “I remember your face!”"),
     effects: {hp: -10},
     choices: [
-      C("迎上去", "Go to meet him", null, R(0.35, "renown", "cha_407", "cha_410", RR(L("你从管道的阴影里冲出去，快得连自己都吃惊。", "You burst from the pipe-shadows, faster than you knew you could be."), L("你冲出去，正对上一只喷嘴。凯德比你快了半步。", "You charge straight into a nozzle. Kade is half a step quicker.")))),
+      C("迎上去", "Go to meet him", null, R(0.35, "renown", "cha_407", "cha_410", RR(L("你从管道的阴影里冲出去，快得连自己都吃惊。", "You burst from the pipe-shadows, faster than you knew you could be."), L("你冲出去，正对上一只喷嘴。凯德比你快了半步。", "You charge straight into a nozzle. Kade is half a step quicker.")), {grudge: {npc: "kade", p: -0.10, note: L("诗班点过他的名，凯德这次不会犹豫。", "The Choir named him. Kade won't hesitate this time.")}})),
       C("沉进废水里躲着", "Sink into the waste-water and hide", "cha_408"),
       C("吹一声长哨", "Give one long whistle", "cha_409", {require: {flag: "whistleJoined"}, hideIfLocked: true}),
       C("吹一声长哨", "Give one long whistle", "cha_409", {require: [{flag: "whistleOwes"}, {notFlag: "whistleJoined"}], hideIfLocked: true})
@@ -466,11 +471,12 @@
     ]};
 
   N.cha_409 = {chapter: 4, scene: "underhive", speaker: WHISTLE, time: {h: 3},
+    grudgeLine: {npc: "whistle", text: L("他挑的是最窄最臭的那条水道，一次也没回头等你。", "He picks the narrowest, foulest channel and never once looks back to wait.")},
     text: L("哨子从水里冒出头，回了你一声短哨：跟我来。\n他带你钻进只有变种人知道的水道。到了出口，他停下：“我不走了。这是我的家。”\n他把你推出去，转身游向了火光。",
             "Whistle surfaces and answers with one short note: follow me.\nHe leads you through channels only mutants know. At the exit he stops. “I'm staying. This is my home.”\nHe pushes you out, then turns and swims back toward the fire."),
     effects: {sanity: -5, hp: 10, set: {whistleGone: true}},
     choices: [
-      C("别回头", "Don't look back", "cha_411")
+      C("别回头", "Don't look back", "cha_411", {grudge: {npc: "whistle", effects: {hp: -8}, note: L("你负过哨子；他领路，走的是最难的水道。", "You wronged Whistle. He leads you by the hardest channel.")}})
     ]};
 
   N.cha_411 = {chapter: 4, scene: "underhive", speaker: TIKKA, time: {d: 12},
@@ -732,7 +738,7 @@
             "A quiet alley. White gloves, grey greatcoat. Inquisitor Strand, alone.\n“I saw you hesitate,” she says. “So you're not entirely theirs. Tell me where Vorgath's landers are and I'll grant you a clean death.”\nWhen she says “clean,” she means it."),
     codex: ["imp_inquisition", "imp_ordo_malleus"],
     choices: [
-      C("告诉她", "Tell her", "cha_708", {effects: {sanity: 5, corruption: -5, renown: -10, set: {toldStrand: true}}, result: L("你说了。斯特兰德点点头，在你手心写下一串数字：“需要的时候，念出来。”然后她就不见了。", "You tell her. Strand nods and writes a string of numerals on your palm. “Say these when you need to.” Then she's gone.")}),
+      C("告诉她", "Tell her", "cha_708", {effects: {sanity: 5, corruption: -5, renown: -10, set: {toldStrand: true, wronged_vorgath: true}}, result: L("你说出沃加斯的登陆艇在哪。斯特兰德点点头，在你手心写下一串数字：“需要的时候，念出来。”", "You tell her where Vorgath's landers are. Strand nods and writes numerals on your palm. “Say these when you need to.”")}),
       C("拔枪", "Draw your pistol", null, R(0.35, "hp", "cha_708", "cha_707", RR(L("你开了枪。斯特兰德的身影晃了晃，像烟一样散了。你分不清打中的是不是她本人。", "You fire. Strand's shape wavers and disperses like smoke. You can't tell whether you hit her at all."), L("你的枪还没举平，她已退进阴影。巷口亮起了白金色的盔甲。", "Your pistol isn't even level before she steps back into shadow. White-and-gold armour fills the alley mouth.")))),
       C("转身就跑", "Turn and run", "cha_707", {effects: {hp: -5}, result: L("你撞翻一排木箱冲出小巷，正好一头扎进街上的交火里。", "You crash through a stack of crates out of the alley, straight into the crossfire in the street.")})
     ]};
@@ -776,7 +782,7 @@
             "Vorgath is cleaning his axe. “The Inquisition's fleet has arrived. The Warmaster's already gone. We're the rearguard.”\nHe glances at you. “You could slip away now. Find some underhive and hide for the rest of your life. No one would know.”"),
     choices: [
       C("我留下", "I'm staying", "cha_711", {effects: {renown: 10}, result: L("沃加斯哼了一声，把磨刀石扔给你。这大概是他表示敬意的方式。", "Vorgath grunts and tosses you the whetstone. That's probably his idea of respect.")}),
-      C("溜走", "Slip away", "cha_711", {effects: {renown: -10, set: {fled: true}}, result: L("你点点头，往后退。沃加斯没抬头：“聪明。”听不出是夸你还是骂你。", "You nod and back away. Vorgath doesn't look up. “Smart.” You can't tell if it's praise or insult.")}),
+      C("溜走", "Slip away", "cha_711", {effects: {renown: -10, set: {fled: true, wronged_vorgath: true}}, result: L("你点点头，往后退。沃加斯没抬头：“聪明。”听不出是夸你还是骂你。", "You nod and back away. Vorgath doesn't look up. “Smart.” You can't tell if it's praise or insult.")}),
       C("向诸神祈求更多力量", "Pray to the gods for more power", "cha_711", {effects: {corruption: 15, renown: 15, hp: 15, taint: {all: 5}}, result: L("祈祷还没说完，回答就来了。指甲变黑，牙齿变尖。沃加斯挑了挑眉。", "Before you finish praying, the answer arrives. Your nails blacken, your teeth sharpen. Vorgath raises an eyebrow.")})
     ]};
 
@@ -811,12 +817,14 @@
     ]};
 
   N.cha_808 = {chapter: 8, scene: "ruins", speaker: IXARIL, time: {h: 3},
+    grudgeLine: {npc: "vorgath", text: L("沃加斯没抬头，把斧子换到了离你更远的那只手。", "Vorgath doesn't look up. He moves the axe to the hand farther from you.")},
     text: L("还剩三个小时。断后的人守在大教堂的废墟里。\n伊克萨里尔在地上画圈，画了又擦。沃加斯在磨斧子。\n早已停了的钟，突然自己响了一声。",
             "Three hours left. The rearguard holds the cathedral ruins.\nIxaril draws circles on the ground, then rubs them out. Vorgath sharpens his axe.\nA bell that stopped long ago rings once, all by itself."),
     effects: {sanity: -5},
     choices: [
-      C("握紧武器", "Grip your weapon", "cha_809", {effects: {renown: 3}, result: L("你握紧武器，手心全是汗。沃加斯瞥了你一眼，点了点头。", "You grip your weapon, palms slick. Vorgath glances over and nods once.")}),
-      C("在烙印上默念神的名字", "Whisper your god's name over the brand", "cha_809", {effects: {corruption: 4, hp: 10, taint: {all: 5}}, result: L("烙印回应了。暖意顺着手臂爬上来，伤口不再流血。远处，那口钟又响了一声。", "The brand answers. Warmth crawls up your arm and your wounds stop bleeding. Far off, the bell rings once more.")})
+      C("握紧武器", "Grip your weapon", "cha_809", {effects: {renown: 3}, grudge: {npc: "vorgath", effects: {sanity: -5}, note: L("你负过沃加斯；他的沉默比斧子更沉。", "You wronged Vorgath. His silence weighs more than his axe.")}, result: L("你握紧武器，手心全是汗。沃加斯瞥了你一眼，点了点头。", "You grip your weapon, palms slick. Vorgath glances over and nods once.")}),
+      C("在烙印上默念神的名字", "Whisper your god's name over the brand", "cha_809", {effects: {corruption: 4, hp: 10, taint: {all: 5}}, grudge: {npc: "vorgath", effects: {hp: -6}, note: L("你负过沃加斯；他的手始终没离开斧柄。", "You wronged Vorgath. His hand never leaves the axe haft.")}, result: L("烙印回应了。暖意顺着手臂爬上来，伤口不再流血。远处，那口钟又响了一声。", "The brand answers. Warmth crawls up your arm and your wounds stop bleeding. Far off, the bell rings once more.")}),
+      C("向沃加斯认账", "Own up to Vorgath", "cha_809", {require: {flag: "wronged_vorgath"}, hideIfLocked: true, effects: {sanity: -3, renown: -3, set: {forgiven_vorgath: true}}, result: L("沃加斯没停手里的活。“我早知道。”他把磨石扔给你，“站我左边。”这大概是他表示原谅的方式。", "Vorgath doesn't stop sharpening. “I knew.” He tosses you the whetstone. “Stand on my left.” That's probably his way of forgiving.")})
     ]};
 
   N.cha_809 = {chapter: 8, scene: "ruins", speaker: STRAND, time: {h: 1},
@@ -830,12 +838,13 @@
     ]};
 
   N.cha_803 = {chapter: 8, scene: "ruins", speaker: VORGATH, foe: "grey_knight", time: {h: 1},
+    grudgeLine: {npc: "vorgath", text: L("沃加斯没看你，与你隔开了一臂远。", "Vorgath doesn't look at you. He stands an arm's length farther off than before.")},
     text: L("他们从光里走出来。银色的盔甲，没有任何装饰，每一步都像在宣读判决。\n伊克萨里尔扔出一团蓝火，火在半空中熄灭，像从没存在过。\n“灰骑士，”沃加斯低声说。他第一次没有笑。",
             "They step out of the light. Silver armour without ornament, each footfall like a verdict being read.\nIxaril hurls blue fire. It goes out in mid-air as if it had never existed.\n“Grey Knights,” Vorgath says quietly. For the first time, he isn't smiling."),
     effects: {sanity: -10, hp: -10},
     codex: ["imp_grey_knights"],
     choices: [
-      C("与沃加斯并肩作战", "Fight beside Vorgath", null, R(0.5, "hp", "cha_805", "cha_end_purged", RR(L("你和沃加斯背靠背，挡开一戟，又一戟。然后，身后传来金属撕裂的声音。", "Back to back with Vorgath, you turn aside one halberd, then another. Then, behind you, the sound of tearing metal."), L("你的每一击都落了空，像砍进一场雪。一道银光迎面而来。", "Every blow you swing finds nothing, like cutting into snow. A silver light comes straight at you.")))),
+      C("与沃加斯并肩作战", "Fight beside Vorgath", null, R(0.5, "hp", "cha_805", "cha_end_purged", RR(L("你和沃加斯背靠背，挡开一戟，又一戟。然后，身后传来金属撕裂的声音。", "Back to back with Vorgath, you turn aside one halberd, then another. Then, behind you, the sound of tearing metal."), L("你的每一击都落了空，像砍进一场雪。一道银光迎面而来。", "Every blow you swing finds nothing, like cutting into snow. A silver light comes straight at you.")), {grudge: {npc: "vorgath", p: -0.12, note: L("沃加斯信不过你，并肩时慢了半拍。", "Vorgath doesn't trust you and is half a beat slow to cover.")}})),
       C("献上一切，呼唤你的神", "Offer everything. Call your god.", "cha_807", {require: [{stat: "renown", min: 60}, {flag: "champion"}]}),
       C("退进圣人墓穴", "Fall back into the saint's crypt", "cha_806", {effects: {renown: -5}, result: L("你丢下沃加斯，钻进墓穴入口。身后，他骂了一句很古老的脏话。", "You leave Vorgath and duck into the crypt. Behind you, he spits a very old curse.")})
     ]};
@@ -1001,6 +1010,12 @@
     tagline: L("帝皇不看你，诸神会", "The Emperor never looked. The gods will."),
     role: L("下巢拾荒者", "Underhive scavenger"),
     world: L("卡尔卡罗斯", "Carcharos"),   // SPEC §27 home world (all three origins start in Hive Vorne)
+    npcs: {   // SPEC §28 grudges: people the route lets you wrong
+      whistle: {name: L("哨子", "Whistle")},
+      vellum:  {name: L("维勒姆", "Vellum"), aka: [L("维勒姆神父", "Father Vellum")]},
+      kade:    {name: L("凯德", "Kade"), aka: [L("执法官凯德", "Enforcer Kade")]},
+      vorgath: {name: L("沃加斯", "Vorgath")}
+    },
     playerSprite: "player_chaos",
     color: "#a3242b",
     startNode: "cha_101",

@@ -23,6 +23,11 @@
  *   ≥3 nodes since the last rumour; only echoes dated ≤ now; other routes preferred; text from WH.echoTemplates → state.echo / step.echo.
  *   Own seeded stream (echoRng); opts.echoes:false or g.echoes = false turns them off; opts.echoChance forces p (tests).
  *   SPEC §23: origin.max:{hp,sanity} (70–130, default 100) → state.max; hp/sanity clamp to g.cap(k); start values default to the caps.
+ *   SPEC §28 grudges: faction.npcs + choice.grudge {npc, p?, effects?, note} + node.grudgeLine {npc, text}. A grudge is ACTIVE while
+ *   flags["wronged_"+npc] && !flags["forgiven_"+npc]. g.choices()[i].grudge = {npc, note, p, effects} (only while active; roll.pEff already
+ *   includes p, final clamp 0.05–0.95); choose() merges grudge.effects into the applied effects and sets step.grudge = {npc, note}
+ *   (also step.consequence.grudge); g.grudgeLine() → {npc, text} of the current node while active; g.nodeText() → node text + that line.
+ *   No extra RNG draws, no new state: runs/saves without an active grudge behave exactly as before.
  *   g.toRecord() / WH.Game.fromRecord(rec)
  */
 (function (root) {
@@ -75,13 +80,41 @@
   function has(o, k) { return o && Object.prototype.hasOwnProperty.call(o, k); }
 
   /* ---------- pure helpers (exported for UI + validator) ---------- */
-  function rollChance(roll, stats) {
+  /* extra = optional additive modifier after the stat adjustment (SPEC §28 grudge p); with extra the result is clamped 0.05–0.95 */
+  function rollChance(roll, stats, extra) {
     var p = +roll.p;
     if (isNaN(p)) p = 0.5;
     if (roll.stat && stats && typeof stats[roll.stat] === "number") {
-      return clamp(p + (stats[roll.stat] - 50) / 200, 0.05, 0.95);
+      p = clamp(p + (stats[roll.stat] - 50) / 200, 0.05, 0.95);
     }
+    if (extra) p = clamp(p + extra, 0.05, 0.95);
     return p;
+  }
+
+  /* ---------- grudges (SPEC §28) ---------- */
+  function grudgeActive(gr, flags) {
+    return !!(gr && gr.npc && flags && flags["wronged_" + gr.npc] && !flags["forgiven_" + gr.npc]);
+  }
+  /* an active grudge of choice c → {npc, note, p, effects} or null. p only counts on roll choices. */
+  function grudgeOf(c, state) {
+    var gr = c && c.grudge;
+    if (!grudgeActive(gr, state && state.flags)) return null;
+    var p = +gr.p;
+    return {npc: gr.npc, note: gr.note || null, p: (c.roll && isFinite(p) && p < 0) ? p : 0, effects: gr.effects || null};
+  }
+  /* effects a + grudge effects b (stat deltas and taint summed; set/unset stay a's) — never mutates the data */
+  function mergeEffects(a, b) {
+    if (!b) return a;
+    var o = {}, k, i;
+    for (k in (a || {})) o[k] = a[k];
+    for (i = 0; i < STATS.length; i++) if (typeof b[STATS[i]] === "number" && b[STATS[i]]) o[STATS[i]] = (+o[STATS[i]] || 0) + b[STATS[i]];
+    if (b.taint) {
+      var t = {};
+      for (k in (o.taint || {})) t[k] = o.taint[k];
+      for (k in b.taint) t[k] = (+t[k] || 0) + (+b.taint[k] || 0);
+      o.taint = t;
+    }
+    return o;
   }
 
   function requireOK(req, state) {
@@ -149,10 +182,10 @@
   /* ---------- consequence beat (SPEC §11) ----------
    * Pure data for the UI's consequence panel, attached to every step returned by choose() as step.consequence:
    *   {text:{zh,en}|null, auto:bool, deltas:{hp,…}, roll:{pEff,success,stat}|null, flags:bool, death:cause|null,
-   *    time:step.time|null, show:bool}
+   *    time:step.time|null, grudge:{npc,note}|null (SPEC §28: shown first), show:bool}
    * text  = choice.result, or choice.rollResult.success/fail for roll choices (falls back to result).
    * auto  = no text but real (clamped) stat deltas → UI prints a compact "生命 −10 · 理智 −5" line.
-   * show  = there is something to show (text, deltas, a roll outcome or a death). Flags alone → nothing. */
+   * show  = there is something to show (text, deltas, a roll outcome, a death or an active grudge). Flags alone → nothing. */
   function hasDeltas(d) {
     if (!d) return false;
     for (var i = 0; i < STATS.length; i++) if (d[STATS[i]]) return true;
@@ -166,9 +199,10 @@
     } else text = c.result || null;
     var d = step.choiceDeltas || {}, dl = hasDeltas(d);
     var eff = c.effects || {};
+    var gr = step.grudge || null;
     return {text: text, auto: !text && dl, deltas: d, roll: roll, flags: !!(eff.set || eff.unset),
-            death: step.death || null, time: isEvent ? null : (step.time || null),
-            show: !!(text || dl || roll || step.death)};
+            death: step.death || null, time: isEvent ? null : (step.time || null), grudge: gr,
+            show: !!(text || dl || roll || step.death || gr)};
   }
 
   /* ---------- origins (SPEC §16) ---------- */
@@ -264,7 +298,7 @@
   function newStep() {
     return {kind: "node", nodeId: null, choiceDeltas: {}, nodeDeltas: {}, deltas: {},
             time: null, chapterChanged: false, fromChapter: null, codexNew: [],
-            roll: null, death: null, ending: null, event: null, deathPending: null, rumor: null, rumorCodex: []};
+            roll: null, death: null, ending: null, event: null, deathPending: null, rumor: null, rumorCodex: [], grudge: null};
   }
 
   /* apply {hp,sanity,corruption,renown,set,unset}; returns actual (clamped) deltas */
@@ -557,8 +591,11 @@
     for (var i = 0; i < list.length; i++) {
       var c = list[i], ok = requireOK(c.require, st);
       if (!ok && c.hideIfLocked) continue;
-      out.push({index: i, choice: c, locked: !ok,
-                roll: c.roll ? {pEff: rollChance(c.roll, st.stats), stat: c.roll.stat || null} : null});
+      var gr = ok ? grudgeOf(c, st) : null;                // SPEC §28 (locked choices unaffected)
+      var ent = {index: i, choice: c, locked: !ok,
+                 roll: c.roll ? {pEff: rollChance(c.roll, st.stats, gr ? gr.p : 0), stat: c.roll.stat || null} : null};
+      if (gr) ent.grudge = gr;
+      out.push(ent);
     }
     var anyOpen = false;
     for (var j = 0; j < out.length; j++) if (!out[j].locked) anyOpen = true;
@@ -568,6 +605,28 @@
       else if (list.length) out.push({index: list.length - 1, choice: list[list.length - 1], locked: false, fallback: true,
                                       roll: list[list.length - 1].roll ? {pEff: rollChance(list[list.length - 1].roll, st.stats)} : null});
     }
+    return out;
+  };
+
+  /* SPEC §28: the current node's presence line while its grudge is active → {npc, text:{zh,en}} or null */
+  Game.prototype.grudgeLine = function (id) {
+    var st = this.state;
+    if (!st) return null;
+    var node;
+    try { node = this.node(id); } catch (e) { return null; }
+    var gl = node && node.grudgeLine;
+    return (gl && gl.text && grudgeActive(gl, st.flags)) ? gl : null;
+  };
+  /* node text {zh,en} with the active grudge line appended */
+  Game.prototype.nodeText = function (id) {
+    var node = this.node(id), gl = this.grudgeLine(id), tx = node.text || {};
+    if (!gl) return tx;
+    return {zh: (tx.zh || "") + (gl.text.zh || ""), en: (tx.en || "") + " " + (gl.text.en || "")};
+  };
+  /* npc ids currently wronged and not forgiven */
+  Game.prototype.activeGrudgeNpcs = function () {
+    var fl = (this.state && this.state.flags) || {}, out = [];
+    for (var k in fl) if (k.indexOf("wronged_") === 0 && fl[k] && !fl["forgiven_" + k.slice(8)]) out.push(k.slice(8));
     return out;
   };
 
@@ -582,8 +641,9 @@
       step.death = st.deathPending;
       return this._enter(this.deathNodeId(st.deathPending), step);
     }
-    var c = v.choice;
-    step.choiceDeltas = this._applyEffects(c.effects, step.deltas);
+    var c = v.choice, gr = v.grudge || null;
+    if (gr) step.grudge = {npc: gr.npc, note: gr.note};                       // SPEC §28
+    step.choiceDeltas = this._applyEffects(gr ? mergeEffects(c.effects, gr.effects) : c.effects, step.deltas);
     this._unlock(c.codex, step);
     var cause = this.deathCause();
     if (cause) {
@@ -594,7 +654,7 @@
     }
     var target = c.next;
     if (c.roll) {
-      var p = rollChance(c.roll, st.stats), r = this.rng(), ok = r < p;
+      var p = rollChance(c.roll, st.stats, gr ? gr.p : 0), r = this.rng(), ok = r < p;
       step.roll = {pEff: p, success: ok, stat: c.roll.stat || null};
       target = ok ? c.roll.success : c.roll.fail;
     }
@@ -886,7 +946,7 @@
     return {game: g, step: g.start(originId)};
   };
   WH.Rules = {
-    STATS: STATS, GODS: GODS, zeroTaint: zeroTaint, CLAIM_MAX: CLAIM_MAX, claimGodOf: claimGodOf, godCodexId: godCodexId, clamp: clamp, rollChance: rollChance, requireOK: requireOK,
+    STATS: STATS, GODS: GODS, zeroTaint: zeroTaint, CLAIM_MAX: CLAIM_MAX, claimGodOf: claimGodOf, godCodexId: godCodexId, clamp: clamp, rollChance: rollChance, requireOK: requireOK, grudgeActive: grudgeActive, grudgeOf: grudgeOf, mergeEffects: mergeEffects,
     timeHours: timeHours, dateParts: dateParts, startHours: startHours, consequenceOf: consequenceOf, hasDeltas: hasDeltas,
     WARP_MIN: WARP_MIN, WARP_MAX: WARP_MAX, HOURS_PER_YEAR: HOURS_PER_YEAR, RUMOR_P: RUMOR_P, RUMOR_P1: RUMOR_P1, RUMOR_P2: RUMOR_P2, RUMOR_GAP: RUMOR_GAP, RUMOR_PER_CHAPTER: RUMOR_PER_CHAPTER,
     rumorEligible: rumorEligible, rumorScore: rumorScore, nodeContext: nodeContext,

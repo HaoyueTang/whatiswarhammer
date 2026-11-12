@@ -21,7 +21,7 @@ WH.difficulty = {
   necrons: 3,
   "necrons/archivist": 3,
   "necrons/convict": 3,
-  "necrons/lexmech": 2,
+  "necrons/lexmech": 3,
   orks: 3,
   "orks/scrap": 3,
   "orks/guard": 3,
@@ -33,5 +33,5 @@ WH.difficulty = {
   mechanicus: 2,
   "mechanicus/menial": 2,
   "mechanicus/savant": 3,
-  "mechanicus/conscript": 2
+  "mechanicus/conscript": 3
 };

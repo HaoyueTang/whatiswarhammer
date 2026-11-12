@@ -18,6 +18,7 @@
     if (okRes && koRes) o.rollResult = {success: okRes, fail: koRes};
     return o;
   }
+  function M(a, b) { var o = {}, k; for (k in a) o[k] = a[k]; for (k in b) o[k] = b[k]; return o; }   // merge (adds grudge / require to a roll choice)
 
   var VASH  = S("tau_water_caste", "瓦尚使节", "Envoy Vash'aun");
   var RENA  = S("preacher", "雷娜姨", "Aunt Rena");
@@ -368,7 +369,7 @@
     choices: [
       C("帮她", "Help her", "tau_403", {effects: {renown: -10, set: {helpedRena: true}}, result: L("你们趁夜摸上钟楼。雷娜姨的手在抖，划了三根火柴才点着灯芯。", "You climb the bell tower under cover of night. Rena's hands shake; it takes three matches to light the wick.")}),
       C("劝她别做傻事", "Beg her not to do anything foolish", "tau_404", {result: L("“雷娜姨，他们不是来接我们的。”话一出口，你就后悔了。", "“Aunt Rena, they're not here to rescue us.” The moment it's out, you regret it.")}),
-      C("去告诉水族", "Go tell the water caste", "tau_405", {effects: {renown: 10, sanity: -15, taint: {nurgle: 25}, set: {reportedRena: true}}, result: L("你走向水族办公楼，一路没敢回头。门口的无人机认出了你，为你开了门。", "You walk to the water-caste office without looking back. The drone at the door recognises you and lets you in.")})
+      C("去告诉水族", "Go tell the water caste", "tau_405", {effects: {renown: 10, sanity: -15, taint: {nurgle: 25}, set: {reportedRena: true, wronged_rena: true, wronged_jory: true}}, result: L("你走向水族办公楼，一路没敢回头。你说出雷娜姨的名字和住址。乔里也住在那里。", "You walk to the water-caste office without looking back. You give them Aunt Rena's name and address. Jory lives there too.")})
     ]};
 
   N.tau_403 = {chapter: 4, scene: "ruins", speaker: S("commissar", "帝国政委", "Imperial Commissar"), time: {h: 8},
@@ -395,8 +396,8 @@
     ]};
 
   N.tau_405 = {chapter: 4, scene: "tau_city", speaker: VASH, time: {h: 3},
-    text: L("瓦尚听完，握住你的手，笑容完美：“谢谢你。你为大义做了一件困难而正确的事。”\n当晚，雷娜姨被“请”去参加一次友好的对话。\n乔里从此没再跟你说过一句话。",
-            "Vash'aun hears you out, takes your hand, and smiles perfectly. “Thank you. You have done a difficult and correct thing for the Greater Good.”\nThat night Aunt Rena is invited to a friendly dialogue.\nJory never speaks to you again."),
+    text: L("瓦尚听完，握住你的手，笑容完美：“谢谢你。你为大义做了一件困难而正确的事。”\n当晚，雷娜姨被“请”去参加一次友好的对话。\n乔里整整一年没再跟你说一句话。",
+            "Vash'aun hears you out, takes your hand, and smiles perfectly. “Thank you. You have done a difficult and correct thing for the Greater Good.”\nThat night Aunt Rena is invited to a friendly dialogue.\nJory doesn't speak a word to you for a whole year."),
     choices: [
       C("回营地", "Go back to barracks", "tau_406", {result: L("营房里，每个人都假装没看见你。你的床铺被人挪到了最角落。", "In the barracks, everyone pretends not to see you. Someone has moved your bunk to the far corner.")})
     ]};
@@ -528,7 +529,7 @@
     choices: [
       C("答应她，等时机", "Agree, and wait for the moment", "tau_509", {effects: {set: {farsightPact: true}, taint: {tzeentch: 35}}, result: L("凯尔拉握了一下你的手，很快松开。“别告诉任何人，”她说，“尤其是瓦尚。”", "Kel'ra squeezes your hand and lets go fast. “Tell no one,” she says. “Especially not Vash'aun.”")}),
       C("拒绝，但替她保密", "Refuse, but keep her secret", "tau_509", {effects: {sanity: -5}, result: L("凯尔拉点点头，不失望，也不生气。“谢谢你，”她说，“这比我预想的多。”", "Kel'ra nods, neither disappointed nor angry. “Thank you,” she says. “That is more than I expected.”")}),
-      C("告发她", "Report her", "tau_509", {effects: {renown: 15, sanity: -15, taint: {tzeentch: 60}, set: {betrayedKelra: true}}, result: L("你走进水族办公楼时，凯尔拉正从走廊另一头经过。她看见了你，什么也没问。", "As you enter the water-caste office, Kel'ra passes at the far end of the corridor. She sees you and asks nothing.")})
+      C("告发她", "Report her", "tau_509", {effects: {renown: 15, sanity: -15, taint: {tzeentch: 60}, set: {betrayedKelra: true, wronged_kelra: true}}, result: L("你走进水族办公楼时，凯尔拉正从走廊另一头经过。她看见了你，什么也没问。", "As you enter the water-caste office, Kel'ra passes at the far end of the corridor. She sees you and asks nothing.")})
     ]};
 
   N.tau_509 = {chapter: 5, scene: "tau_city", speaker: VASH, time: {d: 2},
@@ -576,12 +577,14 @@
     ]};
 
   N.tau_605 = {chapter: 6, scene: "hive_hab", speaker: RENA, time: {h: 3},
+    grudgeLine: {npc: "rena", text: L("她从对话室回来后瘦了一圈。她没问是谁说的，你也没说。", "She came back from the dialogue room thinner. She never asked who spoke, and you never said.")},
     text: L("雷娜姨坐在空讲台前，不肯走。\n“第三批？”她笑了，“孩子，第三批永远不会来的。我在帝国活了六十年，我懂排队。”\n她把双头鹰吊坠塞进你手心，合上你的手指。",
             "Aunt Rena sits before the empty pulpit and won't leave.\n“Third wave?” She laughs. “Child, the third wave never comes. Sixty years in the Imperium; I know queues.”\nShe presses the eagle pendant into your palm and folds your fingers over it."),
     effects: {sanity: -5, set: {hasAquila: true}},
     choices: [
-      C("收下吊坠", "Keep the pendant", "tau_606", {effects: {sanity: 5}, result: L("吊坠还带着她的体温。你把它攥在手心很久，才放进贴身的口袋。", "The pendant is still warm from her. You hold it in your fist a long time before slipping it into an inner pocket.")}),
-      C("硬拉她走", "Try to drag her along", "tau_606", {effects: {hp: -5, sanity: -5}, result: L("她比看上去有力气得多。她死死抓着讲台，指甲划破了你的手背。", "She's far stronger than she looks. She clings to the pulpit, and her nails score the back of your hand.")})
+      C("收下吊坠", "Keep the pendant", "tau_606", {effects: {sanity: 5}, grudge: {npc: "rena", effects: {sanity: -6}, note: L("你告发过她。她递来的吊坠，沉得握不住。", "You informed on her. The pendant she hands you is hard to hold.")}, result: L("吊坠还带着她的体温。你把它攥在手心很久，才放进贴身的口袋。", "The pendant is still warm from her. You hold it in your fist a long time before slipping it into an inner pocket.")}),
+      C("硬拉她走", "Try to drag her along", "tau_606", {effects: {hp: -5, sanity: -5}, grudge: {npc: "rena", effects: {hp: -6}, note: L("你告发过她。她这次拼了命，不让你碰。", "You informed on her. This time she fights your hands off.")}, result: L("她比看上去有力气得多。她死死抓着讲台，指甲划破了你的手背。", "She's far stronger than she looks. She clings to the pulpit, and her nails score the back of your hand.")}),
+      C("向她坦白那一夜的事", "Confess what you did that night", "tau_606", {require: {flag: "wronged_rena"}, hideIfLocked: true, effects: {sanity: 3, set: {forgiven_rena: true}}, result: L("雷娜姨听完，沉默片刻，把吊坠放进你手心。“我知道是你，”她说，“脚步声，我认得。你肯来说，就够了。”", "Rena hears you out, silent a long while, then lays the pendant in your palm. “I knew it was you,” she says. “I know your footsteps. That you came to say it is enough.”")})
     ]};
 
   N.tau_606 = {chapter: 6, scene: "jungle", speaker: null, foe: "genestealer", time: {d: 2}, eventRoll: 0.42,
@@ -622,11 +625,12 @@
     ]};
 
   N.tau_610 = {chapter: 6, scene: "tau_city", speaker: KELRA, time: {h: 1},
+    grudgeLine: {npc: "kelra", text: L("她没忘走廊里的那一眼。这句请求，说得比命令还硬。", "She hasn't forgotten that glance in the corridor. The request lands harder than the order.")},
     text: L("一排火族战士举起了枪。站在最前面的是凯尔拉。\n她的枪口对着你，手很稳，眼睛不稳。\n“请你停下，”她说，“这是命令。也是请求。”",
             "A line of fire warriors raises their rifles. At the front stands Kel'ra.\nHer muzzle is on you. Her hands are steady. Her eyes are not.\n“Please stop,” she says. “That is an order. And a request.”"),
     choices: [
       C("放下武器", "Lower your weapon", "tau_611", {effects: {renown: -10, sanity: -5}, result: L("你的枪落在地上。凯尔拉的肩膀松了下来。两个火族战士把你押走，动作很轻。", "Your rifle hits the ground. Kel'ra's shoulders drop. Two fire warriors lead you away, gently.")}),
-      C("继续往前走", "Keep walking", null, R(0.4, "renown", "tau_611", "tau_end_gate", L("凯尔拉的枪口抖了一下，垂了下去。你在能量屏前站了很久。门没开，也没人开枪。", "Kel'ra's muzzle wavers and drops. You stand before the energy screen a long time. It doesn't open. No one fires either."), L("你又迈了一步。凯尔拉的嘴唇动了动，像是在说“对不起”。", "You take one more step. Kel'ra's lips move, as if saying “I'm sorry.”")))
+      C("继续往前走", "Keep walking", null, M(R(0.4, "renown", "tau_611", "tau_end_gate", L("凯尔拉的枪口抖了一下，垂了下去。你在能量屏前站了很久。门没开，也没人开枪。", "Kel'ra's muzzle wavers and drops. You stand before the energy screen a long time. It doesn't open. No one fires either."), L("你又迈了一步。凯尔拉的嘴唇动了动，像是在说“对不起”。", "You take one more step. Kel'ra's lips move, as if saying “I'm sorry.”")), {grudge: {npc: "kelra", p: -0.1, note: L("你告发过她。这一次，她不会再心软。", "You informed on her. This time she won't waver.")}}))
     ]};
 
   N.tau_end_gate = {chapter: 6, scene: "tau_city", speaker: KELRA, time: {h: 1},
@@ -650,7 +654,8 @@
     effects: {hp: -10, sanity: -5},
     choices: [
       C("守住射击线", "Hold the firing line", "tau_702", {result: L("换电池，开火，换电池，开火。直到虫潮里有什么东西，让所有小虫同时停下。", "Swap cell, fire, swap cell, fire. Until something in the swarm makes every small one stop at once.")}),
-      C("跟克鲁特去侧翼", "Flank with the Kroot", "tau_703", {result: L("格拉克萨冲你吼了一声，像在笑。你跟着克鲁特跳下城墙，冲进了长着牙的雨里。", "Grrak'tha roars at you, almost laughing. You follow the Kroot off the wall and into the rain with teeth.")})
+      C("跟克鲁特去侧翼", "Flank with the Kroot", "tau_703", {result: L("格拉克萨冲你吼了一声，像在笑。你跟着克鲁特跳下城墙，冲进了长着牙的雨里。", "Grrak'tha roars at you, almost laughing. You follow the Kroot off the wall and into the rain with teeth.")}),
+      C("把一半电池分给凯尔拉", "Split your power cells with Kel'ra", "tau_702", {require: {flag: "wronged_kelra"}, hideIfLocked: true, effects: {renown: 2, set: {forgiven_kelra: true}}, result: L("凯尔拉看看你递来的电池，又看看你。“大义不原谅，”她说，“我也许可以。”她把一块电池推进枪里。", "Kel'ra looks at the cells you hold out, then at you. “The Greater Good does not forgive,” she says. “I might.” She slots one into her rifle.")})
     ]};
 
   N.tau_702 = {chapter: 7, scene: "spore_sky", speaker: KELRA, foe: "tyranid_warrior", time: {h: 3},
@@ -699,20 +704,23 @@
     ]};
 
   N.tau_707 = {chapter: 7, scene: "tau_city", speaker: JORY, time: {d: 4},
+    grudgeLine: {npc: "jory", text: L("他递果子时没抬头。雷娜姨的名字，你们谁也没提。", "He holds the fruit out without looking up. Neither of you says Rena's name.")},
     text: L("第四天。舰队来讯：影日的舰队五天后到。“坚守。”\n乔里坐在你旁边，用钛人的手给你剥一个果子。\n“我妈说得对，”他说，“我们永远是第三批。可我还是想当他们的一部分。这是不是很傻？”",
             "Day four. Kel'ra receives word: Shadowsun's fleet arrives in five days. “Hold.”\nJory sits beside you, peeling a fruit with his T'au hand.\n“Mum was right,” he says. “We'll always be the third wave. But I still want to be part of them. Is that stupid?”"),
     choices: [
-      C("“不傻。”", "“It's not stupid.”", "tau_708", {effects: {sanity: 10}, result: L("乔里笑了，把剥好的果子分你一半。那是你这几天吃过最甜的东西。", "Jory grins and gives you half the peeled fruit. It's the sweetest thing you've eaten in days.")}),
-      C("“我也不知道。”", "“I don't know either.”", "tau_708", {effects: {sanity: 5, renown: 3}, result: L("乔里点点头，好像这个答案也挺好。你们一起看着紫色的天，没再说话。", "Jory nods, as if that answer is fine too. You both watch the violet sky without another word.")})
+      C("“不傻。”", "“It's not stupid.”", "tau_708", {effects: {sanity: 10}, grudge: {npc: "jory", effects: {sanity: -5}, note: L("你告发过他母亲。这句安慰，从你嘴里出来是空的。", "You informed on his mother. Comfort from you rings hollow.")}, result: L("乔里笑了，把剥好的果子分你一半。那是你这几天吃过最甜的东西。", "Jory grins and gives you half the peeled fruit. It's the sweetest thing you've eaten in days.")}),
+      C("“我也不知道。”", "“I don't know either.”", "tau_708", {effects: {sanity: 5, renown: 3}, result: L("乔里点点头，好像这个答案也挺好。你们一起看着紫色的天，没再说话。", "Jory nods, as if that answer is fine too. You both watch the violet sky without another word.")}),
+      C("“雷娜姨的事，是我干的。”", "“About your mother. That was me.”", "tau_708", {require: {flag: "wronged_jory"}, hideIfLocked: true, effects: {sanity: 4, set: {forgiven_jory: true}}, result: L("乔里的手停在果子上。“我知道，”他说，“妈回来那天就告诉我了。”他把果子掰开，分你一半，没抬头。", "Jory's hand stops on the fruit. “I know,” he says. “Mum told me the day she came home.” He splits it in two, pushes half toward you, and doesn't look up.")})
     ]};
 
   N.tau_708 = {chapter: 7, scene: "spore_sky", speaker: null, time: {d: 3}, eventRoll: 0.42,
+    grudgeLine: {npc: "jory", text: L("乔里缩在营房角落，血滴在钛人的手背上。他看见你，把脸转开了。", "Jory crouches in a corner of the barracks, blood dripping onto his T'au hand. He sees you and turns his face away.")},
     text: L("第七天夜里，所有人类同时流了鼻血。\n不是因为受伤，是因为一种声音——一种低到听不见、却压在每个人脑子里的嗡鸣。\n钛人什么都没感觉到。他们看着你们，第一次显得不知所措。",
             "On the seventh night, every human bleeds from the nose at once.\nNot from wounds. From a sound, too low to hear, pressing down inside every skull.\nThe T'au feel nothing. They watch you, and for the first time they look lost."),
     effects: {sanity: -10},
     choices: [
       C("捂住耳朵", "Cover your ears", "tau_801", {effects: {sanity: 5}, result: L("没有用。那声音不是从耳朵进来的。可捂着耳朵的这双手，至少还属于你。", "It doesn't help. The sound doesn't come through your ears. But your hands, pressed there, are at least still yours.")}),
-      C("去照顾乔里", "Go look after Jory", "tau_801", {effects: {renown: 3}, result: L("乔里的鼻血止不住。你用袖子替他擦，他用钛人的手替你擦。", "Jory's nosebleed won't stop. You wipe his with your sleeve; he wipes yours with his T'au hand.")})
+      C("去照顾乔里", "Go look after Jory", "tau_801", {effects: {renown: 3}, grudge: {npc: "jory", effects: {sanity: -4}, note: L("他记得雷娜姨的事。你的手，他推开了一次。", "He remembers what you did to his mother. He pushes your hand away once.")}, result: L("乔里的鼻血止不住。你用袖子替他擦，他用钛人的手替你擦。", "Jory's nosebleed won't stop. You wipe his with your sleeve; he wipes yours with his T'au hand.")})
     ]};
 
   /* ============ Chapter 8 · The Swarmlord ============ */
@@ -727,11 +735,12 @@
     ]};
 
   N.tau_802 = {chapter: 8, scene: "tau_city", speaker: KELRA, foe: "hive_tyrant", time: {h: 6},
+    grudgeLine: {npc: "kelra", text: L("她这回没报战术。你只能凭她战斗服的火光，猜她在哪。", "This time she calls no tactics. You can only guess where she is by the flare of her suit.")},
     text: L("凯尔拉在城中心布下了考尤陷阱。虫群主宰走到陷阱边缘，停住了。\n然后它从另一边绕了进来。它也在等。\n防线一点点崩塌，港口方向传来平民的哭喊。",
             "Kel'ra lays a Kauyon trap in the city centre. The Swarmlord walks to the edge of it and stops.\nThen it comes in from the other side. It has been waiting too.\nThe line crumbles, and from the port comes the crying of civilians."),
     effects: {hp: -10},
     choices: [
-      C("掩护凯尔拉的战斗服", "Cover Kel'ra's battlesuit", null, R(0.4, "hp", "tau_803", "tau_804", L("你冲出掩体，把一整块电池打进它的侧脸。它转过头，看向了你。", "You break cover and empty a whole cell into the side of its head. It turns to look at you."), L("你的射击打在它的甲壳上，连一道痕都没留下。它甚至没有转头。", "Your shots strike its carapace without leaving a mark. It doesn't even turn its head."))),
+      C("掩护凯尔拉的战斗服", "Cover Kel'ra's battlesuit", null, M(R(0.4, "hp", "tau_803", "tau_804", L("你冲出掩体，把一整块电池打进它的侧脸。它转过头，看向了你。", "You break cover and empty a whole cell into the side of its head. It turns to look at you."), L("你的射击打在它的甲壳上，连一道痕都没留下。它甚至没有转头。", "Your shots strike its carapace without leaving a mark. It doesn't even turn its head.")), {grudge: {npc: "kelra", p: -0.08, note: L("你告发过她。她的战斗服不再等你的信号。", "You informed on her. Her battlesuit no longer waits for your signal.")}})),
       C("带平民去最后一艘船", "Lead civilians to the last ship", "tau_805", {result: L("你朝港口方向大喊，挥手让人往那边跑。乔里已经在舷梯口等你了。", "You shout toward the port and wave people on. Jory is already waiting at the ramp.")}),
       C("握住雷娜姨的吊坠", "Grip Aunt Rena's pendant", "tau_806", {require: {flag: "hasAquila"}, hideIfLocked: true, result: L("枪声和尖叫突然离你很远。你的手伸进口袋，摸到了那只小小的、冰凉的鹰。", "The gunfire and screaming suddenly seem far away. Your hand finds the small, cold eagle in your pocket.")}),
       C("向西拉斯的神献上一切", "Offer everything to Silas's god", "tau_803", {require: {flag: "cultMark"}, hideIfLocked: true, effects: {corruption: 40, hp: 40, sanity: -10, taint: {khorne: 90}}, result: L("你说出了那个名字。有什么东西从你体内涌出来，接管了你的手，替你瞄准。", "You speak the name. Something floods out through you, takes your hands, and aims for you.")})
@@ -754,11 +763,12 @@
     ]};
 
   N.tau_805 = {chapter: 8, scene: "tau_city", speaker: JORY, foe: "gaunt", time: {h: 3},
+    grudgeLine: {npc: "jory", text: L("他笑得有点勉强，像是在练习原谅你。", "His grin is a little strained, like someone practising forgiving you.")},
     text: L("你和乔里守在舷梯口，把人一个一个推上船。人类，克鲁特，一个吓呆了的土族工程师。\n没有人检查他们是第几批。\n舱门关上时，乔里冲你笑：“看，我们是一批的。”",
             "You and Jory hold the ramp, shoving people aboard one by one. Humans, Kroot, a terrified earth-caste engineer.\nNobody checks which wave they belong to.\nAs the hatch closes, Jory grins at you. “See? We're all one wave.”"),
     effects: {renown: 10, hp: -10, sanity: 10},
     choices: [
-      C("转身面对虫群", "Turn to face the swarm", "tau_807", {result: L("你和乔里背靠背站着，把最后的电池分成两份。虫潮涌上来时，天边亮了。", "You and Jory stand back to back and split the last cells. As the swarm surges in, the horizon lights up.")})
+      C("转身面对虫群", "Turn to face the swarm", "tau_807", {grudge: {npc: "jory", effects: {hp: -6}, note: L("你告发过雷娜姨。乔里守在你背后，却不再全然信你。", "You informed on Rena. Jory guards your back, but no longer fully trusts you.")}, result: L("你和乔里背靠背站着，把最后的电池分成两份。虫潮涌上来时，天边亮了。", "You and Jory stand back to back and split the last cells. As the swarm surges in, the horizon lights up.")})
     ]};
 
   N.tau_806 = {chapter: 8, scene: "throne_light", speaker: S("omen_emperor", "遥远的金光", "Distant Gold"), time: {h: 1},
@@ -857,6 +867,11 @@
     renownLabel: L("大义", "Greater Good"),
     renownIcon: "icon_greatergood",
     taintMod: {khorne: 0.7, nurgle: 0.7, tzeentch: 0.7, slaanesh: 0.7},   // SPEC §19: multiplier on positive taint deltas (cleanses unscaled)
+    npcs: {   // SPEC §28 grudges: people this route lets you wrong (flag wronged_<id>); see tau_402 / tau_508
+      rena: {name: L("雷娜姨", "Aunt Rena"), aka: [L("雷娜", "Rena")], sprite: "preacher"},
+      jory: {name: L("乔里", "Jory"), sprite: "gue_vesa"},
+      kelra: {name: L("凯尔拉", "Kel'ra"), sprite: "tau_warrior"}
+    },
     renownHelp: L("大义值是钛帝国对你“贡献”的评估。服从、耐心、为大义做艰难的选择会让它上升；质疑、违令、偏袒旧帝国会让它下降。它够高，你才会被授予荣誉，也决定你排在第几批。",
                   "Greater Good is the T'au Empire's measure of your contribution. Obeying orders, patience, and hard choices made for the Greater Good raise it; questioning, disobedience and sympathy for the old Imperium lower it. Enough of it earns honours, and decides which wave you are in."),
     origins: [

@@ -871,8 +871,9 @@
     np.textContent = name;
     np.className = "nameplate" + (name ? "" : " narration");
     $("dlg-text").classList.toggle("narr", !node.speaker);
-    if (opts.nodeId) { UI.typer.run(L(node.text), "instant"); renderRumor(null); return; }
+    if (opts.nodeId) { UI.typer.run(L(node.text), "instant"); renderRumor(null); renderGrudgeLine(null); return; }
     renderRumor(g.currentRumor ? g.currentRumor() : null, opts.instant);
+    renderGrudgeLine(g.grudgeLine ? g.grudgeLine() : null, opts.instant);
     renderChoices(true);
     if (!UI.eventOpen) mood(au("moodFor", node, g.state, g.faction));
     var text = L(node.text);
@@ -883,6 +884,29 @@
     UI.typer.run(text, opts.instant ? "instant" : UI.settings.textSpeed, revealChoices);
     if (!opts.instant) taintWhisper();
     updateDlgH();
+  }
+
+  /* ---------- grudges (SPEC §28) ----------
+   * node.grudgeLine (the wronged person is visibly there) → italic line right after the node text, only while the grudge is
+   * active. Space reserved while the typewriter runs, faded in with the choices (revealGrudgeLine). Hidden in the consequence beat. */
+  function renderGrudgeLine(gl, visible) {
+    var el = $("dlg-grudge");
+    if (!el) return;
+    clear(el);
+    el.classList.remove("show", "fade-in");
+    if (!gl || !gl.text) { el.hidden = true; el.removeAttribute("data-npc"); return; }
+    el.appendChild(h("em", null, L(gl.text)));
+    el.setAttribute("data-npc", gl.npc);
+    el.hidden = false;
+    if (visible) el.classList.add("show");
+  }
+  function revealGrudgeLine() {
+    var el = $("dlg-grudge");
+    if (el && !el.hidden && !el.classList.contains("show")) {
+      el.classList.add("show");
+      if (UI.fxOn) el.classList.add("fade-in");
+      updateDlgH();
+    }
   }
 
   /* ---------- rumours (SPEC §20) ----------
@@ -978,16 +1002,21 @@
       kids.push(h("span", {class: "num", "aria-hidden": "true"}, v.locked ? "🔒" : String(i + 1)));
       var ct = h("span", {class: "ct"}, label);
       if (v.locked) { cls += " locked"; ct.appendChild(h("span", {class: "hint"}, reqHint(v.choice.require) || t("locked"))); }
+      var gnote = (v.grudge && !v.locked && v.grudge.note) ? L(v.grudge.note) : "";       // SPEC §28: ⚠ tag + why it is riskier
+      if (v.grudge && !v.locked) { cls += " grudge"; if (gnote) ct.appendChild(h("span", {class: "gnote"}, gnote)); }
       kids.push(ct);
+      if (v.grudge && !v.locked) kids.push(h("span", {class: "badge grudge-tag", "aria-hidden": "true", title: gnote}, "\u26A0"));
       if (v.roll && !v.locked) kids.push(h("span", {class: "badge", title: v.roll.stat ? statLabel(v.roll.stat) : ""}, t("risky") + " " + Math.round(v.roll.pEff * 100) + "%"));
       var aria = (i + 1) + ". " + label + (v.locked ? " (" + t("locked") + ": " + reqHint(v.choice.require) + ")" : "") +
-                 (v.roll && !v.locked ? " (" + t("risky") + " " + Math.round(v.roll.pEff * 100) + "%)" : "");
+                 (v.roll && !v.locked ? " (" + t("risky") + " " + Math.round(v.roll.pEff * 100) + "%)" : "") +
+                 (gnote ? " (" + t("grudge_aria", {x: gnote}) + ")" : "");
       box.appendChild(h("button", {class: cls, type: "button", disabled: v.locked, "aria-label": aria, "data-i": i,
-        onclick: function () { choose(i); }}, kids));
+        title: gnote || null, onclick: function () { choose(i); }}, kids));
     });
   }
 
   function revealChoices() {
+    revealGrudgeLine();
     revealRumor();
     flushLore();
     var box = $("choices");
@@ -1025,6 +1054,7 @@
     if (step.codexNew && step.codexNew.length) codexToast(step.codexNew);
     if (step.kind === "event") {
       renderRumor(null);                                   // SPEC §20: never under an event
+      renderGrudgeLine(null);
       renderHud();
       if (!afterCq) floatDeltas(step.choiceDeltas);
       UI.busy = false;
@@ -1069,6 +1099,7 @@
     var btn = h("button", {class: "btn choice ending cq-go px", type: "button", onclick: onContinue}, t("cont_btn") + " ▸");
     var meta = [deltaLine(o.deltas, !o.text), o.time ? timeChip(o.time) : null].filter(Boolean);
     var el = h("div", {class: "conseq" + (o.death ? " fatal" : "") + (o.text ? "" : " no-text")},
+      o.grudge ? h("div", {class: "cq-grudge", role: "note"}, h("span", {class: "gmark", "aria-hidden": "true"}, "\u26A0"), h("span", {class: "gtx"}, o.grudge)) : null,
       o.pick ? h("div", {class: "cq-pick"}, h("span", {class: "k"}, t("cq_you_chose")), h("span", {class: "v"}, o.pick)) : null,
       o.roll ? h("div", {class: "cq-roll " + (o.roll.success ? "ok" : "fail")},
         h("span", {class: "die", "aria-hidden": "true"}, "⚄"), t("risky") + " " + Math.round(o.roll.pEff * 100) + "%",
@@ -1119,7 +1150,8 @@
     box.classList.add("cq-mode");
     $("choices").hidden = true;
     var b = conseqBlock({pick: L(c.choice.text), roll: cq.roll, text: cq.text ? L(cq.text) : null, deltas: cq.deltas,
-                         death: cq.death, time: c.step.kind === "event" ? null : cq.time}, consequenceContinue);
+                         death: cq.death, time: c.step.kind === "event" ? null : cq.time,
+                         grudge: cq.grudge && cq.grudge.note ? L(cq.grudge.note) : null}, consequenceContinue);
     b.el.id = "conseq";
     box.appendChild(b.el);
     c.block = b;
