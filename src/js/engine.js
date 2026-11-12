@@ -12,9 +12,16 @@
  *   if (step.kind === "event") { g.eventChoices(); var r = g.eventChoose(1); step = g.eventContinue(); }
  *   SPEC §19: faction.taintMod scales positive taint; event choices may `goto` a node (string or {faction:id});
  *   claim events fire at most twice per god (2nd only if flag resisted_<god>); claim endings = ids with "_end_claim_<god>".
- *   SPEC §20 rumours: entering a node without eventRoll (not an ending, no pending death) → with p = RUMOR_P (own seeded
- *   stream, so the main RNG sequence is unchanged) one unseen eligible rumour → step.rumor / step.rumorCodex, g.currentRumor().
- *   new WH.Game(fid, {rumors:false}) or g.rumors = false turns them off (UI setting 传闻).
+ *   SPEC §20/§20b rumours: entering a node without eventRoll (not an ending, no pending death), unseen eligible rumours whose
+ *   `when` matches this node (scene / speaker+foe sprite / codex unlocked here / run flags / keywords in the zh+en text) are
+ *   scored (criteria matched); the best one fires with p 0.6 (score ≥2) or 0.35 (score 1), ties random — at least 3 nodes since
+ *   the last rumour, at most 2 per chapter; rumours without `when` never fire. Own seeded stream, so the main RNG sequence is
+ *   unchanged. → step.rumor / step.rumorScore / step.rumorCodex, g.currentRumor(), g.rumorMatches(nodeId).
+ *   new WH.Game(fid, {rumors:false}) or g.rumors = false turns them off (UI setting 传闻); opts.rumorChance forces p (tests).
+ *   SPEC §27 echoes: g.echoPool = [{runId, echo:{faction, role, world, cause, kind, dateKey, claimedBy}}] (past bad/death runs, set by
+ *   the UI from the run records); at most ONE per run, p 0.15 on nodes with chapter ≥2, no eventRoll, not an ending, no rumour here and
+ *   ≥3 nodes since the last rumour; only echoes dated ≤ now; other routes preferred; text from WH.echoTemplates → state.echo / step.echo.
+ *   Own seeded stream (echoRng); opts.echoes:false or g.echoes = false turns them off; opts.echoChance forces p (tests).
  *   SPEC §23: origin.max:{hp,sanity} (70–130, default 100) → state.max; hp/sanity clamp to g.cap(k); start values default to the caps.
  *   g.toRecord() / WH.Game.fromRecord(rec)
  */
@@ -33,7 +40,10 @@
   var HOURS_PER_YEAR = 8760;
   var WARP_MIN = 0.4, WARP_MAX = 3.0;
   var HISTORY_MAX = 30;
-  var RUMOR_P = 0.25;                                            // SPEC §20: chance per eligible node
+  var RUMOR_P = 0.25;                                            // SPEC §20 (v0.2.2 flat roll; kept for reference)
+  var RUMOR_P2 = 0.6, RUMOR_P1 = 0.35;                           // SPEC §20b: chance when the best match scores ≥2 / 1
+  var RUMOR_GAP = 3, RUMOR_PER_CHAPTER = 2;                      // SPEC §20b: ≥3 nodes since the last rumour, ≤2 per chapter
+  var ECHO_P = 0.15;                                             // SPEC §27: chance of a past life's echo on an eligible node
   var CAP_MIN = 70, CAP_MAX = 130, CAP_DEFAULT = 100;            // SPEC §23: per-run caps for hp / sanity
   var CAPPED = ["hp", "sanity"];
   /* SPEC §23: the run's caps from an origin's max:{hp,sanity} (missing → 100, clamped 70–130) */
@@ -192,8 +202,13 @@
     /* SPEC §20: rumours draw from their own stream (derived from the main seed) so turning them on/off never changes
      * rolls, events or warp time of a seeded run */
     this.rumors = opts.rumors !== false;
-    this.rumorChance = typeof opts.rumorChance === "number" ? opts.rumorChance : RUMOR_P;
-    this.rumorRng = opts.rumorRng || RNG(((this.rng.getState ? this.rng.getState() : Math.floor(Math.random() * 4294967296)) ^ 0x2545F491) >>> 0);
+    this.rumorChance = typeof opts.rumorChance === "number" ? opts.rumorChance : null;     // null = SPEC §20b 0.6 / 0.35
+    var seed0 = this.rng.getState ? this.rng.getState() : Math.floor(Math.random() * 4294967296);
+    this.rumorRng = opts.rumorRng || RNG((seed0 ^ 0x2545F491) >>> 0);
+    this.echoes = opts.echoes !== false;                             // SPEC §27
+    this.echoChance = typeof opts.echoChance === "number" ? opts.echoChance : ECHO_P;
+    this.echoRng = opts.echoRng || RNG((seed0 ^ 0x6A09E667) >>> 0);
+    this.echoPool = opts.echoPool || [];
   }
 
   Game.STATS = STATS;
@@ -217,7 +232,7 @@
       stats: {hp: ss.hp !== undefined ? clamp(ss.hp, 0, mx.hp) : mx.hp, sanity: ss.sanity !== undefined ? clamp(ss.sanity, 0, mx.sanity) : mx.sanity,
               corruption: ss.corruption || 0, renown: ss.renown || 0},
       runId: Date.now().toString(36) + Math.floor(Math.random() * 1e8).toString(36),
-      flags: {}, codex: [], seenEvents: [], seenRumors: [], rumor: null, hours: startHours(f), taint: zeroTaint(), claims: {},
+      flags: {}, codex: [], seenEvents: [], seenRumors: [], rumor: null, rumorLog: [], echo: null, echoRun: null, hours: startHours(f), taint: zeroTaint(), claims: {},
       pendingEvent: null, pendingNext: null, eventChoice: null, eventDeath: null,
       deathPending: null, history: [], visits: 0, playMs: 0, ended: false
     };
@@ -358,6 +373,7 @@
     st.nodeId = id;
     st.deathPending = null;
     st.rumor = null;
+    st.echo = null;
     st.history.push(id);
     if (st.history.length > HISTORY_MAX) st.history.shift();
     st.visits++;
@@ -388,7 +404,10 @@
       if (cause) {
         st.deathPending = cause;
         step.deathPending = cause;
-      } else if (!node.eventRoll) this._rollRumor(node, step);
+      } else if (!node.eventRoll) {
+        this._rollRumor(node, step);
+        if (!step.rumor) this._rollEcho(node, step);
+      }
     }
     return step;
   };
@@ -421,19 +440,109 @@
   /* the rumour overheard at the current node (null if none) */
   Game.prototype.currentRumor = function () { return this.state && this.state.rumor ? this.rumor(this.state.rumor) : null; };
 
-  /* called by _enter for nodes without eventRoll / ending / pending death; one draw per node from rumorRng */
+  /* SPEC §20b: how many `when` criteria a node context matches (0 = not relevant). ctx: {scene, sprites[], codex[], flags{}, zh, en} */
+  function lc(x) { return String(x || "").toLowerCase(); }
+  function rumorScore(r, ctx) {
+    var w = r && r.when, n = 0, i;
+    if (!w || typeof w !== "object") return 0;
+    var anyIn = function (list, set) { if (!Array.isArray(list)) return false; for (var j = 0; j < list.length; j++) if (set.indexOf(list[j]) >= 0) return true; return false; };
+    if (anyIn(w.scenes, ctx.scene ? [ctx.scene] : [])) n++;
+    if (anyIn(w.sprites, ctx.sprites || [])) n++;
+    if (anyIn(w.codex, ctx.codex || [])) n++;
+    if (Array.isArray(w.flags)) for (i = 0; i < w.flags.length; i++) if (ctx.flags && ctx.flags[w.flags[i]]) { n++; break; }
+    if (w.keywords && typeof w.keywords === "object") {
+      var hay = lc(ctx.zh) + "\n" + lc(ctx.en), kws = [].concat(w.keywords.zh || [], w.keywords.en || []);   // language-independent
+      for (i = 0; i < kws.length; i++) if (kws[i] && hay.indexOf(lc(kws[i])) >= 0) { n++; break; }
+    }
+    return n;
+  }
+  function nodeContext(node, flags) {
+    var t = node.text || {};
+    return {scene: node.scene || null, sprites: [node.speaker && node.speaker.sprite, node.foe].filter(Boolean),
+            codex: [].concat(node.codex || []), flags: flags || {}, zh: t.zh || "", en: t.en || ""};
+  }
+  /* eligible unseen rumours matching node `id` (default: current), best first: [{rumor, score}] — no RNG draws */
+  Game.prototype.rumorMatches = function (id, chapter) {
+    var st = this.state, node = this.node(id === undefined ? st.nodeId : id);
+    var ch = chapter !== undefined ? chapter : (typeof node.chapter === "number" ? node.chapter : st.chapter);
+    var ctx = nodeContext(node, st.flags), out = [];
+    this.eligibleRumors(ch).forEach(function (r) { var sc = rumorScore(r, ctx); if (sc > 0) out.push({rumor: r, score: sc}); });
+    out.sort(function (a, b) { return b.score - a.score; });
+    return out;
+  };
+  /* spacing / per-chapter cap (SPEC §20b) from state.rumorLog [{id, visit, chapter}] */
+  Game.prototype.rumorAllowed = function (chapter) {
+    var log = (this.state && this.state.rumorLog) || [], last = log[log.length - 1], n = 0;
+    if (last && this.state.visits - last.visit < RUMOR_GAP) return false;
+    for (var i = 0; i < log.length; i++) if (log[i].chapter === chapter) n++;
+    return n < RUMOR_PER_CHAPTER;
+  };
+
+  /* ---------- SPEC §27 echoes ---------- */
+  /* absolute in-game time as a number: mill×1000 + year + fraction of the year (comparable across routes) */
+  function dateKey(hours, startDate) { var d = dateParts(hours, startDate); return d.mill * 1000 + d.year + ((hours || 0) % HOURS_PER_YEAR) / HOURS_PER_YEAR; }
+  function fillEcho(tpl, e, lang) {
+    var gods = (WH.echoGods) || {}, pick = function (o) { return o && typeof o === "object" ? (o[lang] || o.zh || o.en || "") : (o || ""); };
+    return String(pick(tpl.text)).replace(/\{(role|world|cause|god)\}/g, function (m, k) {
+      if (k === "god") return pick(gods[e.claimedBy]) || e.claimedBy || "";
+      return pick(e[k]);
+    });
+  }
+  Game.prototype.dateKey = function () { return dateKey(this.state.hours, this.faction.startDate); };
+  /* past-run echoes that could be heard now (date ≤ now; other routes first) */
+  Game.prototype.echoCandidates = function () {
+    var now = this.dateKey(), fid = this.faction.id, pool = (this.echoPool || []).filter(function (r) {
+      return r && r.echo && typeof r.echo.dateKey === "number" && r.echo.dateKey <= now + 1e-9; });
+    var other = pool.filter(function (r) { return r.echo.faction !== fid; });
+    return other.length ? other : pool;
+  };
+  Game.prototype.echoTemplates = function (claim) {
+    var fid = this.faction.id;
+    return (this.data.echoTemplates || []).filter(function (tp) {
+      if (!tp || !tp.text || !!tp.claim !== !!claim) return false;
+      var fs = tp.factions || ["*"];
+      return fs.indexOf("*") >= 0 || fs.indexOf(fid) >= 0;
+    });
+  };
+  Game.prototype._rollEcho = function (node, step) {
+    var st = this.state;
+    if (!this.echoes || st.echoRun || !(this.echoPool && this.echoPool.length)) return;
+    var ch = typeof node.chapter === "number" ? node.chapter : st.chapter;
+    if (ch < 2) return;
+    var log = st.rumorLog || [], last = log[log.length - 1];
+    if (last && st.visits - last.visit < RUMOR_GAP) return;
+    var cands = this.echoCandidates();
+    if (!cands.length) return;
+    if (this.echoRng() >= this.echoChance) return;
+    var run = cands[Math.min(cands.length - 1, Math.floor(this.echoRng() * cands.length))], e = run.echo;
+    var tpls = this.echoTemplates(!!e.claimedBy);
+    if (!tpls.length) return;
+    var tpl = tpls[Math.min(tpls.length - 1, Math.floor(this.echoRng() * tpls.length))];
+    st.echo = {runId: run.runId, endingId: run.endingId || null, template: tpl.id || null, text: {zh: fillEcho(tpl, e, "zh"), en: fillEcho(tpl, e, "en")}};
+    st.echoRun = run.runId;
+    step.echo = st.echo;
+  };
+  Game.prototype.currentEcho = function () { return this.state && this.state.echo ? this.state.echo : null; };
+
+  /* called by _enter for nodes without eventRoll / ending / pending death; draws from rumorRng only when something matches */
   Game.prototype._rollRumor = function (node, step) {
     var st = this.state;
     if (!this.rumors || !(this.data.rumors && this.data.rumors.length)) return;
-    if (this.rumorRng() >= this.rumorChance) return;
     var ch = typeof node.chapter === "number" ? node.chapter : st.chapter;
-    var pool = this.eligibleRumors(ch);
-    if (!pool.length) return;
-    var r = pool[Math.min(pool.length - 1, Math.floor(this.rumorRng() * pool.length))];
+    if (!this.rumorAllowed(ch)) return;
+    var m = this.rumorMatches(st.nodeId, ch);
+    if (!m.length) return;
+    var best = m[0].score, top = m.filter(function (x) { return x.score === best; });
+    var p = this.rumorChance !== null && this.rumorChance !== undefined ? this.rumorChance : (best >= 2 ? RUMOR_P2 : RUMOR_P1);
+    if (this.rumorRng() >= p) return;
+    var pick = top.length > 1 ? top[Math.min(top.length - 1, Math.floor(this.rumorRng() * top.length))] : top[0], r = pick.rumor;
     if (!st.seenRumors) st.seenRumors = [];
+    if (!st.rumorLog) st.rumorLog = [];
     st.seenRumors.push(r.id);
+    st.rumorLog.push({id: r.id, visit: st.visits, chapter: ch, score: pick.score});
     st.rumor = r.id;
     step.rumor = r;
+    step.rumorScore = pick.score;
     var tmp = {codexNew: []};
     this._unlock(r.codex, tmp);
     step.rumorCodex = tmp.codexNew;
@@ -613,7 +722,9 @@
       faction: st.faction, origin: st.origin, runId: st.runId, nodeId: st.nodeId, chapter: st.chapter,
       max: {hp: (st.max && st.max.hp) || CAP_DEFAULT, sanity: (st.max && st.max.sanity) || CAP_DEFAULT},
       stats: JSON.parse(JSON.stringify(st.stats)), flags: JSON.parse(JSON.stringify(st.flags)),
-      codex: st.codex.slice(), seenEvents: st.seenEvents.slice(), seenRumors: (st.seenRumors || []).slice(), rumor: st.rumor || null, hours: st.hours,
+      codex: st.codex.slice(), seenEvents: st.seenEvents.slice(), seenRumors: (st.seenRumors || []).slice(), rumor: st.rumor || null,
+      rumorLog: JSON.parse(JSON.stringify(st.rumorLog || [])), echo: st.echo ? JSON.parse(JSON.stringify(st.echo)) : null, echoRun: st.echoRun || null,
+      hours: st.hours,
       taint: JSON.parse(JSON.stringify(st.taint || zeroTaint())), claims: JSON.parse(JSON.stringify(st.claims || {})),
       pendingEvent: st.pendingEvent, pendingNext: st.pendingNext,
       eventChoice: st.eventChoice, eventDeath: st.eventDeath, deathPending: st.deathPending,
@@ -625,7 +736,7 @@
     return rec;
   };
   var RECORD_KEYS = ["schema", "gameVersion", "savedAt", "faction", "origin", "runId", "nodeId", "chapter", "max", "stats", "flags", "codex",
-    "seenEvents", "seenRumors", "rumor", "hours", "taint", "claims", "pendingEvent", "pendingNext", "eventChoice", "eventDeath",
+    "seenEvents", "seenRumors", "rumor", "rumorLog", "echo", "echoRun", "hours", "taint", "claims", "pendingEvent", "pendingNext", "eventChoice", "eventDeath",
     "deathPending", "history", "visits", "playMs", "ended", "lang"];
 
   Game.fromRecord = function (rec, opts) {
@@ -647,6 +758,9 @@
     st.seenEvents = (rec.seenEvents || []).slice();
     st.seenRumors = Array.isArray(rec.seenRumors) ? rec.seenRumors.slice() : [];     // SPEC §20, additive (older saves: none)
     st.rumor = typeof rec.rumor === "string" && g.rumor(rec.rumor) ? rec.rumor : null;
+    st.echo = rec.echo && typeof rec.echo === "object" && rec.echo.text ? rec.echo : null;          // SPEC §27
+    st.echoRun = typeof rec.echoRun === "string" ? rec.echoRun : null;
+    st.rumorLog = Array.isArray(rec.rumorLog) ? rec.rumorLog.filter(function (x) { return x && typeof x.visit === "number"; }) : [];
     st.claims = {};
     if (rec.claims) for (var ci = 0; ci < GODS.length; ci++) { var cn = +rec.claims[GODS[ci]]; if (cn > 0) st.claims[GODS[ci]] = Math.min(CLAIM_MAX, Math.floor(cn)); }
     st.hours = typeof rec.hours === "number" ? rec.hours : st.hours;
@@ -670,6 +784,101 @@
     return g;
   };
 
+  /* ---------- SPEC §25 achievements: DOM-free evaluator over global stores ----------
+   * S = {endingStats:{"fid:node":{count}}, codexGlobal:[ids], eggTiers:{tierId:date}, stats:<achStats>, data:WH}
+   * achStats (whatiswh.achStats) = {resists, rumorsHeard, origins:{fid:{oid:1}}, flags:{fid:{flag:1}}, fastest, surviveMin:{hp,sanity}, taintMax}
+   * Counts are "times reached" (endingStats counts), never distinct endings. */
+  var ACH_TYPES = ["ending", "endingKind", "endingsAll", "claim", "claimAll", "chosen", "resist", "deaths", "runs", "origins", "factionsAll",
+                   "codexPct", "chronicleAll", "rumors", "egg", "survive", "fast", "flag", "taintSum"];
+  var EGG_AT = {25: "whisper", 50: "letter", 75: "flame", 99: "last", 100: "planned"};
+  var CAT_TYPE = {leader: "figure", boss: "figure", enemy: "unit", god: "deity", lore: "concept", place: "place"};
+  function achEmptyStats() { return {resists: 0, rumorsHeard: 0, origins: {}, flags: {}, fastest: null, surviveMin: {}, taintMax: 0}; }
+  function endingRows(S) {
+    var es = S.endingStats || {}, fs = (S.data && S.data.factions) || {}, out = [];
+    for (var k in es) {
+      var i = k.indexOf(":"), fid = k.slice(0, i), nid = k.slice(i + 1), c = (es[k] && +es[k].count) || 0;
+      if (!c) continue;
+      var f = fs[fid], n = f && f.nodes && f.nodes[nid], kind = n && n.ending ? n.ending.kind : null, cause = null;
+      if (f && f.deathNodes) for (var dk in f.deathNodes) if (f.deathNodes[dk] === nid) cause = dk;
+      out.push({faction: fid, node: nid, count: c, kind: kind, cause: cause});
+    }
+    return out;
+  }
+  function factionEndings(f) { return Object.keys((f && f.nodes) || {}).filter(function (id) { return f.nodes[id].ending; }); }
+  /* → {ok, n, t} (n/t = progress for the UI) */
+  function achEval(cond, S) {
+    cond = cond || {};
+    var type = Object.keys(cond)[0], c = cond[type] || {}, st = S.stats || achEmptyStats(), data = S.data || {};
+    var rows = endingRows(S), fs = data.factions || {}, sum = function (f) { return rows.filter(f).reduce(function (a, r) { return a + r.count; }, 0); };
+    var cnt = function (n, t) { t = Math.max(1, t || 1); return {ok: n >= t, n: Math.min(n, t), t: t}; };
+    var cg = {}; (S.codexGlobal || []).forEach(function (id) { cg[id] = 1; });
+    switch (type) {
+      case "ending": return cnt(rows.some(function (r) { return r.node === c.id; }) ? 1 : 0, 1);
+      case "endingKind": return cnt(sum(function (r) { return r.kind === c.kind && (!c.faction || r.faction === c.faction); }), c.count || 1);
+      case "deaths": return cnt(sum(function (r) { return r.kind === "death" && (!c.cause || r.cause === c.cause) && (!c.faction || r.faction === c.faction); }), c.count || 1);
+      case "runs": return cnt(sum(function () { return true; }), c.count || 1);
+      case "endingsAll": {
+        var all = factionEndings(fs[c.faction]), got = all.filter(function (id) { return rows.some(function (r) { return r.faction === c.faction && r.node === id; }); }).length;
+        return all.length ? {ok: got === all.length, n: got, t: all.length} : {ok: false, n: 0, t: 0};
+      }
+      case "claim": return cnt(rows.some(function (r) { return claimGodOf(r.node) === c.god; }) ? 1 : 0, 1);
+      case "claimAll": return cnt(GODS.filter(function (g) { return rows.some(function (r) { return claimGodOf(r.node) === g; }); }).length, 4);
+      case "chosen": return cnt(rows.some(function (r) { return /_end_claim_(khorne|nurgle|tzeentch|slaanesh)_chosen$/.test(r.node); }) ? 1 : 0, 1);
+      case "resist": return cnt(+st.resists || 0, c.count || 1);
+      case "rumors": return cnt(+st.rumorsHeard || 0, c.count || 1);
+      case "origins": {
+        var os = origins(fs[c.faction]).map(function (o) { return o.id; }), done = (st.origins && st.origins[c.faction]) || {};
+        var gotO = os.filter(function (o) { return done[o]; }).length;
+        return os.length ? {ok: gotO === os.length, n: gotO, t: os.length} : {ok: false, n: 0, t: 0};
+      }
+      case "factionsAll": {
+        var ids = Object.keys(fs), gotF = ids.filter(function (fid) { return rows.some(function (r) { return r.faction === fid && r.kind; }); }).length;
+        return ids.length ? {ok: gotF === ids.length, n: gotF, t: ids.length} : {ok: false, n: 0, t: 0};
+      }
+      case "codexPct": case "chronicleAll": {
+        var cx = data.codex || {}, pool = Object.keys(cx).filter(function (id) {
+          var e = cx[id];
+          if (!e || e.hidden) return false;
+          if (type === "chronicleAll") return Array.isArray(e.tags) && e.tags.indexOf("chronicle") >= 0;
+          if (c.type && (e.type || CAT_TYPE[e.cat] || "concept") !== c.type) return false;
+          if (c.race && e.race !== c.race) return false;
+          return true;
+        });
+        var gotC = pool.filter(function (id) { return cg[id]; }).length, need = type === "chronicleAll" ? pool.length : Math.ceil(pool.length * (c.pct || 0) / 100);
+        return pool.length ? {ok: gotC >= need, n: Math.min(gotC, need), t: need} : {ok: false, n: 0, t: 0};
+      }
+      case "egg": {
+        var tiers = (data.easter && data.easter.tzeentch && data.easter.tzeentch.tiers) || [], tid = EGG_AT[c.tier];
+        tiers.forEach(function (x) { if (x.at === c.tier) tid = x.id; });
+        return cnt(tid && S.eggTiers && S.eggTiers[tid] ? 1 : 0, 1);
+      }
+      case "survive": { var m = st.surviveMin && st.surviveMin[c.stat]; return cnt(typeof m === "number" && m <= c.max ? 1 : 0, 1); }
+      case "fast": return cnt(typeof st.fastest === "number" && st.fastest <= c.maxNodes ? 1 : 0, 1);
+      case "flag": {
+        var fl = st.flags || {}, hit = c.faction ? !!(fl[c.faction] && fl[c.faction][c.id]) : Object.keys(fl).some(function (k) { return fl[k] && fl[k][c.id]; });
+        return cnt(hit ? 1 : 0, 1);
+      }
+      case "taintSum": return cnt((+st.taintMax || 0) >= c.min ? 1 : 0, 1);
+    }
+    return {ok: false, n: 0, t: 0, unknown: true};
+  }
+  /* fold one finished run record into achStats (pure; returns the same object) */
+  function achApplyRun(st, run) {
+    st = st || achEmptyStats();
+    if (!run) return st;
+    if (run.faction && run.origin) { st.origins[run.faction] = st.origins[run.faction] || {}; st.origins[run.faction][run.origin] = 1; }
+    if (run.faction && Array.isArray(run.flags)) { st.flags[run.faction] = st.flags[run.faction] || {}; run.flags.forEach(function (x) { st.flags[run.faction][x] = 1; }); }
+    if (typeof run.resists === "number") st.resists = (st.resists || 0) + run.resists;
+    if (typeof run.visits === "number" && run.visits > 0 && (st.fastest === null || st.fastest === undefined || run.visits < st.fastest)) st.fastest = run.visits;
+    if (run.kind === "good" && run.endStats) ["hp", "sanity"].forEach(function (k) {
+      var v = run.endStats[k]; if (typeof v === "number" && (st.surviveMin[k] === undefined || v < st.surviveMin[k])) st.surviveMin[k] = v; });
+    if (run.taint) { var ts = 0; GODS.forEach(function (g) { ts += +run.taint[g] || 0; }); if (ts > (st.taintMax || 0)) st.taintMax = ts; }
+    return st;
+  }
+  WH.Achievements = {TYPES: ACH_TYPES, EGG_AT: EGG_AT, evaluate: achEval, applyRun: achApplyRun, emptyStats: achEmptyStats,
+    /* ids of achievements whose condition holds now */
+    unlockedNow: function (S) { return ((S.data && S.data.achievements) || []).filter(function (a) { return a && a.id && achEval(a.cond, S).ok; }).map(function (a) { return a.id; }); }};
+
   WH.RNG = RNG;
   WH.Game = Game;
   WH.newGame = function (factionId, originId, opts) {
@@ -679,7 +888,9 @@
   WH.Rules = {
     STATS: STATS, GODS: GODS, zeroTaint: zeroTaint, CLAIM_MAX: CLAIM_MAX, claimGodOf: claimGodOf, godCodexId: godCodexId, clamp: clamp, rollChance: rollChance, requireOK: requireOK,
     timeHours: timeHours, dateParts: dateParts, startHours: startHours, consequenceOf: consequenceOf, hasDeltas: hasDeltas,
-    WARP_MIN: WARP_MIN, WARP_MAX: WARP_MAX, HOURS_PER_YEAR: HOURS_PER_YEAR, RUMOR_P: RUMOR_P, rumorEligible: rumorEligible,
+    WARP_MIN: WARP_MIN, WARP_MAX: WARP_MAX, HOURS_PER_YEAR: HOURS_PER_YEAR, RUMOR_P: RUMOR_P, RUMOR_P1: RUMOR_P1, RUMOR_P2: RUMOR_P2, RUMOR_GAP: RUMOR_GAP, RUMOR_PER_CHAPTER: RUMOR_PER_CHAPTER,
+    rumorEligible: rumorEligible, rumorScore: rumorScore, nodeContext: nodeContext,
+    ECHO_P: ECHO_P, dateKey: dateKey, fillEcho: fillEcho,
     capsOf: capsOf, CAP_MIN: CAP_MIN, CAP_MAX: CAP_MAX, CAP_DEFAULT: CAP_DEFAULT, CAPPED: CAPPED
   };
 })(typeof window !== "undefined" ? window : globalThis);

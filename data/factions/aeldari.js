@@ -48,7 +48,7 @@
             "Valda, an agri-world, harvest season. Wheat rolls to the horizon; the air is all chaff.\nYour little sister Nell rides your shoulders, counting grain ships. “One, two... why aren't there any this year?”\nThe sky is empty. The astropath tower hasn't lit up in three days."),
     codex: ["place_valda"],
     choices: [
-      C("去打谷场上工", "Head to the threshing yard", "eld_102"),
+      C("去打谷场上工", "Head to the threshing yard", "eld_102", {result: L("场边的麻袋堆成了山，每袋都印着“什一税·奥雷克斯二号”。没有船来运。", "Sacks are piled into hills at the yard's edge, each stamped ‘Tithe · Aurex Secundus’. No ship has come for them.")}),
       C("带妮尔去田边的老石阵", "Take Nell to the old stones at the field's edge", "eld_103")
     ]};
 
@@ -160,7 +160,7 @@
       C("在谷仓住下，帮她家干活", "Stay in the barn and help with chores", "eld_o_pilgrim_4",
         E({hp: 5, sanity: 5}, "你学会了捆麦子。妮尔每晚都来听你讲梦，听到一半就睡着。",
           "You learn to bind sheaves. Every night Nell comes to hear your dream and falls asleep halfway.")),
-      C("去田边的老石阵过夜", "Spend the night at the old stones", "eld_o_pilgrim_3")
+      C("去田边的老石阵过夜", "Spend the night at the old stones", "eld_o_pilgrim_3", {result: L("你枕着包袱躺下。包袱里有在圣地阿尔德林求来的圣徽，它从没让你少做一个梦。", "You lie down with your bundle for a pillow. In it is a holy medal from the shrine world Aldrin. It has never spared you a single dream.")})
     ]};
 
   N.eld_o_pilgrim_3 = {chapter: 1, scene: "ruins", speaker: S("omen_farseer", "梦", "Dream"), time: {h: 9},
@@ -269,7 +269,7 @@
   N.eld_201 = {chapter: 2, scene: "burning_city", speaker: null, foe: "necron_lord", time: {h: 5}, eventRoll: 0.35,
     text: L("天亮时，瓦尔达在燃烧。没有抢劫，没有喊杀声，只有绿光一片片扫过农庄。\n山丘上站着一个挂满金饰的骷髅领主，像在检阅一块收回的地产。\n妮尔把脸埋在你脖子里：“帝皇什么时候来？”",
             "By dawn Valda is burning. No looting, no war cries—just green light sweeping farm after farm.\nOn a hill stands a skeletal lord hung with gold, surveying the land like reclaimed property.\nNell buries her face in your neck. “When is the Emperor coming?”"),
-    codex: ["nec_necrons", "imp_imperium"],
+    codex: ["nec_necrons", "imp_imperium", "place_arcosa"],
     choices: [
       C("去着陆场找穿梭机", "Head for the landing field", "eld_202"),
       C("去老石阵碰碰运气", "Try your luck at the old stones", "eld_203",
@@ -1222,6 +1222,7 @@
     name: L("灵族", "Aeldari"),
     tagline: L("被先知留下的一根线", "A thread the Farseer kept"),
     role: L("农业星幸存者", "Agri-world survivor"),
+    world: L("瓦尔达", "Valda"),   // SPEC §27 home world (the pilgrim has no home but Valda is where the thread catches)
     playerSprite: "player_aeldari",
     color: "#5fb3a1",
     startNode: "eld_101",

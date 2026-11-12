@@ -79,7 +79,7 @@
     text: L("两天后，蒂卡咳得越来越重，咳出来的东西是绿色的。\n污池里在传：中巢有群穿灰袍的人在发面包，不问名字，不收钱。\n“我们去吧，”蒂卡说，“就这一次。”",
             "Two days later Tikka's cough is worse. What comes up is green.\nWord in the Sump: in the mid-hive, people in grey robes are handing out bread. No names asked, no coin taken.\n“Let's go,” Tikka says. “Just this once.”"),
     choices: [
-      C("走，去中巢", "All right. The mid-hive.", "cha_107"),
+      C("走，去中巢", "All right. The mid-hive.", "cha_107", {result: L("路过中巢的告示墙：今年什一税多征一个团，送去尘落星打绿皮。蒂卡问尘落星在哪，没人知道。", "On the mid-hive notice wall: this year's tithe takes an extra regiment, shipped to Dustfall to fight greenskins. Tikka asks where Dustfall is. Nobody knows.")}),
       C("先去药房给她偷药", "Steal her medicine first", "cha_107", {effects: {hp: -10, renown: 3, set: {stoleMedicine: true}}, result: L("药房的狗咬住了你的小腿。你还是揣出了一瓶药，标签一个字也看不懂。", "The dispensary's dog gets your calf. You still come away with a bottle, its label unreadable.")})
     ]};
 
@@ -143,7 +143,7 @@
     text: L("两天后，蒂卡咳出来的东西是绿色的。\n污池里在传：中巢有群灰袍人在发面包，不问名字，也不问从哪来。\n“不问从哪来，”蒂卡看着你，“正适合你。”",
             "Two days later, what Tikka coughs up is green.\nWord in the Sump: in the mid-hive, people in grey robes are handing out bread. No names asked, no questions about where you're from.\n“No questions,” Tikka says, looking at you. “Made for you.”"),
     choices: [
-      C("走，去中巢", "All right. The mid-hive.", "cha_107"),
+      C("走，去中巢", "All right. The mid-hive.", "cha_107", {result: L("告示墙上贴着新的征兵令：多征一个团，送去尘落星打绿皮。你把领子竖了起来。", "A fresh levy is pasted on the notice wall: one more regiment, shipped to Dustfall to fight greenskins. You turn your collar up.")}),
       C("用军队的法子先给她弄药", "Get her medicine the army way first", "cha_107", {effects: {hp: -10, renown: 3, set: {stoleMedicine: true}}, result: L("你摸进执法站的药柜，手法跟在团里偷补给时一样。只是这回，心跳得更快。", "You slip into the enforcer post's medicine locker, just as you once raided regimental stores. Only now your heart beats faster.")})
     ]};
 
@@ -178,7 +178,7 @@
     text: L("你在蒂卡的窝棚住了半个月，教她认了二十个字。她咳得越来越重，咳出的东西是绿色的。\n污池里在传：中巢有灰袍人发面包。\n有人哼着他们的调子路过。你手心一凉：是那本书里的歌。",
             "Half a month in Tikka's shack; you teach her twenty letters. Her cough worsens. What comes up is green.\nWord in the Sump: grey-robes in the mid-hive are handing out bread.\nSomeone passes humming their tune. Your palms go cold. It's the song from the book."),
     choices: [
-      C("带蒂卡去中巢", "Take Tikka to the mid-hive", "cha_107"),
+      C("带蒂卡去中巢", "Take Tikka to the mid-hive", "cha_107", {result: L("路过中巢的告示墙：今年什一税多征一个团，送去尘落星打绿皮。蒂卡问尘落星在哪，没人知道。", "On the mid-hive notice wall: this year's tithe takes an extra regiment, shipped to Dustfall to fight greenskins. Tikka asks where Dustfall is. Nobody knows.")}),
       C("跟着那首歌走", "Follow the song", "cha_107", {effects: {corruption: 3, renown: 5}, result: L("你不自觉地哼了出来，一个音都没错。路过的灰袍人回头看了你一眼，笑了。", "You hum it without meaning to, every note right. A passing grey-robe turns and smiles at you.")})
     ]};
 
@@ -487,7 +487,7 @@
     text: L("四十天后，天裂开了。\n不是比喻。一道紫色的伤口横过天际，落下来的战舰是黑色的，船身画着一只睁开的眼。\n所有屏幕同时亮起：“卡尔卡罗斯的子民，你们的神听见了。”",
             "Forty days later, the sky splits open.\nNot a metaphor. A violet wound crosses the heavens, and the ships falling through it are black, an open eye painted on each hull.\nEvery screen lights up at once. “People of Carcharos, your gods have heard you.”"),
     effects: {sanity: 5},
-    codex: ["chaos_black_legion"],
+    codex: ["chaos_black_legion", "place_arcosa"],
     choices: [
       C("跪下欢呼", "Kneel and cheer", "cha_502", {effects: {corruption: 4, renown: 5}, result: L("你喊哑了嗓子。屏幕上那只眼睛，好像朝你这边转了一下。", "You cheer yourself hoarse. On the screens, the painted eye seems to turn your way.")}),
       C("先找地方躲起来", "Find cover first", "cha_502", {effects: {hp: 5}, result: L("你缩到一截断墙后。一艘战舰落在两条街外，震得你牙根发酸。", "You duck behind a broken wall. A warship lands two streets away; the impact rattles your teeth.")})
@@ -662,7 +662,7 @@
     text: L("沃加斯在门外等你，看了一眼你的手腕。\n“战帅要回现实宇宙了。目标是圣地世界阿尔德林，那里的大教堂供着一块圣人的骨头。”\n“我们要那块骨头？”\n“不。我们要他们看着它烧掉。”",
             "Vorgath waits outside, glancing at your wrist.\n“The Warmaster returns to realspace. Target: the shrine world Aldrin. Its cathedral keeps a saint's bone.”\n“We want the bone?”\n“No. We want them to watch it burn.”"),
     choices: [
-      C("准备出发", "Make ready", "cha_611"),
+      C("准备出发", "Make ready", "cha_611", {result: L("沃加斯咧嘴一笑：“阿尔德林只是开胃菜。战帅的主力，要去一颗黄天的巢都，叫奥雷克斯。”", "Vorgath grins. “Aldrin's just the appetiser. The Warmaster's main host is bound for a yellow-skied hive called Aurex.”")}),
       C("向诸神要更多的恩赐", "Ask the gods for more gifts", "cha_611", {effects: {corruption: 15, renown: 15, hp: 20, taint: {all: 5}}, result: L("你跪下，烙印像炉口一样张开。有什么涌进你的血管，太多了，多得发疼。沃加斯后退了半步。", "You kneel and the brand opens like a furnace mouth. Something floods your veins, too much, enough to hurt. Vorgath steps back half a pace.")})
     ]};
 
@@ -1000,6 +1000,7 @@
     name: L("混沌", "Chaos"),
     tagline: L("帝皇不看你，诸神会", "The Emperor never looked. The gods will."),
     role: L("下巢拾荒者", "Underhive scavenger"),
+    world: L("卡尔卡罗斯", "Carcharos"),   // SPEC §27 home world (all three origins start in Hive Vorne)
     playerSprite: "player_chaos",
     color: "#a3242b",
     startNode: "cha_101",

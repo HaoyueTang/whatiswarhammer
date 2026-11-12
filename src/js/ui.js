@@ -74,12 +74,13 @@
   /* ---------- art (with placeholders for missing images) ---------- */
   var DEF = {sprite: [48, 48], scene: [192, 108], ui: [16, 16]};
   var GLYPH = {icon_hp: "♥", icon_sanity: "◎", icon_corruption: "✸", icon_faith: "✦", icon_favor: "✶", icon_greatergood: "◉",
-               icon_fate: "✧", icon_worth: "◈",
+               icon_fate: "✧", icon_worth: "◈", icon_teef: "◆", icon_kinship: "❖", icon_grace: "⚙",
                icon_clock: "◷", icon_codex: "▤", icon_save: "▣", icon_lang: "文"};
 
   /* ---------- factions / codex taxonomy v2 (SPEC §12–13) ---------- */
-  var FACTION_ORDER = ["imperium", "chaos", "tau", "aeldari", "necrons"];
-  var FACTION_COLOR = {imperium: "#c9a227", chaos: "#b0304a", tau: "#d08a3a", aeldari: "#5fb3a1", necrons: "#4fd16b"};
+  var FACTION_ORDER = ["imperium", "chaos", "tau", "aeldari", "necrons", "orks", "gsc", "mechanicus"];   // SPEC §26
+  var FACTION_COLOR = {imperium: "#c9a227", chaos: "#b0304a", tau: "#d08a3a", aeldari: "#5fb3a1", necrons: "#4fd16b",
+                       orks: "#6aa84f", gsc: "#9b59b6", mechanicus: "#c0392b"};
   function fcolor(f) { return (f && (f.color || FACTION_COLOR[f.id])) || "#c9a227"; }
   var RACES = ["imperium", "chaos", "tau", "aeldari", "necrons", "orks", "tyranids", "other"];
   var RACE_COLOR = {imperium: "#d4a62a", chaos: "#c4283c", tau: "#c98b3c", aeldari: "#5fb3a1", necrons: "#4fd16b",
@@ -340,6 +341,7 @@
     show("title");
     if (!WH.Save.isPersistent()) toast(t("storage_off"));
     if (UI.bootCheck && UI.bootCheck.updated) toast(t("upd_toast", {v: UI.bootCheck.to}));   // SPEC §22: one-time notice, data kept
+    try { checkAchievements(true); } catch (e) { console.warn("achievements", e); }            // SPEC §25: also on boot
   };
 
   function applyFxSetting() {
@@ -413,6 +415,8 @@
         h("button", {class: "btn px", type: "button", disabled: !latest, onclick: function () { if (latest) loadRecord(latest.rec); }}, t("cont")),
         h("button", {class: "btn px", type: "button", onclick: function () { openSaves("load"); }}, t("load")),
         h("button", {class: "btn px", type: "button", onclick: function () { openCodex(); }}, art("ui", "icon_codex"), t("codex"), newBadge()),
+        (WH.achievements && WH.achievements.length) ? h("button", {class: "btn px ach-btn", type: "button", id: "ach-btn", onclick: function () { openAchievements(); }},
+          "★ " + t("ach_title"), h("span", {class: "ach-count", id: "ach-count"})) : null,
         h("button", {class: "btn px", type: "button", onclick: openSettings}, t("settings"))),
       h("div", {class: "title-meta"},
         h("span", null, t("codex_global", {n: cs.n, t: cs.t})),
@@ -423,6 +427,7 @@
     if (errs.length) s.appendChild(h("div", {class: "notice", role: "status"}, t("load_errors") + " " +
       errs.map(function (e) { return e.file + (e.msg && e.msg !== "missing" ? " (" + e.msg + ")" : ""); }).join(", ")));
     updateCodexBadge();
+    updateAchBadge();
     eggTitle(s);
     setTimeout(function () { if (UI.screen === "title" && !UI.modals.length && !$("egg-planned")) newBtn.focus({preventScroll: true}); }, 0);
   }
@@ -455,7 +460,7 @@
     var tr = eggTier(id);
     return pr.forced && tr.at === UI.eggForce && !UI.eggForcedShown[id];
   }
-  function eggFire(id) { WH.Save.markEggTier(id); UI.eggForcedShown[id] = 1; }
+  function eggFire(id) { WH.Save.markEggTier(id); UI.eggForcedShown[id] = 1; setTimeout(checkAchievements, 0); }
   function eggDone(id) { return !!WH.Save.eggTiers()[id]; }
 
   function eggTitle(s) {
@@ -601,7 +606,9 @@
   function renderRaces() {
     var list = factionList();
     var wrap = selectShell(t("choose_race"), null, null);
-    var cards = h("div", {class: "cards race-cards" + (list.length >= 4 ? " many n" + list.length : ""), role: "list"});
+    var big = list.length >= 6;                            // SPEC §26: 6+ races → compact cards in a grid (2 rows)
+    var cards = h("div", {class: "cards race-cards" + (list.length >= 4 ? " many n" + list.length : "") + (big ? " grid" : ""), role: "list",
+      vars: big ? {"--cols": Math.min(5, Math.ceil(list.length / 2))} : null});
     list.forEach(function (f) {
       var os = WH.Game.origins(f), dl = diffOf(f.id);
       cards.appendChild(h("button", {class: "fcard px", type: "button", role: "listitem", "data-faction": f.id, vars: {"--accent": fcolor(f)},
@@ -686,7 +693,7 @@
 
   function startGame(fid, originId) {
     var g, step;
-    try { var r = WH.newGame(fid, originId, {rng: newRng(), rumors: UI.settings.rumors !== false}); g = r.game; step = r.step; }
+    try { var r = WH.newGame(fid, originId, gameOpts()); g = r.game; step = r.step; }
     catch (e) { toast(t("missing_node", {x: e.message})); console.error(e); return; }
     UI.game = g;
     enterGameScreen();
@@ -887,6 +894,10 @@
     if (!el) return;
     clear(el);
     el.classList.remove("show", "fade-in");
+    el.classList.remove("echo");
+    el.removeAttribute("data-rumor"); el.removeAttribute("data-echo"); el.removeAttribute("role"); el.removeAttribute("tabindex");
+    el.onclick = null; el.onkeydown = null;
+    if (!r && UI.game && !UI.game.state.ended && UI.settings.echoes !== false && UI.game.currentEcho && UI.game.currentEcho()) { renderEcho(el, UI.game.currentEcho(), visible); return; }
     if (!r || UI.settings.rumors === false || !UI.game || UI.game.state.ended) { el.hidden = true; return; }
     var sp = L(r.speaker), zh = WH.lang === "zh";
     var head = t("rumor_tag") + (sp ? " · " + sp : "") + (zh ? "：" : ": ");
@@ -899,6 +910,29 @@
     el.hidden = false;
     if (visible) el.classList.add("show");
   }
+  /* SPEC §27: a past run's echo in the same footer style, with a ✝; click → that run in 往生录 */
+  function renderEcho(el, e, visible) {
+    var zh = WH.lang === "zh";
+    el.classList.add("echo");
+    el.appendChild(h("span", {class: "rm-head"}, h("span", {class: "rm-mark echo-mark", "aria-hidden": "true"}, "✝"), t("echo_tag") + (zh ? "：" : ": ")));
+    el.appendChild(h("span", {class: "rm-tx"}, L(e.text)));
+    el.setAttribute("data-echo", e.runId);
+    el.setAttribute("role", "button");
+    el.setAttribute("tabindex", "0");
+    el.setAttribute("aria-label", t("echo_aria", {x: L(e.text)}));
+    var open = function (ev) { ev.stopPropagation(); if (ev.preventDefault) ev.preventDefault(); openCodex(null, false, "records", {run: e.runId}); };
+    el.onclick = open;
+    el.onkeydown = function (ev) { if (ev.key === "Enter" || ev.key === " ") open(ev); };
+    el.hidden = false;
+    if (visible) el.classList.add("show");
+  }
+  function echoPool() {
+    return WH.Save.runs().filter(function (r) { return r && r.echo && (!UI.game || r.runId !== UI.game.state.runId); })
+      .map(function (r) { return {runId: r.runId, endingId: r.endingId, echo: r.echo}; });
+  }
+  function gameOpts() {
+    return {rng: newRng(), rumors: UI.settings.rumors !== false, echoes: UI.settings.echoes !== false, echoPool: echoPool()};
+  }
   function revealRumor() {
     var el = $("dlg-rumor");
     if (el && !el.hidden && !el.classList.contains("show")) {
@@ -909,6 +943,7 @@
     var ids = UI.rumorCodex;
     UI.rumorCodex = null;
     if (ids && ids.length) codexToast(ids);
+    if (UI.rumorHeard) { UI.rumorHeard = false; bumpAchStat(function (st) { st.rumorsHeard = (st.rumorsHeard || 0) + 1; }); }
   }
 
   function reqHint(req) {
@@ -998,6 +1033,7 @@
     }
     var isDeath = step.ending && step.ending.kind === "death";
     UI.rumorCodex = step.rumorCodex && step.rumorCodex.length ? step.rumorCodex.slice() : null;
+    UI.rumorHeard = !!step.rumor && UI.settings.rumors !== false;      // SPEC §25 global rumours-heard counter
     var pre = (step.chapterChanged && !isDeath) ? chapterCard(g.state.chapter) : Promise.resolve();
     pre.then(function () {
       renderNode();
@@ -1322,6 +1358,7 @@
     if (names.length) { toast("▤ " + t("codex_new", {x: names.join(WH.lang === "zh" ? "、" : ", ")})); sfx("codex"); }
     WH.Save.addCodexGlobal(ids);
     updateCodexBadge();
+    checkAchievements();
   }
 
   /* ======================= EVENTS ======================= */
@@ -1629,11 +1666,87 @@
       endingId: g.state.nodeId, kind: end.kind, title: end.title || {zh: "终", en: "The End"},
       cause: causeOf(f, g.state.nodeId, node), survived: survivedHours(g), finalHours: g.state.hours,
       playMs: Math.round(g.state.playMs), visits: g.state.visits, gods: godsMet(),
-      taint: JSON.parse(JSON.stringify(g.state.taint || WH.Rules.zeroTaint()))
+      taint: JSON.parse(JSON.stringify(g.state.taint || WH.Rules.zeroTaint())),
+      // SPEC §25: what achievements need from a finished run
+      flags: Object.keys(g.state.flags || {}).filter(function (k) { return g.state.flags[k]; }),
+      resists: WH.Rules.GODS.filter(function (gd) { return g.state.flags && g.state.flags["resisted_" + gd]; }).length,
+      claims: JSON.parse(JSON.stringify(g.state.claims || {})), claimedBy: WH.Rules.claimGodOf(g.state.nodeId),
+      chosen: /_end_claim_(khorne|nurgle|tzeentch|slaanesh)_chosen$/.test(g.state.nodeId),
+      endStats: {hp: g.state.stats.hp, sanity: g.state.stats.sanity}, rumorsHeard: (g.state.seenRumors || []).length
     };
+    if (end.kind === "bad" || end.kind === "death") {      // SPEC §27: a later run may overhear this one
+      var og = g.origin() || {};
+      run.echo = {faction: f.id, role: og.name || f.role || f.name, world: og.world || f.world || (WH.sector && WH.sector.name) || f.name,
+                  cause: run.cause, kind: end.kind, dateKey: WH.Rules.dateKey(g.state.hours, f.startDate),
+                  date: WH.Rules.dateParts(g.state.hours, f.startDate), claimedBy: run.claimedBy || null};
+    }
     UI.lastRun = WH.Save.addRun(run);
+    if (UI.lastRun.added) bumpAchStat(function (st) { WH.Achievements.applyRun(st, run); });
     return UI.lastRun;
   }
+
+  /* ======================= ACHIEVEMENTS (SPEC §25) ======================= */
+  function achStats() {
+    var st = WH.Save.achStats();
+    if (st) return st;
+    st = WH.Achievements.emptyStats();                     // first boot with §25: backfill from the stored run records
+    WH.Save.runs().slice().reverse().forEach(function (r) { WH.Achievements.applyRun(st, r); });
+    st.backfilled = new Date().toISOString();
+    WH.Save.setAchStats(st);
+    return st;
+  }
+  function bumpAchStat(fn) { var st = achStats(); fn(st); WH.Save.setAchStats(st); checkAchievements(); }
+  function achState() {
+    return {endingStats: WH.Save.endingStats(), codexGlobal: WH.Save.codexGlobal(), eggTiers: WH.Save.eggTiers(), stats: achStats(), data: WH};
+  }
+  UI.achState = achState;
+  /* evaluate every achievement; newly true ones are stored and announced (one summary toast when many arrive at once) */
+  function checkAchievements(quietMany) {
+    if (!WH.achievements || !WH.achievements.length || !WH.Achievements) return [];
+    var added = WH.Save.markAchievements(WH.Achievements.unlockedNow(achState()));
+    if (!added.length) return added;
+    var byId = {};
+    WH.achievements.forEach(function (a) { byId[a.id] = a; });
+    if (added.length > 3 && quietMany) toast("★ " + t("ach_many", {n: added.length}));
+    else added.slice(0, 3).forEach(function (id) { toast("★ " + t("ach_unlocked", {x: L(byId[id].name)})); });
+    if (added.length > 3 && !quietMany) toast("★ " + t("ach_many", {n: added.length}));
+    sfx("codex");
+    updateAchBadge();
+    return added;
+  }
+  UI.checkAchievements = checkAchievements;
+  function updateAchBadge() {
+    var b = $("ach-count");
+    if (!b) return;
+    var got = WH.Save.achievements(), n = WH.achievements.filter(function (a) { return got[a.id]; }).length;
+    b.textContent = n + "/" + WH.achievements.length;
+  }
+  function achIcon(key, color) {
+    if (key && WH.ui[key] || /^icon_/.test(key || "")) return art("ui", key, "ach-ui");
+    return art("sprite", key, "ach-sp", color);
+  }
+  var TIER_COLOR = {bronze: "#c08a52", silver: "#c9d1d9", gold: "#e3c47c"};
+  function openAchievements(replace) {
+    var got = WH.Save.achievements(), S = achState(), list = WH.achievements || [];
+    var n = list.filter(function (a) { return got[a.id]; }).length;
+    var order = {gold: 0, silver: 1, bronze: 2};
+    var tiles = list.map(function (a, i) {
+      var open = !!got[a.id], hid = a.hidden && !open, col = TIER_COLOR[a.tier] || TIER_COLOR.bronze;
+      var pr = !open && !hid ? WH.Achievements.evaluate(a.cond, S) : null;
+      return h("div", {class: "ach-tile tier-" + (a.tier || "bronze") + (open ? " open" : " locked") + (hid ? " hidden" : ""), "data-id": a.id, vars: {"--tc": col}},
+        h("div", {class: "ach-ic"}, hid ? h("span", {class: "ach-q"}, "?") : achIcon(a.icon, col)),
+        h("div", {class: "ach-body"},
+          h("div", {class: "ach-name"}, hid ? "???" : L(a.name)),
+          h("div", {class: "ach-desc"}, hid ? t("ach_hidden") : L(a.desc)),
+          open ? h("div", {class: "ach-when"}, "✓ " + fmtSavedAt(got[a.id]))
+               : pr && pr.t > 1 ? h("div", {class: "ach-prog"}, h("i", {style: "width:" + Math.round(100 * pr.n / pr.t) + "%"}), h("span", null, pr.n + "/" + pr.t)) : null));
+    });
+    var body = h("div", {class: "ach-grid"}, tiles);
+    if (!list.length) body = h("p", {class: "empty-msg"}, t("ach_none"));
+    openModal({title: t("ach_title"), sub: t("ach_progress", {n: n, t: list.length}), body: body, replace: replace === true, reopen: function () { openAchievements(true); }});
+    void order;
+  }
+  UI.openAchievements = openAchievements;
 
   /* ======================= ENDING ======================= */
   /* opts.badge: show "type · race" chip (codex window); opts.isNew: NEW badge */
@@ -2017,7 +2130,8 @@
     return {body: body, sub: t("unlocked_n", {n: got, t: tot})};
   }
 
-  function recordsView() {
+  function recordsView(opt) {
+    opt = opt || {};
     var runs = WH.Save.runs(), st = WH.Save.runStats(), body = h("div", {class: "records-view"});
     var common = null;
     Object.keys(st.causes || {}).forEach(function (k) { var c = st.causes[k]; if (!common || c.count > common.count) common = c; });
@@ -2032,7 +2146,7 @@
       var gods = (r.gods || []).length ? h("span", {class: "run-gods"}, r.gods.map(function (gd) {
         var el = art("sprite", "sigil_" + gd, "sig", "#8a4fd0"); if (el && el.setAttribute) el.setAttribute("title", godName(gd)); return el; })) : "—";
       var cell = function (k, v) { return h("div", null, h("div", {class: "k"}, k), h("div", {class: "v"}, v)); };
-      body.appendChild(h("div", {class: "run-row", vars: {"--accent": color}},
+      body.appendChild(h("div", {class: "run-row" + (opt.run && r.runId === opt.run ? " hl" : ""), "data-run": r.runId, vars: {"--accent": color}},
         h("div", {class: "run-top"},
           h("span", {class: "kind sm " + r.kind}, t("ending_" + r.kind)),
           h("b", {class: "run-title"}, L(r.title)),
@@ -2065,12 +2179,13 @@
     }
     var pr = !replace && egg() ? eggProgress() : null, lastLine = null;
     if (pr && eggFresh("last", pr)) { eggFire("last"); lastLine = h("span", {class: "egg-last"}, L(eggTier("last").text)); }
-    var v = view === "endings" ? endingsView() : view === "places" ? placesView(null, opt.detail) : view === "records" ? recordsView()
+    var v = view === "endings" ? endingsView() : view === "places" ? placesView(null, opt.detail) : view === "records" ? recordsView(opt)
           : view === "chronicle" ? chronicleView() : entriesView();
     openModal({title: view === "records" ? t("records_title") : t("codex_title"), icon: "icon_codex", sub: lastLine || v.sub, replace: replace,
       body: h("div", {class: "codex-body view-" + view}, codexViews(view), v.body), foot: v.foot,
       focus: opt.focus || (opt.detail ? ".place-detail, .modal-body button" : ".views [aria-selected='true']"),
-      reopen: function () { openCodex(null, true, view, {detail: opt.detail}); }});
+      reopen: function () { openCodex(null, true, view, {detail: opt.detail, run: opt.run}); }});
+    if (opt.run) setTimeout(function () { var r = document.querySelector('.modal .run-row.hl'); if (r && r.scrollIntoView) r.scrollIntoView({block: "center"}); }, 0);
     startJoke();
     if (pr && eggFresh("planned", pr)) { eggFire("planned"); setTimeout(eggPlanned, 250); }
   }
@@ -2149,7 +2264,7 @@
 
   function loadRecord(rec) {
     var g;
-    try { g = WH.Game.fromRecord(rec, {rng: newRng(), rumors: UI.settings.rumors !== false}); }
+    try { g = WH.Game.fromRecord(rec, gameOpts()); }
     catch (e) { toast(t("import_bad", {x: e.message})); return false; }
     UI.game = g;
     enterGameScreen();
@@ -2196,6 +2311,12 @@
         seg([[false, "🔊 " + t("on")], [true, "🔇 " + t("mute")]], !!st.muted, function (v) { if (!!st.muted !== v) toggleMute(); else openSettings(true); })),
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("consequences")),
         seg([[true, t("on")], [false, t("off")]], st.consequences !== false, function (v) { st.consequences = v; save(); openSettings(true); })),
+      h("div", {class: "setrow"}, h("span", {class: "k"}, t("echoes")),
+        seg([[true, t("on")], [false, t("off")]], st.echoes !== false, function (v) {
+          st.echoes = v; save();
+          if (UI.game) { UI.game.echoes = v; if (UI.screen === "game" && !UI.conseq) renderRumor(UI.game.currentRumor(), !UI.typer.active); }
+          openSettings(true);
+        })),
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("rumors")),
         seg([[true, t("on")], [false, t("off")]], st.rumors !== false, function (v) {
           st.rumors = v; save();

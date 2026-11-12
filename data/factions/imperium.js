@@ -279,7 +279,7 @@
             "When the ship drops out of the warp, the calendar jumps. Some say a month has passed, some say six.\nVosk asks one thing. “How many dead?”\n“Three, Sergeant. Nobody knows how.”\n“Then it was a normal voyage.”"),
     effects: {sanity: 5},
     choices: [
-      C("准备登陆", "Prepare to land", "imp_301")
+      C("准备登陆", "Prepare to land", "imp_301", {result: L("沃斯克看着舷窗外的尘落星：“打散的绿皮会往海湾那边飘。到时候，就是那边异形的麻烦了。”", "Vosk eyes Dustfall through the viewport. “The greenskins we scatter drift off toward the Gulf. Then they're the xenos' problem.”")})
     ]};
 
   /* ============ Chapter 3 · The Green Tide ============ */
@@ -648,13 +648,16 @@
       C("问老兵他是谁", "Ask a veteran who he is", "imp_603")
     ]};
 
+  // SPEC §27 sector continuity: Hesper burned (ch5), Valda's grain never shipped (Aeldari route, 113.M42)
+  var VET_GRAIN = L("“新枪有了，口粮却减了三成。”他啐了一口，“赫斯珀烧了，瓦尔达的运粮船一年没来，没人说得清。”",
+                    "“New guns, sure. Rations cut by a third, though.” He spits. “Hesper's ash, and Valda's grain ships haven't come in a year. Nobody can say why.”");
   N.imp_603 = {chapter: 6, scene: "ship_interior", speaker: S("guardsman", "独臂老兵", "One-Armed Veteran"), time: {h: 1},
     text: L("“帝皇有二十个儿子，”老兵说，“一半背叛了他，剩下的死的死、丢的丢。这一个挨了一刀，睡了一万年。”\n他擦擦眼睛，“现在他醒了，还给咱们发新枪。这不是神迹是什么？”",
             "“The Emperor had twenty sons,” the veteran says. “Half betrayed him. The rest died or vanished. This one got stabbed and slept ten thousand years.”\nHe wipes his eyes. “Now he's up and handing out new guns. If that's not a miracle, what is?”"),
     codex: ["chaos_horus_heresy"],
     choices: [
-      C("点点头", "Nod", "imp_602", {require: {notFlag: "fledHesper"}, hideIfLocked: true}),
-      C("点点头", "Nod", "imp_604", {require: {flag: "fledHesper"}, hideIfLocked: true})
+      C("点点头", "Nod", "imp_602", {require: {notFlag: "fledHesper"}, hideIfLocked: true, result: VET_GRAIN}),
+      C("点点头", "Nod", "imp_604", {require: {flag: "fledHesper"}, hideIfLocked: true, result: VET_GRAIN})
     ]};
 
   N.imp_602 = {chapter: 6, scene: "barracks", speaker: DRAVIK, time: {d: 10},
@@ -724,7 +727,7 @@
     text: L("奥雷克斯。黄色的天空裂成了紫色，巢都尖塔烧得像一根巨大的蜡烛。\n哈洛执事站在着陆场上，嗓子哑了，仍在念名单：“……格鲁斯克监工，带着工人用铆钉枪守住了第六工厂。赞美帝皇。”",
             "Aurex. The yellow sky has split violet; the hive spire burns like a giant candle.\nDeacon Hallow stands on the landing field, voice hoarse, still reading names. “...Overseer Grusk, who held Manufactorum Six with his workers and their rivet guns. Praise the Emperor.”"),
     effects: {sanity: -5},
-    codex: ["place_manufactorum_six", "imp_great_rift", "place_aurex"],
+    codex: ["place_manufactorum_six", "imp_great_rift", "place_aurex", "place_arcosa"],
     choices: [
       C("直接去前线报到", "Report straight to the front", "imp_703", {effects: {renown: 2}, result: L("你没回头看巢都，背起枪就走。哈洛在你身后补念了一句祝福。", "You don't look back at the hive. You shoulder your rifle and go. Hallow tacks a blessing on behind you.")}),
       C("问他三号塔怎么样了", "Ask him about Tower Three", "imp_703", {effects: {sanity: -5, hp: 5}, result: L("哈洛翻了很久名单，最后合上本子，塞给你半块干粮。", "Hallow leafs through his list for a long time, then closes it and hands you half a ration bar.")}),
@@ -795,7 +798,7 @@
     choices: [
       C("叛军会走第六工厂的下水道", "They'll come through the drains under Six", "imp_711", {require: {flag: "knowRoute"}, hideIfLocked: true, result: L("德拉维克盯着你看了三秒，然后在地图上第六工厂的位置画了个圈。", "Dravik studies you for three seconds, then circles Manufactorum Six on the map.")}),
       C("那首歌里……提到过下水道", "That song... it mentioned the drains", "imp_711", {require: {flag: "heardSong"}, hideIfLocked: true, effects: {sanity: -5, taint: {slaanesh: 25}}, result: L("你哼出那首歌的一句，自己先打了个寒颤。德拉维克没说话，在第六工厂画了个圈。", "You hum one line of the song and shiver first. Dravik says nothing, and circles Manufactorum Six.")}),
-      C("守住大教堂和难民", "Hold the cathedral and the refugees", "imp_712"),
+      C("守住大教堂和难民", "Hold the cathedral and the refugees", "imp_712", {result: L("难民里有几张生面孔，说话带着卡尔卡罗斯口音。他们说，自家的天也这样裂开过。", "Among the refugees are strangers with Carcharos accents. They say the sky split like this over their world too.")}),
       C("炸掉通往上巢的大桥", "Blow the bridge to the upper hive", "imp_713", {result: L("德拉维克只问了一句：“炸药够吗？”工兵们连夜把桥墩塞满了。", "Dravik asks one question. “Enough charges?” The sappers pack the pylons all night.")})
     ]};
 
@@ -967,6 +970,7 @@
     name: L("人类帝国", "Imperium of Man"),
     tagline: L("一万亿人之一，被帝皇选中", "One in a trillion, chosen by the Emperor"),
     role: L("巢都工人", "Hive worker"),
+    world: L("奥雷克斯二号", "Aurex Secundus"),   // SPEC §27 home world (all three origins grew up on Aurex)
     playerSprite: "player_imperium",
     color: "#c9a227",
     startNode: "imp_101",

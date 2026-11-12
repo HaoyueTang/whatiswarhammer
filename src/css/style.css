@@ -893,3 +893,55 @@ body.portrait .egg-letter { position: fixed; left: 14px; bottom: 46px; }
 .fcard > .diff, .ocard > .diff { position: absolute; top: 9px; right: 9px; z-index: 2; display: inline-flex; gap: 2px; pointer-events: none; }
 .diff .skull { width: 18px; height: 18px; image-rendering: pixelated; filter: drop-shadow(1px 1px 0 #000); }
 body.portrait .fcard > .diff, body.portrait .ocard > .diff { top: 7px; right: 7px; }
+
+/* ======================= v0.3: 8-RACE SELECT (SPEC §26) ======================= */
+/* 6+ races: compact cards in a 2-row grid (--cols = ceil(n/2), max 5) on desktop; portrait phones keep the stacked list */
+.cards.many.grid { display: grid; grid-template-columns: repeat(var(--cols, 4), minmax(0, 205px)); grid-auto-rows: 1fr; justify-content: center; gap: 10px; }
+.cards.many.grid .fcard { max-width: none; margin: 4px; padding-bottom: 6px; background: linear-gradient(180deg, var(--accent-lo) 0 34px, var(--panel) 34px); }
+.cards.many.grid .fcard .portrait { height: 84px; --ss: 1.6; margin-top: 4px; }
+.cards.many.grid .fcard .fname { font-size: 17px; margin-top: 2px; }
+html[lang=en] .cards.many.grid .fcard .fname { font-size: 14px; }
+.cards.many.grid .fcard .ftag { font-size: 12px; margin: 3px 8px 0; min-height: 34px; line-height: 1.4; }
+html[lang=en] .cards.many.grid .fcard .ftag { font-size: 11px; }
+.cards.many.grid .fcard .fmeta { padding-top: 4px; font-size: 11px; }
+.cards.many.grid .fcard .go { display: none; }
+.cards.many.grid .fcard > .diff { top: 7px; right: 7px; }
+.cards.many.grid .diff .skull { width: 14px; height: 14px; }
+.cards.many.grid .fcard:hover, .cards.many.grid .fcard:focus-visible { transform: translateY(-3px); }
+body.portrait .cards.many.grid { display: flex; }
+body.portrait .cards.many.grid .fcard { margin: 6px 0; padding-bottom: 8px; background: linear-gradient(90deg, var(--accent-lo) 0 96px, var(--panel) 96px); }
+body.portrait .cards.many.grid .fcard .portrait { height: 96px; --ss: 2; margin: 0; }
+body.portrait .cards.many.grid .fcard .fname { font-size: 18px; margin: 8px 0 0 12px; }
+body.portrait .cards.many.grid .fcard .ftag { font-size: 13px; min-height: 0; }
+
+/* ======================= v0.3: ACHIEVEMENTS (SPEC §25) ======================= */
+.ach-btn .ach-count { margin-left: 6px; font-size: 11px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ach-tile { --tc: #c08a52; display: flex; gap: 10px; align-items: flex-start; padding: 8px; min-width: 0; background: rgba(255,255,255,.03);
+  box-shadow: inset 0 0 0 1px #2e2520, inset 3px 0 0 color-mix(in srgb, var(--tc) 75%, #000); }
+.ach-tile.open { background: linear-gradient(90deg, color-mix(in srgb, var(--tc) 16%, transparent), rgba(255,255,255,.02) 70%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tc) 45%, #000), inset 3px 0 0 var(--tc); }
+.ach-ic { flex: none; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #0b090b;
+  box-shadow: 0 0 0 2px #000, 0 0 0 3px color-mix(in srgb, var(--tc) 70%, #000); --ss: 1; overflow: hidden; }
+.ach-ic img, .ach-ic .ph, .ach-ic canvas { max-width: 40px; max-height: 40px; image-rendering: pixelated; }
+.ach-ic .ach-ui { --ss: 2; }
+.ach-q { font-size: 22px; color: var(--ink-faint); }
+.ach-tile.locked .ach-ic > * { filter: grayscale(1) brightness(.45); }
+.ach-body { min-width: 0; flex: 1; }
+.ach-name { font-size: 14px; color: color-mix(in srgb, var(--tc) 70%, #fff); }
+.ach-tile.locked .ach-name { color: var(--ink-dim); }
+.ach-tile.hidden .ach-name { letter-spacing: .3em; color: var(--ink-faint); }
+.ach-desc { margin-top: 2px; font-size: 12px; line-height: 1.45; color: var(--ink-dim); }
+.ach-tile.hidden .ach-desc { font-style: italic; color: var(--ink-faint); }
+.ach-when { margin-top: 3px; font-size: 11px; color: #9ff09a; }
+.ach-prog { position: relative; margin-top: 4px; height: 12px; background: #050405; box-shadow: 0 0 0 1px #000, 0 0 0 2px #2e2520; }
+.ach-prog i { display: block; height: 100%; background: color-mix(in srgb, var(--tc) 60%, #000); }
+.ach-prog span { position: absolute; inset: 0; font-size: 10px; line-height: 12px; text-align: center; color: var(--ink); font-variant-numeric: tabular-nums; }
+body.portrait .ach-grid { grid-template-columns: 1fr; }
+
+/* ======================= v0.3: ECHOES OF PAST LIVES (SPEC §27) ======================= */
+.dlg-rumor.echo { cursor: pointer; box-shadow: inset 2px 0 0 #8a8580; color: #b8b0a4; }
+.dlg-rumor.echo .rm-head { color: #c9c1b4; }
+.dlg-rumor.echo .echo-mark { font-size: 13px; vertical-align: 0; opacity: .85; color: #e9e2d4; }
+.dlg-rumor.echo:hover .rm-tx, .dlg-rumor.echo:focus-visible .rm-tx { text-decoration: underline dotted; text-underline-offset: 3px; }
+.dlg-rumor.echo:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.run-row.hl { box-shadow: inset 0 0 0 2px #e9e2d4, inset 4px 0 0 var(--accent); animation: pulse 1.2s steps(3) 2; }

@@ -145,7 +145,7 @@
             "Dal'nor port. The little stall behind Berth Seven is yours.\nSince the Imperial ships stopped coming, old icons, prayer books and eagle pendants have grown rare. So have T'au power cells and purifier tabs, out on the smugglers' boats.\nYou sell to both sides. Neither asks."),
     codex: ["tau_empire", "place_dalnor", "place_dalnor_port"],
     choices: [
-      C("清点今天的货", "Count today's stock", "tau_o_trader_2"),
+      C("清点今天的货", "Count today's stock", "tau_o_trader_2", {result: L("柜台底下压着两箱激光枪电池，戳印是“奥雷克斯二号·第六工厂”。走私船换来的，两边都有人要。", "Under the counter sit two crates of lasgun power cells, stamped ‘Aurex Secundus · Manufactorum Six’. Smuggler goods. Both sides want them.")}),
       C("去码头打听走私船", "Ask after the smugglers' boat", "tau_o_trader_2", {effects: {renown: -3}, result: L("老船工朝海面努努嘴：“今晚，没灯的那艘。”他收下了你一包烟。", "The old boatman jerks his chin at the water. “Tonight. The one without lights.” He pockets your smokes.")})
     ]};
 
@@ -257,9 +257,9 @@
 
   /* ============ Chapter 3 · Green Skins ============ */
   N.tau_301 = {chapter: 3, scene: "tau_outpost", speaker: KELRA, time: {d: 40}, eventRoll: 0.42,
-    text: L("边境前哨。昨晚，天上掉下来一块山那么大的石头，砸进了十公里外的丛林。\n石头里在敲东西，还在唱歌。\n“兽人，”凯尔拉说，“它们把小行星当船。不，它们觉得那就是船。”",
-            "A frontier outpost. Last night a rock the size of a mountain fell from the sky into the jungle ten kilometres off.\nSomething inside it is hammering. And singing.\n“Orks,” Kel'ra says. “They use asteroids as ships. No—they believe asteroids are ships.”"),
-    codex: ["xenos_ork"],
+    text: L("边境前哨。昨晚，一块山那么大的石头从尘落星的方向坠下来，砸进了十公里外的丛林。\n石头里在敲东西，还在唱歌。\n“兽人，”凯尔拉说，“它们把小行星当船。不，它们觉得那就是船。”",
+            "A frontier outpost. Last night a rock the size of a mountain came down from the direction of Dustfall and crashed into the jungle ten kilometres off.\nSomething inside it is hammering. And singing.\n“Orks,” Kel'ra says. “They use asteroids as ships. No—they believe asteroids are ships.”"),
+    codex: ["xenos_ork", "place_dustfall"],
     choices: [
       C("守在防线上", "Hold the line", "tau_302", {result: L("你把电池排成一排，盯着丛林的边缘。歌声越来越近。", "You line up your power cells and watch the jungle's edge. The singing grows louder.")}),
       C("跟克鲁特去丛林", "Go into the jungle with the Kroot", "tau_303", {result: L("格拉克萨冲你点点头，带你钻进树冠。克鲁特爬树比你走路还安静。", "Grrak'tha nods and leads you up into the canopy. The Kroot climb more quietly than you walk.")})
@@ -551,10 +551,10 @@
 
   /* ============ Chapter 6 · The Shadow ============ */
   N.tau_601 = {chapter: 6, scene: "tau_city", speaker: null, time: {d: 40, warp: true},
-    text: L("这个月，达尔诺尔所有的人类孩子都在做同一个噩梦：天上有一张很大很大的嘴。\n钛人的孩子睡得很好。\n远程传感器发来一行冷冰冰的数据：“检测到大规模生物质，正在接近。”",
-            "This month every human child on Dal'nor has the same nightmare: a mouth in the sky, enormous.\nThe T'au children sleep soundly.\nLong-range sensors send one cold line of data: “Large-scale biomass detected. Approaching.”"),
+    text: L("这个月，达尔诺尔所有的人类孩子都在做同一个噩梦：天上有一张很大很大的嘴。\n钛人的孩子睡得很好。\n远程传感器发来一行冷冰冰的数据：“检测到大规模生物质，自赫斯珀方向接近。”",
+            "This month every human child on Dal'nor has the same nightmare: a mouth in the sky, enormous.\nThe T'au children sleep soundly.\nLong-range sensors send one cold line of data: “Large-scale biomass detected. Bearing: from Hesper. Approaching.”"),
     effects: {sanity: -5},
-    codex: ["xenos_shadow_in_warp", "xenos_tyranid", "xenos_hive_mind"],
+    codex: ["xenos_shadow_in_warp", "xenos_tyranid", "xenos_hive_mind", "place_hesper", "place_arcosa"],
     choices: [
       C("去听撤离简报", "Attend the evacuation briefing", "tau_602", {result: L("简报厅门口，人类和钛人排成了两列。你站进了更长的那一列。", "At the briefing hall, humans and T'au queue in two lines. You join the longer one.")})
     ]};
@@ -848,6 +848,7 @@
     name: L("钛帝国", "T'au Empire"),
     tagline: L("为了大义——排在第三批", "For the Greater Good—third in line"),
     role: L("人类殖民者", "Human colonist"),
+    world: L("达尔诺尔", "Dal'nor"),   // SPEC §27 home world (New Calder; the turned Guardsman is resettled here too)
     playerSprite: "player_tau",
     color: "#3fa7c9",
     startNode: "tau_101",
