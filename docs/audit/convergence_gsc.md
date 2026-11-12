@@ -1,0 +1,76 @@
+# Convergence report: gsc
+
+- nodes: 98; nodes with ≥2 choices: 77
+- **false-choice nodes** (all choices → same next node; choice changes only a result line): 52 (68% of multi-choice nodes)
+- choices that have their own follow-up node (not shared with a sibling): 45/208 (22%)
+- shallow branches (siblings re-merge within ≤1 step, i.e. the branch has no follow-up scene of its own): 15
+- forced chapter steps (a node whose choices all lead to one node in a LATER chapter): 10
+- hard jumps (chapter advances, or scene change + big time jump, along an edge): 48
+
+## False-choice nodes
+gsc_101, gsc_103, gsc_104, gsc_105, gsc_106, gsc_107, gsc_108, gsc_o_warden_1, gsc_o_warden_2, gsc_o_warden_3, gsc_o_warden_4, gsc_o_kin_1, gsc_o_kin_2, gsc_o_kin_3, gsc_o_kin_4, gsc_201, gsc_204, gsc_205, gsc_206, gsc_207, gsc_208, gsc_209, gsc_212, gsc_301, gsc_302, gsc_303, gsc_304, gsc_307, gsc_308, gsc_309, gsc_310, gsc_311, gsc_402, gsc_403, gsc_404, gsc_407, gsc_408, gsc_409, gsc_501, gsc_502, gsc_503, gsc_504, gsc_508, gsc_509, gsc_510, gsc_607, gsc_702, gsc_703, gsc_704, gsc_705, gsc_707, gsc_708
+
+## Shallow branches
+gsc_102(rejoin@1), gsc_202(rejoin@1), gsc_210(rejoin@1), gsc_211(rejoin@1), gsc_306(rejoin@1), gsc_401(rejoin@1), gsc_405(rejoin@1), gsc_505(rejoin@1), gsc_506(rejoin@1), gsc_601(rejoin@1), gsc_602(rejoin@1), gsc_608(rejoin@1), gsc_701(rejoin@1), gsc_801(rejoin@1), gsc_802(rejoin@1)
+
+## Forced chapter steps
+gsc_108→gsc_201(ch1→2)
+gsc_o_warden_4→gsc_201(ch1→2)
+gsc_o_kin_4→gsc_201(ch1→2)
+gsc_212→gsc_301(ch2→3)
+gsc_311→gsc_401(ch3→4)
+gsc_409→gsc_501(ch4→5)
+gsc_510→gsc_601(ch5→6)
+gsc_607→gsc_701(ch6→7)
+gsc_609→gsc_701(ch6→7)
+gsc_707→gsc_801(ch7→8)
+
+## Hard jumps (edge: scene/time/chapter change)
+gsc_108→gsc_201(same scene, time {"d":14}, ch1→2)
+gsc_o_warden_2→gsc_o_warden_3(mine_shaft→hive_hab, time {"d":9})
+gsc_o_warden_3→gsc_o_warden_4(hive_hab→underhive, time {"d":20})
+gsc_o_warden_4→gsc_201(underhive→hive_hab, time {"d":14}, ch1→2)
+gsc_o_kin_1→gsc_o_kin_2(gsc_chapel→manufactorum, time {"y":1})
+gsc_o_kin_2→gsc_o_kin_3(manufactorum→hive_hab, time {"d":6})
+gsc_o_kin_4→gsc_201(same scene, time {"d":14}, ch1→2)
+gsc_201→gsc_202(hive_hab→mine_shaft, time {"d":5})
+gsc_204→gsc_205(mine_shaft→underhive, time {"d":3})
+gsc_205→gsc_206(underhive→gsc_chapel, time {"d":6})
+gsc_206→gsc_207(gsc_chapel→hive_hab, time {"d":4})
+gsc_207→gsc_208(hive_hab→mine_shaft, time {"d":10})
+gsc_208→gsc_209(mine_shaft→cathedral, time {"d":5})
+gsc_209→gsc_210(cathedral→gsc_chapel, time {"d":7})
+gsc_210→gsc_301(gsc_chapel→mine_shaft, ch2→3)
+gsc_210→gsc_211(gsc_chapel→cathedral, time {"d":6})
+gsc_211→gsc_301(cathedral→mine_shaft, ch2→3)
+gsc_212→gsc_301(underhive→mine_shaft, ch2→3)
+gsc_308→gsc_310(cult_shrine→hive_hab, time {"d":20})
+gsc_309→gsc_310(cult_shrine→hive_hab, time {"d":20})
+gsc_310→gsc_311(hive_hab→underhive, time {"d":9})
+gsc_311→gsc_401(underhive→hive_hab, time {"y":12}, ch3→4)
+gsc_402→gsc_404(hive_hab→mine_shaft, time {"d":3})
+gsc_403→gsc_404(hive_hab→mine_shaft, time {"d":3})
+gsc_404→gsc_405(mine_shaft→manufactorum, time {"d":30})
+gsc_405→gsc_408(manufactorum→hive_hab, time {"d":10})
+gsc_407→gsc_408(underhive→hive_hab, time {"d":10})
+gsc_408→gsc_409(hive_hab→gsc_chapel, time {"d":15})
+gsc_409→gsc_501(same scene, time {"y":3}, ch4→5)
+gsc_501→gsc_502(gsc_chapel→hive_spire, time {"d":20})
+gsc_503→gsc_504(hive_spire→hive_hab, time {"d":5})
+gsc_505→gsc_510(underhive→cult_shrine, time {"d":6})
+gsc_506→gsc_510(underhive→cult_shrine, time {"d":6})
+gsc_508→gsc_510(gsc_chapel→cult_shrine, time {"d":6})
+gsc_509→gsc_510(hive_hab→cult_shrine, time {"d":6})
+gsc_510→gsc_601(cult_shrine→hive_hab, time {"d":40}, ch5→6)
+gsc_606→gsc_701(cult_shrine→burning_city, ch6→7)
+gsc_607→gsc_701(barracks→burning_city, ch6→7)
+gsc_609→gsc_701(cult_shrine→burning_city, ch6→7)
+gsc_610→gsc_end_corrected(cult_shrine→gsc_chapel, time {"d":3})
+gsc_610→gsc_701(cult_shrine→burning_city, ch6→7)
+gsc_706→gsc_end_ascension(same scene, ch7→8)
+gsc_707→gsc_801(ruins→spore_sky, ch7→8)
+gsc_801→gsc_809(spore_sky→mine_shaft, time {"d":3})
+gsc_803→gsc_end_shadow(cult_shrine→hive_spire, time {"d":9})
+gsc_803→gsc_end_witness(cult_shrine→ship_interior, time {"y":1})
+gsc_806→gsc_end_ark(ship_interior→void, time {"d":60,"warp":true})
+gsc_806→gsc_end_seed(ship_interior→underhive, time {"y":30})
