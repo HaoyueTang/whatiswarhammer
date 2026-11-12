@@ -1,6 +1,6 @@
 {
  "version": 1,
- "count": 126,
+ "count": 127,
  "endings": [
   {
    "key": "end_eld_end_guest",
@@ -47,8 +47,8 @@
     "en": "Farming on Ildaneth"
    },
    "text": {
-    "zh": "三年后，伊尔达涅斯河边多了一块麦田，是一个猿人种的。流亡者的孩子管它叫“会哭的人的田”。\n你教他们唱收割歌。他们唱得比你还难听。\n有时先知会来，站在田埂上，什么也不说，只看着麦子。",
-    "en": "Three years on, a wheat field grows by Ildaneth's river, planted by a mon-keigh. The Exodite children call it “the field of the one who cries.”\nYou teach them the harvest song. They sing it even worse than you.\nSometimes the Farseer visits, stands at the field's edge, says nothing, and watches the wheat."
+    "zh": "三年后，伊尔达涅斯河边多了一块麦田，是一个猿人种的。\n你教流亡者的孩子唱收割歌。他们唱得比你还难听。\n有时先知会来，站在田埂上，什么也不说，只看着麦子。",
+    "en": "Three years on, a wheat field grows by Ildaneth's river, planted by a mon-keigh.\nYou teach the Exodite children the harvest song. They sing it even worse than you.\nSometimes the Farseer visits, stands at the field's edge, says nothing, and watches the wheat."
    },
    "scene": "maiden_world",
    "speaker": null,
@@ -70,8 +70,8 @@
     "en": "Joined the Harlequins"
    },
    "text": {
-    "zh": "丑角剧团多了一个观众，后来又多了一个角色：一个永远演不好的猿人。\n每次《陨落》演到结尾，都由你在黑暗里笑出第一声。\n有人说，欢笑之神本人来看过一场，笑得最响的就是他。",
-    "en": "The Harlequin troupe gains an audience member, then a role: a mon-keigh who never quite gets it right.\nEvery time The Fall reaches its end, you're the one who laughs first in the dark.\nThey say the Laughing God himself attended once, and laughed the loudest."
+    "zh": "丑角剧团多了一个观众。他们从不让你上台，只让你在黑暗里笑第一声。\n每次《陨落》演到结尾，台下最先笑出来的，总是那个猿人。\n有人说，欢笑之神本人来看过一场，笑得最响的就是他。",
+    "en": "The Harlequin troupe gains an audience of one. They never let you on stage; they only let you laugh first in the dark.\nEvery time The Fall reaches its end, the first laugh from the seats is always the mon-keigh's.\nThey say the Laughing God himself attended once, and laughed the loudest."
    },
    "scene": "webway",
    "speaker": {
@@ -99,8 +99,8 @@
     "en": "Walks with the Ynnari"
    },
    "text": {
-    "zh": "你跟着恩灵派走遍了网道。他们叫你“活着的那个”，因为你是队伍里唯一还会变老的人。\n伊芙蕾恩远远地看过你一眼，点了点头。\n你胸前的骷髅里，偶尔有一个声音在吹口哨。是你教的。",
-    "en": "You walk the webway with the Ynnari. They call you “the living one,” since you're the only one among them who still ages.\nYvraine glances at you once from afar, and nods.\nIn the skull on your chest, a voice sometimes whistles. You taught her that."
+    "zh": "你跟着恩灵派走遍了网道。他们叫你“活着的那个”：队伍里只有你活不过一千岁。\n伊芙蕾恩远远地看过你一眼，点了点头。\n你教过一个死去的朋友吹口哨。现在，你常常替她吹。",
+    "en": "You walk the webway with the Ynnari. They call you “the living one”: you're the only one among them who won't see a thousand years.\nYvraine glances at you once from afar, and nods.\nYou once taught a friend, now dead, to whistle. These days you often whistle for her."
    },
    "scene": "webway",
    "speaker": {
@@ -128,8 +128,8 @@
     "en": "Burned as a xenos collaborator"
    },
    "text": {
-    "zh": "你回到人类世界，讲了一切：灵族、网道、先知、那两个数字。\n审判官听得很仔细，记着笔记。\n“与异形同处逾年，”她合上本子，“灵魂已不可信。”\n第二天广场上点起火堆，人们唱着赞美帝皇的歌。",
-    "en": "You return to human space and tell them everything: the Aeldari, the webway, the Farseer, the two numbers.\nThe Inquisitor listens carefully, even takes notes.\n“Over a year among xenos,” she says, closing her book. “The soul cannot be trusted.”\nNext day a pyre is lit in the square, and the crowd sings praise to the Emperor."
+    "zh": "你回到人类那边，讲了一切：灵族、网道、先知、那两个数字。\n审判官记着笔记。“与异形同处逾年，”她合上本子，“灵魂已不可信。”\n第二天广场上点起火堆，人们唱着赞美帝皇的歌。",
+    "en": "Back among humans, you tell them everything: the Aeldari, the webway, the Farseer, the two numbers.\nThe Inquisitor takes notes. “Over a year among xenos,” she says, closing her book. “The soul cannot be trusted.”\nNext day a pyre is lit in the square, and the crowd sings praise to the Emperor."
    },
    "scene": "burning_city",
    "speaker": {
@@ -157,8 +157,8 @@
     "en": "Claimed by Khorne"
    },
    "text": {
-    "zh": "你心里那张战面再也摘不下来了。灵族有道途约束杀意，你没有。\n守护者把你送出了网道。你一路杀进黑暗，没回过头。\n凯恩的怒火属于灵族。你的，被另一位神接住了。他不讲道途，只要头骨。",
-    "en": "The war-mask in your heart will not come off. The Aeldari have their Paths to cage the urge to kill. You have none.\nThe guardians see you out of the webway. You fight your way into the dark and never look back.\nKhaine's rage belongs to the Aeldari. Yours was caught by another god. He keeps no Paths. He wants skulls."
+    "zh": "那一拳之后，你的手再也没真正松开过。灵族有道途约束杀意，你没有。\n守护者把你送出了网道。你一路杀进黑暗，没回过头。\n凯恩的怒火属于灵族。你的，被另一位神接住了。他不讲道途，只要头骨。",
+    "en": "Since that first blow your hands have never truly unclenched. The Aeldari have their Paths to cage the urge to kill. You have none.\nThe Guardians see you out of the webway. You fight your way into the dark and never look back.\nKhaine's rage belongs to the Aeldari. Yours was caught by another god. He keeps no Paths. He wants skulls."
    },
    "scene": "webway",
    "speaker": {
@@ -215,8 +215,8 @@
     "en": "Soul devoured by Slaanesh"
    },
    "text": {
-    "zh": "那个梦再也不醒了：瓦尔达的麦田，妮尔在门口喊你吃饭，一切都刚刚好。\n灵族发现你时，你坐着微笑，灵魂早已不在，没有灵魂石接住它。\n渴求者饿了一万年。一个猿人的灵魂，只是饭前的甜点。",
-    "en": "The dream never ends now: Valda's wheat, Nell calling you in to eat, everything just right.\nWhen the Aeldari find you, you are sitting still and smiling, your soul long gone. No spirit stone caught it.\nShe Who Thirsts has hungered for Aeldari souls for ten thousand years. A mon-keigh soul is a sweet before the meal."
+    "zh": "那段甜甜的音乐再也不停了。你坐下来听，听了一天，一个月，一年。\n后来有人发现你，你还坐着微笑，灵魂早已不在，没有灵魂石接住它。\n渴求者饿了一万年。一个猿人的灵魂，只是饭前的甜点。",
+    "en": "The sweet music never stops now. You sit and listen: a day, a month, a year.\nWhen someone finally finds you, you are still sitting and smiling, your soul long gone. No spirit stone caught it.\nShe Who Thirsts has hungered for ten thousand years. A mon-keigh soul is a sweet before the meal."
    },
    "scene": "craftworld",
    "speaker": {
@@ -302,8 +302,8 @@
     "en": "Harvested with Valda"
    },
    "text": {
-    "zh": "光门合上了。你回到麦田，坐在家门槛上等。\n第二天，一个银色的骷髅停在你面前，抬起了手。你没有跑。\n很久以后，瓦尔达又长满了麦子，没人收割。墓穴重新睡着了，睡得很满足。",
-    "en": "The gate closes. You go back to the fields and sit on your own doorstep to wait.\nNext day a silver skeleton stops before you and raises a hand. You don't run.\nLong after, Valda is thick with wheat again, and no one harvests it. The tomb sleeps once more, content."
+    "zh": "第二天，一个银色的骷髅停在你面前，抬起了手。你没有跑。\n很久以后，瓦尔达又长满了麦子，没人收割。\n先知说过，墓穴会重新睡着。她说对了——它睡得很满足。",
+    "en": "Next day a silver skeleton stops before you and raises a hand. You don't run.\nLong after, Valda is thick with wheat again, and no one harvests it.\nThe Farseer said the tomb would sleep again. She was right. It sleeps content."
    },
    "scene": "tomb_exterior",
    "speaker": null,
@@ -348,8 +348,8 @@
     "en": "Sacrificed for a vision"
    },
    "text": {
-    "zh": "门合上了。另一边，先知垂下眼睛，在符文上划掉一根线。\n你和大魔一起被封在网道里。它不急，它有的是时间；你会慢慢变得不那么干净。\n方舟上没人为猿人唱歌，只有一片灵骨偶尔哼起跑调的收割歌。",
-    "en": "The gate closes. On the other side the Farseer lowers her eyes and strikes a thread from her runes.\nYou are sealed in the webway with the daemon. It's in no hurry; it has all the time there is, and you will grow less clean.\nOn the craftworld no one sings for a mon-keigh. Only a sliver of wraithbone sometimes hums an off-key harvest song."
+    "zh": "门合上了。另一边，先知垂下眼睛，在符文上划掉一根线。\n你和大魔一起被封在网道里。它不急，它有的是时间；你会慢慢变得不那么干净。",
+    "en": "The gate closes. On the other side the Farseer lowers her eyes and strikes a thread from her runes.\nYou are sealed in the webway with the daemon. It's in no hurry; it has all the time there is, and you will grow less clean."
    },
    "scene": "webway",
    "speaker": null,
@@ -400,8 +400,8 @@
     "en": "Consumed by Slaanesh's hunger"
    },
    "text": {
-    "zh": "你想要的越来越多，多到身体装不下。\n你的皮肤开始发光，声音甜得像音乐。守护者们举起了枪，眼里没有恨，只有怜悯。\n在他们开枪之前，很远的地方，有什么东西先一步把你喝干了。",
-    "en": "You want more and more, more than a body can hold.\nYour skin begins to glow; your voice turns sweet as music. The Guardians raise their rifles, eyes holding no hatred, only pity.\nBefore they fire, something very far away drinks you dry."
+    "zh": "你想要的越来越多，多到身体装不下。皮肤发光，长出不该有的颜色，声音甜得像音乐。\n看见你的人都举起了枪，眼里没有恨，只有怜悯。\n在他们开枪之前，很远的地方，有什么东西先一步把你喝干了。",
+    "en": "You want more and more, more than a body can hold. Your skin begins to glow in colours it should not have; your voice turns sweet as music.\nEveryone who sees you raises a gun, with no hatred in their eyes, only pity.\nBefore they fire, something very far away drinks you dry."
    },
    "scene": "daemon_world",
    "speaker": {
@@ -475,8 +475,8 @@
     "en": "Champion of the Black Legion"
    },
    "text": {
-    "zh": "你驾着登陆艇冲出火海。身后，阿尔德林在灭绝令中变成一颗白色的星。\n旗舰的舰桥上，战帅阿巴顿看了你一眼——就一眼——然后继续看他的星图。\n够了。对一个下巢老鼠来说，够了。",
-    "en": "You fly the lander out through the flames. Behind you, Aldrin becomes a white star under Exterminatus.\nOn the flagship's bridge, Warmaster Abaddon glances at you—just once—then returns to his star charts.\nIt's enough. For a rat from the Sump, it's enough."
+    "zh": "你拖着斧子爬上最后一艘起飞的登陆艇。身后，阿尔德林在灭绝令中变成一颗白色的星。\n星系边缘的旗舰上，战帅阿巴顿看了你一眼——就一眼——然后继续看他的星图。\n够了。对你这样的人来说，够了。",
+    "en": "You drag the axe aboard the last lander to lift off. Behind you, Aldrin becomes a white star under Exterminatus.\nOn the flagship at the system's edge, Warmaster Abaddon glances at you—just once—then returns to his star charts.\nIt's enough. For someone like you, it's enough."
    },
    "scene": "void",
    "speaker": {
@@ -565,7 +565,7 @@
     "zh": "你成了宴会的主人。宾客为你而来，为你着迷，为你倾尽所有。\n你是完美的，每一面镜子都这么说。\n可你只想要下一个更完美的瞬间，永远想要。在她的国度里，这就叫恩宠。",
     "en": "You become the host of the feast. Guests come for you, are enthralled by you, give you everything they have.\nYou are perfect; every mirror says so.\nYet all you want is the next, more perfect moment, forever. In Her realm, that is called favour."
    },
-   "scene": "throne_light",
+   "scene": "daemon_world",
    "speaker": {
     "sprite": "daemon_prince",
     "name": {
@@ -649,8 +649,8 @@
     "en": "Hid from the gods"
    },
    "text": {
-    "zh": "你到了另一颗巢都星球，在下巢水泵站过滤水，一滴一滴。\n手腕上的烙印偶尔还会发烫。每当那时，你就哼起诗班的歌，再故意唱错一个音。\n诸神找不到唱错的人。至少你希望如此。",
-    "en": "You end up on another hive world, filtering water in an underhive pump station, drop by drop.\nThe brand on your wrist still warms now and then. When it does, you hum the Choir's hymn and sing one note wrong on purpose.\nThe gods can't find someone singing off-key. Or so you hope."
+    "zh": "撤离船把你卸在另一颗巢都星球。两年后，你在下巢的净水站排班。\n手腕上的烙印偶尔还会发烫。每当那时，你就哼起诗班的歌，再故意唱错一个音。\n诸神找不到唱错的人。至少你希望如此。",
+    "en": "The evacuation ship drops you on another hive world. Two years later you work shifts at an underhive water station.\nThe brand on your wrist still warms now and then. When it does, you hum the Choir's hymn and sing one note wrong on purpose.\nThe gods can't find someone singing off-key. Or so you hope."
    },
    "scene": "underhive",
    "speaker": null,
@@ -672,8 +672,8 @@
     "en": "Became a hound of Khorne"
    },
    "text": {
-    "zh": "你成了血神的猎犬：没有名字，没有诗班，只有下一场仗。\n多年后，污池的孩子还用你的故事吓唬人：一个拾荒者爬出了下巢，从此再没停下。\n头骨一颗颗堆向王座，永远堆不满。",
-    "en": "You become a hound of the Blood God: no name, no Choir, only the next battle.\nYears later, children in the Sump still scare each other with your story: a scavenger who climbed out of the underhive and never stopped.\nSkull after skull piles toward the throne. It is never enough."
+    "zh": "你成了血神的猎犬：没有名字，没有诗班，只有下一场仗。\n多年后，你走过的每个地方都有人用你的故事吓唬孩子：一个凡人从烂泥里爬出来，从此再没停下。\n头骨一颗颗堆向王座，永远堆不满。",
+    "en": "You become a hound of the Blood God: no name, no Choir, only the next battle.\nYears later, everywhere you passed, people frighten children with your story: a mortal who crawled out of the mud and never stopped.\nSkull after skull piles toward the throne. It is never enough."
    },
    "scene": "burning_city",
    "speaker": {
@@ -701,8 +701,8 @@
     "en": "Became a seedbed for Nurgle"
    },
    "text": {
-    "zh": "你在污池最深处躺下，再也不想起来。苍蝇在你身上安了家，菌菇从指缝里长出来。\n拾荒的人都爱在你身边歇脚，说你身上暖洋洋的，像个炉子。\n慈父的花园里没有谁是多余的，也没有谁能离开。",
-    "en": "You lie down at the very bottom of the Sump and never want to get up. Flies make a home of you; mushrooms sprout between your fingers.\nScavengers like to rest beside you. You're warm, they say, like a stove.\nIn Grandfather's garden no one is unwanted, and no one ever leaves."
+    "zh": "你在最近的一摊烂泥里躺下，再也不想起来。苍蝇在你身上安了家，菌菇从指缝里长出来。\n路过的人都爱在你身边歇脚，说你身上暖洋洋的，像个炉子。\n慈父的花园里没有谁是多余的，也没有谁能离开。",
+    "en": "You lie down in the nearest patch of mud and never want to get up. Flies make a home of you; mushrooms sprout between your fingers.\nPassers-by like to rest beside you. You're warm, they say, like a stove.\nIn Grandfather's garden no one is unwanted, and no one ever leaves."
    },
    "scene": "underhive",
    "speaker": {
@@ -817,8 +817,8 @@
     "en": "Burned in the Emperor's light"
    },
    "text": {
-    "zh": "你祈祷了。像小时候那样，笨拙地，不知道该说什么。\n光回应了你。不是宽恕，是火。\n斯特兰德后来在报告里写：“该异端死前在祈祷。备注：无关紧要。”",
-    "en": "You pray. Clumsily, like when you were small, not knowing what to say.\nThe light answers. Not with forgiveness. With fire.\nStrand later writes in her report: “Heretic was praying at time of death. Note: irrelevant.”"
+    "zh": "你祈祷了。笨拙地，不知道该说什么。\n光回应了你。不是宽恕，是火。\n斯特兰德后来在报告里写：“该异端死前在祈祷。备注：无关紧要。”",
+    "en": "You pray. Clumsily, not knowing what to say.\nThe light answers. Not with forgiveness. With fire.\nStrand later writes in her report: “Heretic was praying at time of death. Note: irrelevant.”"
    },
    "scene": "throne_light",
    "speaker": {
@@ -846,8 +846,8 @@
     "en": "Purged by the Grey Knights"
    },
    "text": {
-    "zh": "银光落下时没有声音。\n审判庭的档案里，你只有一行字：“阿尔德林，异端，已净化。”没有名字。\n六小时后，这行字所指的那颗星球，也不存在了。",
-    "en": "When the silver light falls, there is no sound.\nIn the Inquisition's records you are one line: “Aldrin. Heretic. Purged.” No name.\nSix hours later, the world that line refers to no longer exists either."
+    "zh": "光落下时没有声音——士兵的小灯，或者骑士的戟，都一样。\n审判庭的档案里，你只有一行字：“阿尔德林，异端，已净化。”没有名字。\n六小时后，这行字所指的那颗星球，也不存在了。",
+    "en": "When the light falls there is no sound: a trooper's little lamp or a knight's halberd, it's all the same.\nIn the Inquisition's records you are one line: “Aldrin. Heretic. Purged.” No name.\nSix hours later, the world that line refers to no longer exists either."
    },
    "scene": "ruins",
    "speaker": {
@@ -933,8 +933,8 @@
     "en": "Became Chaos Spawn"
    },
    "text": {
-    "zh": "诸神一次给了你太多恩赐：触手、眼睛、翅膀、嘴巴，一样不少。\n你的身体装不下。\n后来，沃加斯的战团多了一只会追着自己尾巴咬的怪物。偶尔它会停下来，像在努力回想一个名字。",
-    "en": "The gods gave you too many gifts at once: tentacles, eyes, wings, mouths, everything.\nYour body couldn't hold them.\nNow Vorgath's warband keeps a beast that chases its own tails. Sometimes it stops, as if trying to recall a name."
+    "zh": "诸神一次给了你太多恩赐：触手、眼睛、翅膀、嘴巴，一样不少。\n你的身体装不下。\n后来，有人见过一只会追着自己尾巴咬的怪物。偶尔它会停下来，像在努力回想一个名字。",
+    "en": "The gods gave you too many gifts at once: tentacles, eyes, wings, mouths, everything.\nYour body couldn't hold them.\nLater, people saw a beast that chases its own tails. Sometimes it stops, as if trying to recall a name."
    },
    "scene": "daemon_world",
    "speaker": {
@@ -962,17 +962,11 @@
     "en": "Died of wounds, belongings shared"
    },
    "text": {
-    "zh": "污池的规矩：人死了，东西归活人。\n有人拿走了你的靴子，有人拿走了你的撬棍。蒂卡拿走了你手腕上的烙印——她说，留着念想。\n四位神没有一个回头看。",
-    "en": "The Sump's rule: when someone dies, their things go to the living.\nSomeone takes your boots. Someone takes your crowbar. Tikka takes the brand from your wrist, as a keepsake, she says.\nNot one of the Four looks back."
+    "zh": "下巢的规矩，到哪儿都一样：人死了，东西归活人。\n有人拿走了你的鞋，有人拿走了你手里的家伙。没人记得你的名字。\n四位神没有一个回头看。",
+    "en": "The underhive's rule holds everywhere: when someone dies, their things go to the living.\nSomeone takes your shoes. Someone takes whatever you were holding. Nobody remembers your name.\nNot one of the Four looks back."
    },
    "scene": "underhive",
-   "speaker": {
-    "sprite": "cultist",
-    "name": {
-     "zh": "蒂卡",
-     "en": "Tikka"
-    }
-   },
+   "speaker": null,
    "foe": null
   },
   {
@@ -991,8 +985,8 @@
     "en": "Mind taken by the Four"
    },
    "text": {
-    "zh": "门后的四个声音不再争吵了，因为它们都进来了。\n你同时在笑、在哭、在愤怒、在渴望。你的嘴说着四种语言，没有一种是你的。\n诸神很满意。只是没有“你”了。",
-    "en": "The four voices behind the door stop arguing, because now they're all inside.\nYou laugh, weep, rage and crave all at once. Your mouth speaks four languages, none of them yours.\nThe gods are pleased. There's just no “you” left."
+    "zh": "你脑子里那些声音不再争吵了，因为它们都进来了。\n你同时在笑、在哭、在愤怒、在渴望。你的嘴说着四种语言，没有一种是你的。\n诸神很满意。只是没有“你”了。",
+    "en": "The voices in your head stop arguing, because now they're all inside.\nYou laugh, weep, rage and crave all at once. Your mouth speaks four languages, none of them yours.\nThe gods are pleased. There's just no “you” left."
    },
    "scene": "warp",
    "speaker": {
@@ -1471,8 +1465,8 @@
     "en": "Left with the crusade fleet"
    },
    "text": {
-    "zh": "你登上了蓝金色的战舰。新军服，新番号，新的一万光年。\n启航时，你最后看了一眼故乡的天空。那道裂隙还在，像一道永远合不上的伤口。\n但至少，现在有人在缝它了。",
-    "en": "You board a blue-and-gold warship. New uniform, new regiment, ten thousand new light-years.\nAs the fleet departs you take a last look at home's sky. The rift is still there, a wound that will never close.\nBut at least someone is stitching it now."
+    "zh": "你登上了战斗群的蓝金色战舰。新军服，新番号，新的一万光年。\n启航时，你最后看了一眼故乡的天空。那道裂隙还在，像一道永远合不上的伤口。\n但至少，现在有人在缝它了。",
+    "en": "You board one of the battle group's blue-and-gold warships. New uniform, new regiment, ten thousand new light-years.\nAs the fleet departs you take a last look at home's sky. The rift is still there, a wound that will never close.\nBut at least someone is stitching it now."
    },
    "scene": "void",
    "speaker": {
@@ -1558,8 +1552,8 @@
     "en": "Kissed by a genestealer"
    },
    "text": {
-    "zh": "你在赫斯珀住了下来，成了家。孩子的皮肤带点紫色，手臂多了两条，你觉得他们完美无缺。\n某天夜里，天上出现了无数颗星星，越来越近。你带着全家出去迎接。",
-    "en": "You settle on Hesper and start a family. Your children's skin has a violet tinge, and they have a few extra arms. You think they're perfect.\nOne night countless stars appear in the sky, drawing closer. You take the whole family outside to welcome them."
+    "zh": "你没有回营地。四十个小时里，他们给你换上干净衣服，叫你“家人”。你从没这么安心过。\n天黑时，紫色的天上落下无数颗星星。你和家人们一起走进麦田，张开双臂迎接。",
+    "en": "You never go back to camp. For forty hours they give you clean clothes and call you “family.” You have never felt so safe.\nAt nightfall countless stars fall from a violet sky. You walk into the wheat with your family and open your arms to welcome them."
    },
    "scene": "jungle",
    "speaker": null,
@@ -1639,8 +1633,8 @@
     "en": "Hollowed out by Slaanesh"
    },
    "text": {
-    "zh": "勋章、掌声、香膏、更响的赞美诗，你都要，而且要更多。\n每一样都比上一样淡。最后你站在凯旋礼上，全舰队都在为你欢呼，你什么也感觉不到。\n她把你一次次装满，又一次次倒空，直到你只剩下想要。",
-    "en": "Medals, applause, scented balm, louder hymns: you want them all, and more.\nEach tastes fainter than the last. At last you stand at the triumph, the whole fleet cheering your name, and feel nothing.\nShe fills you and pours you out, again and again, until nothing is left of you but wanting."
+    "zh": "勋章、掌声、香膏、更响的赞美诗，你都要，而且要更多。\n每一样都比上一样淡。很多年后，人群为你欢呼，喊着你的名字，你什么也感觉不到。\n她把你一次次装满，又一次次倒空，直到你只剩下想要。",
+    "en": "Medals, applause, scented balm, louder hymns: you want them all, and more.\nEach tastes fainter than the last. Years later a crowd cheers your name, and you feel nothing.\nShe fills you and pours you out, again and again, until nothing is left of you but wanting."
    },
    "scene": "cathedral",
    "speaker": {
@@ -1668,8 +1662,8 @@
     "en": "Became Tzeentch's pawn"
    },
    "text": {
-    "zh": "你总能先知道命令、战局，和谁会背叛谁。你升到了上尉。\n某天你在作战图上画了一道线，整个团跟着它走进了埋伏。那道线，是镜子里的人替你画的。\n你以为自己在下棋，其实你只是一颗棋子。",
-    "en": "You always know first: the orders, the battle, who will betray whom. You rise all the way to captain.\nOne day you draw a line on the war map, and a whole regiment follows it into an ambush. The one in the mirror drew it for you.\nYou thought you were playing. You were only a piece."
+    "zh": "你总能先知道命令、战局，和谁会背叛谁。你一步步往上爬。\n某天你在作战图上画了一道线，整个团跟着它走进了埋伏。那道线，是镜子里的人替你画的。\n你以为自己在下棋，其实你只是一颗棋子。",
+    "en": "You always know first: the orders, the battle, who will betray whom. Over the years you climb, step by step.\nOne day you draw a line on the war map, and a whole regiment follows it into an ambush. The one in the mirror drew it for you.\nYou thought you were playing. You were only a piece."
    },
    "scene": "ship_interior",
    "speaker": {
@@ -1836,8 +1830,8 @@
     "en": "Possessed by the warp"
    },
    "text": {
-    "zh": "那个敲船壳的声音，终于等到了回答。\n你的皮肤在发光，你的影子在说话。政委的子弹来得很快，但还是晚了一步——从你身上爬出来的东西，已经开始笑了。",
-    "en": "The knocking on the hull finally gets its answer.\nYour skin glows. Your shadow speaks. The commissar's bullet comes fast, but a moment too late. The thing climbing out of you has already begun to laugh."
+    "zh": "那个一直在敲门的声音，终于等到了回答。\n你的皮肤在发光，你的影子在说话。政委的子弹来得很快，但还是晚了一步——从你身上爬出来的东西，已经开始笑了。",
+    "en": "The knocking that never stopped finally gets its answer.\nYour skin glows. Your shadow speaks. The commissar's bullet comes fast, but a moment too late. The thing climbing out of you has already begun to laugh."
    },
    "scene": "warp",
    "speaker": {
@@ -1888,15 +1882,15 @@
     "en": "Mind shattered"
    },
    "text": {
-    "zh": "你开始笑，停不下来。阿诺医师给你打了一针，又一针。\n后来你被送进一座安静的修道院。那里的人都穿着束缚衣，都在数墙上别人看不见的眼睛。",
-    "en": "You start laughing and can't stop. Medicae Arno gives you a shot, then another.\nLater you're sent to a quiet monastery where everyone wears restraints and counts eyes on the walls that no one else can see."
+    "zh": "你开始笑，停不下来。军医给你打了一针，又一针。\n后来你被送进一座安静的修道院。那里的人都穿着束缚衣，都在数墙上别人看不见的眼睛。",
+    "en": "You start laughing and can't stop. A medic gives you a shot, then another.\nLater you're sent to a quiet monastery where everyone wears restraints and counts eyes on the walls that no one else can see."
    },
    "scene": "barracks",
    "speaker": {
     "sprite": "medicae",
     "name": {
-     "zh": "阿诺医师",
-     "en": "Medicae Arno"
+     "zh": "军医",
+     "en": "Medic"
     }
    },
    "foe": null
@@ -3074,8 +3068,8 @@
     "en": "Honoured citizen of the Greater Good"
    },
    "text": {
-    "zh": "瓦尚亲手把勋章别在你胸前，笑容完美。你成了第一个获此荣誉的古维萨。\n你的孩子会在钛人的学校长大，学会说钛语，学会完美的微笑。\n你常常想，这是好事。你几乎每次都这么想。",
-    "en": "Vash'aun pins the medal on your chest himself, his smile perfect. You're the first gue'vesa so honoured.\nYour children will grow up in T'au schools, speak T'au, and learn the perfect smile.\nYou often think this is a good thing. Almost every time."
+    "zh": "一年后，在新的殖民地，瓦尚亲手把勋章别在你胸前。你是第一个获此荣誉的古维萨。\n街区的孩子会在钛人的学校长大，学会说钛语，学会完美的微笑。\n你常常想，这是好事。你几乎每次都这么想。",
+    "en": "A year later, on a new colony, Vash'aun pins the medal on your chest himself. You're the first gue'vesa so honoured.\nThe quarter's children will grow up in T'au schools, speak T'au, and learn the perfect smile.\nYou often think this is a good thing. Almost every time."
    },
    "scene": "tau_city",
    "speaker": {
@@ -3132,17 +3126,11 @@
     "en": "Stayed to guard Dal'nor"
    },
    "text": {
-    "zh": "你留了下来，和乔里、几个克鲁特，还有不肯走的人一起重建达尔诺尔。\n旧教堂的空讲台上，挂着雷娜姨的双头鹰，旁边是钛人的圆环。\n两年了，没人把哪一个摘下来。",
-    "en": "You stay to rebuild Dal'nor with Jory, a few Kroot, and everyone else who wouldn't leave.\nOn the old chapel's empty pulpit hangs Aunt Rena's eagle, and beside it, a T'au ring.\nTwo years on, nobody has taken either one down."
+    "zh": "你留了下来，和几个不肯走的人一起重建达尔诺尔。\n旧教堂的空讲台上，挂着一枚双头鹰，旁边是钛人的圆环。\n两年了，没人把哪一个摘下来。",
+    "en": "You stay to rebuild Dal'nor with the few who wouldn't leave.\nOn the old chapel's empty pulpit hangs an eagle, and beside it, a T'au ring.\nTwo years on, nobody has taken either one down."
    },
    "scene": "ruins",
-   "speaker": {
-    "sprite": "gue_vesa",
-    "name": {
-     "zh": "乔里",
-     "en": "Jory"
-    }
-   },
+   "speaker": null,
    "foe": null
   },
   {
@@ -3190,8 +3178,8 @@
     "en": "Became Nurgle's carrier"
    },
    "text": {
-    "zh": "咳嗽病回到了人类街区，这次从你开始。你一点也不难受，挨家挨户给邻居送汤。\n医疗无人机封了整条街。钛人隔着能量屏，困惑地看着一群笑眯眯的病人。\n慈父不懂大义，他只知道每个孩子都该有个家。",
-    "en": "The coughing sickness returns to the human quarter, and this time it starts with you. You feel fine, and go door to door bringing your neighbours soup.\nMedical drones seal the whole street. Behind the energy screen, the T'au stare in confusion at a crowd of smiling sick people.\nGrandfather knows nothing of the Greater Good. Only that every child deserves a home."
+    "zh": "人类街区闹起了咳嗽病，从你开始。你一点也不难受，挨家挨户给邻居送汤。\n医疗无人机封了整条街。钛人隔着能量屏，困惑地看着一群笑眯眯的病人。\n慈父不懂大义，他只知道每个孩子都该有个家。",
+    "en": "A coughing sickness breaks out in the human quarter, and it starts with you. You feel fine, and go door to door bringing your neighbours soup.\nMedical drones seal the whole street. Behind the energy screen, the T'au stare in confusion at a crowd of smiling sick people.\nGrandfather knows nothing of the Greater Good. Only that every child deserves a home."
    },
    "scene": "hive_hab",
    "speaker": {
@@ -3248,8 +3236,8 @@
     "en": "Became Tzeentch's pawn"
    },
    "text": {
-    "zh": "你在梦里看见钛人的作战计划，比以太族看得还远。\n你把它们一页页写下来，卖给水族，卖给远见的人，也卖给帝国。每一方都以为你是自己人。\n直到三方同时发现了。那一天，也写在计划里。",
-    "en": "In dreams you see the T'au battle plans, further ahead than any Ethereal can.\nYou write them down page by page and sell them: to the water caste, to Farsight's people, to the Imperium. Each side thinks you're theirs.\nUntil all three find out at once. That day was in the plan too."
+    "zh": "你在梦里看见钛人的作战计划，比以太族看得还远。\n你把它们一页页写下来，卖给水族，卖给海湾那边的人，也卖给帝国。每一方都以为你是自己人。\n直到三方同时发现了。那一天，也写在计划里。",
+    "en": "In dreams you see the T'au battle plans, further ahead than any Ethereal can.\nYou write them down page by page and sell them: to the water caste, to people across the Gulf, to the Imperium. Each side thinks you're theirs.\nUntil all three find out at once. That day was in the plan too."
    },
    "scene": "tau_city",
    "speaker": {
@@ -3306,8 +3294,8 @@
     "en": "Devoured by the swarm"
    },
    "text": {
-    "zh": "你在废墟里找到了92号最后一块碎片。它的灯，还亮着。\n孢子雾里有东西在动。成千上万。\n克鲁特吃东西是为了记住。虫子吃东西是为了忘掉。这一次，没有什么会留下来被记住。",
-    "en": "In the ruins you find the last piece of Drone 92. Its light is still on.\nSomething moves in the spore fog. Thousands of somethings.\nKroot eat to remember. Bugs eat to forget. This time, nothing will be left to remember."
+    "zh": "口袋里，92号的碎片忽然亮了，哔了两声。你转身走回孢子雾里，去找它想让你找的东西。\n雾里有东西在动。成千上万。\n克鲁特吃东西是为了记住。虫子吃东西是为了忘掉。这一次，什么也不会被记住。",
+    "en": "In your pocket, Drone 92's fragment suddenly lights up and beeps twice. You turn back into the spore fog to find whatever it wants you to find.\nSomething moves in the fog. Thousands of somethings.\nKroot eat to remember. Bugs eat to forget. This time, nothing will be remembered."
    },
    "scene": "spore_sky",
    "speaker": null,
@@ -3358,8 +3346,8 @@
     "en": "Re-educated by the water caste"
    },
    "text": {
-    "zh": "对话进行了很久。两年。\n你出来时皮肤白了些，说话慢了些，见人就笑，笑得完美得像量过尺寸。\n雷娜姨在街上认不出你。你也不太记得她了。这是一个暂时的误会。",
-    "en": "The dialogue goes on a long time. Two years.\nWhen you come out, your skin is paler and your speech slower. You smile at everyone, a smile so perfect it looks measured.\nAunt Rena passes you in the street without recognising you. You don't quite remember her either. A temporary misunderstanding."
+    "zh": "对话进行了很久。两年。\n你出来时晒不到太阳，脸色白了些，说话慢了些，见人就笑，笑得完美得像量过尺寸。\n码头上的老工友在街上认不出你。你也不太记得他们了。这是一个暂时的误会。",
+    "en": "The dialogue goes on a long time. Two years.\nYou come out pale from no sun, slower of speech. You smile at everyone, a smile so perfect it looks measured.\nYour old workmates from the docks pass you in the street without recognising you. You don't quite remember them either. A temporary misunderstanding."
    },
    "scene": "tau_city",
    "speaker": {
@@ -3369,6 +3357,29 @@
      "en": "Envoy Vash'aun"
     }
    },
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_thirdwave",
+   "file": "assets/endings/tau_end_thirdwave.png",
+   "faction": "tau",
+   "id": "tau_end_thirdwave",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "第三批",
+    "en": "The Third Wave"
+   },
+   "cause": {
+    "zh": "沦为排在第三批的难民",
+    "en": "A refugee in the third wave"
+   },
+   "text": {
+    "zh": "你挤在最后一艘船的货舱里，和人类、克鲁特、几箱土族设备一起。\n二十天后，钛族边境的难民站给每个人发了一张淡蓝色的卡片，写着新的安置批次：第三批。\n你等着。大家都在等。",
+    "en": "You're crammed into the last ship's hold with humans, Kroot and crates of earth-caste equipment.\nTwenty days later a T'au border refugee station hands everyone a pale blue card with a new resettlement wave: third.\nYou wait. Everyone waits."
+   },
+   "scene": "ship_interior",
+   "speaker": null,
    "foe": null
   },
   {
@@ -3394,8 +3405,8 @@
    "speaker": {
     "sprite": "sigil_undivided",
     "name": {
-     "zh": "西拉斯的神",
-     "en": "Silas's God"
+     "zh": "会倾听的神",
+     "en": "A God Who Listens"
     }
    },
    "foe": null
@@ -3416,8 +3427,8 @@
     "en": "Listed as acceptable losses"
    },
    "text": {
-    "zh": "瓦尚在战报上签了字。你的名字被归入一栏：“可接受的伤亡（人类）”。\n他的笑容一如既往。\n后来，有个克鲁特说他记得你。没人知道他是怎么记住的。",
-    "en": "Vash'aun signs the battle report. Your name goes into a column: “Acceptable losses (human).”\nHis smile is the same as ever.\nLater, a Kroot says he remembers you. No one asks how."
+    "zh": "瓦尚在报告上签了字。你的名字被归入一栏：“可接受的损失（人类）”。\n他的笑容一如既往。\n后来，有个克鲁特说他记得你。没人知道他是怎么记住的。",
+    "en": "Vash'aun signs the report. Your name goes into a column: “Acceptable losses (human).”\nHis smile is the same as ever.\nLater, a Kroot says he remembers you. No one asks how."
    },
    "scene": "tau_outpost",
    "speaker": {
@@ -3441,21 +3452,15 @@
     "en": "The Shadow"
    },
    "cause": {
-    "zh": "心智被虫巢意志吞没",
-    "en": "Mind drowned by the Hive Mind"
+    "zh": "心智被梦魇吞没",
+    "en": "Mind drowned by the nightmare"
    },
    "text": {
-    "zh": "那张天上的嘴，终于不只是梦了。\n你的脑子里只剩下一种声音，低沉、饥饿、没有尽头，像一亿只虫子在同一时刻呼吸。\n你不再害怕了。你什么都不再是了。",
-    "en": "The mouth in the sky is no longer just a dream.\nOnly one sound remains in your head: low, hungry, endless, like a hundred million insects breathing at once.\nYou are no longer afraid. You are no longer anything."
+    "zh": "你一直在做的那个梦，终于醒不过来了。\n门、眼睛、走调的歌，全都挤进你的脑子里，没有一样是你自己的。\n你不再害怕了。你什么都不再是了。",
+    "en": "The dream you kept having finally won't let you wake.\nThe door, the eye, the out-of-tune song all crowd into your head, and none of it is yours.\nYou are no longer afraid. You are no longer anything."
    },
-   "scene": "spore_sky",
-   "speaker": {
-    "sprite": "omen_hivemind",
-    "name": {
-     "zh": "虫巢意志",
-     "en": "The Hive Mind"
-    }
-   },
+   "scene": "warp",
+   "speaker": null,
    "foe": null
   }
  ]
