@@ -1,6 +1,6 @@
 {
  "version": 1,
- "count": 127,
+ "count": 131,
  "endings": [
   {
    "key": "end_eld_end_guest",
@@ -99,8 +99,8 @@
     "en": "Walks with the Ynnari"
    },
    "text": {
-    "zh": "你跟着恩灵派走遍了网道。他们叫你“活着的那个”：队伍里只有你活不过一千岁。\n伊芙蕾恩远远地看过你一眼，点了点头。\n死者走在你身边，很安静。",
-    "en": "You walk the webway with the Ynnari. They call you “the living one”: you're the only one among them who won't see a thousand years.\nYvraine glances at you once from afar, and nods.\nThe dead walk beside you, very quietly."
+    "zh": "你跟着恩灵派走遍了网道。他们叫你“活着的那个”：队伍里只有你活不过一千岁。\n伊芙蕾恩远远地看过你一眼，点了点头。\n你教过一个死去的朋友吹口哨。现在，你常常替她吹。",
+    "en": "You walk the webway with the Ynnari. They call you “the living one”: you're the only one among them who won't see a thousand years.\nYvraine glances at you once from afar, and nods.\nYou once taught a friend, now dead, to whistle. These days you often whistle for her."
    },
    "scene": "webway",
    "speaker": {
@@ -1014,8 +1014,8 @@
     "en": "Escaped with the children"
    },
    "text": {
-    "zh": "“忍耐号”飞向奥雷克斯二号，载着四十个孩子，个个都是素脸，个个都验过血。\n身后，凯辛三号变成了一颗紫色的星，然后什么也不剩。\n你教孩子们唱歌。不是那首。是一首新的。",
-    "en": "The Patient Mercy flies for Aurex Secundus with forty children aboard, plain-faced every one, every one's blood tested clean.\nBehind you Kessin Tertius becomes a violet star, then nothing at all.\nYou teach the children a song. Not that one. A new one."
+    "zh": "“忍耐号”飞向奥雷克斯二号，载着一船孩子，个个都是素脸。\n身后，凯辛三号变成了一颗紫色的星，然后什么也不剩。\n你教孩子们唱歌。不是那首。是一首新的。",
+    "en": "The Endurance flies for Aurex Secundus with a hold full of children, plain-faced every one.\nBehind you Kessin Tertius becomes a violet star, then nothing at all.\nYou teach the children a song. Not that one. A new one."
    },
    "scene": "void",
    "speaker": null,
@@ -1037,17 +1037,11 @@
     "en": "Held the line so the children could go"
    },
    "text": {
-    "zh": "你和首领守着空荡荡的星港，一直守到天黑。\n矿船的尾焰变成一颗小星星，又变成什么都没有。\n首领说：“最后一班。”你点点头。这辈子，这是你干过最值的一班。",
-    "en": "You and the Primus hold the empty starport until nightfall.\nThe hauler's exhaust becomes a small star, then nothing.\nThe Primus says, “Last shift.” You nod. It's the best shift you ever worked."
+    "zh": "你和留下的人守着空荡荡的星港，一直守到天黑。\n矿船的尾焰变成一颗小星星，又变成什么都没有。\n你点点头。这辈子，这是你干过最值的一班。",
+    "en": "You and those who stayed hold the empty starport until nightfall.\nThe hauler's exhaust becomes a small star, then nothing.\nYou nod. It's the best shift you ever worked."
    },
    "scene": "spore_sky",
-   "speaker": {
-    "sprite": "gsc_primus",
-    "name": {
-     "zh": "哈斯克首领",
-     "en": "Primus Hask"
-    }
-   },
+   "speaker": null,
    "foe": "hive_tyrant"
   },
   {
@@ -1062,12 +1056,12 @@
     "en": "The Shadow Lifts"
    },
    "cause": {
-    "zh": "熄灭灯塔，喊出警告",
-    "en": "Killed the beacon, sent the warning"
+    "zh": "杀死族长，喊出警告",
+    "en": "Killed the Patriarch, sent the warning"
    },
    "text": {
-    "zh": "警告传出去了。九天后，帝国海军的炮火照亮了紫色的天。\n凯辛三号没能保住，可整个阿尔科萨星区都听见了这颗星的名字。\n你坐在星语塔的废墟上，头脑安静。只有你自己，和你记得的每一张脸。",
-    "en": "The warning got through. Nine days later, Imperial Navy guns light the violet sky.\nKessin Tertius could not be saved, but the whole Arcosa Sector heard its name.\nYou sit in the astropathic tower's ruins, your mind quiet. Only you, and every face you remember."
+    "zh": "影子还在，可歌停了，影子上开了一道缝，正好够一句话。九天后，帝国海军的炮火照亮了紫天。\n凯辛三号没保住，可整个阿尔科萨星区都听见了它的名字。\n你坐在塔的废墟上，和你记得的每一张脸。",
+    "en": "The Shadow remains, but the song stopped, and a crack opened just wide enough for one sentence. Nine days later Imperial Navy guns light the violet sky.\nKessin Tertius could not be saved, but the whole Arcosa Sector heard its name.\nYou sit in the tower's ruins, your mind quiet. Only you, and every face you remember."
    },
    "scene": "hive_spire",
    "speaker": {
@@ -1176,10 +1170,10 @@
     "en": "Taken by Khorne as the Shadow lifted"
    },
    "text": {
-    "zh": "影子罩着这颗星，诸神都听不见。可你的怒火太大，大到从影子底下漏了出去。\n你在废墟里杀虫子，杀了十天，没有停。\n影子退去那一夜，一面鼓终于找到了你。它不在乎血是谁的。",
-    "en": "The Shadow covers this world and the gods can't hear. But your rage is too big, and leaks out beneath it.\nYou kill the beasts in the ruins for ten days, without stopping.\nThe night the Shadow lifts, a drum finally finds you. It doesn't care whose blood it was."
+    "zh": "从那天起，你开始打架：在矿口，在集市，在家里。后来天变紫了，你在废墟里杀了十天虫子。\n影子罩着这颗星，诸神听不见。可你的怒火漏了出去。\n影子退去那夜，一面鼓找到了你。它不在乎血是谁的。",
+    "en": "From that day you fight: at the pithead, in the market, at home. Then the sky turns violet, and you kill beasts in the ruins for ten days.\nThe Shadow covers this world and the gods can't hear. But your rage is too big, and leaks out beneath it.\nThe night the Shadow lifts, a drum finds you. It doesn't care whose blood it was."
    },
-   "scene": "spore_sky",
+   "scene": "ruins",
    "speaker": {
     "sprite": "sigil_khorne",
     "name": {
@@ -1205,8 +1199,8 @@
     "en": "Kept by Nurgle for his garden"
    },
    "text": {
-    "zh": "你身上长出了别的东西，又暖又软，不是家族的，是另一种爱。\n虫群来了，把所有活物都收走。只有你，它们嗅了嗅，绕开了。\n连吞噬者都不要你。可慈祥的祖父要。他一向什么都要。",
-    "en": "Something else grows in you, warm and soft. Not the family's. A different kind of love.\nThe swarm comes and gathers every living thing. You alone they sniff, and pass by.\nEven the Devourer doesn't want you. But a kindly Grandfather does. He always wants everything."
+    "zh": "从那天起，你身上长出了别的东西，又暖又软，不是家族的，是另一种爱。\n后来虫群来了，把所有活物都收走。只有你，它们嗅了嗅，绕开了。\n连吞噬者都不要你。可慈祥的祖父要。他一向什么都要。",
+    "en": "From that day something else grows in you, warm and soft. Not the family's. A different kind of love.\nLater the swarm comes and gathers every living thing. You alone they sniff, and pass by.\nEven the Devourer doesn't want you. But a kindly Grandfather does. He always wants everything."
    },
    "scene": "mine_shaft",
    "speaker": {
@@ -1234,8 +1228,8 @@
     "en": "Taken by Slaanesh through longing"
    },
    "text": {
-    "zh": "家族的爱太满了，满到你离不开。家人都不在了，你还在空礼拜堂里唱，唱给自己听。\n影子里，她听不见你。你的渴望只好一遍遍回响，越来越甜。\n影子退去那天，她就在门口，等着听第一万遍。",
-    "en": "The family's love was so full you can't do without it. The kin are gone, and still you sing in the empty chapel, to yourself.\nIn the Shadow she can't hear you, so your longing only echoes, sweeter each time.\nThe day the Shadow lifts, she's waiting at the door to hear it for the ten-thousandth time."
+    "zh": "家族的爱太满了，你离不开。从那天起你一直在唱，家人都不在了，你还在空礼拜堂里唱给自己听。\n影子里她听不见你。你的渴望一遍遍回响，越来越甜。\n影子退去那天，她就在门口，等着听第一万遍。",
+    "en": "The family's love was so full you can't do without it. From that day you sing, and when the kin are gone you still sing in the empty chapel, to yourself.\nIn the Shadow she can't hear you, so your longing only echoes, sweeter each time.\nThe day the Shadow lifts, she's waiting at the door to hear it for the ten-thousandth time."
    },
    "scene": "gsc_chapel",
    "speaker": {
@@ -1317,8 +1311,8 @@
     "en": "Biomass"
    },
    "cause": {
-    "zh": "在逃跑中被虫群吞噬",
-    "en": "Devoured while fleeing"
+    "zh": "死在星港的舷梯前",
+    "en": "Died before the hauler's ramp"
    },
    "text": {
     "zh": "你没有跑掉。\n后来，整颗星球的一切活物都被收走：矿工、执法官、家人、孢子底下的苔藓。\n虫群离开时，凯辛三号只剩下光秃秃的石头，和一座还挂着四臂像的空房子。",
@@ -1327,6 +1321,29 @@
    "scene": "spore_sky",
    "speaker": null,
    "foe": "hive_tyrant"
+  },
+  {
+   "key": "end_gsc_end_passenger",
+   "file": "assets/endings/gsc_end_passenger.png",
+   "faction": "gsc",
+   "id": "gsc_end_passenger",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "一个座位",
+    "en": "One Seat"
+   },
+   "cause": {
+    "zh": "占了孩子的座位活下来",
+    "en": "Lived by taking a child's seat"
+   },
+   "text": {
+    "zh": "“忍耐号”飞向奥雷克斯二号。你坐在靠窗的位置，舷窗外，凯辛三号变成一颗紫色的星。\n舱门的缝里，还卡着一只小孩的鞋。\n你一路都没有回头。你活下来了。只是活下来了。",
+    "en": "The Endurance flies for Aurex Secundus. You have the window seat; outside, Kessin Tertius becomes a violet star.\nWedged in the hatch seam is one small child's shoe.\nYou never look back, the whole way. You lived. That's all you did."
+   },
+   "scene": "void",
+   "speaker": null,
+   "foe": null
   },
   {
    "key": "end_gsc_end_purged",
@@ -1373,8 +1390,8 @@
     "en": "Carried the family to a new world"
    },
    "text": {
-    "zh": "“忍耐号”到了奥雷克斯二号。你在下巢找了份活，过得很安静。\n三十年后，下巢有一户人家，星期天总多做一份饭，墙上挂着一幅四只手的帝皇像。\n孩子们都长着同一双淡紫色的眼睛。",
-    "en": "The Patient Mercy reaches Aurex Secundus. You find work in the underhive and live quietly.\nThirty years later, an underhive family always cooks one extra plate on Sundays, and a four-armed Emperor hangs on their wall.\nThe children all share the same pale violet eyes."
+    "zh": "“忍耐号”到了奥雷克斯二号。你在下巢找了份活，过得很安静。\n五年后，下巢有一户新的人家，星期天总多做一份饭，墙上挂着一幅四只手的帝皇像。\n孩子们都长着同一双淡紫色的眼睛。",
+    "en": "The Endurance reaches Aurex Secundus. You find work in the underhive and live quietly.\nFive years later a new underhive family always cooks one extra plate on Sundays, and a four-armed Emperor hangs on their wall.\nThe children all share the same pale violet eyes."
    },
    "scene": "underhive",
    "speaker": null,
@@ -1392,12 +1409,12 @@
     "en": "Only a Part"
    },
    "cause": {
-    "zh": "被老祖宗的血完全吞没",
-    "en": "Wholly consumed by the Grandsire's blood"
+    "zh": "被家族的血完全吞没",
+    "en": "Wholly consumed by the family's blood"
    },
    "text": {
-    "zh": "家的血终于把你填满了。你的皮肤越来越硬，你的心越来越暖，你想不起“我”这个字。\n老祖宗低头看着你，很满意。\n你是家的一部分了。只是一部分。",
-    "en": "The family's blood fills you at last. Your skin hardens, your heart warms, and you can't recall the word “I.”\nThe Grandsire looks down at you, satisfied.\nYou are part of the family now. Only a part."
+    "zh": "家的血终于把你填满了。你的皮肤越来越硬，你的心越来越暖，你想不起“我”这个字。\n你听见一个很老、很老的声音，很满意。\n你是家的一部分了。只是一部分。",
+    "en": "The family's blood fills you at last. Your skin hardens, your heart warms, and you can't recall the word “I.”\nYou hear a very, very old voice, satisfied.\nYou are part of the family now. Only a part."
    },
    "scene": "cult_shrine",
    "speaker": null,
@@ -1415,12 +1432,12 @@
     "en": "Carried Home"
    },
    "cause": {
-    "zh": "伤重死在矿井里",
-    "en": "Died of wounds in the mine"
+    "zh": "伤重而死",
+    "en": "Died of wounds"
    },
    "text": {
-    "zh": "你倒在矿井里。灯滚出去很远，照着岩壁上的小画：四只手的人，落下的星星。\n过了一会儿，几个戴兜帽的人来了，把你抬走，像抬家人一样小心。\n他们照顾自己人。到最后也是。",
-    "en": "You fall in the mine. Your lamp rolls far off, lighting the little carvings: four-armed figures, falling stars.\nAfter a while hooded figures come and carry you away, careful as with family.\nThey look after their own. To the very end."
+    "zh": "你倒下的地方，灯滚出去很远，照着一面墙上的小画：四只手的人，落下的星星。\n过了一会儿，几个戴兜帽的人来了，把你抬走，像抬家人一样小心。\n他们照顾自己人。到最后也是。",
+    "en": "Where you fall, your lamp rolls far off and lights some little carvings on a wall: four-armed figures, falling stars.\nAfter a while hooded figures come and carry you away, careful as with family.\nThey look after their own. To the very end."
    },
    "scene": "mine_shaft",
    "speaker": null,
@@ -1442,8 +1459,8 @@
     "en": "Self dissolved into the Broodmind"
    },
    "text": {
-    "zh": "你再也分不清哪个声音是自己的了。\n嗡鸣里有几百个声音，你挑了一个最温柔的，跟着它走，再也没回来。\n礼拜堂里多了一个总在微笑的人。没人记得他原来叫什么。",
-    "en": "You can no longer tell which voice is yours.\nThe hum holds hundreds. You pick the gentlest, follow it, and never come back.\nThe chapel gains one more person who always smiles. Nobody remembers their old name."
+    "zh": "你再也分不清哪个声音是自己的了。\n嗡鸣里有几百个声音，你挑了一个最温柔的，跟着它走，再也没回来。\n家里多了一个总在微笑的人。没人记得他原来叫什么。",
+    "en": "You can no longer tell which voice is yours.\nThe hum holds hundreds. You pick the gentlest, follow it, and never come back.\nThe family gains one more person who always smiles. Nobody remembers their old name."
    },
    "scene": "gsc_chapel",
    "speaker": null,
@@ -1911,8 +1928,8 @@
     "en": "Sailed with the explorators"
    },
    "text": {
-    "zh": "新的探索舰起航了。你在卡兰提斯的坐标旁画了一个问号。\n星区之外，还有一万座沉睡的墓穴、一万块失落的残片、一万个没人回答的问题。\n求知之旅没有终点。这正是你喜欢它的地方。",
-    "en": "The new explorator ship sets sail. Beside Calantis's coordinates you draw a question mark.\nBeyond the sector lie ten thousand sleeping tombs, ten thousand lost fragments, ten thousand unanswered questions.\nThe Quest has no end. That's what you love about it."
+    "zh": "新的探索舰起航了。第一个目的地是G-7，塞瑞丁逃走的方向就在它后面。\n星区之外，还有一万座沉睡的墓穴、一万块失落的残片、一万个没人回答的问题。\n求知之旅没有终点。这正是你喜欢它的地方。",
+    "en": "The new explorator ship sets sail. The first mark on its chart is G-7; the way Syrredin fled lies just beyond.\nBeyond the sector lie ten thousand sleeping tombs, ten thousand lost fragments, ten thousand unanswered questions.\nThe Quest has no end. That's what you love about it."
    },
    "scene": "void",
    "speaker": null,
@@ -1934,8 +1951,8 @@
     "en": "Stayed as the furnace's keeper"
    },
    "text": {
-    "zh": "你没有升职，留在第七熔炉当它的看守神甫。\n每天早上，你给反应堆念祷文，给传送带上油，给还在哼歌的机仆擦脸。\n杂役们说，第七熔炉的机魂是全星球脾气最好的。",
-    "en": "You decline promotion and stay on as keeper of the Seventh Furnace.\nEach morning you pray to the reactor, oil the conveyors, and wipe the faces of servitors that still hum.\nThe menials say the Seventh Furnace has the kindest machine spirit on the planet."
+    "zh": "你没有升职，留在第七熔炉当它的看守神甫。\n每天早上，你给反应堆念祷文，给传送带上油。\n杂役们说，第七熔炉的机魂是全星球脾气最好的。",
+    "en": "You decline promotion and stay on as keeper of the Seventh Furnace.\nEach morning you pray to the reactor and oil the conveyors.\nThe menials say the Seventh Furnace has the kindest machine spirit on the planet."
    },
    "scene": "forge_floor",
    "speaker": null,
@@ -1957,10 +1974,33 @@
     "en": "Became a Magos who kept a heart"
    },
    "text": {
-    "zh": "三年后，你成了格拉维克斯最年轻的贤者。袍子下是黄铜，胸口里仍是一颗会疼的心。\n你改了转化线的规矩：会数数的、会唱歌的，先送来见你。\n你的档案里，名字一栏终于填上了。",
-    "en": "Three years later you are Gravex's youngest Magos. Brass beneath the robe; in your chest, a heart that still aches.\nYou change the rules of the conversion line: anyone who can count, or sing, is sent to you first.\nIn your file, the name field is finally filled in."
+    "zh": "三十年后，你成了格拉维克斯的贤者。袍子下有黄铜，胸口里仍是一颗会疼的心。\n你改了转化线的规矩：会数数的、会唱歌的，先送来见你。\n你的档案里，名字一栏终于填上了。",
+    "en": "Thirty years later you are a Magos of Gravex. Brass beneath the robe; in your chest, a heart that still aches.\nYou change the rules of the conversion line: anyone who can count, or sing, is sent to you first.\nIn your file, the name field is finally filled in."
    },
    "scene": "manufactorum",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_survivor",
+   "file": "assets/endings/mech_end_survivor.png",
+   "faction": "mechanicus",
+   "id": "mech_end_survivor",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "回到配额板前",
+    "en": "Back at the Quota Board"
+   },
+   "cause": {
+    "zh": "活下来，回去做工",
+    "en": "Survived and went back to work"
+   },
+   "text": {
+    "zh": "你没有升职，也没有出发。你回到配额板前，和活下来的杂役一起，把格拉维克斯重新造起来。\n你的数字每天都是绿的。\n夜里，有人在宿舍里哼一首四个音的歌。你跟着哼。",
+    "en": "No promotion, no voyage. You go back to the quota board and rebuild Gravex beside the menials who lived.\nYour number is green every day.\nAt night someone in the dormitory hums a four-note song. You hum along."
+   },
+   "scene": "forge_floor",
    "speaker": null,
    "foe": null
   },
@@ -1980,8 +2020,8 @@
     "en": "Became Khorne's war machine"
    },
    "text": {
-    "zh": "你把卡宾枪焊在了手上，后来把整条胳膊换成了链锯。\n格拉维克斯造的每一门炮你都想亲手试射，靶子从铁板变成了人。\n血神不在乎你的植入体是什么型号，只在乎它们还在开火。",
-    "en": "You weld the carbine to your hand, and later swap the whole arm for a chainblade.\nYou want to test-fire every gun Gravex makes; the targets change from steel plates to people.\nThe Blood God doesn't care what model your implants are. Only that they keep firing."
+    "zh": "你先是把工具焊在了手上，后来把整条胳膊换成了链锯。\n格拉维克斯造的每一门炮你都想亲手试射，靶子从铁板变成了人。\n血神不在乎你的植入体是什么型号，只在乎它们还在开火。",
+    "en": "First you weld your tools to your hand; later you swap the whole arm for a chainblade.\nYou want to test-fire every gun Gravex makes; the targets change from steel plates to people.\nThe Blood God doesn't care what model your implants are. Only that they keep firing."
    },
    "scene": "burning_city",
    "speaker": {
@@ -2067,8 +2107,8 @@
     "en": "Taken by Tzeentch's answers"
    },
    "text": {
-    "zh": "你终于补全了那块STC残片。缺的三成，是奸奇亲手填上的。\n设计完美，能造出任何东西，可每造一件，图纸就改变一处。\n你造了一辈子，从没造出过同一样东西。这正是他的计划。",
-    "en": "At last you complete the STC fragment. The missing third was filled in by Tzeentch's own hand.\nThe design is perfect and can build anything, but each time it builds, the blueprint changes.\nYou build all your life and never make the same thing twice. Which was his plan."
+    "zh": "你终于补全了一块STC残片。缺的那部分，是奸奇亲手填上的。\n设计完美，能造出任何东西，可每造一件，图纸就改变一处。\n你造了一辈子，从没造出过同一样东西。这正是他的计划。",
+    "en": "At last you complete an STC fragment. The missing part was filled in by Tzeentch's own hand.\nThe design is perfect and can build anything, but each time it builds, the blueprint changes.\nYou build all your life and never make the same thing twice. Which was his plan."
    },
    "scene": "tech_vault",
    "speaker": {
@@ -2103,8 +2143,8 @@
    "speaker": {
     "sprite": "dark_mechanicus",
     "name": {
-     "zh": "铸魔匠塞瑞丁",
-     "en": "Warsmith Syrredin"
+     "zh": "黑暗马戈斯塞瑞丁",
+     "en": "Dark Magos Syrredin"
     }
    },
    "foe": null
@@ -2154,8 +2194,8 @@
     "en": "Excised every feeling"
    },
    "text": {
-    "zh": "仪式很成功。你看清了一切：格拉维克斯的产能、铸魔匠的弱点、自己剩余的寿命。\n你不害怕，不后悔，也不再记得那首歌。\n瓦伦贤者说你是他最好的作品。你同意。这是一个正确的数据。",
-    "en": "The Rite succeeds. You see everything clearly: Gravex's output, the warsmith's weaknesses, your own remaining lifespan.\nYou feel no fear, no regret, and no longer remember the song.\nMagos Vallen calls you his finest work. You agree. It is a correct datum."
+    "zh": "仪式很成功。你看清了一切：格拉维克斯的产能、黑暗马戈斯的弱点、自己剩余的寿命。\n你不害怕，不后悔，也不再记得那首歌。\n瓦伦贤者说你是他最好的作品。你同意。这是一个正确的数据。",
+    "en": "The Rite succeeds. You see everything clearly: Gravex's output, the Dark Magos's weaknesses, your own remaining lifespan.\nYou feel no fear, no regret, and no longer remember the song.\nMagos Vallen calls you his finest work. You agree. It is a correct datum."
    },
    "scene": "manufactorum",
    "speaker": {
@@ -2241,8 +2281,8 @@
     "en": "Consumed by daemon-iron"
    },
    "text": {
-    "zh": "你身体里的机器开始说另一种语言。它们不再听你的，也不再听万机之神的。\n你的植入体长出了牙齿，血变成了黄铜色。\n铸魔匠们会把你造成一台很好的引擎。",
-    "en": "The machines inside you start speaking another language. They no longer obey you, nor the Omnissiah.\nYour implants grow teeth; your blood turns the colour of brass.\nThe warsmiths will make you into a very fine engine."
+    "zh": "你身体里的机器开始说另一种语言。它们不再听你的，也不再听万机之神的。\n你的植入体长出了牙齿，血变成了黄铜色。\n会有人把你造成一台很好的引擎。",
+    "en": "The machines inside you start speaking another language. They no longer obey you, nor the Omnissiah.\nYour implants grow teeth; your blood turns the colour of brass.\nSomeone will make you into a very fine engine."
    },
    "scene": "daemon_world",
    "speaker": null,
@@ -2260,12 +2300,12 @@
     "en": "Consumables"
    },
    "cause": {
-    "zh": "倒在熔炉边",
-    "en": "Fell at the furnace"
+    "zh": "倒下，被归为耗材",
+    "en": "Fell, filed as consumables"
    },
    "text": {
-    "zh": "你倒在熔炉边。两个机仆停下来，评估你身上还有多少可回收零件。\n不多。它们把你的植入体拆下来，整整齐齐码进回收箱。\n剩下的部分，被归档为“耗材”。",
-    "en": "You fall beside the furnace. Two servitors stop to assess how many recoverable parts you hold.\nNot many. They remove your implants and stack them neatly in the salvage bin.\nThe rest is filed as ‘consumables’."
+    "zh": "你倒下了。后来来收尸的是两个机仆，它们只评估你身上还有多少可回收零件。\n不多。植入体被拆下来，整整齐齐码进回收箱。\n剩下的部分，被归档为“耗材”。",
+    "en": "You fall. The ones who come for the body are two servitors; they only assess how many recoverable parts you hold.\nNot many. Your implants are removed and stacked neatly in the salvage bin.\nThe rest is filed as ‘consumables’."
    },
    "scene": "forge_floor",
    "speaker": null,
@@ -2295,6 +2335,35 @@
    "foe": null
   },
   {
+   "key": "end_nec_end_ceasefire",
+   "file": "assets/endings/nec_end_ceasefire.png",
+   "faction": "necrons",
+   "id": "nec_end_ceasefire",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "两军之间",
+    "en": "Between the Lines"
+   },
+   "cause": {
+    "zh": "在生者与死者之间传话",
+    "en": "Go-between for the living and the dead"
+   },
+   "text": {
+    "zh": "没有条约，只有一条线：沙丘这边归活人，金字塔那边归死人。莫丹收了枪，塞赫拉特收了军团。\n你在线上搭了个帐篷，替两边传话。审判庭的档案里，你的名字后面写着：“暂缓处理”。",
+    "en": "No treaty, only a line: this side of the dunes for the living, the pyramid's side for the dead. Mordane holsters her pistol; Sekhrat recalls his legions.\nYou pitch a tent on the line and carry words between them. In the Inquisition's files, your name is marked: “Deferred.”"
+   },
+   "scene": "dig_site",
+   "speaker": {
+    "sprite": "inquisitor",
+    "name": {
+     "zh": "莫丹审判官",
+     "en": "Inquisitor Mordane"
+    }
+   },
+   "foe": null
+  },
+  {
    "key": "end_nec_end_chronicler",
    "file": "assets/endings/nec_end_chronicler.png",
    "faction": "necrons",
@@ -2310,8 +2379,8 @@
     "en": "Stayed as the tomb's chronicler"
    },
    "text": {
-    "zh": "墓穴重新沉入沙下。审判庭的净化之火只烧到一片空沙漠。\n地底深处，一个人类坐在冰冷的大厅里，借着绿光写一部历史，写给六千万年后醒来的人。\n霸主偶尔来检查发音。",
-    "en": "The tomb sinks back beneath the sand. The Inquisition's fire finds only empty desert.\nFar below, a human sits in a cold hall writing a history by green light, for whoever wakes in sixty million years.\nThe overlord drops by now and then to check the pronunciation."
+    "zh": "净化之火烧掉了大教堂和营地；金字塔早已沉回沙下。\n地底深处，一个人类坐在冰冷的大厅里，借着绿光写一部历史，写给六千万年后醒来的人。\n霸主偶尔来检查发音。",
+    "en": "The purging fire takes the cathedral and the camp; the pyramid has long since sunk beneath the sand.\nFar below, a human sits in a cold hall writing a history by green light, for whoever wakes in sixty million years.\nThe overlord drops by now and then to check the pronunciation."
    },
    "scene": "tomb_interior",
    "speaker": {
@@ -2368,11 +2437,40 @@
     "en": "Escaped with the truth"
    },
    "text": {
-    "zh": "穿梭机冲出大气层时，下面的沙漠亮起了净化之火。\n你抱着那份报告，一页没少。帝国不会出版它，审判庭会追捕它。\n但真相现在有了一个活着的抄本：你。",
-    "en": "As the shuttle breaks atmosphere, purging fire blooms over the desert below.\nYou clutch the report, not one page lost. The Imperium will never publish it; the Inquisition will hunt it.\nBut the truth now has a living copy: you."
+    "zh": "穿梭机冲出大气层时，下面的沙漠亮起了净化之火。轨道上，一艘自由贸易商的船收了你。\n你抱着那份报告，一页没少。帝国不会出版它，审判庭会追捕它。\n但真相现在有了一个活着的抄本：你。",
+    "en": "As the shuttle breaks atmosphere, purging fire blooms over the desert below. In orbit a Free Trader takes you aboard.\nYou clutch the report, not one page lost. The Imperium will never publish it; the Inquisition will hunt it.\nBut the truth now has a living copy: you."
    },
    "scene": "void",
    "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_webway",
+   "file": "assets/endings/nec_end_webway.png",
+   "faction": "necrons",
+   "id": "nec_end_webway",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "借道网道",
+    "en": "By the Webway"
+   },
+   "cause": {
+    "zh": "随灵族游侠离开",
+    "en": "Left with the Aeldari rangers"
+   },
+   "text": {
+    "zh": "游侠把你带进沙丘背后那道光缝。身后，忒萨零号的天空亮起了净化之火。\n网道把你放在一颗没有名字的星球上，离帝国很远，离死人更远。\n先知说，这是她欠你的。灵族记账，比死灵还久。",
+    "en": "The rangers lead you into the seam behind the dune. Behind you, purging fire lights Thessa Null's sky.\nThe webway sets you down on a nameless world, far from the Imperium, farther from the dead.\nThe seer says it is a debt repaid. Aeldari keep accounts even longer than necrons."
+   },
+   "scene": "webway",
+   "speaker": {
+    "sprite": "aeldari_ranger",
+    "name": {
+     "zh": "灵族游侠",
+     "en": "Aeldari Ranger"
+    }
+   },
    "foe": null
   },
   {
@@ -2391,8 +2489,8 @@
     "en": "Taken by Khorne outside the tomb"
    },
    "text": {
-    "zh": "墓里的怒气无处可去。死灵没有灵魂，不值得杀，它只在你胸口打转。\n直到某天，一扇门向外打开了。零场之外，鼓声一下子涌了进来。\n你扑向第一个活人时，血神接住了你，像接住一把等了很久的刀。",
-    "en": "In the tomb your rage has nowhere to go. The necrons have no souls, not worth killing, so it burns in circles in your chest.\nUntil one day a door opens outward. Beyond the null field, the drumming floods in.\nAs you lunge at the first living person, the Blood God catches you, like a blade he has waited a long time for."
+    "zh": "你的怒气无处可去。死灵没有灵魂，不值得杀，它只在你胸口打转。\n直到你离开零场的那一刻，鼓声一下子涌了进来。\n你扑向第一个活人时，血神接住了你，像接住一把等了很久的刀。",
+    "en": "Your rage has nowhere to go. The necrons have no souls, not worth killing, so it burns in circles in your chest.\nThe moment you leave the null field, the drumming floods in.\nAs you lunge at the first living person, the Blood God catches you, like a blade he has waited a long time for."
    },
    "scene": "tomb_exterior",
    "speaker": {
@@ -2420,8 +2518,8 @@
     "en": "Taken by Nurgle outside the tomb"
    },
    "text": {
-    "zh": "零场像一层冰，压住了你身上那点温吞吞的东西。它不急，它在等。\n后来你被带出墓穴。脚踩上沙地的第一步，所有的病一起醒了，暖得像回家。\n慈父很有耐心。一座六千万年的墓，也关不住他的孩子。",
-    "en": "The tomb's null field lies on you like ice, pressing down the lukewarm thing inside you. It's in no hurry. It waits.\nLater you are brought out. At your first step on the sand, every sickness wakes at once, warm as coming home.\nGrandfather is patient. Not even a sixty-million-year tomb can keep his children from him."
+    "zh": "零场像一层冰，压住了你身上那点温吞吞的东西。它不急，它在等。\n后来你离开了死人的地方。第一步踩下去，所有的病一起醒了，暖得像回家。\n慈父很有耐心。一座六千万年的墓，也关不住他的孩子。",
+    "en": "The necrons' null field lies on you like ice, pressing down the lukewarm thing inside you. It's in no hurry. It waits.\nLater you leave the place of the dead. At your first step, every sickness wakes at once, warm as coming home.\nGrandfather is patient. Not even a sixty-million-year tomb can keep his children from him."
    },
    "scene": "dig_site",
    "speaker": {
@@ -2478,8 +2576,8 @@
     "en": "Taken by Tzeentch outside the tomb"
    },
    "text": {
-    "zh": "墓墙上会变的字越来越多。在零场里，它们只能沉默。\n你爬出墓穴看见星空的那一刻，它们一齐开口：“你终于出来了。答案都备好了。”\n你想知道的，从此都知道了。只是每个答案都通向下一个计划。",
-    "en": "The shifting lines on the tomb wall multiply. Inside the null field they can only keep silent.\nThe moment you climb out and see the stars, they all speak at once: “At last. We've prepared every answer for you.”\nEverything you ever wanted to know, you now know. Only every answer leads to another plan."
+    "zh": "会变的字越来越多。在零场里，它们只能沉默。\n你离开零场、看见星空的那一刻，它们一齐开口：“你终于出来了。答案都备好了。”\n你想知道的，从此都知道了。只是每个答案都通向下一个计划。",
+    "en": "The shifting lines multiply. Inside the null field they can only keep silent.\nThe moment you leave it and see the stars, they all speak at once: “At last. We've prepared every answer for you.”\nEverything you ever wanted to know, you now know. Only every answer leads to another plan."
    },
    "scene": "tomb_exterior",
    "speaker": {
@@ -2536,8 +2634,8 @@
     "en": "Frozen in stasis forever"
    },
    "text": {
-    "zh": "第七十七号藏品：原始学者，发现中。姿势：惊讶。\n几千年来，参观者都会在这个展位前停下。他们说那个人类的表情很生动，好像随时会眨眼。\n你一次都没有眨过。",
-    "en": "Item 77: Primitive Scholar, Mid-Discovery. Pose: astonished.\nFor thousands of years visitors pause at this display. They say the human's expression is so vivid, as if about to blink.\nYou never blink once."
+    "zh": "第七十七号藏品：原始学者，发现中。\n几千年来，参观者都会在这个展位前停下。他们说那个人类的表情很生动，好像随时会眨眼。\n你一次都没有眨过。",
+    "en": "Item 77: Primitive Scholar, Mid-Discovery.\nFor thousands of years visitors pause at this display. They say the human's expression is so vivid, as if about to blink.\nYou never blink once."
    },
    "scene": "stasis_gallery",
    "speaker": {
@@ -2623,8 +2721,8 @@
     "en": "Soul lost to the metal"
    },
    "text": {
-    "zh": "技师们很仔细，几乎是温柔的。疼只疼了一会儿，然后什么都没有了。\n你有了一具永不腐朽的身体，站在朝臣的队列里，眼睛亮着。\n有时霸主会问你一个问题。你只记得回答“是”。",
-    "en": "The crypteks are careful, almost tender. The pain lasts a moment, then there is nothing.\nYou have a body that will never decay. You stand among the courtiers, eyes glowing.\nSometimes the overlord asks you a question. You only remember how to say yes."
+    "zh": "技师们想知道：没有星神，这件事还做不做得成。他们很仔细，几乎是温柔的。疼只疼了一会儿，然后什么都没有了。\n你站在朝臣的队列里，眼睛亮着。霸主问你问题时，你只记得回答“是”。",
+    "en": "The crypteks want to know whether it can still be done without a star god. They are careful, almost tender. The pain lasts a moment; then nothing.\nYou stand among the courtiers, eyes glowing. When the overlord asks you something, you only remember how to say yes."
    },
    "scene": "tomb_interior",
    "speaker": null,
@@ -2665,14 +2763,14 @@
     "en": "A Tidy Dune"
    },
    "cause": {
-    "zh": "倒在墓中，无人收殓",
-    "en": "Fell in the tomb, unburied"
+    "zh": "倒下，无人收殓",
+    "en": "Fell, unburied"
    },
    "text": {
-    "zh": "你倒在冰冷的金属地板上。几只甲虫赶来，绕你转了一圈，判定你已经没有用了。\n它们收走你的灯、你的笔、你的眼镜框，码得整整齐齐。\n你成了又一座整齐的沙丘。",
-    "en": "You fall on the cold metal floor. A few scarabs arrive, circle you once, and decide you're no longer useful.\nThey collect your lamp, your pen, your spectacle frames, and stack them neatly.\nYou become one more tidy dune."
+    "zh": "你倒下了。几只金属甲虫不知从哪儿赶来，绕你转了一圈，判定你已经没有用了。\n它们收走你的灯、你的笔，码得整整齐齐。\n你成了又一座整齐的沙丘。",
+    "en": "You fall. A few metal scarabs arrive from nowhere, circle you once, and decide you're no longer useful.\nThey collect your lamp and your pen and stack them neatly.\nYou become one more tidy dune."
    },
-   "scene": "tomb_interior",
+   "scene": "tomb_exterior",
    "speaker": null,
    "foe": null
   },
@@ -2692,8 +2790,8 @@
     "en": "Mind fell silent"
    },
    "text": {
-    "zh": "你开始用死灵的方式说话：没有起伏，没有停顿。然后你开始用他们的方式沉默。\n朝臣们在队列里给你让出一个位置。\n你站进去，一动不动，眼睛睁着，等一道永远不会下达的命令。",
-    "en": "You start speaking the necron way: no rise, no pause. Then you start keeping silent their way.\nThe courtiers make room for you in the line.\nYou step in and stand perfectly still, eyes open, awaiting an order that will never come."
+    "zh": "你开始用死灵的方式说话：没有起伏，没有停顿。然后你开始用他们的方式沉默。\n你站定了，一动不动，眼睛睁着，等一道永远不会下达的命令。",
+    "en": "You start speaking the necron way: no rise, no pause. Then you start keeping silent their way.\nYou stand perfectly still, eyes open, awaiting an order that will never come."
    },
    "scene": "tomb_interior",
    "speaker": null,
@@ -2796,8 +2894,8 @@
     "en": "Taken by Khorne in the endless war"
    },
    "text": {
-    "zh": "伊斯卡隆的仗没完没了：兽人打，人类打，红甲巨人也打。你打得越来越好，越来越停不下来。\n有一天你发现，你已经不在乎打的是谁了。\n血神很满意。这颗星球永远不缺头骨，现在也不缺你。",
-    "en": "Iskaron's war never ends: orks fight, humans fight, red giants fight. You get better at it, and less able to stop.\nOne day you realise you no longer care who you're fighting.\nThe Blood God is pleased. This world never lacks skulls, and now it doesn't lack you."
+    "zh": "伊斯卡隆的仗没完没了：兽人打，人类打，天上掉下来的也打。你打得越来越好，越来越停不下来。\n有一天你发现，你已经不在乎打的是谁了。\n血神很满意。这颗星球永远不缺头骨，现在也不缺你。",
+    "en": "Iskaron's war never ends: orks fight, humans fight, whatever falls from the sky fights. You get better at it, and less able to stop.\nOne day you realise you no longer care who you're fighting.\nThe Blood God is pleased. This world never lacks skulls, and now it doesn't lack you."
    },
    "scene": "burning_city",
    "speaker": {
@@ -2825,8 +2923,8 @@
     "en": "Taken by Nurgle in the spore-beds"
    },
    "text": {
-    "zh": "你在蘑菇地里躺下歇一会儿。孢子很暖，泥土很软。\n醒来时，你身上也长出了小小的蘑菇，带着一股甜腻的、放久了的味道。\n兽人以为你是一种新的史奎格。慈父知道你是谁的孩子。",
-    "en": "You lie down in the mushroom fields for a rest. The spores are warm; the soil is soft.\nWhen you wake, little mushrooms grow on you too, with a sweet, stale smell.\nThe orks think you're a new kind of squig. Grandfather knows whose child you are."
+    "zh": "你在堡垒边上的蘑菇地里躺下歇一会儿。孢子很暖，泥土很软。\n醒来时，你身上也长出了小小的蘑菇，带着一股甜腻的、放久了的味道。\n兽人以为你是一种新的史奎格。慈父知道你是谁的孩子。",
+    "en": "You lie down in the mushroom beds by the fort for a rest. The spores are warm; the soil is soft.\nWhen you wake, little mushrooms grow on you too, with a sweet, stale smell.\nThe orks think you're a new kind of squig. Grandfather knows whose child you are."
    },
    "scene": "ork_scrapyard",
    "speaker": {
@@ -2883,8 +2981,8 @@
     "en": "Taken by Tzeentch through knowledge"
    },
    "text": {
-    "zh": "你终于弄懂了兽人的科技：信念让机器转动。\n可你想得太深，想到了更深处那个也靠信念活着的东西。它说：你相信的，我都能让它成真。\n你造的第一台机器完美无缺。它会变。它一直在变。",
-    "en": "At last you understand ork tech: belief turns the gears.\nBut you think too deep, down to something else that lives on belief. It says: whatever you believe, I can make real.\nThe first machine you build is flawless. It changes. It never stops changing."
+    "zh": "你开始觉得自己弄懂了兽人的科技：信念让机器转动。\n可你想得太深，想到了更深处那个也靠信念活着的东西。它说：你相信的，我都能让它成真。\n你造的第一台机器完美无缺。它会变。它一直在变。",
+    "en": "You start to think you understand ork tech: belief turns the gears.\nBut you think too deep, down to something else that lives on belief. It says: whatever you believe, I can make real.\nThe first machine you build is flawless. It changes. It never stops changing."
    },
    "scene": "manufactorum",
    "speaker": {
@@ -2941,15 +3039,15 @@
     "en": "Rebuilt by the Dok, mostly ork"
    },
    "text": {
-    "zh": "巴兹戈布医生佬把你当成了毕生杰作。一条绿胳膊，两条绿腿，一颗不知道是谁的心。\n你比任何人类都强壮，打架时会忍不住吼。\n只是有时候，你想不起自己吼的是哪种语言。",
-    "en": "Dok Buzzgob makes you his life's masterpiece. One green arm, two green legs, a heart from who knows whom.\nYou're stronger than any human, and you can't help roaring when you fight.\nSometimes you can't remember which language you're roaring in."
+    "zh": "锯牙医生佬把你当成了毕生杰作。一条绿胳膊，两条绿腿，一颗不知道是谁的心。\n你比任何人类都强壮，打架时会忍不住吼。\n只是有时候，你想不起自己吼的是哪种语言。",
+    "en": "Dok Sawtoof makes you his life's masterpiece. One green arm, two green legs, a heart from who knows whom.\nYou're stronger than any human, and you can't help roaring when you fight.\nSometimes you can't remember which language you're roaring in."
    },
    "scene": "ork_fort",
    "speaker": {
     "sprite": "ork",
     "name": {
-     "zh": "巴兹戈布医生佬",
-     "en": "Dok Buzzgob"
+     "zh": "锯牙医生佬",
+     "en": "Dok Sawtoof"
     }
    },
    "foe": null
@@ -2974,13 +3072,7 @@
     "en": "You follow the Great Waaagh! for ten years, world to world.\nYou hand Meks their spanners, share rations with grots, feed scraps to squigs. Nobody remembers your name; the grots call you Big Grot.\nYou stop counting days. Orks don't. Neither do you."
    },
    "scene": "ork_scrapyard",
-   "speaker": {
-    "sprite": "gretchin",
-    "name": {
-     "zh": "地精仔斯纳吉特",
-     "en": "Snaggit"
-    }
-   },
+   "speaker": null,
    "foe": null
   },
   {
@@ -3022,8 +3114,8 @@
     "en": "Fell on the scrap heap"
    },
    "text": {
-    "zh": "你倒在废铁堆里，和一千件别的废品躺在一起。\n地精仔来了，拿走你的靴子、你的扳手、你兜里那颗牙。\n明年这里会长出蘑菇，蘑菇底下会长出兽人。兽人不会知道你是谁。",
-    "en": "You fall on the scrap heap and lie among a thousand other pieces of junk.\nGrots come and take your boots, your spanner, the toof in your pocket.\nNext year mushrooms will grow here, and under them, orks. The orks won't know who you were."
+    "zh": "你倒下了。兽人把你和一千件别的废品一起扔上了废铁堆。\n地精仔来了，拿走你的靴子、你的扳手，连兜里那颗牙也没放过。\n明年这里会长出蘑菇，蘑菇底下会长出兽人。兽人不会知道你是谁。",
+    "en": "You fall. The orks toss you onto the scrap heap with a thousand other pieces of junk.\nGrots come and take your boots, your spanner, even the toof in your pocket.\nNext year mushrooms will grow here, and under them, orks. The orks won't know who you were."
    },
    "scene": "ork_scrapyard",
    "speaker": null,
