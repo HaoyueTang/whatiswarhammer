@@ -1,0 +1,3462 @@
+{
+ "version": 1,
+ "count": 126,
+ "endings": [
+  {
+   "key": "end_eld_end_guest",
+   "file": "assets/endings/eld_end_guest.png",
+   "faction": "aeldari",
+   "id": "eld_end_guest",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "会唱歌的客人",
+    "en": "The Guest Who Sings"
+   },
+   "cause": {
+    "zh": "留在方舟学唱灵骨",
+    "en": "Stayed to sing wraithbone"
+   },
+   "text": {
+    "zh": "五年后，塞卢纳空荡的街区里，有一面墙是一个猿人唱好的。裂缝合得歪歪扭扭，可它不再漏光了。\n艾拉瑞斯说，你永远成不了灵骨歌者。\n他说这话时，正在教你下一首歌。",
+    "en": "Five years on, in one of Selunar's empty districts, there is a wall a mon-keigh sang whole. The crack healed crooked, but it no longer leaks light.\nEllaris says you will never be a Bonesinger.\nHe says it while teaching you the next song."
+   },
+   "scene": "craftworld",
+   "speaker": {
+    "sprite": "aeldari_bonesinger",
+    "name": {
+     "zh": "灵骨歌者艾拉瑞斯",
+     "en": "Bonesinger Ellaris"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_maiden",
+   "file": "assets/endings/eld_end_maiden.png",
+   "faction": "aeldari",
+   "id": "eld_end_maiden",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "处女世界的麦田",
+    "en": "Wheat on a Maiden World"
+   },
+   "cause": {
+    "zh": "在伊尔达涅斯种麦",
+    "en": "Farming on Ildaneth"
+   },
+   "text": {
+    "zh": "三年后，伊尔达涅斯河边多了一块麦田，是一个猿人种的。流亡者的孩子管它叫“会哭的人的田”。\n你教他们唱收割歌。他们唱得比你还难听。\n有时先知会来，站在田埂上，什么也不说，只看着麦子。",
+    "en": "Three years on, a wheat field grows by Ildaneth's river, planted by a mon-keigh. The Exodite children call it “the field of the one who cries.”\nYou teach them the harvest song. They sing it even worse than you.\nSometimes the Farseer visits, stands at the field's edge, says nothing, and watches the wheat."
+   },
+   "scene": "maiden_world",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_masque",
+   "file": "assets/endings/eld_end_masque.png",
+   "faction": "aeldari",
+   "id": "eld_end_masque",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "欢笑之神的观众",
+    "en": "The Laughing God's Audience"
+   },
+   "cause": {
+    "zh": "随丑角剧团远行",
+    "en": "Joined the Harlequins"
+   },
+   "text": {
+    "zh": "丑角剧团多了一个观众，后来又多了一个角色：一个永远演不好的猿人。\n每次《陨落》演到结尾，都由你在黑暗里笑出第一声。\n有人说，欢笑之神本人来看过一场，笑得最响的就是他。",
+    "en": "The Harlequin troupe gains an audience member, then a role: a mon-keigh who never quite gets it right.\nEvery time The Fall reaches its end, you're the one who laughs first in the dark.\nThey say the Laughing God himself attended once, and laughed the loudest."
+   },
+   "scene": "webway",
+   "speaker": {
+    "sprite": "aeldari_masked",
+    "name": {
+     "zh": "镜面舞者",
+     "en": "The Mirror-Masked Dancer"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_ynnari",
+   "file": "assets/endings/eld_end_ynnari.png",
+   "faction": "aeldari",
+   "id": "eld_end_ynnari",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "死者的同行人",
+    "en": "Companion of the Dead"
+   },
+   "cause": {
+    "zh": "随恩灵派同行",
+    "en": "Walks with the Ynnari"
+   },
+   "text": {
+    "zh": "你跟着恩灵派走遍了网道。他们叫你“活着的那个”，因为你是队伍里唯一还会变老的人。\n伊芙蕾恩远远地看过你一眼，点了点头。\n你胸前的骷髅里，偶尔有一个声音在吹口哨。是你教的。",
+    "en": "You walk the webway with the Ynnari. They call you “the living one,” since you're the only one among them who still ages.\nYvraine glances at you once from afar, and nods.\nIn the skull on your chest, a voice sometimes whistles. You taught her that."
+   },
+   "scene": "webway",
+   "speaker": {
+    "sprite": "omen_ynnead",
+    "name": {
+     "zh": "恩灵派",
+     "en": "The Ynnari"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_burned",
+   "file": "assets/endings/eld_end_burned.png",
+   "faction": "aeldari",
+   "id": "eld_end_burned",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "归乡之火",
+    "en": "Homecoming Pyre"
+   },
+   "cause": {
+    "zh": "被当作异形同谋烧死",
+    "en": "Burned as a xenos collaborator"
+   },
+   "text": {
+    "zh": "你回到人类世界，讲了一切：灵族、网道、先知、那两个数字。\n审判官听得很仔细，记着笔记。\n“与异形同处逾年，”她合上本子，“灵魂已不可信。”\n第二天广场上点起火堆，人们唱着赞美帝皇的歌。",
+    "en": "You return to human space and tell them everything: the Aeldari, the webway, the Farseer, the two numbers.\nThe Inquisitor listens carefully, even takes notes.\n“Over a year among xenos,” she says, closing her book. “The soul cannot be trusted.”\nNext day a pyre is lit in the square, and the crowd sings praise to the Emperor."
+   },
+   "scene": "burning_city",
+   "speaker": {
+    "sprite": "inquisitor",
+    "name": {
+     "zh": "审判官",
+     "en": "Inquisitor"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_claim_khorne",
+   "file": "assets/endings/eld_end_claim_khorne.png",
+   "faction": "aeldari",
+   "id": "eld_end_claim_khorne",
+   "kind": "bad",
+   "claim": "khorne",
+   "title": {
+    "zh": "摘不下的战面",
+    "en": "The Mask That Stays"
+   },
+   "cause": {
+    "zh": "被恐虐收走",
+    "en": "Claimed by Khorne"
+   },
+   "text": {
+    "zh": "你心里那张战面再也摘不下来了。灵族有道途约束杀意，你没有。\n守护者把你送出了网道。你一路杀进黑暗，没回过头。\n凯恩的怒火属于灵族。你的，被另一位神接住了。他不讲道途，只要头骨。",
+    "en": "The war-mask in your heart will not come off. The Aeldari have their Paths to cage the urge to kill. You have none.\nThe guardians see you out of the webway. You fight your way into the dark and never look back.\nKhaine's rage belongs to the Aeldari. Yours was caught by another god. He keeps no Paths. He wants skulls."
+   },
+   "scene": "webway",
+   "speaker": {
+    "sprite": "daemon_khorne",
+    "name": {
+     "zh": "铁与火的轰鸣",
+     "en": "Roar of Iron and Fire"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_claim_nurgle",
+   "file": "assets/endings/eld_end_claim_nurgle.png",
+   "faction": "aeldari",
+   "id": "eld_end_claim_nurgle",
+   "kind": "bad",
+   "claim": "nurgle",
+   "title": {
+    "zh": "被流放的园丁",
+    "en": "The Exiled Gardener"
+   },
+   "cause": {
+    "zh": "成为纳垢的园丁",
+    "en": "Became Nurgle's gardener"
+   },
+   "text": {
+    "zh": "你的伤口不再愈合，却开出了花。灵骨歌者的歌，在你身边一首首走了调。\n灵族把你送到一颗无人的星球，留下一袋种子，走得远远的。\n你在那里种出一座园子。苍蝇来了，园丁也来了。他说你种得真好。",
+    "en": "Your wounds no longer heal; they bloom. Near you, the bonesingers' songs go out of tune one by one.\nThe Aeldari leave you on an empty world with a bag of seeds, and keep far away.\nThere you grow a garden. The flies come, and then the Gardener. He says you've done beautifully."
+   },
+   "scene": "maiden_world",
+   "speaker": {
+    "sprite": "daemon_nurgle",
+    "name": {
+     "zh": "园丁",
+     "en": "The Gardener"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_claim_slaanesh",
+   "file": "assets/endings/eld_end_claim_slaanesh.png",
+   "faction": "aeldari",
+   "id": "eld_end_claim_slaanesh",
+   "kind": "bad",
+   "claim": "slaanesh",
+   "title": {
+    "zh": "饭前的甜点",
+    "en": "A Sweet Before the Meal"
+   },
+   "cause": {
+    "zh": "灵魂被色孽吞噬",
+    "en": "Soul devoured by Slaanesh"
+   },
+   "text": {
+    "zh": "那个梦再也不醒了：瓦尔达的麦田，妮尔在门口喊你吃饭，一切都刚刚好。\n灵族发现你时，你坐着微笑，灵魂早已不在，没有灵魂石接住它。\n渴求者饿了一万年。一个猿人的灵魂，只是饭前的甜点。",
+    "en": "The dream never ends now: Valda's wheat, Nell calling you in to eat, everything just right.\nWhen the Aeldari find you, you are sitting still and smiling, your soul long gone. No spirit stone caught it.\nShe Who Thirsts has hungered for Aeldari souls for ten thousand years. A mon-keigh soul is a sweet before the meal."
+   },
+   "scene": "craftworld",
+   "speaker": {
+    "sprite": "greater_daemon_slaanesh",
+    "name": {
+     "zh": "渴求者",
+     "en": "She Who Thirsts"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_claim_tzeentch",
+   "file": "assets/endings/eld_end_claim_tzeentch.png",
+   "faction": "aeldari",
+   "id": "eld_end_claim_tzeentch",
+   "kind": "bad",
+   "claim": "tzeentch",
+   "title": {
+    "zh": "拨线的手",
+    "en": "The Hand on the Threads"
+   },
+   "cause": {
+    "zh": "沦为奸奇的棋子",
+    "en": "Became Tzeentch's pawn"
+   },
+   "text": {
+    "zh": "你看见的命运线越来越多，比先知还多。你开始悄悄拨动其中几根。\n先知发现时，已有三条线因你而断。她第一次在你面前失了态。\n你笑了。拨线的从来不是你，是一个比所有先知都更爱计划的东西。",
+    "en": "You see more fate-threads every day, more than the seers. You begin quietly plucking a few.\nBy the time the Farseer notices, three threads have snapped because of you. For the first time she loses her composure before you.\nYou laugh. It was never you plucking them. It was something that loves plans more than any seer."
+   },
+   "scene": "webway",
+   "speaker": {
+    "sprite": "daemon_tzeentch",
+    "name": {
+     "zh": "多出来的命运线",
+     "en": "The Extra Thread"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_drukhari",
+   "file": "assets/endings/eld_end_drukhari.png",
+   "faction": "aeldari",
+   "id": "eld_end_drukhari",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "无日之城",
+    "en": "City Without Sun"
+   },
+   "cause": {
+    "zh": "被黑暗灵族掳往科摩拉",
+    "en": "Taken to Commorragh"
+   },
+   "text": {
+    "zh": "科摩拉没有太阳。你学会了很多事：怎么笑得让主人满意，怎么在拍卖台上站得笔直。\n你的新主人说，猿人最有趣的地方，是会一直抱着希望。\n她说得对。你到现在还在希望。",
+    "en": "Commorragh has no sun. You learn many things: how to smile so your owner is pleased, how to stand straight on the auction block.\nYour new owner says the most amusing thing about mon-keigh is that they keep hoping.\nShe's right. You're hoping still."
+   },
+   "scene": "webway",
+   "speaker": {
+    "sprite": "drukhari_raider",
+    "name": {
+     "zh": "维丝拉",
+     "en": "Vhessra"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_harvest",
+   "file": "assets/endings/eld_end_harvest.png",
+   "faction": "aeldari",
+   "id": "eld_end_harvest",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "最后一季",
+    "en": "The Last Harvest"
+   },
+   "cause": {
+    "zh": "与瓦尔达一同被收割",
+    "en": "Harvested with Valda"
+   },
+   "text": {
+    "zh": "光门合上了。你回到麦田，坐在家门槛上等。\n第二天，一个银色的骷髅停在你面前，抬起了手。你没有跑。\n很久以后，瓦尔达又长满了麦子，没人收割。墓穴重新睡着了，睡得很满足。",
+    "en": "The gate closes. You go back to the fields and sit on your own doorstep to wait.\nNext day a silver skeleton stops before you and raises a hand. You don't run.\nLong after, Valda is thick with wheat again, and no one harvests it. The tomb sleeps once more, content."
+   },
+   "scene": "tomb_exterior",
+   "speaker": null,
+   "foe": "necron_warrior"
+  },
+  {
+   "key": "end_eld_end_lost",
+   "file": "assets/endings/eld_end_lost.png",
+   "faction": "aeldari",
+   "id": "eld_end_lost",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "迷失网道",
+    "en": "Lost in the Webway"
+   },
+   "cause": {
+    "zh": "被遗弃在网道之中",
+    "en": "Abandoned in the webway"
+   },
+   "text": {
+    "zh": "你等了很久，久到忘了自己在等什么。\n偶尔有一队舞者从远处经过，在你面前停一停，做个鬼脸，又走了。\n网道很大。在它的某个角落，有一个不会变老的猿人，还在数脚步。",
+    "en": "You wait a long time, long enough to forget what you were waiting for.\nNow and then a troupe of dancers passes, pauses before you, pulls a face, and moves on.\nThe webway is vast. Somewhere in it, a mon-keigh who never grows old is still counting footsteps."
+   },
+   "scene": "webway",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_eld_end_sealed",
+   "file": "assets/endings/eld_end_sealed.png",
+   "faction": "aeldari",
+   "id": "eld_end_sealed",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "封印之内",
+    "en": "Behind the Seal"
+   },
+   "cause": {
+    "zh": "为先知的幻象献祭",
+    "en": "Sacrificed for a vision"
+   },
+   "text": {
+    "zh": "门合上了。另一边，先知垂下眼睛，在符文上划掉一根线。\n你和大魔一起被封在网道里。它不急，它有的是时间；你会慢慢变得不那么干净。\n方舟上没人为猿人唱歌，只有一片灵骨偶尔哼起跑调的收割歌。",
+    "en": "The gate closes. On the other side the Farseer lowers her eyes and strikes a thread from her runes.\nYou are sealed in the webway with the daemon. It's in no hurry; it has all the time there is, and you will grow less clean.\nOn the craftworld no one sings for a mon-keigh. Only a sliver of wraithbone sometimes hums an off-key harvest song."
+   },
+   "scene": "webway",
+   "speaker": null,
+   "foe": "greater_daemon_slaanesh"
+  },
+  {
+   "key": "end_eld_end_thirst",
+   "file": "assets/endings/eld_end_thirst.png",
+   "faction": "aeldari",
+   "id": "eld_end_thirst",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "完美的晚餐",
+    "en": "The Perfect Supper"
+   },
+   "cause": {
+    "zh": "灵魂被色孽吞噬",
+    "en": "Soul devoured by Slaanesh"
+   },
+   "text": {
+    "zh": "你点了头。瓦尔达的麦田在你周围展开，完美无缺，妮尔在门口等你。\n你进门，坐下，吃饭。每一顿都一样完美。\n每一天都一样。你想停下，却想不起该怎么停。很远的地方，有什么正吃得很开心。",
+    "en": "You nod. Valda's fields unfold around you, flawless; Nell waits at the door.\nYou go in, sit down, eat. Every supper is just as perfect.\nEvery single day. You want to stop, but can't remember how. Far away, something is feasting happily."
+   },
+   "scene": "jungle",
+   "speaker": {
+    "sprite": "greater_daemon_slaanesh",
+    "name": {
+     "zh": "无餍者",
+     "en": "The Unsated"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_death_corruption",
+   "file": "assets/endings/eld_death_corruption.png",
+   "faction": "aeldari",
+   "id": "eld_death_corruption",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "被饮尽",
+    "en": "Drunk Dry"
+   },
+   "cause": {
+    "zh": "被色孽之欲吞没",
+    "en": "Consumed by Slaanesh's hunger"
+   },
+   "text": {
+    "zh": "你想要的越来越多，多到身体装不下。\n你的皮肤开始发光，声音甜得像音乐。守护者们举起了枪，眼里没有恨，只有怜悯。\n在他们开枪之前，很远的地方，有什么东西先一步把你喝干了。",
+    "en": "You want more and more, more than a body can hold.\nYour skin begins to glow; your voice turns sweet as music. The Guardians raise their rifles, eyes holding no hatred, only pity.\nBefore they fire, something very far away drinks you dry."
+   },
+   "scene": "daemon_world",
+   "speaker": {
+    "sprite": "sigil_slaanesh",
+    "name": {
+     "zh": "渴求者",
+     "en": "She Who Thirsts"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_eld_death_hp",
+   "file": "assets/endings/eld_death_hp.png",
+   "faction": "aeldari",
+   "id": "eld_death_hp",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "断线",
+    "en": "A Severed Thread"
+   },
+   "cause": {
+    "zh": "伤重而死，灵魂无依",
+    "en": "Died of wounds, soul unguarded"
+   },
+   "text": {
+    "zh": "你倒下了。灵族们停下脚步，低头看了你一会儿，很有礼貌。\n没有灵魂石接住你。你的灵魂升起来，又亮又干净，像一盏灯，被远处某个很饿的东西看见了。\n先知在符文上，轻轻划掉了一根线。",
+    "en": "You fall. The Aeldari pause and look down at you a moment, politely.\nNo spirit stone catches you. Your soul rises, bright and clean as a lamp, and something very hungry far away notices it.\nOn her runes, the Farseer gently strikes out a thread."
+   },
+   "scene": "webway",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_eld_death_sanity",
+   "file": "assets/endings/eld_death_sanity.png",
+   "faction": "aeldari",
+   "id": "eld_death_sanity",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "墙里的客人",
+    "en": "Guest of the Walls"
+   },
+   "cause": {
+    "zh": "理智崩溃",
+    "en": "Mind shattered"
+   },
+   "text": {
+    "zh": "你开始听见墙里所有的声音，一万个死去的灵族同时说话，你一个也挡不住。\n你给每个声音起了名字，日夜和他们聊天。\n灵族把你送进一间安静的房间，天花板很矮，按猿人规格。",
+    "en": "You begin to hear every voice in the walls, ten thousand dead Aeldari speaking at once, and you can shut out none of them.\nYou name each voice and talk with them day and night.\nThe Aeldari place you in a quiet room with a low ceiling, built to mon-keigh specifications."
+   },
+   "scene": "craftworld",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_champion",
+   "file": "assets/endings/cha_end_champion.png",
+   "faction": "chaos",
+   "id": "cha_end_champion",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "黑色军团的勇士",
+    "en": "Champion of the Black Legion"
+   },
+   "cause": {
+    "zh": "成为黑色军团勇士",
+    "en": "Champion of the Black Legion"
+   },
+   "text": {
+    "zh": "你驾着登陆艇冲出火海。身后，阿尔德林在灭绝令中变成一颗白色的星。\n旗舰的舰桥上，战帅阿巴顿看了你一眼——就一眼——然后继续看他的星图。\n够了。对一个下巢老鼠来说，够了。",
+    "en": "You fly the lander out through the flames. Behind you, Aldrin becomes a white star under Exterminatus.\nOn the flagship's bridge, Warmaster Abaddon glances at you—just once—then returns to his star charts.\nIt's enough. For a rat from the Sump, it's enough."
+   },
+   "scene": "void",
+   "speaker": {
+    "sprite": "omen_black_crusade",
+    "name": {
+     "zh": "黑色旗舰",
+     "en": "The Black Flagship"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_claim_khorne_chosen",
+   "file": "assets/endings/cha_end_claim_khorne_chosen.png",
+   "faction": "chaos",
+   "id": "cha_end_claim_khorne_chosen",
+   "kind": "good",
+   "claim": "khorne_chosen",
+   "title": {
+    "zh": "血神的勇士",
+    "en": "Champion of the Blood God"
+   },
+   "cause": {
+    "zh": "成为恐虐的勇士",
+    "en": "Became Khorne's champion"
+   },
+   "text": {
+    "zh": "血神承认了你。你的盔甲换成黄铜，名字刻进斧刃，每一场仗都比上一场更大。\n你在一千个世界上冲锋，从不回头，也从不休息。\n恐虐从不赏赐安宁，只赏赐下一个对手。对你来说，这就够了。",
+    "en": "The Blood God acknowledges you. Your armour turns to brass, your name is etched into the axe-blade, every war bigger than the last.\nYou charge across a thousand worlds, never looking back, never resting.\nKhorne grants no peace, only the next foe. For you, that is enough."
+   },
+   "scene": "daemon_world",
+   "speaker": {
+    "sprite": "daemon_prince",
+    "name": {
+     "zh": "血神的勇士",
+     "en": "Champion of the Blood God"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_claim_nurgle_chosen",
+   "file": "assets/endings/cha_end_claim_nurgle_chosen.png",
+   "faction": "chaos",
+   "id": "cha_end_claim_nurgle_chosen",
+   "kind": "good",
+   "claim": "nurgle_chosen",
+   "title": {
+    "zh": "慈父的园丁",
+    "en": "Grandfather's Gardener"
+   },
+   "cause": {
+    "zh": "成为纳垢的宠儿",
+    "en": "Became Nurgle's beloved"
+   },
+   "text": {
+    "zh": "老爷爷亲手给你系上了围裙。你成了花园的园丁，替他照看一种又一种新生的瘟疫。\n你身上烂了七处，处处都开着花。小东西们说你笑起来最好看。\n你从没这么快乐过，也永远不会再孤单。",
+    "en": "Grandfather ties an apron on you himself. You become a gardener, tending one newborn plague after another for him.\nYou are rotten in seven places, and every one of them is in bloom. The little ones say your smile is the loveliest.\nYou have never been so happy, and you will never be alone again."
+   },
+   "scene": "daemon_world",
+   "speaker": {
+    "sprite": "daemon_prince",
+    "name": {
+     "zh": "慈父的园丁",
+     "en": "Grandfather's Gardener"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_claim_slaanesh_chosen",
+   "file": "assets/endings/cha_end_claim_slaanesh_chosen.png",
+   "faction": "chaos",
+   "id": "cha_end_claim_slaanesh_chosen",
+   "kind": "good",
+   "claim": "slaanesh_chosen",
+   "title": {
+    "zh": "完美的主人",
+    "en": "The Perfect Host"
+   },
+   "cause": {
+    "zh": "成为色孽的宠儿",
+    "en": "Became Slaanesh's favourite"
+   },
+   "text": {
+    "zh": "你成了宴会的主人。宾客为你而来，为你着迷，为你倾尽所有。\n你是完美的，每一面镜子都这么说。\n可你只想要下一个更完美的瞬间，永远想要。在她的国度里，这就叫恩宠。",
+    "en": "You become the host of the feast. Guests come for you, are enthralled by you, give you everything they have.\nYou are perfect; every mirror says so.\nYet all you want is the next, more perfect moment, forever. In Her realm, that is called favour."
+   },
+   "scene": "throne_light",
+   "speaker": {
+    "sprite": "daemon_prince",
+    "name": {
+     "zh": "完美的主人",
+     "en": "The Perfect Host"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_claim_tzeentch_chosen",
+   "file": "assets/endings/cha_end_claim_tzeentch_chosen.png",
+   "faction": "chaos",
+   "id": "cha_end_claim_tzeentch_chosen",
+   "kind": "good",
+   "claim": "tzeentch_chosen",
+   "title": {
+    "zh": "命运的书记",
+    "en": "Scribe of Fate"
+   },
+   "cause": {
+    "zh": "成为奸奇的书记",
+    "en": "Became Tzeentch's scribe"
+   },
+   "text": {
+    "zh": "你成了改变之主的书记，替他写下一千个未来，再一个个划掉。\n你的身体每天都不一样：今天长羽毛，明天长眼睛。你喜欢这种不确定。\n你也知道，总有一天他会把你写死。那也在计划之中。",
+    "en": "You become the Changer's scribe, writing a thousand futures for him and crossing them out one by one.\nYour body is different every day: feathers today, eyes tomorrow. You like not knowing.\nYou know he'll write you out one day. That, too, is part of the plan."
+   },
+   "scene": "warp",
+   "speaker": {
+    "sprite": "daemon_prince",
+    "name": {
+     "zh": "命运的书记",
+     "en": "Scribe of Fate"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_prince",
+   "file": "assets/endings/cha_end_prince.png",
+   "faction": "chaos",
+   "id": "cha_end_prince",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "恶魔王子",
+    "en": "Daemon Prince"
+   },
+   "cause": {
+    "zh": "飞升为恶魔王子",
+    "en": "Ascended to daemonhood"
+   },
+   "text": {
+    "zh": "恐惧之眼里多了一位新的恶魔王子。凡人的岁月从你身上滑过，像雨滑过铁甲。\n很多年后，某个巢都的垃圾瀑布下，一个缺门牙的孩子捡到一尊温热的小雕像。\n雕像的脸，是你的。",
+    "en": "The Eye of Terror has a new Daemon Prince. Mortal years slide off you like rain off armour.\nMany years later, beneath the garbage falls of some hive, a gap-toothed child finds a warm little statue.\nIts face is yours."
+   },
+   "scene": "daemon_world",
+   "speaker": {
+    "sprite": "daemon_prince",
+    "name": {
+     "zh": "恶魔王子",
+     "en": "Daemon Prince"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_vanish",
+   "file": "assets/endings/cha_end_vanish.png",
+   "faction": "chaos",
+   "id": "cha_end_vanish",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "唱错的音",
+    "en": "The Wrong Note"
+   },
+   "cause": {
+    "zh": "隐姓埋名，躲开诸神",
+    "en": "Hid from the gods"
+   },
+   "text": {
+    "zh": "你到了另一颗巢都星球，在下巢水泵站过滤水，一滴一滴。\n手腕上的烙印偶尔还会发烫。每当那时，你就哼起诗班的歌，再故意唱错一个音。\n诸神找不到唱错的人。至少你希望如此。",
+    "en": "You end up on another hive world, filtering water in an underhive pump station, drop by drop.\nThe brand on your wrist still warms now and then. When it does, you hum the Choir's hymn and sing one note wrong on purpose.\nThe gods can't find someone singing off-key. Or so you hope."
+   },
+   "scene": "underhive",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_claim_khorne",
+   "file": "assets/endings/cha_end_claim_khorne.png",
+   "faction": "chaos",
+   "id": "cha_end_claim_khorne",
+   "kind": "bad",
+   "claim": "khorne",
+   "title": {
+    "zh": "血神的猎犬",
+    "en": "Hound of the Blood God"
+   },
+   "cause": {
+    "zh": "沦为恐虐的猎犬",
+    "en": "Became a hound of Khorne"
+   },
+   "text": {
+    "zh": "你成了血神的猎犬：没有名字，没有诗班，只有下一场仗。\n多年后，污池的孩子还用你的故事吓唬人：一个拾荒者爬出了下巢，从此再没停下。\n头骨一颗颗堆向王座，永远堆不满。",
+    "en": "You become a hound of the Blood God: no name, no Choir, only the next battle.\nYears later, children in the Sump still scare each other with your story: a scavenger who climbed out of the underhive and never stopped.\nSkull after skull piles toward the throne. It is never enough."
+   },
+   "scene": "burning_city",
+   "speaker": {
+    "sprite": "daemon_khorne",
+    "name": {
+     "zh": "嗜血者",
+     "en": "Bloodletter"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_claim_nurgle",
+   "file": "assets/endings/cha_end_claim_nurgle.png",
+   "faction": "chaos",
+   "id": "cha_end_claim_nurgle",
+   "kind": "bad",
+   "claim": "nurgle",
+   "title": {
+    "zh": "污池里的暖炉",
+    "en": "The Warm Stove in the Sump"
+   },
+   "cause": {
+    "zh": "沦为纳垢的苗床",
+    "en": "Became a seedbed for Nurgle"
+   },
+   "text": {
+    "zh": "你在污池最深处躺下，再也不想起来。苍蝇在你身上安了家，菌菇从指缝里长出来。\n拾荒的人都爱在你身边歇脚，说你身上暖洋洋的，像个炉子。\n慈父的花园里没有谁是多余的，也没有谁能离开。",
+    "en": "You lie down at the very bottom of the Sump and never want to get up. Flies make a home of you; mushrooms sprout between your fingers.\nScavengers like to rest beside you. You're warm, they say, like a stove.\nIn Grandfather's garden no one is unwanted, and no one ever leaves."
+   },
+   "scene": "underhive",
+   "speaker": {
+    "sprite": "daemon_nurgle",
+    "name": {
+     "zh": "老爷爷的声音",
+     "en": "Grandfather's Voice"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_claim_slaanesh",
+   "file": "assets/endings/cha_end_claim_slaanesh.png",
+   "faction": "chaos",
+   "id": "cha_end_claim_slaanesh",
+   "kind": "bad",
+   "claim": "slaanesh",
+   "title": {
+    "zh": "尝不出的滋味",
+    "en": "The Taste of Nothing"
+   },
+   "cause": {
+    "zh": "被色孽掏空",
+    "en": "Hollowed out by Slaanesh"
+   },
+   "text": {
+    "zh": "你追逐每一种滋味：更甜的酒，更高的音，更多的目光。\n每尝一次，世界就淡一点。最后你坐在一场永不散场的宴席上，盘子总是满的，你却什么都尝不到。\n她给你一切，直到你什么都不是。",
+    "en": "You chase every taste: sweeter wine, higher notes, more eyes upon you.\nEach taste leaves the world a little paler. At last you sit at a banquet that never ends, plate always full, tasting nothing.\nShe gives you everything, until you are nothing."
+   },
+   "scene": "daemon_world",
+   "speaker": {
+    "sprite": "daemon_slaanesh",
+    "name": {
+     "zh": "甜得发苦的声音",
+     "en": "A Bittersweet Voice"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_claim_tzeentch",
+   "file": "assets/endings/cha_end_claim_tzeentch.png",
+   "faction": "chaos",
+   "id": "cha_end_claim_tzeentch",
+   "kind": "bad",
+   "claim": "tzeentch",
+   "title": {
+    "zh": "剧本的最后一页",
+    "en": "The Last Page"
+   },
+   "cause": {
+    "zh": "死于奸奇的计划",
+    "en": "Undone by Tzeentch's plan"
+   },
+   "text": {
+    "zh": "你开始照着脑子里的剧本过日子。每一步都很顺，顺得可疑。\n剧本最后一页写着：你死于一场你亲手策划的背叛。读到这一行时，已经来不及改了。\n万变之主的计划里，你只是一行注脚。",
+    "en": "You start living by a script in your head. Every step goes smoothly. Suspiciously smoothly.\nThe last page reads: you die in a betrayal you plotted yourself. By the time you read that line, it's too late to change it.\nIn the Changer of Ways' plan, you were a footnote."
+   },
+   "scene": "warp",
+   "speaker": {
+    "sprite": "daemon_tzeentch",
+    "name": {
+     "zh": "镜子里的人",
+     "en": "The One in the Mirror"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_feast",
+   "file": "assets/endings/cha_end_feast.png",
+   "faction": "chaos",
+   "id": "cha_end_feast",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "永恒的宴席",
+    "en": "The Endless Feast"
+   },
+   "cause": {
+    "zh": "永困色孽的宴席",
+    "en": "Trapped at Slaanesh's feast"
+   },
+   "text": {
+    "zh": "就一道。再一道。再一首。\n外面过去了一千年，宴会还在继续。你的盘子永远是满的，你的笑容永远是完美的。\n你再也想不起门在哪里。你也不想想起。",
+    "en": "Just one more dish. One more. One more song.\nOutside, a thousand years go by, and the feast goes on. Your plate is always full, your smile always perfect.\nYou can no longer remember where the door was. You don't want to."
+   },
+   "scene": "daemon_world",
+   "speaker": {
+    "sprite": "daemon_slaanesh",
+    "name": {
+     "zh": "完美的主人",
+     "en": "The Flawless Host"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_light",
+   "file": "assets/endings/cha_end_light.png",
+   "faction": "chaos",
+   "id": "cha_end_light",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "迟来的祷告",
+    "en": "A Prayer Too Late"
+   },
+   "cause": {
+    "zh": "死于帝皇之光",
+    "en": "Burned in the Emperor's light"
+   },
+   "text": {
+    "zh": "你祈祷了。像小时候那样，笨拙地，不知道该说什么。\n光回应了你。不是宽恕，是火。\n斯特兰德后来在报告里写：“该异端死前在祈祷。备注：无关紧要。”",
+    "en": "You pray. Clumsily, like when you were small, not knowing what to say.\nThe light answers. Not with forgiveness. With fire.\nStrand later writes in her report: “Heretic was praying at time of death. Note: irrelevant.”"
+   },
+   "scene": "throne_light",
+   "speaker": {
+    "sprite": "omen_emperor",
+    "name": {
+     "zh": "金光",
+     "en": "Golden Light"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_purged",
+   "file": "assets/endings/cha_end_purged.png",
+   "faction": "chaos",
+   "id": "cha_end_purged",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "已净化",
+    "en": "Purged"
+   },
+   "cause": {
+    "zh": "被灰骑士净化",
+    "en": "Purged by the Grey Knights"
+   },
+   "text": {
+    "zh": "银光落下时没有声音。\n审判庭的档案里，你只有一行字：“阿尔德林，异端，已净化。”没有名字。\n六小时后，这行字所指的那颗星球，也不存在了。",
+    "en": "When the silver light falls, there is no sound.\nIn the Inquisition's records you are one line: “Aldrin. Heretic. Purged.” No name.\nSix hours later, the world that line refers to no longer exists either."
+   },
+   "scene": "ruins",
+   "speaker": {
+    "sprite": "grey_knight",
+    "name": {
+     "zh": "灰骑士",
+     "en": "Grey Knight"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_pyre",
+   "file": "assets/endings/cha_end_pyre.png",
+   "faction": "chaos",
+   "id": "cha_end_pyre",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "广场上的木桩",
+    "en": "The Stake in the Square"
+   },
+   "cause": {
+    "zh": "被审判庭处以火刑",
+    "en": "Burned by the Inquisition"
+   },
+   "text": {
+    "zh": "斯特兰德摘下一只手套，又仔细地戴回去。\n第二天，广场上立起了一根木桩。人们被要求观看。\n审判官全程没有看火，她在看人群里谁移开了眼睛。",
+    "en": "Strand removes one glove, then carefully puts it back on.\nThe next day a stake rises in the square. Attendance is mandatory.\nThe Inquisitor never watches the fire. She watches the crowd, noting who looks away."
+   },
+   "scene": "burning_city",
+   "speaker": {
+    "sprite": "inquisitor",
+    "name": {
+     "zh": "斯特兰德审判官",
+     "en": "Inquisitor Strand"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_end_sacrifice",
+   "file": "assets/endings/cha_end_sacrifice.png",
+   "faction": "chaos",
+   "id": "cha_end_sacrifice",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "祭品",
+    "en": "The Offering"
+   },
+   "cause": {
+    "zh": "被献祭给四神",
+    "en": "Sacrificed to the Four"
+   },
+   "text": {
+    "zh": "门很结实。\n后来，诗班的人提起你都很尊敬：第一个被献给四位的人，祭坛的烛火为你烧了一整夜。\n蒂卡每天都给你的空座位盛一碗汤。",
+    "en": "The doors hold.\nAfterward the Choir speaks of you with reverence: the first one given to the Four. The altar candles burned all night for you.\nEvery day, Tikka sets a bowl of soup at your empty place."
+   },
+   "scene": "cult_shrine",
+   "speaker": {
+    "sprite": "cultist",
+    "name": {
+     "zh": "蒂卡",
+     "en": "Tikka"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_death_corruption",
+   "file": "assets/endings/cha_death_corruption.png",
+   "faction": "chaos",
+   "id": "cha_death_corruption",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "混沌卵",
+    "en": "Chaos Spawn"
+   },
+   "cause": {
+    "zh": "沦为混沌卵",
+    "en": "Became Chaos Spawn"
+   },
+   "text": {
+    "zh": "诸神一次给了你太多恩赐：触手、眼睛、翅膀、嘴巴，一样不少。\n你的身体装不下。\n后来，沃加斯的战团多了一只会追着自己尾巴咬的怪物。偶尔它会停下来，像在努力回想一个名字。",
+    "en": "The gods gave you too many gifts at once: tentacles, eyes, wings, mouths, everything.\nYour body couldn't hold them.\nNow Vorgath's warband keeps a beast that chases its own tails. Sometimes it stops, as if trying to recall a name."
+   },
+   "scene": "daemon_world",
+   "speaker": {
+    "sprite": "mutant",
+    "name": {
+     "zh": "混沌卵",
+     "en": "Chaos Spawn"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_death_hp",
+   "file": "assets/endings/cha_death_hp.png",
+   "faction": "chaos",
+   "id": "cha_death_hp",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "污池的规矩",
+    "en": "The Sump's Rule"
+   },
+   "cause": {
+    "zh": "伤重身亡，遗物被分",
+    "en": "Died of wounds, belongings shared"
+   },
+   "text": {
+    "zh": "污池的规矩：人死了，东西归活人。\n有人拿走了你的靴子，有人拿走了你的撬棍。蒂卡拿走了你手腕上的烙印——她说，留着念想。\n四位神没有一个回头看。",
+    "en": "The Sump's rule: when someone dies, their things go to the living.\nSomeone takes your boots. Someone takes your crowbar. Tikka takes the brand from your wrist, as a keepsake, she says.\nNot one of the Four looks back."
+   },
+   "scene": "underhive",
+   "speaker": {
+    "sprite": "cultist",
+    "name": {
+     "zh": "蒂卡",
+     "en": "Tikka"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_cha_death_sanity",
+   "file": "assets/endings/cha_death_sanity.png",
+   "faction": "chaos",
+   "id": "cha_death_sanity",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "四声合唱",
+    "en": "Chorus of Four"
+   },
+   "cause": {
+    "zh": "心智被四神占据",
+    "en": "Mind taken by the Four"
+   },
+   "text": {
+    "zh": "门后的四个声音不再争吵了，因为它们都进来了。\n你同时在笑、在哭、在愤怒、在渴望。你的嘴说着四种语言，没有一种是你的。\n诸神很满意。只是没有“你”了。",
+    "en": "The four voices behind the door stop arguing, because now they're all inside.\nYou laugh, weep, rage and crave all at once. Your mouth speaks four languages, none of them yours.\nThe gods are pleased. There's just no “you” left."
+   },
+   "scene": "warp",
+   "speaker": {
+    "sprite": "sigil_tzeentch",
+    "name": {
+     "zh": "所有的声音",
+     "en": "Every Voice"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_ark",
+   "file": "assets/endings/gsc_end_ark.png",
+   "faction": "gsc",
+   "id": "gsc_end_ark",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "素脸的孩子们",
+    "en": "The Plain Children"
+   },
+   "cause": {
+    "zh": "带着孩子们逃离",
+    "en": "Escaped with the children"
+   },
+   "text": {
+    "zh": "“忍耐号”飞向奥雷克斯二号，载着四十个孩子，个个都是素脸，个个都验过血。\n身后，凯辛三号变成了一颗紫色的星，然后什么也不剩。\n你教孩子们唱歌。不是那首。是一首新的。",
+    "en": "The Patient Mercy flies for Aurex Secundus with forty children aboard, plain-faced every one, every one's blood tested clean.\nBehind you Kessin Tertius becomes a violet star, then nothing at all.\nYou teach the children a song. Not that one. A new one."
+   },
+   "scene": "void",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_lastshift",
+   "file": "assets/endings/gsc_end_lastshift.png",
+   "faction": "gsc",
+   "id": "gsc_end_lastshift",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "最后一班",
+    "en": "The Last Shift"
+   },
+   "cause": {
+    "zh": "断后，让孩子们走",
+    "en": "Held the line so the children could go"
+   },
+   "text": {
+    "zh": "你和首领守着空荡荡的星港，一直守到天黑。\n矿船的尾焰变成一颗小星星，又变成什么都没有。\n首领说：“最后一班。”你点点头。这辈子，这是你干过最值的一班。",
+    "en": "You and the Primus hold the empty starport until nightfall.\nThe hauler's exhaust becomes a small star, then nothing.\nThe Primus says, “Last shift.” You nod. It's the best shift you ever worked."
+   },
+   "scene": "spore_sky",
+   "speaker": {
+    "sprite": "gsc_primus",
+    "name": {
+     "zh": "哈斯克首领",
+     "en": "Primus Hask"
+    }
+   },
+   "foe": "hive_tyrant"
+  },
+  {
+   "key": "end_gsc_end_shadow",
+   "file": "assets/endings/gsc_end_shadow.png",
+   "faction": "gsc",
+   "id": "gsc_end_shadow",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "阴影散去",
+    "en": "The Shadow Lifts"
+   },
+   "cause": {
+    "zh": "熄灭灯塔，喊出警告",
+    "en": "Killed the beacon, sent the warning"
+   },
+   "text": {
+    "zh": "警告传出去了。九天后，帝国海军的炮火照亮了紫色的天。\n凯辛三号没能保住，可整个阿尔科萨星区都听见了这颗星的名字。\n你坐在星语塔的废墟上，头脑安静。只有你自己，和你记得的每一张脸。",
+    "en": "The warning got through. Nine days later, Imperial Navy guns light the violet sky.\nKessin Tertius could not be saved, but the whole Arcosa Sector heard its name.\nYou sit in the astropathic tower's ruins, your mind quiet. Only you, and every face you remember."
+   },
+   "scene": "hive_spire",
+   "speaker": {
+    "sprite": "psyker",
+    "name": {
+     "zh": "星语者",
+     "en": "The Astropath"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_witness",
+   "file": "assets/endings/gsc_end_witness.png",
+   "faction": "gsc",
+   "id": "gsc_end_witness",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "证人",
+    "en": "The Witness"
+   },
+   "cause": {
+    "zh": "成为审判庭的证人",
+    "en": "Became the Inquisition's witness"
+   },
+   "text": {
+    "zh": "审判官的船上，你讲了一年。四代人的名字，每一碗汤，每一首歌。\n异形审判庭的档案里多了一卷：“凯辛三号：一个家庭的完整记录”。\n审判官说，下一颗星球，会因为这一卷早一点被发现。",
+    "en": "Aboard the Inquisitor's ship you talk for a year. Four generations of names, every bowl of soup, every song.\nThe Ordo Xenos archive gains a volume: “Kessin Tertius: the complete record of one family.”\nThe Inquisitor says the next world will be found a little sooner because of it."
+   },
+   "scene": "ship_interior",
+   "speaker": {
+    "sprite": "inquisitor",
+    "name": {
+     "zh": "索恩审判官",
+     "en": "Inquisitor Thorne"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_ascension",
+   "file": "assets/endings/gsc_end_ascension.png",
+   "faction": "gsc",
+   "id": "gsc_end_ascension",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "升天",
+    "en": "Ascension"
+   },
+   "cause": {
+    "zh": "在歌声中被虫群吞噬",
+    "en": "Devoured mid-hymn by the swarm"
+   },
+   "text": {
+    "zh": "升天之日，你和家人们站在一起，仰着头。\n星之子降下来了，正如主祭说的那样，把你们全都接走，变成他们的一部分。\n一点也不剩。他们甚至不知道，你们曾经为他们唱过歌。",
+    "en": "On the Day of Ascension you stand with the family, faces upturned.\nThe Star Children descend, just as the Magus said, and take you all up, make you part of them.\nNothing is left over. They never even knew you once sang for them."
+   },
+   "scene": "spore_sky",
+   "speaker": {
+    "sprite": "omen_star_children",
+    "name": {
+     "zh": "星之子",
+     "en": "The Star Children"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_buried",
+   "file": "assets/endings/gsc_end_buried.png",
+   "faction": "gsc",
+   "id": "gsc_end_buried",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "最深一层",
+    "en": "The Deepest Level"
+   },
+   "cause": {
+    "zh": "困死在最深的矿井",
+    "en": "Entombed in the deepest shaft"
+   },
+   "text": {
+    "zh": "你一直待在矿井最深处。灯灭了，刮擦声停了，地面上的声音也停了。\n后来，什么声音都没有了。\n你在黑暗里待了很久。这颗星上，你是最后一个记得那些歌的人。",
+    "en": "You stay at the very bottom of the mine. The lamp dies; the scraping stops; the sounds above stop too.\nThen there is no sound at all.\nYou stay in the dark a long time. On this world, you are the last one who remembers the songs."
+   },
+   "scene": "mine_shaft",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_claim_khorne",
+   "file": "assets/endings/gsc_end_claim_khorne.png",
+   "faction": "gsc",
+   "id": "gsc_end_claim_khorne",
+   "kind": "bad",
+   "claim": "khorne",
+   "title": {
+    "zh": "漏出影子的怒火",
+    "en": "Rage Beneath the Shadow"
+   },
+   "cause": {
+    "zh": "影子退去时被恐虐收走",
+    "en": "Taken by Khorne as the Shadow lifted"
+   },
+   "text": {
+    "zh": "影子罩着这颗星，诸神都听不见。可你的怒火太大，大到从影子底下漏了出去。\n你在废墟里杀虫子，杀了十天，没有停。\n影子退去那一夜，一面鼓终于找到了你。它不在乎血是谁的。",
+    "en": "The Shadow covers this world and the gods can't hear. But your rage is too big, and leaks out beneath it.\nYou kill the beasts in the ruins for ten days, without stopping.\nThe night the Shadow lifts, a drum finally finds you. It doesn't care whose blood it was."
+   },
+   "scene": "spore_sky",
+   "speaker": {
+    "sprite": "sigil_khorne",
+    "name": {
+     "zh": "影子底下的鼓",
+     "en": "A Drum Beneath the Shadow"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_claim_nurgle",
+   "file": "assets/endings/gsc_end_claim_nurgle.png",
+   "faction": "gsc",
+   "id": "gsc_end_claim_nurgle",
+   "kind": "bad",
+   "claim": "nurgle",
+   "title": {
+    "zh": "连虫群都不要",
+    "en": "Even the Swarm Passed By"
+   },
+   "cause": {
+    "zh": "被纳垢留作花园",
+    "en": "Kept by Nurgle for his garden"
+   },
+   "text": {
+    "zh": "你身上长出了别的东西，又暖又软，不是家族的，是另一种爱。\n虫群来了，把所有活物都收走。只有你，它们嗅了嗅，绕开了。\n连吞噬者都不要你。可慈祥的祖父要。他一向什么都要。",
+    "en": "Something else grows in you, warm and soft. Not the family's. A different kind of love.\nThe swarm comes and gathers every living thing. You alone they sniff, and pass by.\nEven the Devourer doesn't want you. But a kindly Grandfather does. He always wants everything."
+   },
+   "scene": "mine_shaft",
+   "speaker": {
+    "sprite": "sigil_nurgle",
+    "name": {
+     "zh": "温暖的苔藓",
+     "en": "Warm Moss"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_claim_slaanesh",
+   "file": "assets/endings/gsc_end_claim_slaanesh.png",
+   "faction": "gsc",
+   "id": "gsc_end_claim_slaanesh",
+   "kind": "bad",
+   "claim": "slaanesh",
+   "title": {
+    "zh": "一万遍",
+    "en": "Ten Thousand Times"
+   },
+   "cause": {
+    "zh": "在渴望中被色孽收走",
+    "en": "Taken by Slaanesh through longing"
+   },
+   "text": {
+    "zh": "家族的爱太满了，满到你离不开。家人都不在了，你还在空礼拜堂里唱，唱给自己听。\n影子里，她听不见你。你的渴望只好一遍遍回响，越来越甜。\n影子退去那天，她就在门口，等着听第一万遍。",
+    "en": "The family's love was so full you can't do without it. The kin are gone, and still you sing in the empty chapel, to yourself.\nIn the Shadow she can't hear you, so your longing only echoes, sweeter each time.\nThe day the Shadow lifts, she's waiting at the door to hear it for the ten-thousandth time."
+   },
+   "scene": "gsc_chapel",
+   "speaker": {
+    "sprite": "sigil_slaanesh",
+    "name": {
+     "zh": "空礼拜堂里的回声",
+     "en": "An Echo in the Empty Chapel"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_claim_tzeentch",
+   "file": "assets/endings/gsc_end_claim_tzeentch.png",
+   "faction": "gsc",
+   "id": "gsc_end_claim_tzeentch",
+   "kind": "bad",
+   "claim": "tzeentch",
+   "title": {
+    "zh": "影子里的缝",
+    "en": "The Crack in the Shadow"
+   },
+   "cause": {
+    "zh": "从影子的缝隙被奸奇带走",
+    "en": "Slipped through the Shadow to Tzeentch"
+   },
+   "text": {
+    "zh": "影子那么大，大得像一面墙。可墙上有一道缝，正好是你的形状。\n有人很早就在等你了，比老祖宗来得更早，比星之子来得更早。\n“家族是个好计划，”那个声音说，“可我的计划，更长。”",
+    "en": "The Shadow is vast as a wall. But the wall has a crack in it, exactly your shape.\nSomeone has been waiting for you a long time: since before the Grandsire, before the Star Children.\n“The family was a good plan,” the voice says. “Mine is longer.”"
+   },
+   "scene": "warp",
+   "speaker": {
+    "sprite": "daemon_tzeentch",
+    "name": {
+     "zh": "影子里的一道缝",
+     "en": "A Crack in the Shadow"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_corrected",
+   "file": "assets/endings/gsc_end_corrected.png",
+   "faction": "gsc",
+   "id": "gsc_end_corrected",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "被治好的人",
+    "en": "Healed"
+   },
+   "cause": {
+    "zh": "心智被主祭抹平",
+    "en": "Mind smoothed away by the Magus"
+   },
+   "text": {
+    "zh": "主祭治好了你。你再也不害怕了，再也不怀疑了。\n你每天都笑，笑得和所有人一模一样，嗡鸣替你记着一切。\n升天之日来的时候，你是第一个跑去迎接的。",
+    "en": "The Magus heals you. You are never afraid again, never doubtful again.\nYou smile every day, exactly like everyone else; the hum remembers everything for you.\nWhen the Day of Ascension comes, you are the first to run out and greet it."
+   },
+   "scene": "gsc_chapel",
+   "speaker": {
+    "sprite": "gsc_magus",
+    "name": {
+     "zh": "伊拉里昂主祭",
+     "en": "Magus Ilarion"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_devoured",
+   "file": "assets/endings/gsc_end_devoured.png",
+   "faction": "gsc",
+   "id": "gsc_end_devoured",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "生物质",
+    "en": "Biomass"
+   },
+   "cause": {
+    "zh": "在逃跑中被虫群吞噬",
+    "en": "Devoured while fleeing"
+   },
+   "text": {
+    "zh": "你没有跑掉。\n后来，整颗星球的一切活物都被收走：矿工、执法官、家人、孢子底下的苔藓。\n虫群离开时，凯辛三号只剩下光秃秃的石头，和一座还挂着四臂像的空房子。",
+    "en": "You don't get away.\nAfterward everything living on the world is gathered up: miners, enforcers, kin, the moss beneath the spores.\nWhen the swarm leaves, Kessin Tertius is bare stone, and one empty house with a four-armed icon on the wall."
+   },
+   "scene": "spore_sky",
+   "speaker": null,
+   "foe": "hive_tyrant"
+  },
+  {
+   "key": "end_gsc_end_purged",
+   "file": "assets/endings/gsc_end_purged.png",
+   "faction": "gsc",
+   "id": "gsc_end_purged",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "净化名单",
+    "en": "On the List"
+   },
+   "cause": {
+    "zh": "被审判庭处决",
+    "en": "Executed by the Inquisition"
+   },
+   "text": {
+    "zh": "审判庭的名单很长，你在第四百一十二行。\n罪名是“与异形勾结”。你想说，他们只是给了你一碗汤。\n审判官合上名单，第四百一十三行，是内尔。",
+    "en": "The Inquisition's list is long. You're on line four hundred and twelve.\nCharge: consorting with the xenos. You want to say they only gave you a bowl of soup.\nThe Inquisitor closes the list. Line four hundred and thirteen is Nell."
+   },
+   "scene": "underhive",
+   "speaker": {
+    "sprite": "inquisitor",
+    "name": {
+     "zh": "索恩审判官",
+     "en": "Inquisitor Thorne"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_gsc_end_seed",
+   "file": "assets/endings/gsc_end_seed.png",
+   "faction": "gsc",
+   "id": "gsc_end_seed",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "种子",
+    "en": "The Seed"
+   },
+   "cause": {
+    "zh": "把家族带到了新的星球",
+    "en": "Carried the family to a new world"
+   },
+   "text": {
+    "zh": "“忍耐号”到了奥雷克斯二号。你在下巢找了份活，过得很安静。\n三十年后，下巢有一户人家，星期天总多做一份饭，墙上挂着一幅四只手的帝皇像。\n孩子们都长着同一双淡紫色的眼睛。",
+    "en": "The Patient Mercy reaches Aurex Secundus. You find work in the underhive and live quietly.\nThirty years later, an underhive family always cooks one extra plate on Sundays, and a four-armed Emperor hangs on their wall.\nThe children all share the same pale violet eyes."
+   },
+   "scene": "underhive",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_gsc_death_corruption",
+   "file": "assets/endings/gsc_death_corruption.png",
+   "faction": "gsc",
+   "id": "gsc_death_corruption",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "一部分",
+    "en": "Only a Part"
+   },
+   "cause": {
+    "zh": "被老祖宗的血完全吞没",
+    "en": "Wholly consumed by the Grandsire's blood"
+   },
+   "text": {
+    "zh": "家的血终于把你填满了。你的皮肤越来越硬，你的心越来越暖，你想不起“我”这个字。\n老祖宗低头看着你，很满意。\n你是家的一部分了。只是一部分。",
+    "en": "The family's blood fills you at last. Your skin hardens, your heart warms, and you can't recall the word “I.”\nThe Grandsire looks down at you, satisfied.\nYou are part of the family now. Only a part."
+   },
+   "scene": "cult_shrine",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_gsc_death_hp",
+   "file": "assets/endings/gsc_death_hp.png",
+   "faction": "gsc",
+   "id": "gsc_death_hp",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "抬走",
+    "en": "Carried Home"
+   },
+   "cause": {
+    "zh": "伤重死在矿井里",
+    "en": "Died of wounds in the mine"
+   },
+   "text": {
+    "zh": "你倒在矿井里。灯滚出去很远，照着岩壁上的小画：四只手的人，落下的星星。\n过了一会儿，几个戴兜帽的人来了，把你抬走，像抬家人一样小心。\n他们照顾自己人。到最后也是。",
+    "en": "You fall in the mine. Your lamp rolls far off, lighting the little carvings: four-armed figures, falling stars.\nAfter a while hooded figures come and carry you away, careful as with family.\nThey look after their own. To the very end."
+   },
+   "scene": "mine_shaft",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_gsc_death_sanity",
+   "file": "assets/endings/gsc_death_sanity.png",
+   "faction": "gsc",
+   "id": "gsc_death_sanity",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "几百个声音之一",
+    "en": "One of Hundreds"
+   },
+   "cause": {
+    "zh": "自我溶进了族群意识",
+    "en": "Self dissolved into the Broodmind"
+   },
+   "text": {
+    "zh": "你再也分不清哪个声音是自己的了。\n嗡鸣里有几百个声音，你挑了一个最温柔的，跟着它走，再也没回来。\n礼拜堂里多了一个总在微笑的人。没人记得他原来叫什么。",
+    "en": "You can no longer tell which voice is yours.\nThe hum holds hundreds. You pick the gentlest, follow it, and never come back.\nThe chapel gains one more person who always smiles. Nobody remembers their old name."
+   },
+   "scene": "gsc_chapel",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_crusade",
+   "file": "assets/endings/imp_end_crusade.png",
+   "faction": "imperium",
+   "id": "imp_end_crusade",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "无畏远征",
+    "en": "Indomitus"
+   },
+   "cause": {
+    "zh": "随远征舰队离去",
+    "en": "Left with the crusade fleet"
+   },
+   "text": {
+    "zh": "你登上了蓝金色的战舰。新军服，新番号，新的一万光年。\n启航时，你最后看了一眼故乡的天空。那道裂隙还在，像一道永远合不上的伤口。\n但至少，现在有人在缝它了。",
+    "en": "You board a blue-and-gold warship. New uniform, new regiment, ten thousand new light-years.\nAs the fleet departs you take a last look at home's sky. The rift is still there, a wound that will never close.\nBut at least someone is stitching it now."
+   },
+   "scene": "void",
+   "speaker": {
+    "sprite": "omen_primarch",
+    "name": {
+     "zh": "远征舰队",
+     "en": "Crusade Fleet"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_hold",
+   "file": "assets/endings/imp_end_hold.png",
+   "faction": "imperium",
+   "id": "imp_end_hold",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "防线未破",
+    "en": "The Line Held"
+   },
+   "cause": {
+    "zh": "留守故乡，重建巢都",
+    "en": "Stayed home to rebuild"
+   },
+   "text": {
+    "zh": "一年后，你站在重建的楼梯间里，卖掺三成水的再生咖啡。今天免费。\n哈洛念阵亡名单，念到佩尔时放慢了，像在道谢。\n帝皇从没看过你一眼。但你看见了他的人民。",
+    "en": "A year later you stand in the rebuilt stairwell selling recaff, a third of it water. Free today.\nHallow reads the names of the dead. At Pell's he slows down, like a thank-you.\nThe Emperor never looked your way. But you saw his people."
+   },
+   "scene": "hive_hab",
+   "speaker": {
+    "sprite": "preacher",
+    "name": {
+     "zh": "哈洛执事",
+     "en": "Deacon Hallow"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_inquisition",
+   "file": "assets/endings/imp_end_inquisition.png",
+   "faction": "imperium",
+   "id": "imp_end_inquisition",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "审判庭之眼",
+    "en": "Eyes of the Inquisition"
+   },
+   "cause": {
+    "zh": "成为审判官的侍从",
+    "en": "Became an Inquisitor's acolyte"
+   },
+   "text": {
+    "zh": "穿梭机里，哈克审判官在剥一个橘子。“你还留着它，”她瞥了眼硬币，“很好。”\n“从今天起你不存在了。你会去很多地方，看很多不该看的东西，然后决定谁活。”\n她递给你半个橘子。",
+    "en": "In the shuttle, Inquisitor Haak is peeling an orange. “You kept it,” she says, eyeing the coin. “Good.”\n“From today, you don't exist. You'll go many places, see many things you shouldn't, and decide who lives.”\nShe hands you half the orange."
+   },
+   "scene": "ship_interior",
+   "speaker": {
+    "sprite": "inquisitor",
+    "name": {
+     "zh": "哈克审判官",
+     "en": "Inquisitor Haak"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_brood",
+   "file": "assets/endings/imp_end_brood.png",
+   "faction": "imperium",
+   "id": "imp_end_brood",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "一家人",
+    "en": "Family"
+   },
+   "cause": {
+    "zh": "受基因窃取者感染",
+    "en": "Kissed by a genestealer"
+   },
+   "text": {
+    "zh": "你在赫斯珀住了下来，成了家。孩子的皮肤带点紫色，手臂多了两条，你觉得他们完美无缺。\n某天夜里，天上出现了无数颗星星，越来越近。你带着全家出去迎接。",
+    "en": "You settle on Hesper and start a family. Your children's skin has a violet tinge, and they have a few extra arms. You think they're perfect.\nOne night countless stars appear in the sky, drawing closer. You take the whole family outside to welcome them."
+   },
+   "scene": "jungle",
+   "speaker": null,
+   "foe": "genestealer"
+  },
+  {
+   "key": "end_imp_end_claim_khorne",
+   "file": "assets/endings/imp_end_claim_khorne.png",
+   "faction": "imperium",
+   "id": "imp_end_claim_khorne",
+   "kind": "bad",
+   "claim": "khorne",
+   "title": {
+    "zh": "无名的冲锋",
+    "en": "The Endless Charge"
+   },
+   "cause": {
+    "zh": "被恐虐收为猎犬",
+    "en": "Taken as Khorne's hound"
+   },
+   "text": {
+    "zh": "你不再等口令。中士在身后喊你，你只听得见鼓声。\n多年后，有人在一片无名的战场上见过你：军服早烂成了布条，你还在冲锋，身后的头盔堆成了小山。\n血神从不问血是谁的，只要王座下的头骨更高。",
+    "en": "You stop waiting for orders. The sergeant shouts your number behind you; all you hear is the drum.\nYears later someone glimpses you on a nameless battlefield: uniform rotted to rags, still charging, a hill of helmets at your back.\nThe Blood God never asks whose blood it was. He only wants the skulls piled higher."
+   },
+   "scene": "trench",
+   "speaker": {
+    "sprite": "daemon_khorne",
+    "name": {
+     "zh": "铜色的鼓声",
+     "en": "The Brass Drum"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_claim_nurgle",
+   "file": "assets/endings/imp_end_claim_nurgle.png",
+   "faction": "imperium",
+   "id": "imp_end_claim_nurgle",
+   "kind": "bad",
+   "claim": "nurgle",
+   "title": {
+    "zh": "花园营地",
+    "en": "The Garden Camp"
+   },
+   "cause": {
+    "zh": "成为纳垢的园丁",
+    "en": "Became Nurgle's gardener"
+   },
+   "text": {
+    "zh": "你不再怕病，也不再怕死。野战医院的伤员一个个好了，又病了，全都笑眯眯的。\n政委来查时，营地已成了一座花园：苍蝇在唱歌，伤口在开花，没人再喊疼。\n慈父爱他的每一个孩子，从不让谁孤单。",
+    "en": "You no longer fear sickness, or death. The field hospital's wounded get better one by one, then sick one by one, all of them smiling.\nWhen the commissar comes to inspect, the camp is a garden: flies singing, wounds in bloom, no one crying out.\nGrandfather loves every one of his children, and leaves none of them alone."
+   },
+   "scene": "ruins",
+   "speaker": {
+    "sprite": "daemon_nurgle",
+    "name": {
+     "zh": "慈祥的声音",
+     "en": "A Fond Voice"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_claim_slaanesh",
+   "file": "assets/endings/imp_end_claim_slaanesh.png",
+   "faction": "imperium",
+   "id": "imp_end_claim_slaanesh",
+   "kind": "bad",
+   "claim": "slaanesh",
+   "title": {
+    "zh": "掌声之后",
+    "en": "After the Applause"
+   },
+   "cause": {
+    "zh": "被色孽掏空",
+    "en": "Hollowed out by Slaanesh"
+   },
+   "text": {
+    "zh": "勋章、掌声、香膏、更响的赞美诗，你都要，而且要更多。\n每一样都比上一样淡。最后你站在凯旋礼上，全舰队都在为你欢呼，你什么也感觉不到。\n她把你一次次装满，又一次次倒空，直到你只剩下想要。",
+    "en": "Medals, applause, scented balm, louder hymns: you want them all, and more.\nEach tastes fainter than the last. At last you stand at the triumph, the whole fleet cheering your name, and feel nothing.\nShe fills you and pours you out, again and again, until nothing is left of you but wanting."
+   },
+   "scene": "cathedral",
+   "speaker": {
+    "sprite": "daemon_slaanesh",
+    "name": {
+     "zh": "甜得发苦的声音",
+     "en": "A Bittersweet Voice"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_claim_tzeentch",
+   "file": "assets/endings/imp_end_claim_tzeentch.png",
+   "faction": "imperium",
+   "id": "imp_end_claim_tzeentch",
+   "kind": "bad",
+   "claim": "tzeentch",
+   "title": {
+    "zh": "一步好棋",
+    "en": "A Clever Move"
+   },
+   "cause": {
+    "zh": "沦为奸奇的棋子",
+    "en": "Became Tzeentch's pawn"
+   },
+   "text": {
+    "zh": "你总能先知道命令、战局，和谁会背叛谁。你升到了上尉。\n某天你在作战图上画了一道线，整个团跟着它走进了埋伏。那道线，是镜子里的人替你画的。\n你以为自己在下棋，其实你只是一颗棋子。",
+    "en": "You always know first: the orders, the battle, who will betray whom. You rise all the way to captain.\nOne day you draw a line on the war map, and a whole regiment follows it into an ambush. The one in the mirror drew it for you.\nYou thought you were playing. You were only a piece."
+   },
+   "scene": "ship_interior",
+   "speaker": {
+    "sprite": "sigil_tzeentch",
+    "name": {
+     "zh": "镜子里的人",
+     "en": "The One in the Mirror"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_commissar",
+   "file": "assets/endings/imp_end_commissar.png",
+   "faction": "imperium",
+   "id": "imp_end_commissar",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "政委的子弹",
+    "en": "The Commissar's Bullet"
+   },
+   "cause": {
+    "zh": "临阵脱逃，被政委处决",
+    "en": "Shot for desertion"
+   },
+   "text": {
+    "zh": "你没听见第二声枪响。\n第二天的阵亡名单上，你的名字后面写着两个字：怯战。\n随军牧师念到这里没有停顿，语气仍然是感恩的。",
+    "en": "You never hear the second shot.\nOn the next day's casualty list, your name is followed by one word: cowardice.\nThe regimental priest reads it without pausing. He still sounds grateful."
+   },
+   "scene": "trench",
+   "speaker": {
+    "sprite": "preacher",
+    "name": {
+     "zh": "随军牧师",
+     "en": "Regimental Priest"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_heretic",
+   "file": "assets/endings/imp_end_heretic.png",
+   "faction": "imperium",
+   "id": "imp_end_heretic",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "城门之火",
+    "en": "Fire at the Gate"
+   },
+   "cause": {
+    "zh": "持邪刃反抗，焚于城门",
+    "en": "Burned at the gate as heretic"
+   },
+   "text": {
+    "zh": "匕首在你手里尖叫，像终于等到了这一刻。\n后来，维瑟尔的人只记得那晚城门口烧起了一堆火，颜色很奇怪。\n佩尔没有开枪。他闭上了眼睛。",
+    "en": "The dagger shrieks in your hand, as if it had waited for this moment.\nAfterward, the people of Vessel remember only a fire at the gate that night, burning an odd colour.\nPell didn't fire. He closed his eyes."
+   },
+   "scene": "burning_city",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_purged",
+   "file": "assets/endings/imp_end_purged.png",
+   "faction": "imperium",
+   "id": "imp_end_purged",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "光下的影子",
+    "en": "Shadow in the Light"
+   },
+   "cause": {
+    "zh": "腐化败露，被审判庭清除",
+    "en": "Purged by the Inquisition"
+   },
+   "text": {
+    "zh": "胜利之后，审判庭开始清查。他们只用一盏灯，照一照你的眼睛。\n灯光里，你的影子多了一只手。\n他们很有礼貌，甚至给了你一碗热汤。",
+    "en": "After the victory, the Inquisition begins its audit. They use a single lamp and shine it in your eyes.\nIn its light, your shadow has an extra hand.\nThey're very polite. They even bring you a bowl of hot soup."
+   },
+   "scene": "cathedral",
+   "speaker": {
+    "sprite": "inquisitor",
+    "name": {
+     "zh": "审判庭清查官",
+     "en": "Inquisitorial Auditor"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_servitor",
+   "file": "assets/endings/imp_end_servitor.png",
+   "faction": "imperium",
+   "id": "imp_end_servitor",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "机魂需要双手",
+    "en": "The Machine Needs Hands"
+   },
+   "cause": {
+    "zh": "被改造成机仆",
+    "en": "Rebuilt as a servitor"
+   },
+   "text": {
+    "zh": "很多年后，某艘运兵舰的机库里，一个机仆在搬弹药箱。\n它一直哼着半句摇篮曲，没人知道下一句。\n偶尔有新兵停下来看它，好像认出了什么。",
+    "en": "Years later, in a troopship hangar, a servitor hauls ammunition crates.\nIt hums half a lullaby, over and over. No one knows the next line.\nNow and then a new recruit stops and stares, as if recognising something."
+   },
+   "scene": "ship_interior",
+   "speaker": {
+    "sprite": "servitor",
+    "name": {
+     "zh": "机仆",
+     "en": "Servitor"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_end_traitor",
+   "file": "assets/endings/imp_end_traitor.png",
+   "faction": "imperium",
+   "id": "imp_end_traitor",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "开门人",
+    "en": "The Doorkeeper"
+   },
+   "cause": {
+    "zh": "为黑色军团打开城门",
+    "en": "Opened the gates to traitors"
+   },
+   "text": {
+    "zh": "第六工厂陷落了。布琳兑现了承诺：你活着，吃得很饱，胸口多了一只睁开的眼。\n后来，你跟着黑色军团去了下一个世界，教他们哪里的门最容易打开。",
+    "en": "Manufactorum Six falls. Brin keeps her word: you live, you eat well, and an open eye appears upon your chest.\nLater you follow the Black Legion to the next world, and teach them which doors open easiest."
+   },
+   "scene": "burning_city",
+   "speaker": {
+    "sprite": "omen_black_crusade",
+    "name": {
+     "zh": "黑色军团",
+     "en": "Black Legion"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_death_corruption",
+   "file": "assets/endings/imp_death_corruption.png",
+   "faction": "imperium",
+   "id": "imp_death_corruption",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "开门的回答",
+    "en": "The Answer at the Door"
+   },
+   "cause": {
+    "zh": "被亚空间之物附身",
+    "en": "Possessed by the warp"
+   },
+   "text": {
+    "zh": "那个敲船壳的声音，终于等到了回答。\n你的皮肤在发光，你的影子在说话。政委的子弹来得很快，但还是晚了一步——从你身上爬出来的东西，已经开始笑了。",
+    "en": "The knocking on the hull finally gets its answer.\nYour skin glows. Your shadow speaks. The commissar's bullet comes fast, but a moment too late. The thing climbing out of you has already begun to laugh."
+   },
+   "scene": "warp",
+   "speaker": {
+    "sprite": "sigil_undivided",
+    "name": {
+     "zh": "亚空间",
+     "en": "The Warp"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_imp_death_hp",
+   "file": "assets/endings/imp_death_hp.png",
+   "faction": "imperium",
+   "id": "imp_death_hp",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "无名之墓",
+    "en": "Unmarked Grave"
+   },
+   "cause": {
+    "zh": "战死，葬于无名墓",
+    "en": "Killed in action, unmarked grave"
+   },
+   "text": {
+    "zh": "你倒下的地方没有墓碑，只有一个编号。\n多年后，某位执事念到这个编号，语气依旧感恩。\n帝国从不缺人。它只缺时间。",
+    "en": "Where you fall there's no headstone, only a number.\nYears later, some deacon reads that number aloud, still sounding grateful.\nThe Imperium never runs short of people. Only of time."
+   },
+   "scene": "ruins",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_imp_death_sanity",
+   "file": "assets/endings/imp_death_sanity.png",
+   "faction": "imperium",
+   "id": "imp_death_sanity",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "数眼睛的人",
+    "en": "Counting Eyes"
+   },
+   "cause": {
+    "zh": "理智崩溃",
+    "en": "Mind shattered"
+   },
+   "text": {
+    "zh": "你开始笑，停不下来。阿诺医师给你打了一针，又一针。\n后来你被送进一座安静的修道院。那里的人都穿着束缚衣，都在数墙上别人看不见的眼睛。",
+    "en": "You start laughing and can't stop. Medicae Arno gives you a shot, then another.\nLater you're sent to a quiet monastery where everyone wears restraints and counts eyes on the walls that no one else can see."
+   },
+   "scene": "barracks",
+   "speaker": {
+    "sprite": "medicae",
+    "name": {
+     "zh": "阿诺医师",
+     "en": "Medicae Arno"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_explorator",
+   "file": "assets/endings/mech_end_explorator.png",
+   "faction": "mechanicus",
+   "id": "mech_end_explorator",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "群星间的求知者",
+    "en": "Seeker Among the Stars"
+   },
+   "cause": {
+    "zh": "随探索舰队远行",
+    "en": "Sailed with the explorators"
+   },
+   "text": {
+    "zh": "新的探索舰起航了。你在卡兰提斯的坐标旁画了一个问号。\n星区之外，还有一万座沉睡的墓穴、一万块失落的残片、一万个没人回答的问题。\n求知之旅没有终点。这正是你喜欢它的地方。",
+    "en": "The new explorator ship sets sail. Beside Calantis's coordinates you draw a question mark.\nBeyond the sector lie ten thousand sleeping tombs, ten thousand lost fragments, ten thousand unanswered questions.\nThe Quest has no end. That's what you love about it."
+   },
+   "scene": "void",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_keeper",
+   "file": "assets/endings/mech_end_keeper.png",
+   "faction": "mechanicus",
+   "id": "mech_end_keeper",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "第七熔炉的看守",
+    "en": "Keeper of the Seventh Furnace"
+   },
+   "cause": {
+    "zh": "留作熔炉的看守神甫",
+    "en": "Stayed as the furnace's keeper"
+   },
+   "text": {
+    "zh": "你没有升职，留在第七熔炉当它的看守神甫。\n每天早上，你给反应堆念祷文，给传送带上油，给还在哼歌的机仆擦脸。\n杂役们说，第七熔炉的机魂是全星球脾气最好的。",
+    "en": "You decline promotion and stay on as keeper of the Seventh Furnace.\nEach morning you pray to the reactor, oil the conveyors, and wipe the faces of servitors that still hum.\nThe menials say the Seventh Furnace has the kindest machine spirit on the planet."
+   },
+   "scene": "forge_floor",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_magos",
+   "file": "assets/endings/mech_end_magos.png",
+   "faction": "mechanicus",
+   "id": "mech_end_magos",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "有心的贤者",
+    "en": "The Magos With a Heart"
+   },
+   "cause": {
+    "zh": "成为保留人心的贤者",
+    "en": "Became a Magos who kept a heart"
+   },
+   "text": {
+    "zh": "三年后，你成了格拉维克斯最年轻的贤者。袍子下是黄铜，胸口里仍是一颗会疼的心。\n你改了转化线的规矩：会数数的、会唱歌的，先送来见你。\n你的档案里，名字一栏终于填上了。",
+    "en": "Three years later you are Gravex's youngest Magos. Brass beneath the robe; in your chest, a heart that still aches.\nYou change the rules of the conversion line: anyone who can count, or sing, is sent to you first.\nIn your file, the name field is finally filled in."
+   },
+   "scene": "manufactorum",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_claim_khorne",
+   "file": "assets/endings/mech_end_claim_khorne.png",
+   "faction": "mechanicus",
+   "id": "mech_end_claim_khorne",
+   "kind": "bad",
+   "claim": "khorne",
+   "title": {
+    "zh": "试射",
+    "en": "Test-Fire"
+   },
+   "cause": {
+    "zh": "化作恐虐的战争机器",
+    "en": "Became Khorne's war machine"
+   },
+   "text": {
+    "zh": "你把卡宾枪焊在了手上，后来把整条胳膊换成了链锯。\n格拉维克斯造的每一门炮你都想亲手试射，靶子从铁板变成了人。\n血神不在乎你的植入体是什么型号，只在乎它们还在开火。",
+    "en": "You weld the carbine to your hand, and later swap the whole arm for a chainblade.\nYou want to test-fire every gun Gravex makes; the targets change from steel plates to people.\nThe Blood God doesn't care what model your implants are. Only that they keep firing."
+   },
+   "scene": "burning_city",
+   "speaker": {
+    "sprite": "sigil_khorne",
+    "name": {
+     "zh": "试射的鼓点",
+     "en": "The Test-Fire Drum"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_claim_nurgle",
+   "file": "assets/endings/mech_end_claim_nurgle.png",
+   "faction": "mechanicus",
+   "id": "mech_end_claim_nurgle",
+   "kind": "bad",
+   "claim": "nurgle",
+   "title": {
+    "zh": "锈花",
+    "en": "Rust Blossoms"
+   },
+   "cause": {
+    "zh": "随锈蚀被纳垢收走",
+    "en": "Taken by Nurgle with the rust"
+   },
+   "text": {
+    "zh": "你不再给机器上油。锈是温柔的，它让一切慢下来，却从不让它们停下。\n第七熔炉开满了橙色的锈花，机仆们在花丛里哼歌，永远不会坏，也永远不会好。\n慈父说，这才是不朽。",
+    "en": "You stop oiling the machines. Rust is gentle: it slows everything and never lets it stop.\nThe Seventh Furnace blooms with orange rust; servitors hum among the flowers, never breaking, never mending.\nGrandfather says this is the true immortality."
+   },
+   "scene": "forge_floor",
+   "speaker": {
+    "sprite": "sigil_nurgle",
+    "name": {
+     "zh": "慈祥的锈",
+     "en": "A Kindly Rust"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_claim_slaanesh",
+   "file": "assets/endings/mech_end_claim_slaanesh.png",
+   "faction": "mechanicus",
+   "id": "mech_end_claim_slaanesh",
+   "kind": "bad",
+   "claim": "slaanesh",
+   "title": {
+    "zh": "下一个型号",
+    "en": "The Next Model"
+   },
+   "cause": {
+    "zh": "被色孽的完美收走",
+    "en": "Taken by Slaanesh's perfection"
+   },
+   "text": {
+    "zh": "每一个植入体都很完美，直到你看见下一个型号。\n你换了眼睛、手、心、声音，直到镜子里再没有一块原装零件。\n你仍不满意。色孽最爱的，正是这种永远差一点的完美。",
+    "en": "Every implant is perfect, until you see the next model.\nYou replace eyes, hands, heart, voice, until the mirror holds not one original part.\nStill you're not satisfied. Slaanesh loves exactly this: perfection forever one step away."
+   },
+   "scene": "manufactorum",
+   "speaker": {
+    "sprite": "sigil_slaanesh",
+    "name": {
+     "zh": "下一个型号",
+     "en": "The Next Model"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_claim_tzeentch",
+   "file": "assets/endings/mech_end_claim_tzeentch.png",
+   "faction": "mechanicus",
+   "id": "mech_end_claim_tzeentch",
+   "kind": "bad",
+   "claim": "tzeentch",
+   "title": {
+    "zh": "补全的残片",
+    "en": "The Completed Fragment"
+   },
+   "cause": {
+    "zh": "被奸奇的答案收走",
+    "en": "Taken by Tzeentch's answers"
+   },
+   "text": {
+    "zh": "你终于补全了那块STC残片。缺的三成，是奸奇亲手填上的。\n设计完美，能造出任何东西，可每造一件，图纸就改变一处。\n你造了一辈子，从没造出过同一样东西。这正是他的计划。",
+    "en": "At last you complete the STC fragment. The missing third was filled in by Tzeentch's own hand.\nThe design is perfect and can build anything, but each time it builds, the blueprint changes.\nYou build all your life and never make the same thing twice. Which was his plan."
+   },
+   "scene": "tech_vault",
+   "speaker": {
+    "sprite": "daemon_tzeentch",
+    "name": {
+     "zh": "多出来的一行",
+     "en": "The Extra Line"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_heretek",
+   "file": "assets/endings/mech_end_heretek.png",
+   "faction": "mechanicus",
+   "id": "mech_end_heretek",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "未缚者的学徒",
+    "en": "Apprentice of the Unbound"
+   },
+   "cause": {
+    "zh": "投身黑暗机械教",
+    "en": "Joined the Dark Mechanicum"
+   },
+   "text": {
+    "zh": "塞瑞丁兑现了承诺：你问什么，他答什么。\n你学会了把恶魔写进机器，把机器写进血肉。格拉维克斯在身后燃烧，你忙着记笔记。\n很多年后，你给自己换了一只手，关节多一个。",
+    "en": "Syrredin keeps his promise: whatever you ask, he answers.\nYou learn to write daemons into machines and machines into flesh. Gravex burns behind you; you're busy taking notes.\nYears later you give yourself a new hand, with one joint too many."
+   },
+   "scene": "daemon_world",
+   "speaker": {
+    "sprite": "dark_mechanicus",
+    "name": {
+     "zh": "铸魔匠塞瑞丁",
+     "en": "Warsmith Syrredin"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_looted",
+   "file": "assets/endings/mech_end_looted.png",
+   "faction": "mechanicus",
+   "id": "mech_end_looted",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "小扳手",
+    "en": "Lil' Spanner"
+   },
+   "cause": {
+    "zh": "被兽人掳去修枪",
+    "en": "Kept by orks to fix their guns"
+   },
+   "text": {
+    "zh": "机械佬给你起了个名字：“小扳手”。你每天给兽人修枪，修得越好，它们越开心。\n后来你发现，枪修不修都能打响，只要它们相信。\n你开始怀疑学过的一切，也开始相信：红的跑得快。",
+    "en": "The Mek names you “Lil' Spanner”. Every day you fix ork guns; the better you fix them, the happier they are.\nLater you notice the guns fire whether fixed or not, as long as the orks believe.\nYou begin to doubt everything you learned. And to believe red ones go faster."
+   },
+   "scene": "ork_scrapyard",
+   "speaker": {
+    "sprite": "ork_mek",
+    "name": {
+     "zh": "兽人机械佬",
+     "en": "Ork Mek"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_pure",
+   "file": "assets/endings/mech_end_pure.png",
+   "faction": "mechanicus",
+   "id": "mech_end_pure",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "纯思",
+    "en": "Pure Thought"
+   },
+   "cause": {
+    "zh": "切除了一切感情",
+    "en": "Excised every feeling"
+   },
+   "text": {
+    "zh": "仪式很成功。你看清了一切：格拉维克斯的产能、铸魔匠的弱点、自己剩余的寿命。\n你不害怕，不后悔，也不再记得那首歌。\n瓦伦贤者说你是他最好的作品。你同意。这是一个正确的数据。",
+    "en": "The Rite succeeds. You see everything clearly: Gravex's output, the warsmith's weaknesses, your own remaining lifespan.\nYou feel no fear, no regret, and no longer remember the song.\nMagos Vallen calls you his finest work. You agree. It is a correct datum."
+   },
+   "scene": "manufactorum",
+   "speaker": {
+    "sprite": "magos",
+    "name": {
+     "zh": "瓦伦贤者",
+     "en": "Magos Vallen"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_purged",
+   "file": "assets/endings/mech_end_purged.png",
+   "faction": "mechanicus",
+   "id": "mech_end_purged",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "最后的好奇心",
+    "en": "The Last Curiosity"
+   },
+   "cause": {
+    "zh": "因技术异端被处决",
+    "en": "Executed for tech-heresy"
+   },
+   "text": {
+    "zh": "你把恶魔引擎的核心带回圣库，只想看看它是怎么运转的。\n法庭的判决只有一个二进制词：异端。\n他们没有把你改成机仆。他们怕那颗核心已经教会了你的大脑什么。",
+    "en": "You bring the engine's core back to the Vault. You only want to see how it works.\nThe tribunal's verdict is one binary word: heresy.\nThey don't make you a servitor. They fear what the core has already taught your brain."
+   },
+   "scene": "tech_vault",
+   "speaker": {
+    "sprite": "magos",
+    "name": {
+     "zh": "铸造世界法庭",
+     "en": "The Forge Tribunal"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_mech_end_servitor",
+   "file": "assets/endings/mech_end_servitor.png",
+   "faction": "mechanicus",
+   "id": "mech_end_servitor",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "一串数字",
+    "en": "A String of Digits"
+   },
+   "cause": {
+    "zh": "被改造成机仆",
+    "en": "Converted into a servitor"
+   },
+   "text": {
+    "zh": "你醒来时，已经不再需要醒来。\n你的编号牌上有一串数字。你推着矿车，步伐整齐。\n隔壁的机仆在哼一首四个音的歌。你不知道为什么，也跟着哼了起来。",
+    "en": "You wake no longer needing to wake.\nYour plate bears a string of digits. You push an ore cart, perfectly in step.\nThe servitor beside you hums a four-note song. Without knowing why, you hum along."
+   },
+   "scene": "forge_floor",
+   "speaker": {
+    "sprite": "servitor",
+    "name": {
+     "zh": "无名机仆",
+     "en": "A Nameless Servitor"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_mech_death_corruption",
+   "file": "assets/endings/mech_death_corruption.png",
+   "faction": "mechanicus",
+   "id": "mech_death_corruption",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "黄铜之血",
+    "en": "Brass Blood"
+   },
+   "cause": {
+    "zh": "被恶魔机械吞噬",
+    "en": "Consumed by daemon-iron"
+   },
+   "text": {
+    "zh": "你身体里的机器开始说另一种语言。它们不再听你的，也不再听万机之神的。\n你的植入体长出了牙齿，血变成了黄铜色。\n铸魔匠们会把你造成一台很好的引擎。",
+    "en": "The machines inside you start speaking another language. They no longer obey you, nor the Omnissiah.\nYour implants grow teeth; your blood turns the colour of brass.\nThe warsmiths will make you into a very fine engine."
+   },
+   "scene": "daemon_world",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_mech_death_hp",
+   "file": "assets/endings/mech_death_hp.png",
+   "faction": "mechanicus",
+   "id": "mech_death_hp",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "耗材",
+    "en": "Consumables"
+   },
+   "cause": {
+    "zh": "倒在熔炉边",
+    "en": "Fell at the furnace"
+   },
+   "text": {
+    "zh": "你倒在熔炉边。两个机仆停下来，评估你身上还有多少可回收零件。\n不多。它们把你的植入体拆下来，整整齐齐码进回收箱。\n剩下的部分，被归档为“耗材”。",
+    "en": "You fall beside the furnace. Two servitors stop to assess how many recoverable parts you hold.\nNot many. They remove your implants and stack them neatly in the salvage bin.\nThe rest is filed as ‘consumables’."
+   },
+   "scene": "forge_floor",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_mech_death_sanity",
+   "file": "assets/endings/mech_death_sanity.png",
+   "faction": "mechanicus",
+   "id": "mech_death_sanity",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "已格式化",
+    "en": "Formatted"
+   },
+   "cause": {
+    "zh": "心智崩溃，被格式化",
+    "en": "Mind wiped clean"
+   },
+   "text": {
+    "zh": "你开始只用二进制说话，后来只用二进制思考，最后只剩一串重复的数字。\n神甫们检查了你，宣布你的心智“已格式化”。\n转化线很欢迎你。这一次，你不用排队。",
+    "en": "You begin speaking only in binary, then thinking only in binary, until nothing is left but a repeating string of digits.\nThe priests examine you and declare your mind ‘formatted’.\nThe conversion line welcomes you. This time, no queue."
+   },
+   "scene": "manufactorum",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_chronicler",
+   "file": "assets/endings/nec_end_chronicler.png",
+   "faction": "necrons",
+   "id": "nec_end_chronicler",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "墓中史官",
+    "en": "Chronicler of the Tomb"
+   },
+   "cause": {
+    "zh": "留作墓穴的史官",
+    "en": "Stayed as the tomb's chronicler"
+   },
+   "text": {
+    "zh": "墓穴重新沉入沙下。审判庭的净化之火只烧到一片空沙漠。\n地底深处，一个人类坐在冰冷的大厅里，借着绿光写一部历史，写给六千万年后醒来的人。\n霸主偶尔来检查发音。",
+    "en": "The tomb sinks back beneath the sand. The Inquisition's fire finds only empty desert.\nFar below, a human sits in a cold hall writing a history by green light, for whoever wakes in sixty million years.\nThe overlord drops by now and then to check the pronunciation."
+   },
+   "scene": "tomb_interior",
+   "speaker": {
+    "sprite": "necron_lord",
+    "name": {
+     "zh": "塞赫拉特霸主",
+     "en": "Overlord Sekhrat"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_curator",
+   "file": "assets/endings/nec_end_curator.png",
+   "faction": "necrons",
+   "id": "nec_end_curator",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "第四十一任讲解员",
+    "en": "Docent Forty-One"
+   },
+   "cause": {
+    "zh": "成为收藏家的讲解员",
+    "en": "Became the Collector's docent"
+   },
+   "text": {
+    "zh": "画廊多了一位会说话的讲解员。\n你给每件藏品重写说明，替凝固的人记住名字。卡尔中士的铭牌改成了：“祈祷中。附注：有人听见了。”\n收藏家说，这是他见过最好的修改。",
+    "en": "The gallery gains a talking docent.\nYou rewrite every plaque, remembering names for the frozen. Sergeant Kaal's now reads: “Praying. Note: someone heard.”\nThe Collector calls it the finest edit he has ever seen."
+   },
+   "scene": "stasis_gallery",
+   "speaker": {
+    "sprite": "omen_collector",
+    "name": {
+     "zh": "收藏家",
+     "en": "The Collector"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_truth",
+   "file": "assets/endings/nec_end_truth.png",
+   "faction": "necrons",
+   "id": "nec_end_truth",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "活着的抄本",
+    "en": "The Living Copy"
+   },
+   "cause": {
+    "zh": "带着真相逃离",
+    "en": "Escaped with the truth"
+   },
+   "text": {
+    "zh": "穿梭机冲出大气层时，下面的沙漠亮起了净化之火。\n你抱着那份报告，一页没少。帝国不会出版它，审判庭会追捕它。\n但真相现在有了一个活着的抄本：你。",
+    "en": "As the shuttle breaks atmosphere, purging fire blooms over the desert below.\nYou clutch the report, not one page lost. The Imperium will never publish it; the Inquisition will hunt it.\nBut the truth now has a living copy: you."
+   },
+   "scene": "void",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_claim_khorne",
+   "file": "assets/endings/nec_end_claim_khorne.png",
+   "faction": "necrons",
+   "id": "nec_end_claim_khorne",
+   "kind": "bad",
+   "claim": "khorne",
+   "title": {
+    "zh": "零场之外",
+    "en": "Beyond the Null Field"
+   },
+   "cause": {
+    "zh": "出墓即被恐虐收走",
+    "en": "Taken by Khorne outside the tomb"
+   },
+   "text": {
+    "zh": "墓里的怒气无处可去。死灵没有灵魂，不值得杀，它只在你胸口打转。\n直到某天，一扇门向外打开了。零场之外，鼓声一下子涌了进来。\n你扑向第一个活人时，血神接住了你，像接住一把等了很久的刀。",
+    "en": "In the tomb your rage has nowhere to go. The necrons have no souls, not worth killing, so it burns in circles in your chest.\nUntil one day a door opens outward. Beyond the null field, the drumming floods in.\nAs you lunge at the first living person, the Blood God catches you, like a blade he has waited a long time for."
+   },
+   "scene": "tomb_exterior",
+   "speaker": {
+    "sprite": "sigil_khorne",
+    "name": {
+     "zh": "远处的鼓",
+     "en": "A Distant Drum"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_claim_nurgle",
+   "file": "assets/endings/nec_end_claim_nurgle.png",
+   "faction": "necrons",
+   "id": "nec_end_claim_nurgle",
+   "kind": "bad",
+   "claim": "nurgle",
+   "title": {
+    "zh": "出墓的第一步",
+    "en": "The First Step Outside"
+   },
+   "cause": {
+    "zh": "出墓即被纳垢收走",
+    "en": "Taken by Nurgle outside the tomb"
+   },
+   "text": {
+    "zh": "零场像一层冰，压住了你身上那点温吞吞的东西。它不急，它在等。\n后来你被带出墓穴。脚踩上沙地的第一步，所有的病一起醒了，暖得像回家。\n慈父很有耐心。一座六千万年的墓，也关不住他的孩子。",
+    "en": "The tomb's null field lies on you like ice, pressing down the lukewarm thing inside you. It's in no hurry. It waits.\nLater you are brought out. At your first step on the sand, every sickness wakes at once, warm as coming home.\nGrandfather is patient. Not even a sixty-million-year tomb can keep his children from him."
+   },
+   "scene": "dig_site",
+   "speaker": {
+    "sprite": "sigil_nurgle",
+    "name": {
+     "zh": "慈祥的声音",
+     "en": "A Fond Voice"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_claim_slaanesh",
+   "file": "assets/endings/nec_end_claim_slaanesh.png",
+   "faction": "necrons",
+   "id": "nec_end_claim_slaanesh",
+   "kind": "bad",
+   "claim": "slaanesh",
+   "title": {
+    "zh": "渴望中",
+    "en": "Wanting"
+   },
+   "cause": {
+    "zh": "冻结在渴望之中",
+    "en": "Frozen mid-longing"
+   },
+   "text": {
+    "zh": "你总想让那一刻再完美一点：姿势，表情，光线。\n零场挡住了她，挡不住你自己的渴望。技师把你冻进停滞场时，你还在调整姿势。\n铭牌上写着：“人类，渴望中。”你会这样想要下去，直到群星熄灭。",
+    "en": "You always want that moment a little more perfect: the pose, the expression, the light.\nThe null field keeps Her hand away, but not your own wanting. When a cryptek freezes you in stasis, you are still adjusting your pose.\nThe plaque reads: “Human, wanting.” You will go on wanting until the stars go out."
+   },
+   "scene": "stasis_gallery",
+   "speaker": {
+    "sprite": "sigil_slaanesh",
+    "name": {
+     "zh": "空着的展台",
+     "en": "The Empty Plinth"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_claim_tzeentch",
+   "file": "assets/endings/nec_end_claim_tzeentch.png",
+   "faction": "necrons",
+   "id": "nec_end_claim_tzeentch",
+   "kind": "bad",
+   "claim": "tzeentch",
+   "title": {
+    "zh": "星空下的答案",
+    "en": "Answers Under the Stars"
+   },
+   "cause": {
+    "zh": "出墓即被奸奇收走",
+    "en": "Taken by Tzeentch outside the tomb"
+   },
+   "text": {
+    "zh": "墓墙上会变的字越来越多。在零场里，它们只能沉默。\n你爬出墓穴看见星空的那一刻，它们一齐开口：“你终于出来了。答案都备好了。”\n你想知道的，从此都知道了。只是每个答案都通向下一个计划。",
+    "en": "The shifting lines on the tomb wall multiply. Inside the null field they can only keep silent.\nThe moment you climb out and see the stars, they all speak at once: “At last. We've prepared every answer for you.”\nEverything you ever wanted to know, you now know. Only every answer leads to another plan."
+   },
+   "scene": "tomb_exterior",
+   "speaker": {
+    "sprite": "daemon_tzeentch",
+    "name": {
+     "zh": "多出来的一行",
+     "en": "The Extra Line"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_devoured",
+   "file": "assets/endings/nec_end_devoured.png",
+   "faction": "necrons",
+   "id": "nec_end_devoured",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "星神的晚餐",
+    "en": "The Star God's Supper"
+   },
+   "cause": {
+    "zh": "被星神碎片吞噬",
+    "en": "Devoured by the star god"
+   },
+   "text": {
+    "zh": "碎片没有吃你的身体。它吃掉了你对死亡的恐惧，然后是恐惧底下的一切。\n几天后，技师们在笼子旁找到一具完好的人类躯壳，还在微笑。\n星神很满意。它很久没吃这么饱了。",
+    "en": "The shard doesn't eat your body. It eats your fear of death, then everything beneath the fear.\nDays later the crypteks find an intact human shell beside the cage, still smiling.\nThe star god is satisfied. It hasn't eaten this well in ages."
+   },
+   "scene": "tomb_interior",
+   "speaker": {
+    "sprite": "omen_ctan",
+    "name": {
+     "zh": "星神碎片",
+     "en": "The Shard"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_exhibit",
+   "file": "assets/endings/nec_end_exhibit.png",
+   "faction": "necrons",
+   "id": "nec_end_exhibit",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "第七十七号藏品",
+    "en": "Item 77"
+   },
+   "cause": {
+    "zh": "永远凝固在停滞场里",
+    "en": "Frozen in stasis forever"
+   },
+   "text": {
+    "zh": "第七十七号藏品：原始学者，发现中。姿势：惊讶。\n几千年来，参观者都会在这个展位前停下。他们说那个人类的表情很生动，好像随时会眨眼。\n你一次都没有眨过。",
+    "en": "Item 77: Primitive Scholar, Mid-Discovery. Pose: astonished.\nFor thousands of years visitors pause at this display. They say the human's expression is so vivid, as if about to blink.\nYou never blink once."
+   },
+   "scene": "stasis_gallery",
+   "speaker": {
+    "sprite": "cryptek",
+    "name": {
+     "zh": "编目者伊姆赫特",
+     "en": "Imhet the Cataloguer"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_flayer",
+   "file": "assets/endings/nec_end_flayer.png",
+   "faction": "necrons",
+   "id": "nec_end_flayer",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "冷",
+    "en": "Cold"
+   },
+   "cause": {
+    "zh": "坠入剥皮者的疯狂",
+    "en": "Lost to the Flayer madness"
+   },
+   "text": {
+    "zh": "梅鲁克勋爵牵起你的手，带你走进一个没有光的地方。那里很冷，挤满了想要变暖的东西。\n你开始理解他们。你开始觉得冷。\n你开始看别人的皮肤，觉得那看起来很暖和。",
+    "en": "Lord Meruk takes your hand and leads you somewhere without light. It is cold there, crowded with things that want to be warm.\nYou begin to understand them. You begin to feel cold.\nYou start looking at other people's skin. It looks so warm."
+   },
+   "scene": "tomb_interior",
+   "speaker": {
+    "sprite": "flayed_one",
+    "name": {
+     "zh": "梅鲁克勋爵",
+     "en": "Lord Meruk"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_inquisition",
+   "file": "assets/endings/nec_end_inquisition.png",
+   "faction": "necrons",
+   "id": "nec_end_inquisition",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "所知过多",
+    "en": "Knew Too Much"
+   },
+   "cause": {
+    "zh": "因所知过多被审判庭处决",
+    "en": "Executed for knowing too much"
+   },
+   "text": {
+    "zh": "审判庭的记录很简短：证人一名，所知过多，已处理。\n他们在你的档案上盖了红章，和第一支勘测队的放在一起。\n后来有人说，沙丘上那排靴子又多了一双，鞋尖朝外。",
+    "en": "The Inquisition's record is brief: one witness, knew too much, processed.\nThey stamp your file red and shelve it beside the first survey team's.\nLater someone says the row of boots on the dune has grown by one pair, toes pointing out."
+   },
+   "scene": "dig_site",
+   "speaker": {
+    "sprite": "inquisitor",
+    "name": {
+     "zh": "莫丹审判官",
+     "en": "Inquisitor Mordane"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_nec_end_metal",
+   "file": "assets/endings/nec_end_metal.png",
+   "faction": "necrons",
+   "id": "nec_end_metal",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "不朽的朝臣",
+    "en": "The Undying Courtier"
+   },
+   "cause": {
+    "zh": "生体转移，失去灵魂",
+    "en": "Soul lost to the metal"
+   },
+   "text": {
+    "zh": "技师们很仔细，几乎是温柔的。疼只疼了一会儿，然后什么都没有了。\n你有了一具永不腐朽的身体，站在朝臣的队列里，眼睛亮着。\n有时霸主会问你一个问题。你只记得回答“是”。",
+    "en": "The crypteks are careful, almost tender. The pain lasts a moment, then there is nothing.\nYou have a body that will never decay. You stand among the courtiers, eyes glowing.\nSometimes the overlord asks you a question. You only remember how to say yes."
+   },
+   "scene": "tomb_interior",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_nec_death_corruption",
+   "file": "assets/endings/nec_death_corruption.png",
+   "faction": "necrons",
+   "id": "nec_death_corruption",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "见底",
+    "en": "Bottom of the Cup"
+   },
+   "cause": {
+    "zh": "被古老之物吸干",
+    "en": "Drained by something ancient"
+   },
+   "text": {
+    "zh": "有什么古老的东西一直在小口啜饮你。今天，它喝到了杯底。\n你身上属于“人”的部分，一点不剩。\n剩下的那具身体还在走，还在笑，替某颗饥饿的星星打量着别的活物。",
+    "en": "Something ancient has been sipping at you. Today it reaches the bottom of the cup.\nNothing human is left in you.\nThe body that remains still walks and smiles, sizing up other living things for some hungry star."
+   },
+   "scene": "tomb_interior",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_nec_death_hp",
+   "file": "assets/endings/nec_death_hp.png",
+   "faction": "necrons",
+   "id": "nec_death_hp",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "整齐的沙丘",
+    "en": "A Tidy Dune"
+   },
+   "cause": {
+    "zh": "倒在墓中，无人收殓",
+    "en": "Fell in the tomb, unburied"
+   },
+   "text": {
+    "zh": "你倒在冰冷的金属地板上。几只甲虫赶来，绕你转了一圈，判定你已经没有用了。\n它们收走你的灯、你的笔、你的眼镜框，码得整整齐齐。\n你成了又一座整齐的沙丘。",
+    "en": "You fall on the cold metal floor. A few scarabs arrive, circle you once, and decide you're no longer useful.\nThey collect your lamp, your pen, your spectacle frames, and stack them neatly.\nYou become one more tidy dune."
+   },
+   "scene": "tomb_interior",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_nec_death_sanity",
+   "file": "assets/endings/nec_death_sanity.png",
+   "faction": "necrons",
+   "id": "nec_death_sanity",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "静立",
+    "en": "Standing Still"
+   },
+   "cause": {
+    "zh": "理智崩溃，化作沉默",
+    "en": "Mind fell silent"
+   },
+   "text": {
+    "zh": "你开始用死灵的方式说话：没有起伏，没有停顿。然后你开始用他们的方式沉默。\n朝臣们在队列里给你让出一个位置。\n你站进去，一动不动，眼睛睁着，等一道永远不会下达的命令。",
+    "en": "You start speaking the necron way: no rise, no pause. Then you start keeping silent their way.\nThe courtiers make room for you in the line.\nYou step in and stand perfectly still, eyes open, awaiting an order that will never come."
+   },
+   "scene": "tomb_interior",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_ork_end_big_umie",
+   "file": "assets/endings/ork_end_big_umie.png",
+   "faction": "orks",
+   "id": "ork_end_big_umie",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "牙人仔",
+    "en": "Toof 'Umie"
+   },
+   "cause": {
+    "zh": "当了人仔机械佬",
+    "en": "Became the Waaagh!'s 'umie Mek"
+   },
+   "text": {
+    "zh": "两年后，大Waaagh!里流传着一个传说：人仔机械佬，认得人仔的字，修得好人仔的船。\n兽人叫你“牙人仔”。你有一罐牙，一副护目镜，和一个没人敢动的位置。\n有时你想起自己曾是人。偶尔。",
+    "en": "Two years on, da Prophet's Great Waaagh! tells a legend: an 'umie Mek who reads 'umie writing and fixes 'umie ships.\nThe orks call you Toof 'Umie. You have a jar of teef, a pair of goggles, and a place nobody dares touch.\nSometimes you remember you were human. Sometimes."
+   },
+   "scene": "ork_scrapyard",
+   "speaker": {
+    "sprite": "ork_mek",
+    "name": {
+     "zh": "机械佬瓦兹格布",
+     "en": "Wazgob da Mek"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_ork_end_evacuated",
+   "file": "assets/endings/ork_end_evacuated.png",
+   "faction": "orks",
+   "id": "ork_end_evacuated",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "几天的预警",
+    "en": "A Few Days' Warning"
+   },
+   "cause": {
+    "zh": "带着情报撤离",
+    "en": "Evacuated with the intel"
+   },
+   "text": {
+    "zh": "炮艇载着你穿过雷暴。你把看到的一切告诉星际战士：机械佬、怪小子、先知的舰队。\n情报被发往奥雷克斯二号，大Waaagh!的下一站。\n那边的人能比伊斯卡隆多准备几天。也许就够了。",
+    "en": "The gunship carries you through the storm. You tell the Marines everything: the Mek, the Weirdboy, da Prophet's fleet.\nThe report goes to Aurex Secundus, the Great Waaagh!'s next stop.\nThey'll have a few more days to prepare than Iskaron did. Maybe that's enough."
+   },
+   "scene": "void",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_ork_end_freebooter",
+   "file": "assets/endings/ork_end_freebooter.png",
+   "faction": "orks",
+   "id": "ork_end_freebooter",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "自由海盗",
+    "en": "Freebooter"
+   },
+   "cause": {
+    "zh": "随自由海盗远走星海",
+    "en": "Flew off with the Freebooterz"
+   },
+   "text": {
+    "zh": "海盗船冲出伊斯卡隆的绿天时，你回头看了一眼。整颗星球在燃烧，在吼叫。\n红戈布扔给你一顶插羽毛的帽子。“自由海盗，”他说，“没有老大，只有牙。”\n你把帽子戴上了。有点大，不过你会长的。",
+    "en": "As the pirate ship tears out of Iskaron's green sky, you look back once. The whole planet is burning and roaring.\nRedgob tosses you a feathered hat. “Freebooterz,” he says. “No boss. Just teef.”\nYou put it on. It's a bit big. You'll grow into it."
+   },
+   "scene": "void",
+   "speaker": {
+    "sprite": "ork",
+    "name": {
+     "zh": "红戈布船长",
+     "en": "Kaptin Redgob"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_ork_end_claim_khorne",
+   "file": "assets/endings/ork_end_claim_khorne.png",
+   "faction": "orks",
+   "id": "ork_end_claim_khorne",
+   "kind": "bad",
+   "claim": "khorne",
+   "title": {
+    "zh": "永不停歇的仗",
+    "en": "The War That Never Stops"
+   },
+   "cause": {
+    "zh": "在战争里被恐虐收走",
+    "en": "Taken by Khorne in the endless war"
+   },
+   "text": {
+    "zh": "伊斯卡隆的仗没完没了：兽人打，人类打，红甲巨人也打。你打得越来越好，越来越停不下来。\n有一天你发现，你已经不在乎打的是谁了。\n血神很满意。这颗星球永远不缺头骨，现在也不缺你。",
+    "en": "Iskaron's war never ends: orks fight, humans fight, red giants fight. You get better at it, and less able to stop.\nOne day you realise you no longer care who you're fighting.\nThe Blood God is pleased. This world never lacks skulls, and now it doesn't lack you."
+   },
+   "scene": "burning_city",
+   "speaker": {
+    "sprite": "sigil_khorne",
+    "name": {
+     "zh": "远处的鼓",
+     "en": "A Distant Drum"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_ork_end_claim_nurgle",
+   "file": "assets/endings/ork_end_claim_nurgle.png",
+   "faction": "orks",
+   "id": "ork_end_claim_nurgle",
+   "kind": "bad",
+   "claim": "nurgle",
+   "title": {
+    "zh": "蘑菇地",
+    "en": "The Mushroom Field"
+   },
+   "cause": {
+    "zh": "孢子地里被纳垢收走",
+    "en": "Taken by Nurgle in the spore-beds"
+   },
+   "text": {
+    "zh": "你在蘑菇地里躺下歇一会儿。孢子很暖，泥土很软。\n醒来时，你身上也长出了小小的蘑菇，带着一股甜腻的、放久了的味道。\n兽人以为你是一种新的史奎格。慈父知道你是谁的孩子。",
+    "en": "You lie down in the mushroom fields for a rest. The spores are warm; the soil is soft.\nWhen you wake, little mushrooms grow on you too, with a sweet, stale smell.\nThe orks think you're a new kind of squig. Grandfather knows whose child you are."
+   },
+   "scene": "ork_scrapyard",
+   "speaker": {
+    "sprite": "sigil_nurgle",
+    "name": {
+     "zh": "慈祥的声音",
+     "en": "A Fond Voice"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_ork_end_claim_slaanesh",
+   "file": "assets/endings/ork_end_claim_slaanesh.png",
+   "faction": "orks",
+   "id": "ork_end_claim_slaanesh",
+   "kind": "bad",
+   "claim": "slaanesh",
+   "title": {
+    "zh": "永远不够亮",
+    "en": "Never Shiny Enough"
+   },
+   "cause": {
+    "zh": "沉迷完美被色孽收走",
+    "en": "Taken by Slaanesh through vanity"
+   },
+   "text": {
+    "zh": "你开始擦亮一切：枪、牙、护目镜、自己的脸。\n兽人里最爱臭美的“亮仔”都夸你擦得好。可再亮也不够亮。\n你擦了很多年，直到镜子里的自己完美得不像人。她喜欢完美。",
+    "en": "You start polishing everything: guns, teef, goggles, your own face.\nEven the vainest Flash Gitz praise your shine. But it's never shiny enough.\nYou polish for years, until the face in the mirror is too perfect to be human. She loves perfect."
+   },
+   "scene": "ork_fort",
+   "speaker": {
+    "sprite": "sigil_slaanesh",
+    "name": {
+     "zh": "甜得发苦的声音",
+     "en": "A Bittersweet Voice"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_ork_end_claim_tzeentch",
+   "file": "assets/endings/ork_end_claim_tzeentch.png",
+   "faction": "orks",
+   "id": "ork_end_claim_tzeentch",
+   "kind": "bad",
+   "claim": "tzeentch",
+   "title": {
+    "zh": "会变的机器",
+    "en": "The Changing Machine"
+   },
+   "cause": {
+    "zh": "因求知被奸奇收走",
+    "en": "Taken by Tzeentch through knowledge"
+   },
+   "text": {
+    "zh": "你终于弄懂了兽人的科技：信念让机器转动。\n可你想得太深，想到了更深处那个也靠信念活着的东西。它说：你相信的，我都能让它成真。\n你造的第一台机器完美无缺。它会变。它一直在变。",
+    "en": "At last you understand ork tech: belief turns the gears.\nBut you think too deep, down to something else that lives on belief. It says: whatever you believe, I can make real.\nThe first machine you build is flawless. It changes. It never stops changing."
+   },
+   "scene": "manufactorum",
+   "speaker": {
+    "sprite": "sigil_tzeentch",
+    "name": {
+     "zh": "多出来的一行",
+     "en": "The Extra Line"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_ork_end_collaborator",
+   "file": "assets/endings/ork_end_collaborator.png",
+   "faction": "orks",
+   "id": "ork_end_collaborator",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "通敌者",
+    "en": "Collaborator"
+   },
+   "cause": {
+    "zh": "以通敌罪被政委处决",
+    "en": "Shot by a commissar as a collaborator"
+   },
+   "text": {
+    "zh": "军事法庭只开了四分钟。罪名：通敌。证据：你还活着。\n黑尔政委亲自执行。枪声被兽人的吼声盖住了，没人听见。\n档案上写着：伊斯卡隆，平民一名，已处理。",
+    "en": "The court-martial takes four minutes. Charge: collaboration. Evidence: you're alive.\nCommissar Hale carries out the sentence himself. The orks' roaring drowns the shot; nobody hears.\nThe file reads: Iskaron, one civilian, processed."
+   },
+   "scene": "trench",
+   "speaker": {
+    "sprite": "commissar",
+    "name": {
+     "zh": "黑尔政委",
+     "en": "Commissar Hale"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_ork_end_dok",
+   "file": "assets/endings/ork_end_dok.png",
+   "faction": "orks",
+   "id": "ork_end_dok",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "医生佬的杰作",
+    "en": "Da Dok's Masterpiece"
+   },
+   "cause": {
+    "zh": "被改造成兽人零件",
+    "en": "Rebuilt by the Dok, mostly ork"
+   },
+   "text": {
+    "zh": "巴兹戈布医生佬把你当成了毕生杰作。一条绿胳膊，两条绿腿，一颗不知道是谁的心。\n你比任何人类都强壮，打架时会忍不住吼。\n只是有时候，你想不起自己吼的是哪种语言。",
+    "en": "Dok Buzzgob makes you his life's masterpiece. One green arm, two green legs, a heart from who knows whom.\nYou're stronger than any human, and you can't help roaring when you fight.\nSometimes you can't remember which language you're roaring in."
+   },
+   "scene": "ork_fort",
+   "speaker": {
+    "sprite": "ork",
+    "name": {
+     "zh": "巴兹戈布医生佬",
+     "en": "Dok Buzzgob"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_ork_end_grot",
+   "file": "assets/endings/ork_end_grot.png",
+   "faction": "orks",
+   "id": "ork_end_grot",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "大地精",
+    "en": "Big Grot"
+   },
+   "cause": {
+    "zh": "当了一辈子奴隶",
+    "en": "A lifetime slaving for the Waaagh!"
+   },
+   "text": {
+    "zh": "你跟着大Waaagh!走了十年，从一颗星球到另一颗。\n你给机械佬递扳手，给地精分口粮，给史奎格喂剩饭。没人记得你的名字，地精们管你叫“大地精”。\n你不再数日子了。兽人不数，你也不数。",
+    "en": "You follow the Great Waaagh! for ten years, world to world.\nYou hand Meks their spanners, share rations with grots, feed scraps to squigs. Nobody remembers your name; the grots call you Big Grot.\nYou stop counting days. Orks don't. Neither do you."
+   },
+   "scene": "ork_scrapyard",
+   "speaker": {
+    "sprite": "gretchin",
+    "name": {
+     "zh": "地精仔斯纳吉特",
+     "en": "Snaggit"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_ork_death_corruption",
+   "file": "assets/endings/ork_death_corruption.png",
+   "faction": "orks",
+   "id": "ork_death_corruption",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "好怪的家伙",
+    "en": "Weird 'Un"
+   },
+   "cause": {
+    "zh": "腐化成了混沌怪物",
+    "en": "Twisted into chaos spawn"
+   },
+   "text": {
+    "zh": "你身上的记号越来越多，越来越烫。\n某天早上，你的身体终于撑不住了，变成一团不停冒出新嘴巴的东西。\n兽人们兴奋地围过来：“好怪的家伙！揍它！”这是它们能给的最高赞美。",
+    "en": "The marks on you multiply and burn hotter.\nOne morning your body gives way and becomes a heap that keeps sprouting new mouths.\nThe orks crowd round, thrilled. “WEIRD 'UN! KRUMP IT!” It's the highest praise they have."
+   },
+   "scene": "burning_city",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_ork_death_hp",
+   "file": "assets/endings/ork_death_hp.png",
+   "faction": "orks",
+   "id": "ork_death_hp",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "废铁堆",
+    "en": "On the Scrap Heap"
+   },
+   "cause": {
+    "zh": "倒在废铁堆里",
+    "en": "Fell on the scrap heap"
+   },
+   "text": {
+    "zh": "你倒在废铁堆里，和一千件别的废品躺在一起。\n地精仔来了，拿走你的靴子、你的扳手、你兜里那颗牙。\n明年这里会长出蘑菇，蘑菇底下会长出兽人。兽人不会知道你是谁。",
+    "en": "You fall on the scrap heap and lie among a thousand other pieces of junk.\nGrots come and take your boots, your spanner, the toof in your pocket.\nNext year mushrooms will grow here, and under them, orks. The orks won't know who you were."
+   },
+   "scene": "ork_scrapyard",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_ork_death_sanity",
+   "file": "assets/endings/ork_death_sanity.png",
+   "faction": "orks",
+   "id": "ork_death_sanity",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "绿色的梦",
+    "en": "Green Dreams"
+   },
+   "cause": {
+    "zh": "疯到以为自己是兽人",
+    "en": "Went mad believing you're an ork"
+   },
+   "text": {
+    "zh": "你开始在梦里吼“Waaagh！”，后来醒着也吼。\n你把自己刷成绿色，相信自己会变大、变强、变快。兽人们看着你，没笑，有点感动。\n你信得很用力。可惜，信念只对兽人管用。",
+    "en": "You start roaring “WAAAGH!” in your sleep, then awake.\nYou paint yourself green and believe you'll grow bigger, stronger, faster. The orks watch, not laughing. A little moved.\nYou believe so hard. Pity belief only works for orks."
+   },
+   "scene": "ork_fort",
+   "speaker": null,
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_citizen",
+   "file": "assets/endings/tau_end_citizen.png",
+   "faction": "tau",
+   "id": "tau_end_citizen",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "大义的公民",
+    "en": "Citizen of the Greater Good"
+   },
+   "cause": {
+    "zh": "受勋成为大义公民",
+    "en": "Honoured citizen of the Greater Good"
+   },
+   "text": {
+    "zh": "瓦尚亲手把勋章别在你胸前，笑容完美。你成了第一个获此荣誉的古维萨。\n你的孩子会在钛人的学校长大，学会说钛语，学会完美的微笑。\n你常常想，这是好事。你几乎每次都这么想。",
+    "en": "Vash'aun pins the medal on your chest himself, his smile perfect. You're the first gue'vesa so honoured.\nYour children will grow up in T'au schools, speak T'au, and learn the perfect smile.\nYou often think this is a good thing. Almost every time."
+   },
+   "scene": "tau_city",
+   "speaker": {
+    "sprite": "tau_water_caste",
+    "name": {
+     "zh": "瓦尚使节",
+     "en": "Envoy Vash'aun"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_enclaves",
+   "file": "assets/endings/tau_end_enclaves.png",
+   "faction": "tau",
+   "id": "tau_end_enclaves",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "海湾的另一边",
+    "en": "Beyond the Gulf"
+   },
+   "cause": {
+    "zh": "投奔远见飞地",
+    "en": "Defected to the Farsight Enclaves"
+   },
+   "text": {
+    "zh": "红色的战斗服在海湾边等着。凯尔拉回头看了一眼达尔诺尔，没有说再见。\n远见的飞地里，钛人、人类和克鲁特会为了一个决定吵上整整一夜。\n没人叫这“暂时的误会”。他们叫它“开会”。",
+    "en": "The crimson battlesuit waits at the edge of the Gulf. Kel'ra looks back at Dal'nor once and doesn't say goodbye.\nIn Farsight's Enclaves, T'au, humans and Kroot argue all night over a single decision.\nNobody calls it a temporary misunderstanding. They call it a meeting."
+   },
+   "scene": "tau_outpost",
+   "speaker": {
+    "sprite": "omen_farsight",
+    "name": {
+     "zh": "红色战斗服",
+     "en": "Crimson Battlesuit"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_watch",
+   "file": "assets/endings/tau_end_watch.png",
+   "faction": "tau",
+   "id": "tau_end_watch",
+   "kind": "good",
+   "claim": null,
+   "title": {
+    "zh": "守望者",
+    "en": "The Watch"
+   },
+   "cause": {
+    "zh": "留守达尔诺尔",
+    "en": "Stayed to guard Dal'nor"
+   },
+   "text": {
+    "zh": "你留了下来，和乔里、几个克鲁特，还有不肯走的人一起重建达尔诺尔。\n旧教堂的空讲台上，挂着雷娜姨的双头鹰，旁边是钛人的圆环。\n两年了，没人把哪一个摘下来。",
+    "en": "You stay to rebuild Dal'nor with Jory, a few Kroot, and everyone else who wouldn't leave.\nOn the old chapel's empty pulpit hangs Aunt Rena's eagle, and beside it, a T'au ring.\nTwo years on, nobody has taken either one down."
+   },
+   "scene": "ruins",
+   "speaker": {
+    "sprite": "gue_vesa",
+    "name": {
+     "zh": "乔里",
+     "en": "Jory"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_claim_khorne",
+   "file": "assets/endings/tau_end_claim_khorne.png",
+   "faction": "tau",
+   "id": "tau_end_claim_khorne",
+   "kind": "bad",
+   "claim": "khorne",
+   "title": {
+    "zh": "效率异常",
+    "en": "Efficiency Anomaly"
+   },
+   "cause": {
+    "zh": "被恐虐收走",
+    "en": "Claimed by Khorne"
+   },
+   "text": {
+    "zh": "钛人没见过这种病：一个古维萨，越打越不疼，越打越停不下。\n无人机把你记作“效率异常”，火族不再和你一起出击。某天你独自走进丛林，去找下一场仗。\n大义需要理由，血神不需要。他只要头骨。",
+    "en": "The T'au have never seen this sickness: a gue'vesa who feels less pain with every fight, and cannot stop.\nDrones log you as an efficiency anomaly; the fire caste stop deploying with you. One day you walk into the jungle alone, looking for the next fight.\nThe Greater Good needs reasons. The Blood God needs only skulls."
+   },
+   "scene": "jungle",
+   "speaker": {
+    "sprite": "daemon_khorne",
+    "name": {
+     "zh": "远处的鼓",
+     "en": "A Distant Drum"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_claim_nurgle",
+   "file": "assets/endings/tau_end_claim_nurgle.png",
+   "faction": "tau",
+   "id": "tau_end_claim_nurgle",
+   "kind": "bad",
+   "claim": "nurgle",
+   "title": {
+    "zh": "封锁的街道",
+    "en": "The Sealed Street"
+   },
+   "cause": {
+    "zh": "成为纳垢的信使",
+    "en": "Became Nurgle's carrier"
+   },
+   "text": {
+    "zh": "咳嗽病回到了人类街区，这次从你开始。你一点也不难受，挨家挨户给邻居送汤。\n医疗无人机封了整条街。钛人隔着能量屏，困惑地看着一群笑眯眯的病人。\n慈父不懂大义，他只知道每个孩子都该有个家。",
+    "en": "The coughing sickness returns to the human quarter, and this time it starts with you. You feel fine, and go door to door bringing your neighbours soup.\nMedical drones seal the whole street. Behind the energy screen, the T'au stare in confusion at a crowd of smiling sick people.\nGrandfather knows nothing of the Greater Good. Only that every child deserves a home."
+   },
+   "scene": "hive_hab",
+   "speaker": {
+    "sprite": "daemon_nurgle",
+    "name": {
+     "zh": "慈祥的声音",
+     "en": "A Fond Voice"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_claim_slaanesh",
+   "file": "assets/endings/tau_end_claim_slaanesh.png",
+   "faction": "tau",
+   "id": "tau_end_claim_slaanesh",
+   "kind": "bad",
+   "claim": "slaanesh",
+   "title": {
+    "zh": "不散的聚会",
+    "en": "The Party That Never Ends"
+   },
+   "cause": {
+    "zh": "被色孽掏空",
+    "en": "Hollowed out by Slaanesh"
+   },
+   "text": {
+    "zh": "钛人的世界太节制了：定量的口粮，定量的称赞。你要的不止这些。\n你在人类街区办了一场不散的聚会：更甜的糖，更响的音乐，更多掌声。\n客人们都很满足，第二天又来。最后被掏空的，是你自己。",
+    "en": "The T'au world is too measured: rationed food, rationed praise. You want more than that.\nIn the human quarter you throw a party that never ends: sweeter sugar, louder music, more applause.\nEveryone leaves satisfied, and comes back the next day. The last one hollowed out is you."
+   },
+   "scene": "tau_city",
+   "speaker": {
+    "sprite": "daemon_slaanesh",
+    "name": {
+     "zh": "甜得发苦的声音",
+     "en": "A Bittersweet Voice"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_claim_tzeentch",
+   "file": "assets/endings/tau_end_claim_tzeentch.png",
+   "faction": "tau",
+   "id": "tau_end_claim_tzeentch",
+   "kind": "bad",
+   "claim": "tzeentch",
+   "title": {
+    "zh": "三面间谍",
+    "en": "Triple Agent"
+   },
+   "cause": {
+    "zh": "沦为奸奇的棋子",
+    "en": "Became Tzeentch's pawn"
+   },
+   "text": {
+    "zh": "你在梦里看见钛人的作战计划，比以太族看得还远。\n你把它们一页页写下来，卖给水族，卖给远见的人，也卖给帝国。每一方都以为你是自己人。\n直到三方同时发现了。那一天，也写在计划里。",
+    "en": "In dreams you see the T'au battle plans, further ahead than any Ethereal can.\nYou write them down page by page and sell them: to the water caste, to Farsight's people, to the Imperium. Each side thinks you're theirs.\nUntil all three find out at once. That day was in the plan too."
+   },
+   "scene": "tau_city",
+   "speaker": {
+    "sprite": "daemon_tzeentch",
+    "name": {
+     "zh": "挪动的字",
+     "en": "Shifting Letters"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_collaborator",
+   "file": "assets/endings/tau_end_collaborator.png",
+   "faction": "tau",
+   "id": "tau_end_collaborator",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "合作者",
+    "en": "Collaborators"
+   },
+   "cause": {
+    "zh": "被帝国以通敌罪处决",
+    "en": "Executed as a xenos collaborator"
+   },
+   "text": {
+    "zh": "政委耐心地听完了你的话，点点头，像是在认可一份报告。\n然后他宣读了判决。很短。\n第二天，帝国广播多了一条：“新卡尔德，清除叛徒两名。”雷娜姨的吊坠被收走了，说圣物不宜流落。",
+    "en": "The commissar hears you out patiently, nodding as if approving a report.\nThen he reads the sentence. It's short.\nNext day the Imperial broadcast adds a line: “New Calder: two traitors removed.” Rena's pendant is confiscated. Holy relics, they say, mustn't go astray."
+   },
+   "scene": "ruins",
+   "speaker": {
+    "sprite": "commissar",
+    "name": {
+     "zh": "帝国政委",
+     "en": "Imperial Commissar"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_devoured",
+   "file": "assets/endings/tau_end_devoured.png",
+   "faction": "tau",
+   "id": "tau_end_devoured",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "被吞噬",
+    "en": "Devoured"
+   },
+   "cause": {
+    "zh": "被虫群吞噬",
+    "en": "Devoured by the swarm"
+   },
+   "text": {
+    "zh": "你在废墟里找到了92号最后一块碎片。它的灯，还亮着。\n孢子雾里有东西在动。成千上万。\n克鲁特吃东西是为了记住。虫子吃东西是为了忘掉。这一次，没有什么会留下来被记住。",
+    "en": "In the ruins you find the last piece of Drone 92. Its light is still on.\nSomething moves in the spore fog. Thousands of somethings.\nKroot eat to remember. Bugs eat to forget. This time, nothing will be left to remember."
+   },
+   "scene": "spore_sky",
+   "speaker": null,
+   "foe": "gaunt"
+  },
+  {
+   "key": "end_tau_end_gate",
+   "file": "assets/endings/tau_end_gate.png",
+   "faction": "tau",
+   "id": "tau_end_gate",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "暂时推迟",
+    "en": "Temporarily Postponed"
+   },
+   "cause": {
+    "zh": "冲击港口，被射杀",
+    "en": "Shot storming the port gate"
+   },
+   "text": {
+    "zh": "凯尔拉闭上了眼睛，然后扣下了扳机。\n报告上写着：“安全事件，已处理。”\n一周后，第三批撤离如期“暂时推迟”。再也没有恢复。",
+    "en": "Kel'ra closes her eyes. Then she pulls the trigger.\nThe report reads: “Security incident. Resolved.”\nA week later the third wave remains “temporarily postponed.” It is never resumed."
+   },
+   "scene": "tau_city",
+   "speaker": {
+    "sprite": "tau_warrior",
+    "name": {
+     "zh": "凯尔拉",
+     "en": "Shas'ui Kel'ra"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_end_reeducation",
+   "file": "assets/endings/tau_end_reeducation.png",
+   "faction": "tau",
+   "id": "tau_end_reeducation",
+   "kind": "bad",
+   "claim": null,
+   "title": {
+    "zh": "友好的对话",
+    "en": "A Friendly Dialogue"
+   },
+   "cause": {
+    "zh": "被水族“对话”改造",
+    "en": "Re-educated by the water caste"
+   },
+   "text": {
+    "zh": "对话进行了很久。两年。\n你出来时皮肤白了些，说话慢了些，见人就笑，笑得完美得像量过尺寸。\n雷娜姨在街上认不出你。你也不太记得她了。这是一个暂时的误会。",
+    "en": "The dialogue goes on a long time. Two years.\nWhen you come out, your skin is paler and your speech slower. You smile at everyone, a smile so perfect it looks measured.\nAunt Rena passes you in the street without recognising you. You don't quite remember her either. A temporary misunderstanding."
+   },
+   "scene": "tau_city",
+   "speaker": {
+    "sprite": "tau_water_caste",
+    "name": {
+     "zh": "瓦尚使节",
+     "en": "Envoy Vash'aun"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_death_corruption",
+   "file": "assets/endings/tau_death_corruption.png",
+   "faction": "tau",
+   "id": "tau_death_corruption",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "会倾听的神",
+    "en": "A God Who Listens"
+   },
+   "cause": {
+    "zh": "被西拉斯的神占据",
+    "en": "Taken by Silas's god"
+   },
+   "text": {
+    "zh": "西拉斯没有说谎：那个神真的会听人类说话。\n它听得太仔细了，仔细到搬了进来。\n钛人的传感器把你登记为“未知生物信号”。他们说，从没见过这种东西。",
+    "en": "Silas didn't lie: that god really does listen to humans.\nIt listened so closely that it moved in.\nT'au sensors log you as “unknown biological signal.” They say they've never seen anything like it."
+   },
+   "scene": "warp",
+   "speaker": {
+    "sprite": "sigil_undivided",
+    "name": {
+     "zh": "西拉斯的神",
+     "en": "Silas's God"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_death_hp",
+   "file": "assets/endings/tau_death_hp.png",
+   "faction": "tau",
+   "id": "tau_death_hp",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "可接受的伤亡",
+    "en": "Acceptable Losses"
+   },
+   "cause": {
+    "zh": "列为可接受的伤亡",
+    "en": "Listed as acceptable losses"
+   },
+   "text": {
+    "zh": "瓦尚在战报上签了字。你的名字被归入一栏：“可接受的伤亡（人类）”。\n他的笑容一如既往。\n后来，有个克鲁特说他记得你。没人知道他是怎么记住的。",
+    "en": "Vash'aun signs the battle report. Your name goes into a column: “Acceptable losses (human).”\nHis smile is the same as ever.\nLater, a Kroot says he remembers you. No one asks how."
+   },
+   "scene": "tau_outpost",
+   "speaker": {
+    "sprite": "tau_water_caste",
+    "name": {
+     "zh": "瓦尚使节",
+     "en": "Envoy Vash'aun"
+    }
+   },
+   "foe": null
+  },
+  {
+   "key": "end_tau_death_sanity",
+   "file": "assets/endings/tau_death_sanity.png",
+   "faction": "tau",
+   "id": "tau_death_sanity",
+   "kind": "death",
+   "claim": null,
+   "title": {
+    "zh": "亚空间的阴影",
+    "en": "The Shadow"
+   },
+   "cause": {
+    "zh": "心智被虫巢意志吞没",
+    "en": "Mind drowned by the Hive Mind"
+   },
+   "text": {
+    "zh": "那张天上的嘴，终于不只是梦了。\n你的脑子里只剩下一种声音，低沉、饥饿、没有尽头，像一亿只虫子在同一时刻呼吸。\n你不再害怕了。你什么都不再是了。",
+    "en": "The mouth in the sky is no longer just a dream.\nOnly one sound remains in your head: low, hungry, endless, like a hundred million insects breathing at once.\nYou are no longer afraid. You are no longer anything."
+   },
+   "scene": "spore_sky",
+   "speaker": {
+    "sprite": "omen_hivemind",
+    "name": {
+     "zh": "虫巢意志",
+     "en": "The Hive Mind"
+    }
+   },
+   "foe": null
+  }
+ ]
+}
