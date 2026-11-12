@@ -249,6 +249,45 @@
     return img;
   }
 
+  /* ---------- ending illustrations (SPEC §31) ---------- */
+  /* key of the picture for an ending node: `end_<node id>` when the manifest has it, else the node's own scene (the pre-v0.3.4 look) */
+  function endingArt(factionId, nodeId) {
+    var a = WH.scenes["end_" + nodeId];
+    if (a && a.src) return "end_" + nodeId;
+    var f = WH.factions[factionId], n = f && f.nodes && f.nodes[nodeId];
+    return (n && n.scene) || "void";
+  }
+  /* A fixed 16:9 box (so nothing jumps while the image decodes) framed in the kind colour. Unlocked: the ending picture, falling back
+   * to the node's scene if the key is unregistered or the file fails to load; if even that fails the box stays flat dark — never a
+   * broken-image icon and never the slime / "ph-scene" placeholder. size "sm" = endings-grid thumbnail. */
+  function endingPic(factionId, nodeId, kind, title, size) {
+    var wrap = h("div", {class: "end-pic " + kind + (size ? " " + size : ""), "data-ending": nodeId});
+    var f = WH.factions[factionId], n = f && f.nodes && f.nodes[nodeId];
+    var alt = t("end_art_alt", {x: title || ""});
+    var tried = {};
+    (function put(key) {
+      var a = key && WH.scenes[key];
+      if (!key || tried[key]) return;
+      tried[key] = 1;
+      if (!a || !a.src) { var alt2 = n && n.scene; if (alt2 && alt2 !== key) put(alt2); else wrap.classList.add("empty"); return; }
+      var img = new Image();
+      img.alt = alt;
+      img.draggable = false;
+      img.decoding = "async";
+      img.className = "px-img";
+      img.dataset.key = key;
+      img.onerror = function () {
+        img.onerror = null;
+        if (img.parentNode) img.parentNode.removeChild(img);
+        var next = n && n.scene && n.scene !== key ? n.scene : null;
+        if (next) put(next); else wrap.classList.add("empty");
+      };
+      img.src = a.src;
+      wrap.appendChild(img);
+    })(endingArt(factionId, nodeId));
+    return wrap;
+  }
+
   /* ---------- typewriter ---------- */
   var SPEED = {slow: 52, normal: 30, fast: 12, instant: 0};
   function Typer(el, live) { this.el = el; this.live = live; this.active = false; this.timer = null; }
@@ -304,6 +343,7 @@
   };
 
   UI.applyAudioSettings = applyAudioSettings;
+  UI.endingArt = endingArt;                                    // SPEC §31
 
   UI.init = function () {
     try { UI.bootCheck = WH.Save.bootCheck(); } catch (e) { UI.bootCheck = null; console.warn("bootCheck", e); }   // SPEC §22: before anything writes
@@ -1898,16 +1938,19 @@
       h("button", {class: "btn px rewind-end", type: "button", id: "rewind-end", "aria-keyshortcuts": "Z", title: t("rewind_end") + " (Z)", onclick: function () { rewindStep(); }}, "\u21B6 " + t("rewind_end")) : null;
     s.appendChild(h("div", {class: "ending-wrap"},
       h("div", {class: "ending-panel px", role: "region", "aria-label": L(end.title)},
-        h("div", {class: "ending-head"},
-          h("span", {class: "kind " + end.kind}, t("ending_" + end.kind)),
-          h("h2", {class: "ending-title"}, L(end.title)),
-          h("span", {class: "ending-fac"}, L(f.name) + " · " + originLabel(f, g.state.origin))),
-        h("p", {class: "ending-text"}, L(node.text)),
-        h("div", {class: "ending-fate " + end.kind},
-          end.kind !== "good" ? h("div", {class: "fate"}, h("span", {class: "k"}, t("cause")), h("span", {class: "v cause"}, L(causeOf(f, g.state.nodeId, node)))) : null,
-          h("div", {class: "fate"}, h("span", {class: "k"}, t("survived")), h("span", {class: "v"}, WH.fmtDur(surv))),
-          rr && rr.newRecord ? h("span", {class: "new-record"}, "★ " + t("new_record")) : null,
-          g.rewindCount > 0 ? h("span", {class: "run-rw", title: t("rewinds_title", {n: g.rewindCount})}, "\u21B6" + g.rewindCount) : null),
+        h("div", {class: "ending-hero"},                                    // SPEC §31: picture (left in landscape, on top in portrait) + head / text / fate
+          endingPic(f.id, g.state.nodeId, end.kind, L(end.title)),
+          h("div", {class: "ending-info"},
+            h("div", {class: "ending-head"},
+              h("span", {class: "kind " + end.kind}, t("ending_" + end.kind)),
+              h("h2", {class: "ending-title"}, L(end.title)),
+              h("span", {class: "ending-fac"}, L(f.name) + " · " + originLabel(f, g.state.origin))),
+            h("p", {class: "ending-text"}, L(node.text)),
+            h("div", {class: "ending-fate " + end.kind},
+              end.kind !== "good" ? h("div", {class: "fate"}, h("span", {class: "k"}, t("cause")), h("span", {class: "v cause"}, L(causeOf(f, g.state.nodeId, node)))) : null,
+              h("div", {class: "fate"}, h("span", {class: "k"}, t("survived")), h("span", {class: "v"}, WH.fmtDur(surv))),
+              rr && rr.newRecord ? h("span", {class: "new-record"}, "★ " + t("new_record")) : null,
+              g.rewindCount > 0 ? h("span", {class: "run-rw", title: t("rewinds_title", {n: g.rewindCount})}, "\u21B6" + g.rewindCount) : null))),
         h("div", {class: "ending-stats"},
           h("div", null, h("div", {class: "k"}, t("final_date")), h("div", {class: "v"}, WH.fmtDate(g.date()))),
           h("div", null, h("div", {class: "k"}, t("play_time")), h("div", {class: "v"}, WH.fmtPlay(g.state.playMs))),
@@ -2214,8 +2257,10 @@
         h("h4", null, L(f.name) + "  ·  " + t("unlocked_n", {n: n, t: ids.length})),
         h("div", {class: "end-grid"}, ids.map(function (id) {
           var node = f.nodes[id], k = node.ending.kind, st = es[f.id + ":" + id];
-          if (!st) return h("div", {class: "end-tile locked"}, h("span", {class: "kind sm " + k}, t("ending_" + k)), h("div", {class: "et"}, "???"));
+          if (!st) return h("div", {class: "end-tile locked"}, h("div", {class: "end-pic sm locked", "aria-hidden": "true"}),        // SPEC §31: flat dark, no image, nothing spoiled
+            h("span", {class: "kind sm " + k}, t("ending_" + k)), h("div", {class: "et"}, "???"));
           return h("div", {class: "end-tile " + k},
+            endingPic(f.id, id, k, L(node.ending.title), "sm"),
             h("div", {class: "etop"}, h("span", {class: "kind sm " + k}, t("ending_" + k)), h("span", {class: "cnt"}, t("times", {n: st.count}))),
             h("div", {class: "et"}, L(node.ending.title)),
             k !== "good" ? h("div", {class: "ec"}, t("cause") + "：" + L(causeOf(f, id, node))) : null,

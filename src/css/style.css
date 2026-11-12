@@ -350,6 +350,8 @@ html[lang=en] .dlg-text.narr, html[lang=en] .fcard .ftag { font-style: italic; }
 .end-tile .cnt { font-size: 12px; color: var(--brass-hi); }
 .end-tile .et { font-size: 15px; color: var(--ink); margin: 5px 0 2px; }
 .end-tile.locked .et { letter-spacing: .3em; color: var(--ink-faint); }
+.end-tile > .end-pic { display: block; }
+.end-tile.locked > .end-pic { margin-bottom: 7px; }
 .end-tile .ec { font-size: 12px; color: #ff9c8c; }
 .end-tile .ed { font-size: 11px; color: var(--ink-dim); margin-top: 2px; }
 .rec-sum { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 10px; box-shadow: inset 0 0 0 1px #3a2f28; }
@@ -397,6 +399,22 @@ html[lang=en] .dlg-text.narr, html[lang=en] .fcard .ftag { font-style: italic; }
 .ending-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 50px 16px 14px; }
 .ending-stats > div:first-child { flex: 1.5; }
 .ending-panel { --bc: var(--accent-lo); width: 900px; max-height: 100%; display: flex; flex-direction: column; background: rgba(14,10,14,.94); padding: 14px 20px 10px; }
+/* SPEC §31 ending illustration: a fixed 16:9 box in the kind colour. Landscape: picture on the left, head/text/fate on its right
+ * (a full-width 16:9 picture would not fit the 960×540 stage); portrait: picture on top at full width. */
+.end-pic { --k: #9a8a74; position: relative; box-sizing: content-box; width: calc(100% - 6px); aspect-ratio: 16 / 9; background: #0b090b; border: 3px solid var(--k);
+  box-shadow: 0 0 0 3px #000, 0 6px 0 3px #000; overflow: hidden; contain: paint; }
+.end-pic.good { --k: #e3c47c; } .end-pic.bad { --k: #9a8a74; } .end-pic.death { --k: #c0392b; }
+.end-pic > img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; object-fit: fill; image-rendering: pixelated; }
+.end-pic.locked { --k: #2e2520; background: repeating-linear-gradient(135deg, #0d0b0e 0 6px, #120f13 6px 12px); box-shadow: 0 0 0 2px #000; }
+.end-pic.sm { width: calc(100% - 4px); border-width: 2px; box-shadow: 0 0 0 2px #000; margin: 2px 2px 7px; }
+.ending-hero { --end-pic-w: 384px; flex: none; display: grid; grid-template-columns: calc(var(--end-pic-w) + 6px) minmax(0, 1fr); gap: 0 22px; align-items: start; margin: 3px 3px 8px; }
+.ending-hero > .end-pic { width: var(--end-pic-w); margin: 0; }
+.ending-info { min-width: 0; display: flex; flex-direction: column; }
+.ending-hero .ending-head { flex-wrap: wrap; gap: 6px 12px; }
+.ending-hero .ending-title { order: 3; flex: 1 0 100%; font-size: 28px; line-height: 1.25; }
+.ending-hero .ending-fac { order: 2; font-size: 13px; }
+.ending-hero .ending-text { margin: 8px 0 8px; }
+.ending-hero .ending-fate { flex-wrap: wrap; gap: 4px 18px; margin: 0; }
 .ending-head { display: flex; align-items: center; gap: 14px; }
 .kind { padding: 3px 12px; font-size: 14px; letter-spacing: .25em; color: #120c08; background: var(--k); box-shadow: 0 0 0 3px #000; }
 .kind.good { --k: #e3c47c; } .kind.bad { --k: #9a8a74; } .kind.death { --k: #c0392b; color: #fff; }
@@ -417,7 +435,7 @@ html[lang=en] .dlg-text.narr, html[lang=en] .fcard .ftag { font-style: italic; }
 .ending-fate.good .v.cause { color: var(--ink); }
 .new-record { margin-left: auto; padding: 2px 10px; font-size: 14px; color: #160f0b; background: var(--brass-hi); box-shadow: 0 0 0 2px #000; letter-spacing: .1em; animation: blink 1.2s steps(2) 3; }
 .met-title { font-family: var(--font-title); font-size: 17px; color: var(--brass-hi); letter-spacing: .3em; margin: 0 0 6px; }
-.ending-scroll { flex: 1; min-height: 0; overflow-y: auto; padding-right: 6px; scrollbar-color: var(--brass-lo) #0b090b; }
+.ending-scroll { flex: 1; min-height: 96px; overflow-y: auto; padding-right: 6px; scrollbar-color: var(--brass-lo) #0b090b; }
 .met { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .gods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 4px; }
 .gods .god-card .nm::before { content: "" !important; }
@@ -648,6 +666,10 @@ body.portrait .toasts { position: fixed; top: auto; bottom: 28px; }
 body.portrait .ending-wrap { position: relative; inset: auto; padding: 56px 10px 10px; }
 body.portrait .ending-stats .v { white-space: normal; }
 body.portrait .ending-panel { width: 100%; }
+body.portrait .ending-hero { display: block; margin: 3px 3px 10px; }
+body.portrait .ending-hero > .end-pic { width: calc(100% - 6px); margin: 3px 3px 12px; }
+body.portrait .ending-hero .ending-title { font-size: 24px; }
+body.portrait .ending-hero .ending-fate { flex-wrap: wrap; }
 body.portrait .ending-head { flex-wrap: wrap; }
 body.portrait .ending-title { font-size: 24px; width: 100%; }
 body.portrait .ending-fac { margin-left: 0; }
