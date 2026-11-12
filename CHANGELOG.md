@@ -4,6 +4,12 @@ Format follows Keep a Changelog; versions follow SemVer.
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-11-12
+### Changed
+- UI wording: "种族" → "势力" (title "选择势力", back button, codex sort "按势力"); English "Choose your faction" / "Factions" / "By faction". In-world prose that means a real species ("古老种族") is untouched.
+### Added
+- `tools/dev/date_audit.js`: checks every Imperial date written in node text against the earliest / latest game clock a player can arrive with (past references are fine, a date later than the clock is reported). Result today: the clock and the text agree on all 8 routes.
+
 ## [0.3.0] — 2026-11-12
 ### Added
 - Routes (SPEC §26): three new playable races — Orks, Genestealer Cult, Adeptus Mechanicus — 8 routes in all (each with 3 origins, taint events, claim endings, rumours and codex entries). The race picker lays 8 cards out in a 4 x 2 grid on desktop and a stacked list on mobile; new faction accents, theme colours and faction-stat icons (glyph fallbacks if an icon is missing).

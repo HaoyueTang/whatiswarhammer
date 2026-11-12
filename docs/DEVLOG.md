@@ -653,3 +653,7 @@ Newest at the bottom. Format: `## YYYY-MM-DD · role` then short bullets (what c
 - **Version** bumped to 0.3.0 (`WH.VERSION`); CHANGELOG 0.3.0 entry added (audio writer's bullets kept under "Audio").
 - **Tests**: smoke `--real` now starts every origin of all 8 routes from the picker, plays aeldari/necrons/orks/gsc/mechanicus to an ending, opens the achievements page and toggles zh/en (`run_real_v03`).
 - **Not done / open**: `data/difficulty.js` still lacks orks/gsc/mechanicus (lead runs `--write-difficulty`); `release/README.public.md` lacks the §22 note; writer-owned warnings remain (see validator output).
+
+## 2026-11-12 — 0.3.1 wording + date audit (lead)
+- UI: "种族" → "势力" per Howie (`choose_race`, `back_race`, `sort_race` in i18n.js; English "faction"). Data key `race` / `RACES` stay (taxonomy key, not player-facing). README/SPEC §16/TODO updated.
+- Howie asked that dates written in the text also feed the survival timeline and picked "make the clock match the text dates". Audit (`tools/dev/date_audit.js`): the only node with an explicit Imperial date in its text is `nec_701` ("lost 113.M42", a past reference — the clock there is centuries later, correctly). Relative phrases ("一年后", "三天后", "十二年过去了") also match `node.time` everywhere; the 4 that don't (`eld_108`, `imp_506`, `chaos/cha_end_purged`, `tau_end_gate`) are forecasts, not elapsed time. Nothing to fix in data; the tool stays as a guard. Asked Howie for a concrete spot if he saw a mismatch.

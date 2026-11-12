@@ -219,8 +219,8 @@ UI (16): `icon_fate`, `icon_worth`
 ## 15. Audio
 New moods: `aeldari` (ethereal, harp-like arps, slow, modal) and `necron` (cold, mechanical, low drones, sparse metallic percussion). moodFor: aeldari route scenes craftworld/webway/maiden_world → `aeldari`; tomb_exterior/tomb_interior/stasis_gallery/dig_site → `necron` (battle/boss/ending rules still take priority).
 
-## 16. Race → Origin selection (先选种族，再选出身)
-New game flow: **选择种族/势力** (race cards: imperium, chaos, tau, aeldari, necrons; later orks, tyranids) → **选择出身** (origin cards for that race) → prologue.
+## 16. Faction → Origin selection (先选势力，再选出身)
+New game flow: **选择势力** (faction cards; the UI no longer says 种族 / "race" — the data field `race` stays as the codex taxonomy key: imperium, chaos, tau, aeldari, necrons; later orks, tyranids) → **选择出身** (origin cards for that race) → prologue.
 Each faction gets an optional `origins` array (if absent, the engine builds one default origin from the faction's own role/playerSprite/startNode/startStats):
 ```js
 origins: [
@@ -346,3 +346,30 @@ Audio moods: `orks` (rowdy, stompy, brassy square leads), `gsc` (hymn-like but w
 Each faction gets `world:{zh,en}` (home world name); origins may override with their own `world`.
 
 **Echoes (死讯).** When a run ends in a **bad or death** ending, the run record stores an echo: `{faction, origin role, world, cause, kind, date, claimedBy?}`. In later runs (any route), the engine may surface ONE echo per run as an overheard line — **never guaranteed**: chance 0.15 on eligible nodes (chapter ≥ 2, no eventRoll, not an ending, ≥3 nodes since the last rumour), at most once per run, only echoes whose date ≤ the current in-game date, preferring other routes. Text from templates in `data/sector.js` (`WH.echoTemplates`, 8–12 framings: a broadcast, a casualty list, a tavern story, a graffiti, a sermon, a xenos remark…) filled with role/world/cause, e.g. "听说奥雷克斯二号有个巢都工人——临阵脱逃，被政委处决。" Claim endings phrase it as "有人说他被<神>带走了". Echo lines show in the 传闻 footer style with a small ✝ mark; clicking shows the past run's record (往生录). Setting: 前世死讯 on/off (default on).
+
+## 28. Grudges — hurting people has later costs (人际后果, v0.3.2)
+Requested by Howie 2026-11-12: if the player does something harmful to a person in the story, later choices that involve that person should become more dangerous — **but only where that person is genuinely present in the scene** (context must be coherent).
+
+**Data.**
+- `faction.npcs = { <npcId>: {name:{zh,en}, aka:[{zh,en}…]?, sprite?:"<sprite key>"} }` — the named people a route lets you wrong. Only people who really exist in the route's text. `<npcId>` is a short lowercase slug.
+- **Wronging.** A choice that harms/betrays/abandons/informs on/sacrifices/robs that person sets the flag `wronged_<npcId>` in `effects.set` (alongside any existing flag; never rename an existing flag, saves hold them). The choice's own text or `result` must make the harm explicit and name the person (zh name or an `aka`).
+- **Grudge on a later choice.** `choice.grudge = {npc:"<npcId>", p?:-0.15, effects?:{hp:-6,…}, note:{zh,en}}`:
+  - active only when `state.flags["wronged_"+npc]` is set (and not `state.flags["forgiven_"+npc]`);
+  - `p` (−0.30…0, roll choices only) is added to the roll's success chance after stat adjustment (final clamp 0.05–0.95);
+  - `effects` (non-positive stat deltas only, magnitudes ≤ 12; may add `taint` bumps ≤ 10) are merged into the choice's effects when it is taken;
+  - `note` (≤ 30 zh / ≤ 20 en words) explains WHY it is riskier, shown on the choice (tooltip/small ⚠ tag, only while active) and as the first line of the consequence panel.
+- **Presence line.** `node.grudgeLine = {npc, text:{zh,en}}` (≤ 60 zh chars): extra sentence appended to the node text only while the grudge is active — the person is visibly there (looks at you, stands at the door, is in the queue). Use it wherever the node's base text alone would not make their presence obvious.
+- **Redemption (optional).** A choice may set `forgiven_<npcId>` (an apology, a repaid debt, a saved life), which switches the grudge off.
+
+**Coherence rules (validator, ERROR unless noted).**
+1. `grudge.npc` exists in `faction.npcs`; flag `wronged_<npc>` is set by at least one choice in the route, and a path exists from such a choice to the node carrying the grudge (graph reachability; events and `goto` ignored).
+2. **Presence:** the node holding a grudge choice must mention the person — the node's zh text AND en text contain the NPC name (or an `aka`), or the node's `speaker`/`foe` sprite equals `npcs[npc].sprite`, or the node has a `grudgeLine` for that npc. Otherwise ERROR "grudge on <node>: <npc> is not present".
+3. The choice that sets the flag names the person in its text, `result` or the node text (WARN if not).
+4. A grudge never appears before the harm in time: the grudge node must come strictly after the wronging node on every path (node chapter ≥ chapter of the earliest wronging node; WARN if equal-chapter).
+5. Bounds: ≤ 4 distinct `wronged_` npcs per route; ≤ 3 grudge choices per npc; `p` ≥ −0.30; effects magnitudes ≤ 12; texts within length limits.
+
+**Engine/UI.** `Game.choices()` returns `grudge: {npc, note, p, effects}` for an active grudge; `rollChance` accepts the extra modifier; `choose()` merges effects and records `step.grudge = {npc, note}`; consequence panel shows it first. UI: ⚠ tag + note on the choice; locked choices unaffected. Backwards compatible: nodes without `grudge` behave exactly as before.
+
+**Balance.** Grudges are a tax on harmful play, not a trap: with random play the route death rate may rise ≤ 3 points vs before; origins stay within ±6 of the route average (§23); claim-rate bands (§19) unchanged. Validator reports per route: wronged npcs, grudge choices, activations per run, death rate with/without.
+
+**Content targets.** 2–4 npcs per route; each has 1–3 harmful choices that set `wronged_*` and 1–3 later grudge choices in nodes where the person is plainly present. Prefer people who already matter in the story; add a `grudgeLine` rather than inventing coincidences. Original prose only (no canon likenesses).

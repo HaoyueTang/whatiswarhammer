@@ -578,7 +578,7 @@
 
   function statChip(icon, v, title) { return h("span", {title: title}, art("ui", icon), String(v)); }
 
-  /* Two steps (SPEC §16): 选择种族/势力 (race cards) → 选择出身 (origin cards of that race) → game.
+  /* Two steps (SPEC §16): 选择势力 (faction cards) → 选择出身 (origin cards of that faction) → game.
    * A faction without `origins` has one synthesized default origin → the origin step is skipped. */
   function renderSelect() {
     var f = UI.sel.faction && WH.factions[UI.sel.faction];

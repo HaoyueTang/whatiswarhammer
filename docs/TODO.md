@@ -3,10 +3,7 @@
 Open items and decisions waiting on Howie. Newest decisions at the top of each section.
 
 ## Decisions pending
-- [ ] **Race vs. origin (种族)** — the player is always an ordinary human; the "种族" screen really picks the side you are drawn into. Options:
-  1. Rename "选择种族" → "选择势力 / 阵营" (UI only).
-  2. Rename + add lore-compatible non-human origins that merge into existing spines: Imperium Ogryn / Ratling (abhumans), Chaos mutant, T'au Kroot hunter. *(recommended)*
-  3. True xenos perspective routes (play a Fire Warrior, an Aeldari Guardian, a Necron with residual memories) — each a full new route, since shared text assumes a human player.
+- [x] **Race vs. origin (种族)** — decided by Howie 2026-11-12: UI only, "种族" → "势力" (option 1, shipped in 0.3.1). Options 2 (non-human origins, e.g. Ogryn / Ratling / Kroot) and 3 (true xenos-POV routes) stay open as future ideas, not requested.
 - [ ] **Public artifact link** — publicly shared, so each republish needs Howie's explicit OK ("更新公开链接").
 - [ ] **GitHub Pages** — enable in repo Settings → Pages (main, root) or ask Claude to try via API.
 

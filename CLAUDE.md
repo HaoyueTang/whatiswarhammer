@@ -34,9 +34,11 @@ Read this first in every session on this project. Keep it short and current; his
 - Validate data + simulate runs: `node tools/dev/validate.js`
 - Regenerate art: `python3 tools/art/build_all.py`
 - Play: open `index.html` in a browser.
+- Text dates vs game clock: `node tools/dev/date_audit.js [--all]`.
 - Audition music/SFX: open `tools/dev/audio_test.html`.
 
 ## Status
+- v0.3.1 (2026-11-12, dev) — UI "种族" → "势力" (Howie's decision; data key `race` unchanged); date audit tool.
 - v0.3.0 released 2026-11-12 — + 3 routes (Orks, Genestealer Cult, Mechanicus; 8 total, 24 origins), 60 achievements (§25), Arcosa Sector echoes (§27), relevance-gated rumours (§20b), music/art for new routes. Gates: validate 0 errors; smoke --real 129/129; audio_check OK.
 - v0.2.3 released 2026-11-11 — + claim endings (0.2.1), rumours/Chronicle, Tzeentch egg, origin caps, progress preservation (0.2.2), skull difficulty (0.2.3).
 - v0.2.0 released 2026-11-11 — 5 routes (Imperium, Chaos, T'au, Aeldari, Necrons) × 3 origins, consequence panel, codex v2 (race × type, search, NEW), hidden chaos-god taint, lore-card modes, Home button, faction-stat tips. v0.1.0 same day.
@@ -46,5 +48,5 @@ Read this first in every session on this project. Keep it short and current; his
 - Known: music verified only by automated checks — needs a human listen (`tools/dev/audio_test.html`).
 
 ## Next ideas
-- More routes / non-human viewpoint (open question: rename "race"→"side" only, add non-human origins, or true xenos-POV routes — user hasn't decided); GitHub Pages; human listen to music.
+- More routes; optional non-human origins / xenos-POV routes (Howie chose UI rename 种族→势力 only, 2026-11-12); GitHub Pages; human listen to music.
 - Artifact link is publicly shared → republishing needs the user's explicit OK each time (v0.3.0 republish OK'd by Howie on 2026-11-12: "继续以后更新到artifact").
