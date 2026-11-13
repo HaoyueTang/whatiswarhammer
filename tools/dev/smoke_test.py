@@ -7,6 +7,7 @@
     python3 tools/dev/smoke_test.py --only-track [--real]    # just the SPEC §29b track-selection checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-gather [--real]   # just the SPEC §20c gathering-place checks (tag, rumours / echoes only on gather nodes; also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-v034 [--real]     # just the SPEC §31 ending-illustration checks (also part of the default and --real runs)
+    python3 tools/dev/smoke_test.py --only-fam [--real]      # just the SPEC §33 "do you know Warhammer?" dialog checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-v040 [--real]     # just the SPEC §32 story-overhaul checks: alt / resultAlt / event where / save fallback (also part of the default and --real runs)
     options: --chrome /usr/bin/google-chrome   --out tools/dev/screenshots   --headed
 
@@ -20,6 +21,11 @@ import io, json, os, re, sys, time, random
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+# SPEC §33: a fresh profile gets a "do you know Warhammer?" dialog before the first new game. Tests that wipe storage use
+# CLEAR (wipe + settings.loreAsked = true) so they are unaffected; only new_ctx(fam=True) / run_fam keep the pristine profile.
+# (An add_init_script that touches localStorage on every load was tried first: it raced with page.reload() and lost writes.)
+CLEAR = "() => { localStorage.clear(); localStorage.setItem('whatiswh.settings', '{\"loreAsked\":true}'); if (window.WH && WH.UI && WH.UI.settings) WH.UI.settings.loreAsked = true; }"
 ARGS = sys.argv[1:]
 REAL = "--real" in ARGS
 def opt(name, default):
@@ -147,7 +153,7 @@ def run_desktop(p):
     attach_console(page, "desktop")
     page.goto(BASE + QS + ("&" if QS else "?") + "seed=7")
     page.wait_for_selector("#scr-title .title-main")
-    page.evaluate("() => localStorage.clear()")
+    page.evaluate(CLEAR)
     page.reload(); page.wait_for_selector("#scr-title .title-main")
     check("boots from file:// with title screen", page.locator("#scr-title .title-main").is_visible())
     # record WH.Audio calls (wraps the real audio.js if present, else a stub) to verify the UI's audio hooks
@@ -462,7 +468,7 @@ def run_mobile(p):
     attach_console(page, "mobile")
     page.goto(BASE + QS + ("&" if QS else "?") + "seed=5")
     page.wait_for_selector("#scr-title .title-main")
-    page.evaluate("() => localStorage.clear()")
+    page.evaluate(CLEAR)
     check("portrait layout active", page.evaluate("document.body.classList.contains('portrait')"))
     shot(page, "m01_title")
     page.locator("#scr-title .menu .btn.primary").tap(); page.wait_for_timeout(250)
@@ -508,6 +514,8 @@ def run_no_storage(p):
     check("boots without localStorage (memory fallback)", page.evaluate("WH.Save.isPersistent()") is False)
     check("reduced motion turns FX off", page.evaluate("document.getElementById('stage').classList.contains('fx-off')"))
     page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(200)
+    check("§33 no storage: the profile is fresh, so the familiarity dialog is shown (and works in memory)", page.locator(".fam-opt").count() == 2)
+    page.locator(".fam-opt[data-fam=new]").click(); page.wait_for_timeout(250)
     pick_faction(page); page.wait_for_timeout(1600); wait_idle(page)
     click_choice(page, 0)
     page.locator("#tools button").nth(1).click(); page.wait_for_timeout(150)
@@ -515,7 +523,7 @@ def run_no_storage(p):
     check("in-memory save works", page.evaluate("!!WH.Save.read('slot1')"))
     ctx.close()
 
-def new_ctx(p, mobile=False, seed=7, tag="v02", extra=""):
+def new_ctx(p, mobile=False, seed=7, tag="v02", extra="", fam=False):
     b = p.chromium.launch(executable_path=CHROME, headless="--headed" not in ARGS)
     if mobile:
         ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True, locale="zh-CN")
@@ -525,7 +533,7 @@ def new_ctx(p, mobile=False, seed=7, tag="v02", extra=""):
     attach_console(page, tag)
     page.goto(BASE + QS + ("&" if QS else "?") + f"seed={seed}" + extra)
     page.wait_for_selector("#scr-title .title-main")
-    page.evaluate("() => localStorage.clear()")
+    page.evaluate("() => localStorage.clear()" if fam else CLEAR)
     page.reload(); page.wait_for_selector("#scr-title .title-main")
     return b, ctx, page
 
@@ -1031,7 +1039,7 @@ def run_data(p):
     ctx = b.new_context(viewport={"width": 1280, "height": 720}, locale="zh-CN", accept_downloads=True)
     page = ctx.new_page(); attach_console(page, "data")
     page.goto(BASE + QS + ("&" if QS else "?") + "seed=7"); page.wait_for_selector("#scr-title .title-main")
-    page.evaluate("() => localStorage.clear()"); page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
+    page.evaluate(CLEAR); page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
     check("fresh install: no update notice, lastVersion recorded silently", page.locator(".toasts").count() == 0
           and page.evaluate("localStorage.getItem('whatiswh.lastVersion')") == page.evaluate("WH.VERSION"))
     page.evaluate("""(L) => { localStorage.clear(); for (const k in L) localStorage.setItem('whatiswh.' + k, JSON.stringify(L[k])); }""", LEGACY)
@@ -1075,7 +1083,7 @@ def run_data(p):
     check("复制到剪贴板 fallback shows the JSON text", page.locator("#data-out").is_visible() and '"whatiswh-backup"' in page.locator("#data-out").input_value())
     text = page.locator("#data-out").input_value()
     page.keyboard.press("Escape"); page.wait_for_timeout(80); page.keyboard.press("Escape")
-    page.evaluate("() => localStorage.clear()")
+    page.evaluate(CLEAR)
     page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
     check("cleared browser: nothing left", page.evaluate("WH.Save.runs().length") == 0 and page.evaluate("WH.Save.codexGlobal().length") == 0)
     page.evaluate("() => WH.UI.openData()"); page.wait_for_timeout(150)
@@ -2159,17 +2167,17 @@ def run_track(p):
         row = page.locator(".modal .track-row")
         check(f"§29b {tag}: …and Settings shows the track chosen in the panel", row.locator('[aria-checked="true"]').get_attribute("data-track") == "holy")
         # settings export, reload, unknown values
-        check(f"§22/§29b {tag}: musicTrack is part of the exported settings", page.evaluate("WH.Save.exportAll().data.settings.musicTrack") == "holy")
+        check(f"§22/§29b {tag}: musicTrack is part of the exported settings", page.evaluate("WH.Save.exportAll().data.settings.musicTrack") == "holy", page.evaluate("[localStorage.getItem('whatiswh.settings'), WH.Save.isPersistent()]").__str__()[:300])
         page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
-        check(f"§29b {tag}: the track survives a reload and is re-applied at start-up", page.evaluate("WH.UI.settings.musicTrack") == "holy" and page.evaluate("WH.Audio.getTrack()") == "holy")
+        check(f"§29b {tag}: the track survives a reload and is re-applied at start-up", page.evaluate("WH.UI.settings.musicTrack") == "holy" and page.evaluate("WH.Audio.getTrack()") == "holy", json.dumps([page.evaluate("WH.UI.settings.musicTrack"), page.evaluate("WH.Audio.getTrack()"), page.evaluate("localStorage.getItem('whatiswh.settings')")]))
         page.evaluate("() => { WH.UI.settings.musicTrack = 'no-such-track'; WH.Save.saveSettings(WH.UI.settings); }")
         page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
         page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
         check(f"§29b {tag}: an unknown stored track falls back to auto (audio + UI)", page.evaluate("WH.Audio.getTrack()") == "auto"
               and page.locator('.modal .track-row [aria-checked="true"]').get_attribute("data-track") == "auto")
-        page.evaluate("() => { localStorage.setItem('whatiswh.settings', JSON.stringify({musicTrack: 'a b!'})); }")
+        page.evaluate("() => { localStorage.setItem('whatiswh.settings', JSON.stringify({musicTrack: 'a b!', loreAsked: true})); }")
         page.reload(); page.wait_for_selector("#scr-title .title-main")
-        check(f"§29b {tag}: a malformed stored value is sanitised to auto", page.evaluate("WH.UI.settings.musicTrack") == "auto")
+        check(f"§29b {tag}: a malformed stored value is sanitised to auto", page.evaluate("WH.UI.settings.musicTrack") == "auto", json.dumps([page.evaluate("WH.UI.settings.musicTrack"), page.evaluate("localStorage.getItem('whatiswh.settings')")]))
         # ---- in play: the ♪ button lives in the toolbar; a fixed track survives the story; auto follows it
         (page.locator("#scr-title .menu .btn.primary").tap if mobile else page.locator("#scr-title .menu .btn.primary").click)(); page.wait_for_timeout(250)
         pick_faction(page, None, 0, tap=mobile); page.wait_for_timeout(300)
@@ -2302,7 +2310,7 @@ def run_v034(p):
             ctx = b.new_context(viewport={"width": 1280, "height": 720}, locale="zh-CN")
         page = ctx.new_page(); attach_console(page, tag)
         page.goto(BASE + QS + ("&" if QS else "?") + "seed=21"); page.wait_for_selector("#scr-title .title-main")
-        page.evaluate("() => localStorage.clear()"); page.reload(); page.wait_for_selector("#scr-title .title-main")
+        page.evaluate(CLEAR); page.reload(); page.wait_for_selector("#scr-title .title-main")
         page.evaluate("() => { WH.UI.settings.loreCards = 'off'; WH.UI.settings.textSpeed = 'instant'; WH.Save.saveSettings(WH.UI.settings); }")
         dsf = 2 if mobile else 1
         pre = f"§31 {mode}: "
@@ -2440,7 +2448,7 @@ def run_v034(p):
         ctx = b.new_context(viewport={"width": 390, "height": 844} if mobile else {"width": 1280, "height": 720}, device_scale_factor=1, is_mobile=mobile, has_touch=mobile, locale="zh-CN")
         page = ctx.new_page(); attach_console(page, "end-fit" + ("-m" if mobile else ""))
         page.goto(BASE + QS + ("&" if QS else "?") + "seed=22"); page.wait_for_selector("#scr-title .title-main")
-        page.evaluate("() => localStorage.clear()"); page.reload(); page.wait_for_selector("#scr-title .title-main")
+        page.evaluate(CLEAR); page.reload(); page.wait_for_selector("#scr-title .title-main")
         res = page.evaluate("""(mobile) => {
           const bad = [], seen = [];
           for (const lang of ['zh', 'en']) {
@@ -2470,6 +2478,86 @@ def run_v034(p):
               res["n"] >= 2 and not res["bad"], "; ".join(res["bad"][:6]))
         ctx.close(); b.close()
 
+
+def run_fam(p):
+    """SPEC §33: first-run "do you know Warhammer?" dialog -> lore cards + keyword links on/off; asked once; returning players skipped."""
+    print("\n== v0.4.0 familiarity dialog (§33) ==")
+    for mobile in (False, True):
+        tag = "mobile" if mobile else "desktop"
+        tap = (lambda loc: loc.tap()) if mobile else (lambda loc: loc.click())
+        # ---- a brand-new profile
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="fam" + ("-m" if mobile else ""), fam=True)
+        st = page.evaluate("WH.UI.settings")
+        check(f"§33 {tag}: fresh profile -> loreAsked false, keywordLinks true, loreCards new", st["loreAsked"] is False and st["keywordLinks"] is True and st["loreCards"] == "new", json.dumps(st))
+        tap(page.locator("#scr-title .menu .btn.primary")); page.wait_for_timeout(300)
+        dlg = page.locator(".modal-back .modal")
+        check(f"§33 {tag}: 开始新游戏 opens the familiarity dialog instead of the faction picker", dlg.count() == 1 and page.locator("#scr-select").is_hidden() and dlg.locator(".fam-opt").count() == 2, "")
+        bb = dlg.bounding_box()
+        check(f"§33 {tag}: dialog fits the viewport", bb and bb["x"] >= 0 and bb["x"] + bb["width"] <= (390 if mobile else 1280) + 1 and bb["y"] >= 0 and bb["y"] + bb["height"] <= (844 if mobile else 720) + 1, str(bb))
+        check(f"§33 {tag}: both options + a note are visible; focus is inside the dialog", "你熟悉战锤" in dlg.inner_text() and page.evaluate("document.activeElement.closest('.modal') !== null"))
+        shot(page, ("m" if mobile else "") + "130_familiarity")
+        # ---- 我很熟 -> cards + links off
+        tap(dlg.locator("[data-fam=vet]")); page.wait_for_timeout(350)
+        st = page.evaluate("WH.UI.settings")
+        check(f"§33 {tag}: 我很熟 -> loreCards codex, keywordLinks off, loreAsked true", st["loreCards"] == "codex" and st["keywordLinks"] is False and st["loreAsked"] is True, json.dumps(st))
+        check(f"§33 {tag}: ... and the faction picker opens", page.locator("#scr-select").is_visible() and page.locator(".modal-back").count() == 0)
+        check(f"§33 {tag}: choice is persisted", page.evaluate("JSON.parse(localStorage.getItem('whatiswh.settings')).keywordLinks") is False)
+        page.reload(); page.wait_for_selector("#scr-title .title-main")
+        tap(page.locator("#scr-title .menu .btn.primary")); page.wait_for_timeout(300)
+        check(f"§33 {tag}: asked only once (reload -> new game goes straight to the picker)", page.locator(".modal-back").count() == 0 and page.locator("#scr-select").is_visible())
+        ctx.close(); b.close()
+
+        # ---- 我是新人 -> defaults kept
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="fam2" + ("-m" if mobile else ""), fam=True)
+        tap(page.locator("#scr-title .menu .btn.primary")); page.wait_for_timeout(300)
+        tap(page.locator(".modal-back [data-fam=new]")); page.wait_for_timeout(350)
+        st = page.evaluate("WH.UI.settings")
+        check(f"§33 {tag}: 我是新人 -> cards new + links on + asked", st["loreCards"] == "new" and st["keywordLinks"] is True and st["loreAsked"] is True and page.locator("#scr-select").is_visible(), json.dumps(st))
+        ctx.close(); b.close()
+
+        # ---- closing with Esc keeps the defaults and still counts as asked
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="fam3" + ("-m" if mobile else ""), fam=True)
+        tap(page.locator("#scr-title .menu .btn.primary")); page.wait_for_timeout(300)
+        page.keyboard.press("Escape"); page.wait_for_timeout(300)
+        st = page.evaluate("WH.UI.settings")
+        check(f"§33 {tag}: Esc keeps the defaults, counts as asked and continues to the picker", st["loreCards"] == "new" and st["keywordLinks"] is True and st["loreAsked"] is True and page.locator("#scr-select").is_visible(), json.dumps(st))
+        ctx.close(); b.close()
+
+    # ---- returning player (has codex progress) is never asked
+    b, ctx, page = new_ctx(p, tag="fam4", fam=True)
+    page.evaluate("() => { localStorage.setItem('whatiswh.codexGlobal', JSON.stringify([Object.keys(WH.codex)[0]])); }")
+    page.reload(); page.wait_for_selector("#scr-title .title-main")
+    check("§33: returning player (codex progress, no stored flag) -> loreAsked true, not asked", page.evaluate("WH.UI.settings.loreAsked") is True)
+    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(300)
+    check("§33: ... new game goes straight to the picker", page.locator(".modal-back").count() == 0 and page.locator("#scr-select").is_visible())
+    ctx.close(); b.close()
+
+    # ---- keyword links in the story text follow the setting (re-render via the language switch)
+    b, ctx, page = new_ctx(p, tag="fam5")
+    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(250)
+    pick_faction(page); page.wait_for_timeout(500); wait_idle(page); page.wait_for_timeout(300); finish_text(page); page.wait_for_timeout(200)
+    def rerender():
+        page.locator("#tools button", has_text="EN").click(); page.wait_for_timeout(150); finish_text(page)
+        page.locator("#tools button", has_text="中").click(); page.wait_for_timeout(150); finish_text(page)
+    if not REAL:
+        check("§33: links on (default) -> keyword spans in the story text", page.locator("#dlg-text .kw").count() >= 1)
+    page.evaluate("() => { WH.UI.settings.keywordLinks = false; }"); rerender()
+    check("§33: keywordLinks off -> no keyword spans, text intact", page.locator("#dlg-text .kw").count() == 0 and len(page.locator("#dlg-text").inner_text()) > 10)
+    page.evaluate("() => { WH.UI.settings.keywordLinks = true; }"); rerender()
+    if not REAL:
+        check("§33: keywordLinks back on -> keyword spans return", page.locator("#dlg-text .kw").count() >= 1)
+    ctx.close(); b.close()
+
+    b, ctx, page = new_ctx(p, tag="fam6")
+    page.locator("#scr-title .menu button", has_text="设置").click(); page.wait_for_timeout(250)
+    row = page.locator(".kw-row")
+    check("§33: Settings has a 台词里的条目链接 on/off row", row.count() == 1 and "台词里的条目链接" in row.inner_text())
+    row.locator("button", has_text="关").click(); page.wait_for_timeout(200)
+    check("§33: toggling it off persists keywordLinks=false", page.evaluate("JSON.parse(localStorage.getItem('whatiswh.settings')).keywordLinks") is False and page.evaluate("WH.UI.settings.keywordLinks") is False)
+    page.locator(".kw-row button", has_text="开").click(); page.wait_for_timeout(200)
+    check("§33: ... and back on", page.evaluate("WH.UI.settings.keywordLinks") is True)
+    page.locator(".modal-head button").click(); page.wait_for_timeout(150)
+    ctx.close(); b.close()
 
 def run_v040(p):
     """SPEC §32 on sample data: node.alt (text replacement + adds, from* conditions, arrival state, reload / rewind), choice.resultAlt, death-node alt,
@@ -2711,6 +2799,13 @@ with sync_playwright() as p:
         for e in errors: print("  " + e)
         print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
         sys.exit(1 if fails or errors else 0)
+    if "--only-fam" in ARGS:                         # SPEC §33 quick loop (sample data, or --real)
+        run_fam(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
     if "--only-v040" in ARGS:                        # SPEC §32 quick loop (sample: run_v040, --real: run_real_v040)
         (run_real_v040 if REAL else run_v040)(p)
         fails = [r for r in results if not r[1]]
@@ -2743,6 +2838,7 @@ with sync_playwright() as p:
     run_style(p)
     run_track(p)
     run_v034(p)
+    run_fam(p)
     if REAL:
         run_new_routes(p)
         run_real_v022(p)

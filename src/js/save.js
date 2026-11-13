@@ -143,14 +143,17 @@
     /* settings */
     defaultSettings: function () {
       var nav = (root.navigator && (root.navigator.language || "")) || "";
-      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true, rewind: false, musicStyle: "chip", musicTrack: "auto"};
+      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", keywordLinks: true, loreAsked: false, knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true, rewind: false, musicStyle: "chip", musicTrack: "auto"};
     },
     loadSettings: function () {
       var d = Save.defaultSettings(), s = getJSON("settings") || {};
+      var askedStored = typeof s.loreAsked === "boolean";                  // SPEC §33: must be read before the defaults are merged in
       for (var k in d) if (s[k] === undefined) s[k] = d[k];
       if (s.lang !== "zh" && s.lang !== "en") s.lang = d.lang;
       if (s.loreCards === "auto" || ["new", "all", "codex"].indexOf(s.loreCards) < 0) s.loreCards = "new";   // v0.1 "auto" → "new"
       if (s.knownHint !== "silent") s.knownHint = "toast";
+      s.keywordLinks = s.keywordLinks !== false;                           // SPEC §33: underlined codex terms inside story text
+      if (!askedStored) s.loreAsked = Save.codexGlobal().length > 0 || Save.runs().length > 0;   // returning players are never asked
       s.rewind = s.rewind === true;                                        // SPEC §30 (default off)
       if (typeof s.musicStyle !== "string" || !/^[a-z0-9_-]{1,24}$/i.test(s.musicStyle)) s.musicStyle = "chip";   // SPEC §29 (audio.js maps unknown ids to chip)
       if (typeof s.musicTrack !== "string" || !/^[a-z0-9_-]{1,24}$/i.test(s.musicTrack)) s.musicTrack = "auto";   // SPEC §29b ("auto" or a mood id; the UI/audio.js map unknown ids to auto)

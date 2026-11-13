@@ -617,7 +617,7 @@
     var latest = WH.Save.latest();
     var cs = codexStats();
     var errs = (window.WH_LOAD_ERRORS || []);
-    var newBtn = h("button", {class: "btn primary px", type: "button", "data-sfx": "start", onclick: function () { show("select"); }}, t("new_game"));
+    var newBtn = h("button", {class: "btn primary px", type: "button", "data-sfx": "start", onclick: function () { if (UI.settings.loreAsked) show("select"); else askFamiliarity(function () { show("select"); }); }}, t("new_game"));
     s.appendChild(h("div", {class: "bg"}, art("scene", "title")));
     s.appendChild(h("div", {class: "corner"}, soundButton(), musicButton(), langButton()));
     s.appendChild(h("div", {class: "title-wrap"},
@@ -1780,6 +1780,34 @@
     UI.event = null;
   }
 
+  /* ======================= SPEC §33: "do you know Warhammer?" — asked once, before the first new game =======================
+   * new  → loreCards "new" + keywordLinks on (defaults); vet → loreCards "codex" (no cards, toasts only) + keywordLinks off.
+   * Entries are collected either way. Closing the dialog (✕ / Esc / click outside) keeps the defaults and still counts as asked. */
+  function askFamiliarity(next) {
+    var st = UI.settings, done = false;
+    function pick(vet) {
+      if (done) return; done = true;
+      st.loreAsked = true;
+      st.loreCards = vet ? "codex" : "new";
+      st.keywordLinks = !vet;
+      WH.Save.saveSettings(st);
+      closeTop(true);
+      next();
+    }
+    function opt(vet, key) {
+      return h("button", {class: "btn px fam-opt" + (vet ? "" : " primary"), type: "button", "data-fam": vet ? "vet" : "new", onclick: function () { pick(vet); }},
+        h("b", null, t(key)), h("span", {class: "fam-d"}, t(key + "_d")));
+    }
+    openModal({title: t("fam_title"), narrow: true,
+      body: h("div", {class: "fam-box"},
+        h("p", {class: "fam-q"}, t("fam_q")),
+        h("p", {class: "fam-intro"}, t("fam_intro")),
+        h("div", {class: "fam-opts"}, opt(false, "fam_new"), opt(true, "fam_vet")),
+        h("p", {class: "set-hint"}, t("fam_note"))),
+      onClose: function () { if (done) return; done = true; st.loreAsked = true; WH.Save.saveSettings(st); next(); }});
+  }
+  UI.askFamiliarity = askFamiliarity;
+
   /* ======================= LORE CARDS + KEYWORD LINKS ======================= */
   var GODS = ["khorne", "nurgle", "tzeentch", "slaanesh"];
 
@@ -1879,6 +1907,7 @@
   }
   function linkify(el, text) {
     clear(el);
+    if (UI.settings && UI.settings.keywordLinks === false) { el.textContent = text; return; }   // SPEC §33
     var terms = codexTerms();
     if (!terms.length) { el.textContent = text; return; }
     var en = WH.lang === "en", hay = en ? text.toLowerCase() : text, ranges = [], used = {};
@@ -2721,6 +2750,9 @@
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("lore_cards")),
         seg([["new", t("lore_new_only")], ["all", t("lore_all")], ["codex", t("lore_codex_only")]],
           st.loreCards === "all" || st.loreCards === "codex" ? st.loreCards : "new", function (v) { st.loreCards = v; save(); openSettings(true); })),
+      h("div", {class: "setrow hint-row kw-row"}, h("span", {class: "k"}, t("kw_links")),
+        seg([[true, t("on")], [false, t("off")]], st.keywordLinks !== false, function (v) { st.keywordLinks = v; save(); openSettings(true); }),
+        h("p", {class: "set-hint"}, t("kw_links_hint"))),
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("known_hint")),
         seg([["toast", t("hint_toast")], ["silent", t("hint_silent")]], st.knownHint === "silent" ? "silent" : "toast",
           function (v) { st.knownHint = v; save(); openSettings(true); })),

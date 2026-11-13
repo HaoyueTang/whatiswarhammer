@@ -487,3 +487,10 @@ If a loaded slot/autosave points to a node id that no longer exists, the engine 
 - **Shallow branch (rule 2, lead decision 2026-11-12).** Defined in rule 2 above: re-merge within ≤ 1 step AND no read flag distinguishes the choices; the plain "re-merge within ≤ 1 step" count stays as an INFO figure.
 - **Not implemented:** the §32.3 heuristic "event text contradicts the scene"; only the dead-roll check (an `eventRoll` node where no event can fire) exists.
 (Note: `node tools/dev/playthrough.js <faction> [--seed N] [--origin id|index] [--en] [--stats] [--flags] [--first|--last]` prints one random run as readable text — QA tool.)
+
+## 33. "Do you know Warhammer?" opening choice (开局选择是否熟悉战锤, v0.4.0)
+- **Dialog.** The first time a player presses 开始新游戏 on the title screen (`settings.loreAsked` false) a modal asks 你熟悉战锤40K的设定吗？ with two buttons: **我是新人 · 开启条目** (keeps `loreCards: "new"`, `keywordLinks: true`) and **我很熟 · 关闭条目** (`loreCards: "codex"` = no pop-up cards, toasts only; `keywordLinks: false`). Entries are collected into the codex either way. ✕ / Esc / click-outside keeps the defaults and still counts as asked; then the faction picker opens. Asked once per browser profile.
+- **Returning players are not asked.** If `settings.loreAsked` was never stored and the profile already has codex progress or finished runs, `Save.loadSettings` sets it to true (read *before* the defaults are merged in).
+- **New setting `keywordLinks`** (default true; Settings → 台词里的条目链接 on/off). Off = `linkify` renders plain text (no dotted underline, no tooltip, no click-to-open); applies from the next text that is rendered. Independent of 知识卡片 (new / all / codex).
+- **Code.** `UI.askFamiliarity(next)` in ui.js; i18n keys `fam_*`, `kw_links*`; CSS `.fam-*`.
+- **Tests.** `smoke_test.py --only-fam` (28 sample / 26 real checks). Every smoke context starts with `loreAsked = true` via an init script (so older tests are unaffected) except contexts created with `_fam=True` / `new_ctx(fam=True)`.

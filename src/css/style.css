@@ -1057,3 +1057,12 @@ body.portrait .track-prev { min-width: 44px; padding: 0 8px; }
 .gather-tag[hidden] { display: none; }
 body.portrait .plate-row { flex-wrap: wrap; row-gap: 0; }
 body.portrait .gather-tag { margin: calc(2 * var(--pb)) 0 calc(2 * var(--pb)) 4px; align-self: center; }
+
+/* SPEC §33: first-run "do you know Warhammer?" dialog */
+.fam-box { display: flex; flex-direction: column; gap: 10px; }
+.fam-q { margin: 0; font-size: 16px; color: var(--accent-hi); }
+.fam-intro { margin: 0; font-size: 13px; line-height: 1.6; color: var(--ink-dim); }
+.fam-opts { display: flex; flex-direction: column; gap: 8px; margin: 4px 0; }
+.fam-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; width: 100%; padding: 10px 12px; }
+.fam-opt b { font-weight: normal; font-size: 15px; }
+.fam-opt .fam-d { font-size: 12px; line-height: 1.45; opacity: .8; }

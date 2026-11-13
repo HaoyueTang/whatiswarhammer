@@ -2,7 +2,16 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
-## [Unreleased]
+## [0.4.0] - 2026-11-13 (preview: 47 of 131 ending pictures; the rest fall back to the node scene)
+### Changed — Story overhaul of all 8 routes (SPEC §32)
+- Every route rewritten by an Opus author and then read through by a QA reader (≈ 280 continuity fixes): no cosmetic choices (false choices 43–69 % → 0 %), no forced chapter steps (6–10 per route → 0), every chapter step goes through a bridge node (where / when / who is present), every flag that is set is read later (21–49 never-read flags per route → 0), hard jumps explained or removed (18–48 → 0 unexplained).
+- Nodes per route 89–111 → 103–140; typical run 52–62 nodes; random-play death rates stay within ±3 pts of v0.3.3 (aeldari −2 to −3); good-ending share in random play falls to 22–29 % because choices now have consequences.
+- New engine features (§32.2–32.4): flag-conditional text (`alt`, `resultAlt`), event placement (`where`, `excludeFactions`), `bridge` / `jump` nodes, old saves fall back to the start of their chapter when a node was merged or removed (toast "Story updated").
+- New endings (5, total 131): `tau_end_thirdwave`, `nec_end_ceasefire`, `nec_end_webway`, `mech_end_survivor`, `gsc_end_passenger`. Dark Mechanicum antagonist is now "Dark Magos Syrredin" (a "warsmith" is an Iron Warriors rank). Shared events and rumours re-placed so none fires where it contradicts the scene; Imperium route rumours 15 → 12.
+### Added — Opening choice (SPEC §33)
+- First new game asks "你熟悉战锤40K的设定吗？": 新人 keeps lore cards + clickable terms; 熟悉 turns both off (entries still collected in the codex). New setting "台词里的条目链接" (Settings). Returning players are not asked.
+### Added — Dev tools
+- `tools/dev/playthrough.js` (one seeded random run as readable text), `route_graph.js`, `route_converge.js`, `story_lib.js`, `event_matrix.js`, `validate.js --story-report / --story-gate / --gather-report`.
 ### Added — Ending illustrations (SPEC §31)
 - UI (web): every ending screen shows its own picture. A fixed 16:9 box (pixel-crisp, 3 px frame in the ending's kind colour: gold good / grey bad / red death, `alt` = "结局插图：<title>" / "Ending illustration: <title>", async decoding, the space is reserved so nothing jumps while it loads) is the top of the ending panel: left of the title / cause / facts on landscape, full width above them on portrait. The dimmed old scene stays as the screen background. The panel now scrolls as a whole (picture, facts, "你认识了" recap) with the buttons pinned below it, so they are never covered at 1280×720, 1920×1080 or 390×844.
 - 往生录 → 结局: unlocked tiles get a 16:9 thumbnail above the title; locked tiles show a flat dark box (no image, nothing spoiled) and "???" as before.
