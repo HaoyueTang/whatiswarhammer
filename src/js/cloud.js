@@ -117,11 +117,11 @@
   function connect() {
     var c = root.claude;
     if (!c || typeof c.use !== "function") return false;
-    Cloud.available = true;
     setStatus("connecting");
     Promise.all([withTimeout(c.use("db"), TIMEOUT), withTimeout(c.use("user"), TIMEOUT)]).then(function (r) {
       var db = r[0], user = r[1];
-      if (!db || !user || typeof user.id !== "function") throw {code: "off"};
+      if (!db || !user || typeof user.id !== "function") throw {code: "off"};   // capability not declared / not served: hidden, silent
+      Cloud.available = true;                                                  // from here on Settings shows the cloud row
       return user.id().then(function (id) {
         if (!id) throw {code: "off"};
         col = db.collection("data/users/" + id);

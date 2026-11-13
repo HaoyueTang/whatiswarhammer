@@ -2583,11 +2583,14 @@ def run_cloud(p):
     # ---- not signed in / no db capability: stays local, never writes
     for label, kw in (("signed-out viewer (id null)", dict(uid=None)), ("db unavailable in this view", dict(no_db=True))):
         b, ctx, page = cloud_ctx(p, tag="cloud4", **kw)
-        page.wait_for_function("WH.Cloud.status === 'off' && WH.Cloud.available === true", timeout=15000)
+        page.wait_for_function("WH.Cloud.status === 'off'", timeout=15000)
         page.evaluate("() => { WH.Save.addCodexGlobal([Object.keys(WH.codex)[0]]); }"); page.wait_for_timeout(500)
         check(f"§34: {label} -> status off, no cloud writes, game data intact", page.evaluate("window.__cdbLog.length") == 0 and page.evaluate("WH.Save.codexGlobal().length") >= 1)
         page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
-        check(f"§34: {label} -> the row explains that saves stay in this browser", page.locator(".cloud-row").count() == 1 and "只存在本机" in page.locator(".cloud-row").inner_text())
+        if kw.get("no_db"):
+            check(f"§34: {label} -> no cloud row at all (the capability is not there)", page.locator(".cloud-row").count() == 0 and page.evaluate("WH.Cloud.available") is False)
+        else:
+            check(f"§34: {label} -> the row explains that saves stay in this browser", page.locator(".cloud-row").count() == 1 and "只存在本机" in page.locator(".cloud-row").inner_text())
         page.keyboard.press("Escape")
         ctx.close(); b.close()
 
