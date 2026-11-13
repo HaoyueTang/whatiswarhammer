@@ -7,6 +7,7 @@
     python3 tools/dev/smoke_test.py --only-track [--real]    # just the SPEC §29b track-selection checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-gather [--real]   # just the SPEC §20c gathering-place checks (tag, rumours / echoes only on gather nodes; also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-v034 [--real]     # just the SPEC §31 ending-illustration checks (also part of the default and --real runs)
+    python3 tools/dev/smoke_test.py --only-cloud [--real]    # just the SPEC §34 cloud-save checks with a fake window.claude db (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-fam [--real]      # just the SPEC §33 "do you know Warhammer?" dialog checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-v040 [--real]     # just the SPEC §32 story-overhaul checks: alt / resultAlt / event where / save fallback (also part of the default and --real runs)
     options: --chrome /usr/bin/google-chrome   --out tools/dev/screenshots   --headed
@@ -2479,6 +2480,134 @@ def run_v034(p):
         ctx.close(); b.close()
 
 
+_FAKE_CLAUDE = """(function(){
+  var store = window.__cdb = __SEED__; window.__cdbLog = []; window.__cdbFail = false;
+  function ref(path){ return {
+    id: path.split('/').pop(), path: path,
+    get: function(){ return Promise.resolve({exists: path in store, data: function(){ return path in store ? JSON.parse(JSON.stringify(store[path])) : undefined; }}); },
+    set: function(d){ if (window.__cdbFail) return Promise.reject({code:'unavailable', message:'fail'}); window.__cdbLog.push('set ' + path); store[path] = JSON.parse(JSON.stringify(d)); return Promise.resolve(); },
+    delete: function(){ window.__cdbLog.push('del ' + path); delete store[path]; return Promise.resolve(); } }; }
+  var db = {doc: ref, collection: function(p){ return {doc: function(id){ return ref(p + '/' + id); }}; }};
+  window.claude = {use: function(n){
+    if (n === 'db') return Promise.resolve(__NODB__ ? null : db);
+    if (n === 'user') return Promise.resolve({id: function(){ return Promise.resolve(__UID__); }});
+    return Promise.resolve(null); }};
+})();"""
+
+def cloud_seed(text, uid="u_test"):
+    CH = 60000; n = max(1, -(-len(text) // CH)); d = {}
+    for i in range(n): d[f"data/users/{uid}/sv_{i}"] = {"i": i, "s": text[i * CH:(i + 1) * CH]}
+    d[f"data/users/{uid}/sv_meta"] = {"n": n, "t": 1, "bytes": len(text), "ver": "0.4.0"}
+    return d
+
+def cloud_ctx(p, seed=None, uid="u_test", claude=True, no_db=False, tag="cloud", mobile=False):
+    b = p.chromium.launch(executable_path=CHROME, headless="--headed" not in ARGS)
+    kw = dict(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True, locale="zh-CN") if mobile else dict(viewport={"width": 1280, "height": 720}, locale="zh-CN")
+    ctx = b.new_context(**kw)
+    if claude:
+        js = _FAKE_CLAUDE.replace("__SEED__", json.dumps(seed or {})).replace("__NODB__", "true" if no_db else "false").replace("__UID__", "null" if uid is None else json.dumps(uid))
+        ctx.add_init_script(js)
+    page = ctx.new_page()
+    attach_console(page, tag)
+    page.goto(BASE + QS + ("&" if QS else "?") + "seed=7")
+    page.wait_for_selector("#scr-title .title-main")
+    return b, ctx, page
+
+def run_cloud(p):
+    """SPEC §34: cloud save mirror through a fake window.claude db (pull / merge / chunked push / failure modes)."""
+    print("\n== v0.4.0 cloud save (§34) ==")
+    # ---- a real profile with a game in progress, exported as the "other device"
+    b, ctx, page = new_ctx(p, tag="cloud0")
+    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(250)
+    pick_faction(page); page.wait_for_timeout(500); wait_idle(page); finish_text(page)
+    click_choice(page, 0); page.wait_for_timeout(300); finish_text(page)
+    page.wait_for_timeout(3400)                                             # (the 3 s grace period for window.claude has passed)
+    check("§34: without window.claude the status is off and available stays false", page.evaluate("WH.Cloud.status") == "off" and page.evaluate("WH.Cloud.available") is False)
+    page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+    check("§34: Settings has no cloud row outside an artifact", page.locator(".cloud-row").count() == 0)
+    page.keyboard.press("Escape")
+    text = page.evaluate("JSON.stringify(WH.Save.exportAll())")
+    has_auto = page.evaluate("!!WH.Save.read('auto')")
+    codex0 = page.evaluate("WH.Save.codexGlobal()")
+    ctx.close(); b.close()
+    check("§34: setup — the source profile has an autosave and codex entries", has_auto and len(codex0) > 0 and len(text) > 500, f"{has_auto} {len(codex0)} {len(text)}")
+
+    # ---- fresh browser + cloud copy -> restored
+    b, ctx, page = cloud_ctx(p, seed=cloud_seed(text), tag="cloud1")
+    page.wait_for_function("WH.Cloud.status === 'ok'", timeout=15000)
+    page.wait_for_timeout(400)
+    check("§34: cloud available + status ok after the pull", page.evaluate("WH.Cloud.available") is True)
+    check("§34: codex entries restored from the cloud", sorted(page.evaluate("WH.Save.codexGlobal()")) == sorted(codex0))
+    check("§34: the autosave came back (Continue is enabled on the title screen)", page.evaluate("!!WH.Save.read('auto')") and page.locator("#scr-title .menu button").nth(1).is_enabled())
+    check("§34: settings arrived from the cloud and were applied (loreAsked true, so no dialog is asked again)", page.evaluate("WH.UI.settings.loreAsked") is True)
+    check("§34: a restore toast was shown", page.locator(".toasts .toast", has_text="云端").count() >= 1)
+    n_log = page.evaluate("window.__cdbLog.length")
+    # ---- a local change is pushed (debounced)
+    page.evaluate("() => { WH.Cloud.debounce = 150; const have = WH.Save.codexGlobal(); const id = Object.keys(WH.codex).filter(k => have.indexOf(k) < 0)[0]; window.__newId = id; WH.Save.addCodexGlobal([id]); }")
+    page.wait_for_timeout(1500)
+    pushed = page.evaluate("Object.keys(window.__cdb).filter(k => /sv_[0-9]+$/.test(k)).sort().map(k => window.__cdb[k].s).join('')")
+    check("§34: a local change is mirrored to the cloud copy within the debounce", page.evaluate("window.__newId") in pushed and page.evaluate("window.__cdbLog.length") > n_log, str(page.evaluate("window.__cdbLog")))
+    meta = page.evaluate("window.__cdb['data/users/u_test/sv_meta']")
+    check("§34: sv_meta describes the copy (n, bytes, version)", meta and meta["n"] >= 1 and meta["bytes"] == len(pushed) and meta["ver"] == page.evaluate("WH.VERSION"), json.dumps(meta))
+    check("§34: nothing outside the viewer's private subtree was written", all(k.startswith("data/users/u_test/") for k in page.evaluate("Object.keys(window.__cdb)")))
+    n_log = page.evaluate("window.__cdbLog.length")
+    page.evaluate("() => { WH.Save.addCodexGlobal([window.__newId]); }"); page.wait_for_timeout(700)
+    check("§34: an unchanged profile is not re-sent", page.evaluate("window.__cdbLog.length") == n_log)
+    page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+    row = page.locator(".cloud-row")
+    check("§34: Settings shows the cloud row with a synced state", row.count() == 1 and "已同步" in row.inner_text(), row.inner_text() if row.count() else "")
+    row.locator("#cloud-now").click(); page.wait_for_timeout(800)
+    check("§34: 立即同步 keeps the state ok", page.evaluate("WH.Cloud.status") == "ok" and "已同步" in page.locator(".cloud-row #cloud-state").inner_text())
+    shot(page, "140_cloud_settings")
+    page.keyboard.press("Escape")
+    ctx.close(); b.close()
+
+    # ---- large profile: several chunks, round trip into another browser
+    b, ctx, page = cloud_ctx(p, tag="cloud2")
+    page.wait_for_function("WH.Cloud.status === 'ok'", timeout=15000)
+    page.evaluate("""() => { WH.Cloud.debounce = 150; const runs = [];
+        for (let i = 0; i < 170; i++) runs.push({runId: 'r' + i, endingId: 'e' + (i % 7), at: '2026-11-1' + (i % 9) + 'T10:' + (10 + i % 50) + ':00.000Z', kind: 'good', survived: 10 + i, faction: 'imperium', note: 'x'.repeat(700) + i});
+        localStorage.setItem('whatiswh.runs', JSON.stringify(runs)); localStorage.setItem('whatiswh.runStats', JSON.stringify({runs: 170, deaths: 0, longest: 179, causes: {}}));
+        WH.Save.saveSettings(WH.UI.settings); }""")
+    page.wait_for_timeout(2500)
+    n = page.evaluate("window.__cdb['data/users/u_test/sv_meta'].n")
+    sizes = page.evaluate("Object.keys(window.__cdb).filter(k => /sv_[0-9]+$/.test(k)).map(k => JSON.stringify(window.__cdb[k]).length)")
+    check("§34: a large profile is split into several chunks, each far below the 256 KiB document cap", n >= 2 and max(sizes) < 200000 and len(sizes) == n, f"n={n} sizes={sizes}")
+    store = page.evaluate("window.__cdb")
+    ctx.close(); b.close()
+    b, ctx, page = cloud_ctx(p, seed=store, tag="cloud3")
+    page.wait_for_function("WH.Cloud.status === 'ok'", timeout=15000)
+    check("§34: the chunked copy restores completely in a fresh browser", page.evaluate("WH.Save.runs().length") == 170 and page.evaluate("WH.Save.runs().every(r => r.note.length > 700)"))
+    ctx.close(); b.close()
+
+    # ---- not signed in / no db capability: stays local, never writes
+    for label, kw in (("signed-out viewer (id null)", dict(uid=None)), ("db unavailable in this view", dict(no_db=True))):
+        b, ctx, page = cloud_ctx(p, tag="cloud4", **kw)
+        page.wait_for_function("WH.Cloud.status === 'off' && WH.Cloud.available === true", timeout=15000)
+        page.evaluate("() => { WH.Save.addCodexGlobal([Object.keys(WH.codex)[0]]); }"); page.wait_for_timeout(500)
+        check(f"§34: {label} -> status off, no cloud writes, game data intact", page.evaluate("window.__cdbLog.length") == 0 and page.evaluate("WH.Save.codexGlobal().length") >= 1)
+        page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        check(f"§34: {label} -> the row explains that saves stay in this browser", page.locator(".cloud-row").count() == 1 and "只存在本机" in page.locator(".cloud-row").inner_text())
+        page.keyboard.press("Escape")
+        ctx.close(); b.close()
+
+    # ---- unreadable cloud copy: never import, never overwrite it
+    bad = {"data/users/u_test/sv_meta": {"n": 2, "t": 1, "bytes": 10, "ver": "x"}, "data/users/u_test/sv_0": {"i": 0, "s": "{\"format\":"}}
+    b, ctx, page = cloud_ctx(p, seed=bad, tag="cloud5")
+    page.wait_for_function("WH.Cloud.status === 'error'", timeout=15000)
+    page.evaluate("() => { WH.Cloud.debounce = 100; WH.Save.addCodexGlobal([Object.keys(WH.codex)[0]]); }"); page.wait_for_timeout(600)
+    check("§34: a broken cloud copy -> error status, nothing imported, nothing overwritten", page.evaluate("window.__cdbLog.length") == 0 and page.evaluate("Object.keys(window.__cdb).length") == 2)
+    ctx.close(); b.close()
+
+    # ---- cloud writes failing: the game keeps working on localStorage
+    b, ctx, page = cloud_ctx(p, tag="cloud6")
+    page.wait_for_function("WH.Cloud.status === 'ok'", timeout=15000)
+    page.evaluate("() => { window.__cdbFail = true; WH.Cloud.debounce = 100; WH.Save.addCodexGlobal([Object.keys(WH.codex)[1]]); }"); page.wait_for_timeout(900)
+    check("§34: failing cloud writes -> status error, local save unaffected", page.evaluate("WH.Cloud.status") == "error" and page.evaluate("WH.Save.codexGlobal().length") >= 1)
+    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(300)
+    check("§34: ... and the game still starts", page.locator("#scr-select").is_visible() or page.locator(".modal-back").count() == 1)
+    ctx.close(); b.close()
+
 def run_fam(p):
     """SPEC §33: first-run "do you know Warhammer?" dialog -> lore cards + keyword links on/off; asked once; returning players skipped."""
     print("\n== v0.4.0 familiarity dialog (§33) ==")
@@ -2799,6 +2928,13 @@ with sync_playwright() as p:
         for e in errors: print("  " + e)
         print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
         sys.exit(1 if fails or errors else 0)
+    if "--only-cloud" in ARGS:                       # SPEC §34 quick loop
+        run_cloud(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
     if "--only-fam" in ARGS:                         # SPEC §33 quick loop (sample data, or --real)
         run_fam(p)
         fails = [r for r in results if not r[1]]
@@ -2839,6 +2975,7 @@ with sync_playwright() as p:
     run_track(p)
     run_v034(p)
     run_fam(p)
+    run_cloud(p)
     if REAL:
         run_new_routes(p)
         run_real_v022(p)

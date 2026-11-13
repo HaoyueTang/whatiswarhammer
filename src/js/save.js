@@ -27,14 +27,20 @@
     if (persistent) { try { return root.localStorage.getItem(PREFIX + key); } catch (e) { persistent = false; } }
     return mem.hasOwnProperty(key) ? mem[key] : null;
   }
+  /* SPEC §34: cloud.js listens here (Save.onChange(fn)) to mirror every write / delete; never throws into the game */
+  var changeFns = [];
+  function changed(key) { for (var i = 0; i < changeFns.length; i++) { try { changeFns[i](key); } catch (e) { /* ignore */ } } }
   function set(key, val) {
     mem[key] = val;
-    if (persistent) { try { root.localStorage.setItem(PREFIX + key, val); return true; } catch (e) { persistent = false; } }
-    return false;
+    var ok = false;
+    if (persistent) { try { root.localStorage.setItem(PREFIX + key, val); ok = true; } catch (e) { persistent = false; } }
+    changed(key);
+    return ok;
   }
   function del(key) {
     delete mem[key];
     if (persistent) { try { root.localStorage.removeItem(PREFIX + key); } catch (e) { persistent = false; } }
+    changed(key);
   }
   function getJSON(key) {
     var s = get(key);
@@ -287,6 +293,7 @@
       out.updated = true;
       return out;
     },
+    onChange: function (fn) { if (typeof fn === "function") changeFns.push(fn); },
     /* every whatiswh.* key as one object (values parsed when they are JSON) */
     exportAll: function () {
       var data = {};
@@ -394,11 +401,13 @@
         if (!v || typeof v !== "object") return;
         var cur = get(sl), txt = JSON.stringify(v);
         if (cur === txt) return;
-        if (cur !== null && !opts.overwrite) { sum.skipped.push(sl); return; }
+        var newer = false;                   // SPEC §34 (cloud pull): a slot saved later than the local one wins; the old one is kept as bak.import.<slot>
+        if (cur !== null && opts.newer) { try { newer = String(v.savedAt || "") > String((JSON.parse(cur) || {}).savedAt || ""); } catch (e) { newer = true; } }
+        if (cur !== null && !opts.overwrite && !newer) { sum.skipped.push(sl); return; }
         if (cur !== null && get("bak.import." + sl) === null) set("bak.import." + sl, cur);
         set(sl, txt); sum.slots.push(sl);
       });
-      if (d.settings && get("settings") === null) set("settings", JSON.stringify(d.settings));
+      if (d.settings && get("settings") === null) { set("settings", JSON.stringify(d.settings)); sum.settings = true; }
       // any other key we don't know: copy only if missing here
       var known = ["codexGlobal", "codexSeen", "tipsSeen", "eggTiers", "achievements", "achStats", "runs", "runsSeen", "runStats", "endingStats", "settings", "lastVersion"].concat(SLOTS);
       for (var k in d) {

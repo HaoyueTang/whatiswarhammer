@@ -552,6 +552,7 @@
     renderFooter();
     buildTools();
     fit();
+    if (WH.Cloud && WH.Cloud.onStatus) WH.Cloud.onStatus(function () { var el = $("cloud-state"); if (el) el.textContent = cloudText(); });
     show("title");
     if (!WH.Save.isPersistent()) toast(t("storage_off"));
     if (UI.bootCheck && UI.bootCheck.updated) toast(t("upd_toast", {v: UI.bootCheck.to}));   // SPEC §22: one-time notice, data kept
@@ -1780,6 +1781,43 @@
     UI.event = null;
   }
 
+  /* ======================= SPEC §34: cloud save status / pull hook ======================= */
+  function cloudText() {
+    var C = WH.Cloud; if (!C) return "";
+    var s = C.status;
+    if (s === "connecting") return t("cloud_connecting");
+    if (s === "syncing") return t("cloud_syncing");
+    if (s === "ok") {
+      if (!C.lastAt) return t("cloud_ok_now");
+      var d = new Date(C.lastAt), p2 = function (n) { return ("0" + n).slice(-2); };
+      return t("cloud_ok", {t: p2(d.getHours()) + ":" + p2(d.getMinutes())});
+    }
+    if (s === "error" && C.error === "invalid_argument") return t("cloud_off");   // a viewer without write access (public visitor): saves stay local
+    if (s === "error") return t(C.error === "quota_exceeded" || C.error === "invalid_argument" || C.error === "revoked" || C.error === "too_big" ? "cloud_err_stop" : "cloud_err");
+    return t("cloud_off");
+  }
+  function cloudRow() {
+    var C = WH.Cloud;
+    if (!C || !C.available) return null;                                  // not inside an artifact with the db capability
+    return h("div", {class: "setrow hint-row cloud-row"}, h("span", {class: "k"}, t("cloud_set")),
+      h("span", {class: "cloud-state", id: "cloud-state"}, cloudText()),
+      h("button", {class: "btn small px", type: "button", id: "cloud-now", onclick: function () { C.syncNow(); }}, "⟳ " + t("cloud_now")),
+      h("p", {class: "set-hint"}, t("cloud_hint")));
+  }
+  /* called by cloud.js after a pull that changed something in this browser */
+  UI.cloudPulled = function (sum) {
+    if (!sum || !(sum.runs || sum.codex || sum.endings || sum.slots.length || sum.keys || sum.settings)) return;
+    if (sum.settings && !UI.modals.length) {                              // settings arrived from the cloud (this browser had none)
+      UI.settings = WH.Save.loadSettings();
+      WH.lang = UI.settings.lang;
+      document.documentElement.lang = WH.lang === "zh" ? "zh-CN" : "en";
+      applyFxSetting(); applyAudioSettings(); renderFooter(); buildTools();
+    }
+    if (UI.screen === "title" && !UI.modals.length && !$("egg-planned")) renderTitle();
+    updateCodexBadge();
+    toast(t("cloud_pulled"));
+  };
+
   /* ======================= SPEC §33: "do you know Warhammer?" — asked once, before the first new game =======================
    * new  → loreCards "new" + keywordLinks on (defaults); vet → loreCards "codex" (no cards, toasts only) + keywordLinks off.
    * Entries are collected either way. Closing the dialog (✕ / Esc / click outside) keeps the defaults and still counts as asked. */
@@ -2745,6 +2783,7 @@
         }), h("p", {class: "set-hint"}, t("rewind_hint"))),
       styleRow(),
       trackRow(),
+      cloudRow(),
       eggDone("planned") ? h("div", {class: "setrow tz-row"}, h("span", {class: "k"}, t("tz_joke")),
         seg([[true, t("on")], [false, t("off")]], st.tzeentchJoke !== false, function (v) { st.tzeentchJoke = v; save(); openSettings(true); })) : null,
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("lore_cards")),

@@ -10,6 +10,8 @@ Format follows Keep a Changelog; versions follow SemVer.
 - New endings (5, total 131): `tau_end_thirdwave`, `nec_end_ceasefire`, `nec_end_webway`, `mech_end_survivor`, `gsc_end_passenger`. Dark Mechanicum antagonist is now "Dark Magos Syrredin" (a "warsmith" is an Iron Warriors rank). Shared events and rumours re-placed so none fires where it contradicts the scene; Imperium route rumours 15 → 12.
 ### Added — Opening choice (SPEC §33)
 - First new game asks "你熟悉战锤40K的设定吗？": 新人 keeps lore cards + clickable terms; 熟悉 turns both off (entries still collected in the codex). New setting "台词里的条目链接" (Settings). Returning players are not asked.
+### Added — Cloud save (SPEC §34)
+- Inside the claude.ai artifact, saves / codex / records / settings are mirrored to a private space on the viewer's account (db capability), so progress is no longer lost when the browser storage comes back empty. Restores on load, auto-pushes on every change; Settings → 云端存档 shows the state and has 立即同步. Outside an artifact nothing changes.
 ### Added — Dev tools
 - `tools/dev/playthrough.js` (one seeded random run as readable text), `route_graph.js`, `route_converge.js`, `story_lib.js`, `event_matrix.js`, `validate.js --story-report / --story-gate / --gather-report`.
 ### Added — Ending illustrations (SPEC §31)
