@@ -157,8 +157,8 @@
     "en": "Claimed by Khorne"
    },
    "text": {
-    "zh": "那一拳之后，你的手再也没真正松开过。灵族有道途约束杀意，你没有。\n守护者把你送出了网道。你一路杀进黑暗，没回过头。\n凯恩的怒火属于灵族。你的，被另一位神接住了。他不讲道途，只要头骨。",
-    "en": "Since that first blow your hands have never truly unclenched. The Aeldari have their Paths to cage the urge to kill. You have none.\nThe Guardians see you out of the webway. You fight your way into the dark and never look back.\nKhaine's rage belongs to the Aeldari. Yours was caught by another god. He keeps no Paths. He wants skulls."
+    "zh": "心里那团火一旦点着，就再也没熄过。灵族有道途约束杀意，你没有。\n守护者把你送出了网道。你一路杀进黑暗，没回过头。\n凯恩的怒火属于灵族。你的，被另一位神接住了。他不讲道途，只要头骨。",
+    "en": "Once the fire in you caught, it never went out. The Aeldari have their Paths to cage the urge to kill. You have none.\nThe Guardians see you out of the webway. You fight your way into the dark and never look back.\nKhaine's rage belongs to the Aeldari. Yours was caught by another god. He keeps no Paths. He wants skulls."
    },
    "scene": "webway",
    "speaker": {
@@ -1060,8 +1060,8 @@
     "en": "Killed the Patriarch, sent the warning"
    },
    "text": {
-    "zh": "影子还在，可歌停了，影子上开了一道缝，正好够一句话。九天后，帝国海军的炮火照亮了紫天。\n凯辛三号没保住，可整个阿尔科萨星区都听见了它的名字。\n你坐在塔的废墟上，和你记得的每一张脸。",
-    "en": "The Shadow remains, but the song stopped, and a crack opened just wide enough for one sentence. Nine days later Imperial Navy guns light the violet sky.\nKessin Tertius could not be saved, but the whole Arcosa Sector heard its name.\nYou sit in the tower's ruins, your mind quiet. Only you, and every face you remember."
+    "zh": "影子还在，可歌停了，影子掀开了一道缝，正好够一句话。九天后，帝国海军的炮火照亮了紫天。\n凯辛三号没保住，可整个阿尔科萨星区都听见了它的名字。\n你坐在塔的废墟上，和你记得的每一张脸。",
+    "en": "The Shadow remains, but the song stopped, and for the space of one sentence it lifted. Nine days later Imperial Navy guns light the violet sky.\nKessin Tertius could not be saved, but the whole Arcosa Sector heard its name.\nYou sit in the tower's ruins with every face you remember."
    },
    "scene": "hive_spire",
    "speaker": {
@@ -1459,7 +1459,7 @@
     "en": "Self dissolved into the Broodmind"
    },
    "text": {
-    "zh": "你再也分不清哪个声音是自己的了。\n嗡鸣里有几百个声音，你挑了一个最温柔的，跟着它走，再也没回来。\n家里多了一个总在微笑的人。没人记得他原来叫什么。",
+    "zh": "你再也分不清哪个声音是自己的了。\n嗡鸣里有几百个声音，你挑了一个最温柔的，跟着它走，再也没回来。\n家里多了一个总在微笑的人。没人记得这人原来叫什么。",
     "en": "You can no longer tell which voice is yours.\nThe hum holds hundreds. You pick the gentlest, follow it, and never come back.\nThe family gains one more person who always smiles. Nobody remembers their old name."
    },
    "scene": "gsc_chapel",
@@ -1789,8 +1789,8 @@
     "en": "Rebuilt as a servitor"
    },
    "text": {
-    "zh": "很多年后，某艘运兵舰的机库里，一个机仆在搬弹药箱。\n它一直哼着半句摇篮曲，没人知道下一句。\n偶尔有新兵停下来看它，好像认出了什么。",
-    "en": "Years later, in a troopship hangar, a servitor hauls ammunition crates.\nIt hums half a lullaby, over and over. No one knows the next line.\nNow and then a new recruit stops and stares, as if recognising something."
+    "zh": "很多年后，某艘运兵舰的机库里，一个机仆在搬弹药箱。\n它一直哼着半句摇篮曲，没人接得上下一句。\n偶尔有新兵停下来看它，好像认出了什么。",
+    "en": "Years later, in a troopship hangar, a servitor hauls ammunition crates.\nIt hums half a lullaby, over and over. No one can supply the next line.\nNow and then a new recruit stops and stares, as if recognising something."
    },
    "scene": "ship_interior",
    "speaker": {
@@ -1974,8 +1974,8 @@
     "en": "Became a Magos who kept a heart"
    },
    "text": {
-    "zh": "三十年后，你成了格拉维克斯的贤者。袍子下有黄铜，胸口里仍是一颗会疼的心。\n你改了转化线的规矩：会数数的、会唱歌的，先送来见你。\n你的档案里，名字一栏终于填上了。",
-    "en": "Thirty years later you are a Magos of Gravex. Brass beneath the robe; in your chest, a heart that still aches.\nYou change the rules of the conversion line: anyone who can count, or sing, is sent to you first.\nIn your file, the name field is finally filled in."
+    "zh": "三十年后，你成了格拉维克斯的贤者。袍子下的黄铜比同僚少得多，胸口里仍是一颗会疼的心。\n你改了转化线的规矩：会数数的、会唱歌的，先送来见你。\n你的档案里，名字一栏终于填上了。",
+    "en": "Thirty years later you are a Magos of Gravex. Far less brass beneath the robe than your peers; in your chest, a heart that still aches.\nYou change the rules of the conversion line: anyone who can count, or sing, is sent to you first.\nIn your file, the name field is finally filled in."
    },
    "scene": "manufactorum",
    "speaker": null,
