@@ -1,6 +1,6 @@
 /* data/events.js — random warp / chaos-god events (text role). SPEC §5.
- * Fired before a node with eventRoll; once per run. Kept faction-neutral ("*") so the wording fits
- * a guardsman, a cultist and a gue'vesa alike.
+ * Fired before a node with eventRoll; once per run. Mostly faction-neutral ("*"); `where` / `excludeFactions` (SPEC §32.3) keep each
+ * event off scenes it contradicts (shared-events pass 2026-11-12, see docs/audit/shared_events_pass.md and tools/dev/event_matrix.js).
  */
 (function () {
   function L(zh, en) { return {zh: zh, en: en}; }
@@ -10,6 +10,7 @@
   WH.registerEvents([
     /* ---------- Khorne ---------- */
     {id: "evt_khorne_1", god: "khorne", factions: ["*"], minChapter: 2,
+     where: {notScenes: ["stasis_gallery"], notNodes: ["imp_306", "imp_714", "cha_701", "nec_504", "nec_810"]},   // a dream: never mid-battle or in stasis (shared-events pass)
      scene: "daemon_world", speaker: S("daemon_khorne", "铜色的声音", "A Brass Voice"), foe: null,
      text: L("你梦见一座斗技场，看台上坐满了没有头的观众。\n一个声音像铁砧：“下一次，先出手。我会让你的手比他们的快。”\n醒来时，你的拳头攥得发白。",
              "You dream of an arena, its stands packed with headless spectators.\nA voice like an anvil: “Next time, strike first. I will make your hands faster than theirs.”\nYou wake with your fists clenched white."),
@@ -23,7 +24,8 @@
          "You prise your fingers open one by one. Four bloody crescents mark your palm: your own nails.")
      ]},
 
-    {id: "evt_khorne_2", god: "khorne", factions: ["*"], minChapter: 3,
+    {id: "evt_khorne_2", god: "khorne", factions: ["*"], excludeFactions: ["aeldari", "orks", "gsc"], minChapter: 3,
+     where: {notScenes: ["tomb_interior", "stasis_gallery", "mars_vista", "craftworld", "webway", "maiden_world"]},   // human comrades sharing rations
      scene: "barracks", speaker: S("sigil_khorne", "红雾", "Red Haze"), foe: null,
      text: L("一个同伴为了半块口粮推了你一把。很小的事。\n可你的视野边缘突然泛红，耳朵里有个声音在数数：一、二、三……\n它想知道你能不能数到八。",
              "A comrade shoves you over half a ration bar. A small thing.\nBut the edges of your vision suddenly redden, and something in your ear starts counting: one, two, three...\nIt wants to know whether you can count to eight."),
@@ -41,7 +43,8 @@
      ]},
 
     /* ---------- Nurgle ---------- */
-    {id: "evt_nurgle_1", god: "nurgle", factions: ["*"], minChapter: 2,
+    {id: "evt_nurgle_1", god: "nurgle", factions: ["*"], excludeFactions: ["aeldari", "orks"], minChapter: 2,
+     where: {notScenes: ["tomb_interior", "stasis_gallery"], notNodes: ["imp_306", "imp_714", "cha_701", "nec_504", "nec_810"]},   // days in a sickbed / bunk
      scene: "barracks", speaker: S("daemon_nurgle", "温和的老人", "A Kindly Old Voice"), foe: null,
      text: L("你发烧了。烧得最厉害的那晚，有个温和的老人坐在你床边，身上有烂苹果的甜味。\n“别跟它斗了，孩子，”他说，“让它留下来。你会发现，生病也没那么糟。”",
              "You fall ill. On the worst night of the fever, a kindly old man sits by your bed, smelling sweetly of rotten apples.\n“Stop fighting it, child,” he says. “Let it stay. You'll find being ill isn't so bad.”"),
@@ -55,7 +58,23 @@
          "You sweat through three nights and wake too weak to stand. No one is by the bed, only a few flies.")
      ]},
 
+    /* the Ork route's version of evt_nurgle_1 (no bunks, no sickbay among orks; shared-events pass 2026-11-12) */
+    {id: "evt_nurgle_pen", god: "nurgle", factions: ["orks"], minChapter: 2,
+     scene: "ork_scrapyard", speaker: S("daemon_nurgle", "温和的老人", "A Kindly Old Voice"), foe: null,
+     text: L("你在废料场发了烧。兽人不管谁病了，只管谁还搬得动。\n烧得最厉害那晚，一个温和的老人蹲在你身边，身上有烂蘑菇的甜味：“别跟它斗了，孩子。让它留下来，你就再也不会累。”",
+             "You fall ill in the scrapyard. The orks don't care who's sick, only who can still haul.\nOn the worst night a kindly old man crouches beside you, smelling sweetly of rotten fungus. “Stop fighting it, child. Let it stay, and you'll never be tired again.”"),
+     codex: ["god_nurgle"],
+     choices: [
+       O("让它留下来", "Let it stay", {hp: 10, sanity: 10, corruption: 8, taint: {nurgle: 30}},
+         "烧退了，病却没走。你搬废铁再也不觉得累，也不觉得疼。地精仔开始绕着你走。",
+         "The fever breaks, but the sickness stays. You haul scrap without tiring or hurting. The grots start giving you a wide berth."),
+       O("硬扛过去", "Fight it off", {hp: -10, sanity: -5},
+         "你在废铁堆里抖了三夜。醒来时虚得站不住，身边只有几只苍蝇，和不知谁留下的半块面包。",
+         "You shiver through three nights in the scrap. You wake too weak to stand. Beside you, only a few flies and half a crust someone left.")
+     ]},
+
     {id: "evt_nurgle_2", god: "nurgle", factions: ["*"], minChapter: 3,
+     where: {notScenes: ["stasis_gallery"]},
      scene: "ruins", speaker: S("sigil_nurgle", "一朵花", "A Flower"), foe: null,
      text: L("你的靴子裂缝里长出了一朵小花，花瓣绿得发灰，几只苍蝇围着它哼歌。\n哼的是摇篮曲。你小时候听过。",
              "A little flower has sprouted from a crack in your boot. Its petals are a greyish green, and a few flies hum around it.\nThey're humming a lullaby. One you heard as a child."),
@@ -71,6 +90,7 @@
 
     /* ---------- Tzeentch ---------- */
     {id: "evt_tzeentch_1", god: "tzeentch", factions: ["*"], minChapter: 2,
+     where: {notScenes: ["stasis_gallery"], notNodes: ["imp_306", "imp_714", "cha_701", "nec_504", "nec_810"]},   // "tomorrow": needs a day between
      scene: "warp", speaker: S("daemon_tzeentch", "多出来的一页", "The Extra Page"), foe: null,
      text: L("你在口袋里摸到一张纸条，是你的笔迹，可你不记得写过。\n上面写着：“明天别走左边。”\n纸条背面还有一行小字：“除非你想知道走左边会怎样。”",
              "You find a note in your pocket, in your own handwriting, which you don't remember writing.\nIt says: “Don't go left tomorrow.”\nOn the back, smaller: “Unless you want to know what happens if you do.”"),
@@ -88,6 +108,7 @@
      ]},
 
     {id: "evt_tzeentch_2", god: "tzeentch", factions: ["*"], minChapter: 4,
+     where: {notScenes: ["stasis_gallery"]},
      scene: "warp", speaker: S("sigil_tzeentch", "慢半拍的倒影", "The Lagging Reflection"), foe: null,
      text: L("你在水洼里看见自己的倒影，它比你慢了半拍。\n然后它没有跟着你眨眼，而是张开嘴，无声地说了一句话。\n你读懂了唇语：“我知道你下一步会做错什么。”",
              "In a puddle you see your reflection lagging half a beat behind.\nThen it doesn't blink when you do. It opens its mouth and silently says something.\nYou read its lips: “I know which next step you'll get wrong.”"),
@@ -103,6 +124,7 @@
 
     /* ---------- Slaanesh ---------- */
     {id: "evt_slaanesh_1", god: "slaanesh", factions: ["*"], minChapter: 2,
+     where: {notScenes: ["stasis_gallery"], notNodes: ["imp_402"]},   // not right before Brin's soup ("every meal tastes of ash")
      scene: "cult_shrine", speaker: S("daemon_slaanesh", "完美的一口", "The Perfect Bite"), foe: null,
      text: L("有人递给你一颗果子，你从没见过，也没问。\n那是你这辈子吃过最好吃的东西。好吃到之后的每一顿饭都像嚼灰。\n递果子的人笑着说：“还有。只要你想要。”",
              "Someone hands you a fruit you've never seen. You don't ask.\nIt's the best thing you've ever tasted. So good that every meal afterward tastes of ash.\nThe one who gave it smiles. “There's more. Whenever you want it.”"),
@@ -117,6 +139,7 @@
      ]},
 
     {id: "evt_slaanesh_2", god: "slaanesh", factions: ["*"], minChapter: 3,
+     where: {notScenes: ["stasis_gallery"]},
      scene: "throne_light", speaker: S("sigil_slaanesh", "掌声", "Applause"), foe: null,
      text: L("你做好了一件小事，耳边响起了掌声。周围没有人。\n掌声很真诚，很热烈，你从没被人这样夸过。\n一个声音轻轻地说：“再来一次。做得再漂亮一点。”",
              "You do a small thing well, and applause rings in your ears. No one is near.\nIt's sincere and warm. No one has ever praised you like this.\nA voice whispers: “Again. Do it a little more beautifully.”"),
@@ -131,7 +154,8 @@
      ]},
 
     /* ---------- Undivided ---------- */
-    {id: "evt_undivided_1", god: "undivided", factions: ["*"], minChapter: 2,
+    {id: "evt_undivided_1", god: "undivided", factions: ["*"], excludeFactions: ["chaos", "orks", "aeldari", "gsc"], minChapter: 2,
+     where: {notScenes: ["tomb_interior", "stasis_gallery", "mars_vista"], notNodes: ["imp_306", "imp_714", "nec_504", "nec_810"]},   // a bunk, and someone above you who burns heresy
      scene: "barracks", speaker: S("sigil_undivided", "八芒星", "Eight-Pointed Star"), foe: null,
      text: L("你的铺位底下被人刻了一颗八芒星。刻痕很新，木屑还是软的。\n你不知道是谁刻的。你只知道，看着它的时候，伤口不那么疼了。",
              "Someone has carved an eight-pointed star beneath your bunk. The cuts are fresh; the shavings still soft.\nYou don't know who did it. You only know that while you look at it, your wounds hurt less."),
@@ -149,14 +173,15 @@
      ]},
 
     {id: "evt_undivided_2", god: "undivided", factions: ["*"], minChapter: 4,
+     where: {notScenes: ["stasis_gallery"], notNodes: ["imp_306", "imp_714", "cha_701", "nec_504", "nec_810"]},   // at night
      scene: "warp", speaker: S("sigil_undivided", "敲门声", "The Knocking"), foe: null,
-     text: L("夜里，有东西在敲你身边的墙。三下，停一停，再三下。\n很有礼貌。\n墙那边是实心的岩石。",
-             "At night something knocks on the wall beside you. Three times, a pause, three more.\nVery polite.\nOn the other side of the wall is solid rock."),
+     text: L("夜里，有东西在敲你身边的墙。三下，停一停，再三下。\n很有礼貌。\n墙那边，本该什么都没有。",
+             "At night something knocks on the wall beside you. Three times, a pause, three more.\nVery polite.\nOn the other side of the wall there should be nothing at all."),
      codex: ["chaos_warp"],
      choices: [
        O("敲回去", "Knock back", {corruption: 12, renown: 5, sanity: -5, taint: {all: 15}},
          "敲门声停了。然后，墙那边有个声音说：“谢谢。我们会再来的。”",
-         "The knocking stops. Then a voice from inside the rock says: “Thank you. We'll be back.”"),
+         "The knocking stops. Then a voice from the other side says: “Thank you. We'll be back.”"),
        O("捂住耳朵念祷词", "Cover your ears and recite a prayer", {sanity: -8},
          "敲了一整夜。天亮时停了。墙上多了一个小小的、圆圆的凹痕，正好是指节的形状。",
          "It knocks all night, stopping at dawn. In the wall is a small round dent, exactly the shape of a knuckle.")
@@ -164,9 +189,11 @@
 
     /* ---------- Other ---------- */
     {id: "evt_other_1", god: "other", factions: ["*"], minChapter: 3,
+     where: {notScenes: ["webway", "tomb_interior", "stasis_gallery", "daemon_world", "mars_vista"],
+             notNodes: ["imp_501", "tau_511", "tau_601", "gsc_504", "gsc_509"]},   // not where the Shadow in the Warp has fallen, in the Eye, the webway or a null tomb
      scene: "throne_light", speaker: S("omen_emperor", "遥远的金光", "Distant Gold"), foe: null,
-     text: L("某个瞬间，所有的噪音都停了。你感到一道很远很远的光，从银河的另一头照过来，冷，但是稳。\n它没有看你。它只是在那里。一万年了，一直在那里。",
-             "For one moment, all the noise stops. You sense a light from very, very far away, shining across the galaxy—cold, but steady.\nIt isn't looking at you. It's simply there. Ten thousand years, always there."),
+     text: L("某个瞬间，所有的噪音都停了。你感到一道很远很远的光，隔着大裂隙，从银河的另一头透过来，很淡，但是稳。\n它没有看你。它只是在那里。一万年了，一直在那里。",
+             "For one moment, all the noise stops. You sense a light from very, very far away, seeping through the Rift from the far side of the galaxy—faint, but steady.\nIt isn't looking at you. It's simply there. Ten thousand years, always there."),
      codex: ["imp_emperor"],
      choices: [
        O("对着光祷告", "Pray toward the light", {sanity: 10, corruption: -8, taint: {all: -10}},
@@ -177,7 +204,8 @@
          "The light doesn't follow you. It never follows anyone.")
      ]},
 
-    {id: "evt_other_2", god: "other", factions: ["*"], minChapter: 4,
+    {id: "evt_other_2", god: "other", factions: ["imperium", "tau", "gsc"], minChapter: 4,
+     where: {nodes: ["imp_501", "tau_511", "tau_601", "gsc_409", "gsc_504", "gsc_509"]},   // only as the hive fleet's Shadow approaches
      scene: "spore_sky", speaker: S("omen_hivemind", "巨大的寂静", "A Vast Silence"), foe: null,
      text: L("亚空间突然安静了。所有的低语、所有的敲门声，全都消失了。\n这本该是好事。\n可你感觉到有什么东西把它们全吃掉了，现在正慢慢转过来，朝向你。",
              "The warp falls suddenly silent. Every whisper, every knock—gone.\nThat should be a relief.\nBut you sense that something has eaten them all, and is now slowly turning toward you."),

@@ -37,7 +37,7 @@
     codex: ["tau_empire", "place_dalnor", "imp_great_rift"],
     choices: [
       C("去港口上工", "Head to the docks", "tau_102", {result: L("汽笛响了。今天码头不开工——所有人都被叫去听演讲。", "The whistle blows. No unloading today: everyone is called to hear a speech.")}),
-      C("先去看看雷娜姨", "Visit Aunt Rena first", "tau_103", {result: L("人类街区的巷子还是老样子。雷娜姨家的门没锁，屋里有股蜡烛味。", "The human quarter's alleys haven't changed. Rena's door is unlocked; the room smells of candle wax.")})
+      C("先去看看邻居雷娜姨", "Visit your neighbour, Aunt Rena, first", "tau_103", {result: L("人类街区的巷子还是老样子。雷娜姨家的门没锁，屋里有股蜡烛味。", "The human quarter's alleys haven't changed. Rena's door is unlocked; the room smells of candle wax.")})
     ]};
 
   N.tau_102 = {chapter: 1, scene: "tau_city", speaker: VASH, time: {h: 2}, gather: L("码头", "Docks"),
@@ -226,7 +226,7 @@
     alt: [
       {if: {flag: "lateSigner"}, text: L("三天后清晨，达尔诺尔港，码头上挤满了送行的人。你是这一班里的迟到者——乔里一周前就走了。\n雷娜姨也来了，往你兜里塞了个煮蛋：“替我看看他。”\n汽笛响了。", "Three days later, at dawn: Port Dal'nor, the docks packed with people seeing recruits off. You're the late one on this boat; Jory left a week ago.\nAunt Rena came anyway and pushes a boiled egg into your pocket. “Look in on him for me.”\nThe whistle blows.")},
       {if: {flag: "promisedRena"}, add: L("她隔着人群冲你做了个口型：看着他。", "Across the crowd she mouths it at you: watch him.")},
-      {if: {flag: "renaDistrust"}, add: L("她看了你一眼，又转回去看乔里。", "She glances at you once, then back at Jory.")}
+      {if: {all: [{flag: "renaDistrust"}, {notFlag: "lateSigner"}]}, add: L("她看了你一眼，又转回去看乔里。", "She glances at you once, then back at Jory.")}
     ],
     choices: [
       C("上船", "Board", "tau_201", {result: L("船顺着河口开进丛林。岸上的人越来越小，最后只剩一片挥动的手。", "The boat noses up the estuary into the jungle. The people on shore shrink to a field of waving hands.")})
@@ -276,7 +276,7 @@
       C("礼貌地拒绝", "Politely decline", "tau_205", {result: L("格拉克萨耸耸肩，把那块也吞了。“犹豫，”他说，“看吧。”", "Grrak'tha shrugs and swallows that piece too. “Hesitation,” he says. “See?”")})
     ]};
 
-  N.tau_205 = {chapter: 2, scene: "jungle", speaker: KELRA, time: {d: 20}, jump: L("训练第三周，丛林", "Week three of training, the jungle"),
+  N.tau_205 = {chapter: 2, scene: "jungle", speaker: KELRA, time: {d: 20}, jump: L("训练一个多月后，丛林", "Over a month into training, the jungle"),
     text: L("伏击训练。凯尔拉让你趴在泥里十四个小时，一动不动。\n“猎人要有耐心，”她说，“等猎物自己走进陷阱，这叫‘考尤’。然后一击致命，这叫‘蒙卡’。”\n第九个小时，一只虫子爬进了你的领口。",
             "Ambush drill. Kel'ra has you lie motionless in the mud for fourteen hours.\n“A hunter must be patient,” she says. “Wait for the prey to walk into the trap. That is Kauyon. Then, one killing blow. That is Mont'ka.”\nIn hour nine, a bug crawls down your collar."),
     codex: ["tau_kauyon"],
@@ -486,7 +486,7 @@
     alt: [
       {if: {flag: "renaDistrust"}, text: L("雷娜姨把双头鹰吊坠挂在胸前，眼睛亮得吓人。她本不想找你——你劝过她扔掉它。可她没有别人了。\n“他们来接我们了。今晚我要在钟楼上点一盏灯。你帮我。”", "Aunt Rena wears the eagle pendant openly now, eyes frighteningly bright. She didn't want to ask you; you told her to throw it away. But there is no one else.\n“They've come for us. Tonight I'll light a lamp in the bell tower. Help me.”")},
       {if: {flag: "soldRena"}, add: L("她手里攥着钱：“我付你钱，像上次那样。”", "She has coins in her fist. “I'll pay you, like last time.”")},
-      {if: {anyFlag: ["knowAquila", "satWithRena"]}, add: L("她直接推开你的门，像来找自家人。", "She walks straight in, the way family does.")}
+      {if: {all: [{anyFlag: ["knowAquila", "satWithRena"]}, {notFlag: "renaDistrust"}]}, add: L("她直接推开你的门，像来找自家人。", "She walks straight in, the way family does.")}
     ],
     choices: [
       C("帮她", "Help her", "tau_403", {effects: {renown: -10, set: {helpedRena: true, watched: true}}, result: L("你们趁夜摸上钟楼。雷娜姨的手在抖，划了三根火柴才点着灯芯。街角，有一点红光闪了一下。", "You climb the bell tower under cover of night. Rena's hands shake; it takes three matches to light the wick. On the corner, a red light blinks once.")}),
@@ -540,7 +540,7 @@
     alt: [
       {if: {all: [{flag: "helpedRena"}, {anyFlag: ["logged", "flagged"]}]}, text: L("三天后。轨道上的火光一夜没停，凯尔拉把所有古维萨召回城外营地。\n枕头下压着瓦尚的淡蓝卡片：“战后我们谈谈。”你的脸早就进了无人机的表格。\n“帝国军明天登陆，”凯尔拉说，“准备好。”", "Three days later. The orbital fire never stops; Kel'ra recalls every gue'vesa to the camp outside the city.\nUnder your pillow, a pale blue card in Vash'aun's hand: “Let us talk after the war.” Your face has long been in a drone's table.\n“The Imperials land tomorrow,” Kel'ra says. “Be ready.”")},
       {if: {flag: "reportedRena"}, text: L("三天后。轨道上的火光一夜没停，凯尔拉把所有古维萨召回城外营地。\n你的床铺被人挪到了最角落。没人跟你说话。\n“帝国军明天登陆，”凯尔拉说，“你们会看见自己的同胞。准备好。”", "Three days later. The orbital fire never stops; Kel'ra recalls every gue'vesa to the camp outside the city.\nSomeone has moved your bunk to the far corner. Nobody speaks to you.\n“The Imperials land tomorrow,” Kel'ra says. “You will see your own kind. Be ready.”")},
-      {if: {flag: "helpedRena"}, add: L("扫描停在你脸上很久。钟楼那一夜，它全记下了。", "The scan lingers on your face. It logged everything from the bell tower.")},
+      {if: {all: [{flag: "helpedRena"}, {not: {anyFlag: ["logged", "flagged"]}}]}, add: L("扫描停在你脸上很久。钟楼那一夜，它全记下了。", "The scan lingers on your face. It logged everything from the bell tower.")},
       {if: {flag: "shotCommissar"}, add: L("你肩上的伤还在渗血。没人问是谁打的。", "Your shoulder is still seeping. Nobody asks who shot you.")}
     ],
     choices: [
@@ -585,7 +585,7 @@
             "Five days of retreat. Street by street you fall back, the gue'vesa always last, always where the Imperials can see them.\nEach day's casualty list again holds only humans and Kroot.\nFor the first time, Kel'ra goes silent on the comm for a long while."),
     alt: [
       {if: {fromNode: ["tau_409"]}, add: L("你在克鲁特营地醒来，格拉克萨在一旁磨刀。", "You wake in the Kroot camp; Grrak'tha is sharpening his blade beside you.")},
-      {if: {flag: "firedHigh"}, add: L("92号记下你抬高枪口的那段，她删了。谁也没告诉。", "The log of you aiming high: she deleted it. She told no one.")}
+      {if: {flag: "firedHigh"}, add: L("92号记下你抬高枪口的那段，凯尔拉删了。谁也没告诉。", "The log of you aiming high: Kel'ra deleted it. She told no one.")}
     ],
     choices: [
       C("撑到第六天", "Hold out to the sixth day", "tau_408", {result: L("第六天早上，帝国军追进了城中心。凯尔拉在频道里只说了一句：“现在。”", "On the sixth morning the Imperials push into the city centre. Kel'ra says one word on the comm: “Now.”")})
@@ -711,7 +711,7 @@
       {if: {flag: "sawEye"}, add: L("“你也看见那只眼了？”他笑了，“它也看见你了。”", "“You saw the eye too?” He smiles. “It saw you as well.”")}
     ],
     choices: [
-      C("听他说完", "Hear him out", "tau_507", {effects: {corruption: 8, sanity: -5, taint: {slaanesh: 50}}, result: L("你留了下来。糖很甜，西拉斯的声音很温和，比瓦尚更像是在跟你说话。", "You stay. The sugar is sweet, and Silas's gentle voice sounds more like he's talking to you than Vash'aun ever did.")}),
+      C("听他说完", "Hear him out", "tau_507", {effects: {corruption: 8, sanity: -5, taint: {slaanesh: 50}}, result: L("你留了下来。糖甜得发腻。西拉斯说话时，你觉得屋里还有别的什么在听，听得那么专注，专注得让你脸红。", "You stay. The sugar is cloyingly sweet. While Silas talks, you feel something else in the room listening too, so intently that you flush.")}),
       C("报告凯尔拉", "Report to Kel'ra", "tau_508", {effects: {renown: 5, set: {reportedSilas: true}}, result: L("凯尔拉听完，只说了一句“知道了”。第二天，营房里的聚会散了，西拉斯不见了。", "Kel'ra hears you out and says only, “Understood.” Next day the meetings stop, and Silas is gone.")})
     ]};
 
@@ -719,7 +719,7 @@
     text: L("西拉斯在你手腕上画了一个符号，八道线从一个点散开。\n“你会更强，”他说，“不用等任何人批准你的贡献。”\n符号在发烫。你的伤疤全都不疼了。",
             "Silas draws a symbol on your wrist: eight lines radiating from one point.\n“You'll be stronger,” he says. “No one has to approve your contribution.”\nThe symbol grows warm. None of your scars hurt anymore."),
     choices: [
-      C("让符号留下", "Let the mark stay", "tau_508", {effects: {corruption: 20, hp: 20, taint: {khorne: 50}, set: {cultMark: true}}, result: L("你放下袖子盖住符号。夜里，它在布料下轻轻地跳，像第二颗心脏。", "You pull your sleeve over the mark. At night it pulses softly under the cloth, like a second heart.")}),
+      C("让符号留下", "Let the mark stay", "tau_508", {effects: {corruption: 20, hp: 20, taint: {khorne: 50}, set: {cultMark: true}}, result: L("你放下袖子盖住符号。夜里，它在布料下轻轻地跳，像第二颗心脏。你梦见一片铜色的平原，头骨堆成了王座。", "You pull your sleeve over the mark. At night it pulses softly under the cloth, like a second heart, and you dream of a brass plain where skulls are piled into a throne.")}),
       C("用刀刮掉它", "Scrape it off with a knife", "tau_508", {effects: {hp: -10, sanity: -5, taint: {all: -5}, set: {scrapedMark: true}}, result: L("你刮到见血，符号才淡下去。西拉斯没拦你，只是笑了笑：“它记住你了。”", "You scrape until it bleeds before the mark fades. Silas doesn't stop you. He only smiles. “It remembers you.”")})
     ]};
 
@@ -837,7 +837,7 @@
     choices: [
       C("收下吊坠，求她去难民营", "Keep it; beg her to go to the camp", "tau_606", {effects: {sanity: 5, set: {renaCamp: true}}, grudge: {npc: "rena", effects: {sanity: -6}, note: L("你告发过她。她递来的吊坠，沉得握不住。", "You informed on her. The pendant she hands you is hard to hold.")}, result: L("吊坠还带着她的体温。她叹了口气，站起来：“好吧。难民营也是排队，我会排。”", "The pendant is still warm from her. She sighs and stands. “All right. The camp's a queue too. I can queue.”")}),
       C("硬拉她走", "Try to drag her along", "tau_605a", {effects: {hp: -5, sanity: -5}, grudge: {npc: "rena", effects: {hp: -6}, note: L("你告发过她。她这次拼了命，不让你碰。", "You informed on her. This time she fights your hands off.")}, result: L("她比看上去有力气得多。她死死抓着讲台，指甲划破了你的手背。", "She's far stronger than she looks. She clings to the pulpit, and her nails score the back of your hand.")}),
-      C("向她坦白那一夜的事", "Confess what you did that night", "tau_606", {require: {flag: "wronged_rena"}, hideIfLocked: true, effects: {sanity: 3, set: {forgiven_rena: true, renaCamp: true}}, result: L("雷娜姨沉默片刻：“我知道是你。脚步声，我认得。你肯来说，就够了。”她跟你走了。", "Rena is silent a while. “I knew it was you. I know your footsteps. That you came to say it is enough.” She comes with you.")})
+      C("向她坦白那一夜的事", "Confess what you did that night", "tau_606", {require: {flag: "wronged_rena"}, hideIfLocked: true, effects: {sanity: 3, set: {forgiven_rena: true, renaCamp: true}}, result: L("雷娜姨沉默片刻：“我知道是你。那天你出门，一路没回头，我在窗口看着。你肯来说，就够了。”她跟你走了。", "Rena is silent a while. “I knew it was you. You walked out that day and never looked back; I watched. That you came to say it is enough.” She comes with you.")})
     ]};
 
   N.tau_605a = {chapter: 6, scene: "hive_hab", speaker: RENA, time: {h: 1},
@@ -862,7 +862,7 @@
       C("悄悄去报告凯尔拉", "Quietly report to Kel'ra", "tau_607", {effects: {sanity: -5, taint: {nurgle: 10}}, result: L("你一步一步退出帐篷区，不敢跑。身后，那三个孩子一起笑出了声。", "You back out of the tents step by step, not daring to run. Behind you, the three children laugh in unison.")})
     ]};
 
-  N.tau_607 = {chapter: 6, scene: "tau_city", speaker: KELRA, foe: "genestealer", time: {h: 2},
+  N.tau_607 = {chapter: 6, scene: "jungle", speaker: KELRA, foe: "genestealer", time: {h: 2},
     text: L("火族包围了帐篷。里面的东西冲出来时，营地炸开了锅。\n“它们一直在叫什么东西过来，”凯尔拉擦着枪说，“现在它来了。”\n天亮后，钛人看人类的眼神变了。港口的大门关上了。",
             "The fire caste surrounds the tent. When the things inside burst out, the camp erupts.\n“They have been calling something here,” Kel'ra says, wiping her rifle. “Now it is coming.”\nBy dawn the way the T'au look at humans has changed. The port gates close."),
     effects: {renown: 5},
@@ -886,7 +886,7 @@
     codex: ["place_dalnor_port"],
     alt: [
       {if: {fromNode: ["tau_608"]}, add: L("你胸口的绷带还在渗血，乔里一直扶着你。", "The bandage on your chest is still seeping; Jory hasn't let go of you.")},
-      {if: {flag: "toldQuarter"}, add: L("有人认出你：“是联络官！他早告诉过我们！”", "Someone recognises you. “The liaison! He told us straight!”")}
+      {if: {flag: "toldQuarter"}, add: L("有人认出你：“是联络官！早就跟我们说实话了！”", "Someone recognises you. “The liaison! Told us straight!”")}
     ],
     choices: [
       C("回到防线去", "Return to the defence line", "tau_611", {effects: {renown: 5, taint: {nurgle: 20}}, result: L("你转身逆着人群走。身后的哭喊越来越远，你没有回头。", "You turn and push against the crowd. The cries behind you fade. You don't look back.")}),
@@ -1011,8 +1011,8 @@
     ]};
 
   N.tau_706a = {chapter: 7, scene: "tau_city", speaker: S("gue_vesa", "老哈斯克", "Old Hask"), foe: "gaunt", time: {h: 1},
-    text: L("人类古维萨没被那根线牵着。哈斯克第一个应声，乔里第二个。\n人类的枪声撑住了城墙。整整一刻钟，只有人类在开火。\n直到凯尔拉晃了晃脑袋，重新举起了枪。",
-            "The human gue'vesa were never on that string. Hask answers first; Jory second.\nHuman fire holds the wall. For a full quarter of an hour, only humans are shooting.\nUntil Kel'ra shakes her head and raises her rifle again."),
+    text: L("你的喊声还没落，哈斯克第一个应声，乔里第二个。\n人类的枪声撑住了城墙。整整一刻钟，只有人类在开火。\n直到凯尔拉晃了晃脑袋，重新举起了枪。",
+            "Before your shout dies away, Hask answers first; Jory second.\nHuman fire holds the wall. For a full quarter of an hour, only humans are shooting.\nUntil Kel'ra shakes her head and raises her rifle again."),
     effects: {sanity: 5, taint: {khorne: 10}},
     choices: [
       C("撑住", "Hold", "tau_707", {result: L("火族战士一个接一个醒过来。有人经过你身边时，低声说了句钛语。你听懂了：谢谢。", "The fire warriors come back one by one. One passing you murmurs a word in T'au. You understand it: thank you.")})
@@ -1074,8 +1074,8 @@
     effects: {hp: -10},
     choices: [
       C("掩护凯尔拉的战斗服", "Cover Kel'ra's battlesuit", null, M(R(0.4, "hp", "tau_803", "tau_804", L("你冲出掩体，把一整块电池打进它的侧脸。它转过头，看向了你。", "You break cover and empty a whole cell into the side of its head. It turns to look at you."), L("你的射击打在它的甲壳上，连一道痕都没留下。它甚至没有转头。", "Your shots strike its carapace without leaving a mark. It doesn't even turn its head.")), {grudge: {npc: "kelra", p: -0.08, note: L("你告发过她。她的战斗服不再等你的信号。", "You informed on her. Her battlesuit no longer waits for your signal.")}})),
-      C("带平民去最后一艘船", "Lead civilians to the last ship", "tau_805", {result: L("你朝港口方向大喊，挥手让人往那边跑。乔里已经在舷梯口等你了。", "You shout toward the port and wave people on. Jory is already waiting at the ramp."),
-        resultAlt: [{if: {flag: "caredJory"}, text: L("“港口！”乔里在你耳边喊，“最后一艘船！”是他先想到的。你们一起挥手，把人往那边赶。", "“The port!” Jory yells in your ear. “The last ship!” He thought of it first. Together you wave people that way.")}]}),
+      C("带平民去港口上船", "Lead civilians to the ships at the port", "tau_805", {result: L("你朝港口方向大喊，挥手让人往那边跑。乔里已经在舷梯口等你了。", "You shout toward the port and wave people on. Jory is already waiting at the ramp."),
+        resultAlt: [{if: {flag: "caredJory"}, text: L("“港口！”乔里在你耳边喊，“那边还有船！”是他先想到的。你们一起挥手，把人往那边赶。", "“The port!” Jory yells in your ear. “There's still a ship!” He thought of it first. Together you wave people that way.")}]}),
       C("握紧口袋里的信物", "Clutch the keepsake in your pocket", "tau_806", {require: {flag: "prayerToken"}, hideIfLocked: true, result: L("枪声和尖叫突然离你很远。你的手伸进口袋，摸到了那件小小的、冰凉的东西。", "The gunfire and screaming suddenly seem far away. Your hand finds the small, cold thing in your pocket.")}),
       C("向西拉斯的神献上一切", "Offer everything to Silas's god", "tau_803", {require: {flag: "cultMark"}, hideIfLocked: true, effects: {corruption: 30, hp: 40, sanity: -10, taint: {khorne: 50}}, result: L("你说出了那个名字。有什么东西从你体内涌出来，接管了你的手，替你瞄准。", "You speak the name. Something floods out through you, takes your hands, and aims for you.")})
     ]};
@@ -1169,7 +1169,7 @@
     alt: [
       {if: {anyFlag: ["joryBond", "forgiven_jory"]}, add: L("乔里也留下了，用钛人的手砌墙。", "Jory stayed too, laying bricks with his T'au hand.")},
       {if: {anyFlag: ["renaStayed", "renaCamp"]}, add: L("雷娜姨每天还去擦那张讲台。", "Aunt Rena still dusts that pulpit every day.")},
-      {if: {flag: "grrakDead"}, text: L("你留了下来，和几个不肯走的人、几个记得格拉克萨的克鲁特一起，重建达尔诺尔。\n旧教堂的空讲台上，挂着一枚双头鹰，旁边是钛人的圆环。\n两年了，没人把哪一个摘下来。", "You stay to rebuild Dal'nor with the few who wouldn't leave, and a few Kroot who remember Grrak'tha.\nOn the old chapel's empty pulpit hangs an eagle, and beside it, a T'au ring.\nTwo years on, nobody has taken either one down.")}
+      {if: {flags: ["grrakDead", "rememberGrrak"]}, text: L("你留了下来，和几个不肯走的人、几个记得格拉克萨的克鲁特一起，重建达尔诺尔。\n旧教堂的空讲台上，挂着一枚双头鹰，旁边是钛人的圆环。\n两年了，没人把哪一个摘下来。", "You stay to rebuild Dal'nor with the few who wouldn't leave, and a few Kroot who remember Grrak'tha.\nOn the old chapel's empty pulpit hangs an eagle, and beside it, a T'au ring.\nTwo years on, nobody has taken either one down.")}
     ],
     ending: {kind: "good", title: L("守望者", "The Watch"), cause: L("留守达尔诺尔", "Stayed to guard Dal'nor")}};
 
@@ -1194,6 +1194,9 @@
     text: L("钛人没见过这种病：一个古维萨，越打越不疼，越打越停不下。\n无人机把你记作“效率异常”，火族不再和你一起出击。某天你独自走进丛林，去找下一场仗。\n大义需要理由，血神不需要。他只要头骨。",
             "The T'au have never seen this sickness: a gue'vesa who feels less pain with every fight, and cannot stop.\nDrones log you as an efficiency anomaly; the fire caste stop deploying with you. One day you walk into the jungle alone, looking for the next fight.\nThe Greater Good needs reasons. The Blood God needs only skulls."),
     codex: ["god_khorne"],
+    alt: [
+      {if: {fromChapter: {min: 7}}, text: L("虫群退去时，你还在城墙外砍杀，砍的早已不只是虫子。\n无人机把你记作“效率异常”，撤离名单上划掉了你的名字。你独自走进孢子雾，去找下一场仗。\n大义需要理由，血神不需要。他只要头骨。", "When the swarm pulls back you are still killing beyond the wall, and not only bugs anymore.\nDrones log you as an efficiency anomaly; your name is struck from the evacuation list. You walk alone into the spore fog, looking for the next fight.\nThe Greater Good needs reasons. The Blood God needs only skulls.")}
+    ],
     ending: {kind: "bad", title: L("效率异常", "Efficiency Anomaly"), cause: L("被恐虐收走", "Claimed by Khorne")}};
 
   N.tau_end_claim_nurgle = {scene: "hive_hab", speaker: S("daemon_nurgle", "慈祥的声音", "A Fond Voice"), time: {d: 20},

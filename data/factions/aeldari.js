@@ -204,7 +204,9 @@
   N.eld_o_pilgrim_4 = {chapter: 1, scene: "cathedral", speaker: JORBAN, time: {d: 1},
     text: L("乔班神父把你堵在礼拜堂门口，盯着你鼻孔下的血痕。\n“会做准的梦，会流鼻血。”他压低声音，“孩子，黑船来的时候，会先找你这样的人。”\n他身后，圣像脚下的石板裂开一道缝，透出绿光。",
             "Father Jorban corners you at the chapel door, eyeing the blood under your nose.\n“Dreams that come true. Nosebleeds.” He lowers his voice. “Child, when the Black Ships come, they look for your kind first.”\nBehind him, the flagstone beneath the saint's statue cracks. Green light seeps through."),
-    alt: [A(F("toldCrew"), "“补给船上的人说来了个讲梦的疯子，”他叹气，“消息传得比收成还快。”",
+    alt: [AT(FROM("eld_o_pilgrim_2"), "乔班神父把你堵在礼拜堂门口，盯着你鼻孔下的血痕：昨晚给妮尔讲梦，你又流了鼻血。\n“会做准的梦，会流鼻血。孩子，黑船来的时候，会先找你这样的人。”\n他身后，石板裂开一道缝，透出绿光。",
+             "Father Jorban corners you at the chapel door, eyeing the blood under your nose. It bled again last night as you told Nell your dream.\n“Dreams that come true. Nosebleeds. Child, when the Black Ships come, they look for your kind first.”\nBehind him a flagstone cracks. Green light seeps through."),
+          A(F("toldCrew"), "“补给船上的人说来了个讲梦的疯子，”他叹气，“消息传得比收成还快。”",
             "“The supply crew say a madman came down telling dreams,” he sighs. “News travels faster than harvests.”")],
     codex: ["imp_psyker", "imp_black_ships"],
     choices: [
@@ -298,7 +300,7 @@
   N.eld_o_trooper_5 = {chapter: 1, scene: "burning_city", speaker: null, time: {h: 2},
     text: L("你们驻扎时借住的那户农家着了火。你冲进去，只找到了小女儿妮尔，缩在水缸后面。\n她认得你，你给她削过木头小兵。\n她没哭，只问：“你的枪呢？”",
             "The farmhouse where you were billeted is on fire. You charge in and find only the little daughter, Nell, curled behind the water barrel.\nShe knows you. You once whittled her a wooden soldier.\nShe doesn't cry. She only asks, “Where's your gun?”"),
-    alt: [A(F("wronged_edda"), "你一路跑到这里，再没听见埃达的声音。", "You ran all the way here and never heard Edda's voice again."),
+    alt: [A(F("wronged_edda"), "你一路跑到这里，身后再没传来埃达的声音。", "You ran all the way here. No more of Edda's voice came from behind you."),
           A(NF("wronged_edda"), "埃达把你拖到水渠边，塞给你她的手枪，就回路口收拢剩下的人了。", "Edda dragged you to the ditch, pressed her pistol on you, and went back to gather the others at the crossroads.")],
     effects: {hp: -5},
     choices: [
@@ -314,7 +316,7 @@
     text: L("后半夜，你抱着妮尔在麦田里跑，麦秆抽在脸上。身后，金属的脚步整齐得像钟。\n妮尔跑丢了一只鞋，一直在你耳边数：“一百零一、一百零二……”她说数着就不怕。\n天快亮时，你们滚进了一条灌溉渠。",
             "Deep in the night you run through the wheat with Nell, stalks whipping your face. Behind you, metal footsteps keep time like a clock.\nNell has lost a shoe. She counts in your ear the whole way, “A hundred and one, a hundred and two...” Counting, she says, keeps the fear off.\nNear dawn you tumble into an irrigation ditch."),
     alt: [A(F("origin_pilgrim"), "数到一千时，她小声问：“你梦里，我们跑出去了吗？”", "At a thousand she whispers, “In your dream, do we get away?”"),
-          A(F("origin_trooper"), "她趴在你背上，摸着你空空的枪套。", "On your back, she pats your empty holster.")],
+          A(F("origin_trooper"), "她趴在你背上，摸着你肩上空空的枪背带。", "On your back, she pats the empty sling where your rifle used to hang.")],
     choices: [
       C("天亮了，爬出水渠看看", "It's light. Climb out and look.", "eld_201",
         RS("你先探出头。风里全是烧焦麦子的味道。", "You raise your head first. The wind smells of burnt wheat."))
@@ -344,8 +346,8 @@
     ]};
 
   N.eld_201b = {chapter: 2, scene: "ruins", speaker: null, time: {h: 10},
-    text: L("你们在涵洞里躲了一整天。扫描的绿光一遍遍从洞口扫过，妮尔睡着了又惊醒。\n黄昏前，你想起山脊上那圈白石头：那个披斗篷的人站在那里。剪断星语塔的人，是从那边来的。",
-            "You hide in the culvert all day. Scanning light sweeps the mouth again and again; Nell sleeps and jolts awake.\nBefore dusk you think of the ring of white stones on the ridge: the cloaked figure stood there. Whoever cut the tower came from that way."),
+    text: L("你们在涵洞里躲了一整天。扫描的绿光一遍遍从洞口扫过，妮尔睡着了又惊醒。\n黄昏前，你想起山脊上那圈白石头：那个披斗篷的人站在那里，看了一整夜。",
+            "You hide in the culvert all day. Scanning light sweeps the mouth again and again; Nell sleeps and jolts awake.\nBefore dusk you think of the ring of white stones on the ridge: the cloaked figure stood there, watching all night."),
     alt: [AT(F("duskStones"), "你们在路下的涵洞里躲了一整天。扫描的绿光一遍遍从洞口扫过，妮尔睡着了又惊醒。\n黄昏前，你想起斗篷人的话：黄昏，山脊上的白石环。带上她。只带她。",
              "You hide in the culvert all day. Scanning light sweeps the mouth again and again; Nell sleeps and jolts awake.\nBefore dusk you remember the cloaked one's words: dusk, the ring of white stones on the ridge. Bring her. Only her."),
           A(F("runeStone"), "口袋里的白石头在发热，热的那一面朝着山脊。", "The white stone in your pocket is warm, warmest on the side facing the ridge."),
@@ -506,6 +508,7 @@
             "The Farseer raises one hand, like turning a page shut. At Nell's fingertips the light becomes a wall. “Her thread is not here.”\nFather Jorban stumbles up the slope and lifts her. “Go. I'll take her to the old mines. They run deep.”\nNell doesn't cry. She's watching you."),
     alt: [A(F("jorbanKnows"), "“你说过门在白石头中间，”神父喘着气，“我就找来了。”", "“You said the gate stood in white stones,” the priest pants. “So I came.”"),
           A(F("liedJorban"), "神父看了你一眼：“你说你只是个朝圣者。”", "The priest gives you a look. “You said you were only a pilgrim.”"),
+          A(F("duskStones"), "石环外，那个让你“带上她”的斗篷人别过了脸。", "Outside the ring, the cloaked one who told you to bring her looks away."),
           AT(F("origin_trooper"), "先知抬起一只手，像合上一页书。光在妮尔指尖前变成了一堵墙。“她的线不在这里。”\n镇上的老神父乔班带着几个逃难的人，循着光爬上坡来，抱起妮尔：“去吧。我带她去旧矿井，那里深。”",
              "The Farseer raises a hand, like turning a page shut. At Nell's fingertips the light becomes a wall. “Her thread is not here.”\nFather Jorban, the town's old priest, climbs the slope with a few refugees who followed the light, and lifts her. “Go. I'll take her to the old mines. They run deep.”")],
     effects: {sanity: -8, set: {nellToJorban: true}},
@@ -528,20 +531,20 @@
         E({sanity: -5, renown: 3, set: {lastLook: true}}, "绿光一片片扫过你长大的地方。你把它记住了，每一块田。",
           "Green light sweeps the land below, field by field. You memorise every one.")),
       C("留在瓦尔达", "Stay on Valda", "eld_210n",
-        RS("米瑞丝收回了手。她没再劝。", "Mireth lowers her hand. She doesn't ask again."))
+        RS("年轻的守护者收回了手。她没再劝。", "The young Guardian lowers her hand. She doesn't ask again."))
     ]};
 
   N.eld_210n = {chapter: 2, scene: "ruins", speaker: null, time: {h: 2},
-    text: L("你走下坡，走回燃烧的麦田。墓穴的扫描一遍比一遍细，像梳子梳头。\n走到坡底，你回头看：光门还亮着。米瑞丝站在门口，没走。",
-            "You walk down the slope, back into the burning wheat. The tomb's scans pass finer each time, like a comb through hair.\nAt the bottom you look back. The gate still glows. Mireth is standing in it. She hasn't gone."),
-    alt: [A(F("nellToJorban"), "你追上了神父和妮尔，一起钻进旧矿井。矿井很深。", "You catch up with the priest and Nell and climb down into the old mine together. It runs deep."),
+    text: L("你走下坡，走回燃烧的麦田。墓穴的扫描一遍比一遍细，像梳子梳头。\n走到坡底，你回头看：光门还亮着。那个年轻的守护者站在门口，没走。",
+            "You walk down the slope, back into the burning wheat. The tomb's scans pass finer each time, like a comb through hair.\nAt the bottom you look back. The gate still glows. The young Guardian is standing in it. She hasn't gone."),
+    alt: [A(F("nellToJorban"), "坡下，神父抱着妮尔正往旧矿井走。你还追得上。", "Below, the priest is carrying Nell toward the old mines. You could still catch them up."),
           A({all: [F("nellKept"), NF("nellToJorban")]}, "妮尔攥着你的手，没问你为什么。", "Nell holds your hand and doesn't ask why."),
-          AT(F("nellLander"), "你走下坡，走回燃烧的麦田。妮尔在天上。至少，她在天上。\n走到坡底，你回头看：光门还亮着。米瑞丝站在门口，没走。", "You walk down into the burning wheat. Nell is somewhere in the sky. At least she's in the sky.\nAt the bottom you look back. The gate still glows. Mireth is standing in it.")],
+          AT(F("nellLander"), "你走下坡，走回燃烧的麦田。妮尔在天上。至少，她在天上。\n走到坡底，你回头看：光门还亮着。那个守护者站在门口，没走。", "You walk down into the burning wheat. Nell is somewhere in the sky. At least she's in the sky.\nAt the bottom you look back. The gate still glows. The young Guardian is standing in it.")],
     choices: [
-      C("回家，坐在门槛上等", "Go home and wait on the doorstep", "eld_end_harvest",
+      C("留下来，等它们来", "Stay, and wait for them to come", "eld_end_harvest",
         RS("你转过身。身后的光暗了下去，这回是真的合上了。", "You turn away. Behind you the light dims, and this time the gate really closes.")),
       C("掉头跑回坡顶", "Turn and run back up the slope", "eld_211",
-        E({sanity: -5}, "你跑得肺都要炸了。米瑞丝没有伸手拉你，只是等着。", "You run until your lungs burn. Mireth doesn't reach for you. She just waits."))
+        E({sanity: -5}, "你跑得肺都要炸了。那个守护者没有伸手拉你，只是等着。", "You run until your lungs burn. The Guardian doesn't reach for you. She just waits."))
     ]};
 
   N.eld_end_harvest = {chapter: 2, scene: "tomb_exterior", speaker: null, foe: "necron_warrior", time: {d: 2},
@@ -552,12 +555,13 @@
   N.eld_211 = {chapter: 2, scene: "ruins", speaker: MIRETH,
     text: L("光门在你面前嗡嗡作响。一个年轻的守护者摘下头盔，是个女孩，眼睛像冬天的湖。\n“米瑞丝，”她说，“先知让我看着你。进去以后，跟紧我。别碰墙。”",
             "The gate hums before you. A young Guardian takes off her helm: a girl, eyes like a winter lake.\n“Mireth,” she says. “The Farseer has told me to watch you. Once we're inside, stay close. Don't touch the walls.”"),
-    alt: [AT(FROM("eld_210n"), "你跑回坡顶时，米瑞丝还站在门口。“你迟到了，”她说，“先知让我看着你。进去以后，跟紧我。别碰墙。”\n光门在你面前嗡嗡作响。",
-             "When you reach the top again, Mireth is still in the gate. “You're late,” she says. “The Farseer told me to watch you. Once inside, stay close. Don't touch the walls.”\nThe gate hums before you."),
-          AT(FROM("eld_210"), "米瑞丝还站在你身边，头盔夹在臂弯里。\n“进去以后，跟紧我，”她说，“先知让我看着你。别碰墙。”\n光门在你面前嗡嗡作响。",
-             "Mireth is still beside you, helm under her arm.\n“Once we're inside, stay close,” she says. “The Farseer has told me to watch you. Don't touch the walls.”\nThe gate hums before you."),
+    alt: [AT(FROM("eld_210n"), "你跑回坡顶时，那个守护者还站在门口。“米瑞丝，”她说，“你迟到了。先知让我看着你。进去以后，跟紧我。别碰墙。”\n光门在你面前嗡嗡作响。",
+             "When you reach the top again, the Guardian is still in the gate. “Mireth,” she says. “You're late. The Farseer told me to watch you. Once inside, stay close. Don't touch the walls.”\nThe gate hums before you."),
+          AT(FROM("eld_210"), "那个守护者还站在你身边，头盔夹在臂弯里。\n“米瑞丝，”她说，“进去以后，跟紧我。先知让我看着你。别碰墙。”\n光门在你面前嗡嗡作响。",
+             "The Guardian is still beside you, helm under her arm.\n“Mireth,” she says. “Once we're inside, stay close. The Farseer has told me to watch you. Don't touch the walls.”\nThe gate hums before you."),
           A(NF("knowsPrice"), "先知在门里回头：“四千一百万，换伊尔达涅斯的六千。你该知道你是从什么里面被拿出来的。”", "The Farseer turns in the gate. “Forty-one million, for six thousand on Ildaneth. You should know what you were taken out of.”"),
-          A(F("nellToJorban"), "坡下，神父抱着妮尔的背影已经小得看不见了。", "Down the slope, the priest carrying Nell has shrunk out of sight.")],
+          A(F("nellToJorban"), "坡下，神父抱着妮尔的背影已经小得看不见了。", "Down the slope, the priest carrying Nell has shrunk out of sight."),
+          A({all: [F("nellKept"), NF("nellToJorban")]}, "乔班神父带着逃难的人爬上坡来。你把妮尔交给他，他说去旧矿井，那里深。", "Father Jorban climbs the slope with a few refugees. You give Nell to him; he says the old mines run deep.")],
     choices: [
       C("跟着米瑞丝进去，一步不落", "Follow Mireth in, step for step", "eld_302",
         RS("你踩着她的脚印走进光里。瓦尔达在你身后合上了。", "You step into the light in her footprints. Valda closes behind you.")),
@@ -730,12 +734,12 @@
   N.eld_307 = {chapter: 3, scene: "webway", speaker: TAETHRA, time: {h: 6},
     text: L("先知在一道巨大的拱门前等着，符文石绕着她慢慢转。\n“线还在。”她说，没有看你，像在清点一件行李。\n拱门那头，是你从未想象过的光：一座城漂浮在虚空里，骨白色的尖塔像一片森林。",
             "The Farseer waits before a vast arch, her rune-stones turning slowly.\n“The thread holds,” she says without looking at you, as if checking luggage.\nBeyond the arch is a light you never imagined: a city adrift in the void, bone-white spires like a forest."),
-    alt: [A(F("sylvaenWebway"), "西尔凡把你送到这里就走了。先知没看他：“游侠不该替我捡行李。”", "Sylvaen leaves you here and goes. The Farseer doesn't look at him. “Rangers should not fetch my luggage.”"),
+    alt: [A(F("sylvaenWebway"), "游侠把你送到这里就走了。先知没看他：“游侠不该替我捡行李。”", "The Ranger leaves you here and goes. The Farseer doesn't look at him. “Rangers should not fetch my luggage.”"),
           A(FROM("eld_308", "eld_309", "eld_310"), "米瑞丝一言不发地检查你的伤，手比平时重。", "Mireth checks you for wounds without a word, rougher than usual.")],
     choices: [
       C("和米瑞丝并肩走进去", "Walk through beside Mireth", "eld_400",
         RS("拱门那边传来一阵低语，像风吹过一大片草。", "Beyond the arch a murmur rises, like wind across a great field of grass.")),
-      C("等人群散了再进去", "Wait until the crowd has gone", "eld_401",
+      C("在拱门下站一会儿，晚点再进", "Linger under the arch; go in later", "eld_401",
         RS("你在拱门下站到灯光调暗。米瑞丝陪你站着，一句话也没抱怨。", "You stand under the arch until the lights dim. Mireth waits with you and doesn't complain once."))
     ]};
 
@@ -1074,12 +1078,12 @@
   N.eld_509 = {chapter: 5, scene: "craftworld", speaker: SYLVAEN, time: {h: 1},
     text: L("“穿梭机到了轨道，”西尔凡说，“一艘自由商船收容了它。之后我没去看。”\n“为什么？”\n“我不想知道。先知说这是软弱。”\n他转身前补了一句：“起飞时我在山脊上。她一直在喊你的名字。”",
             "“The shuttle reached orbit,” Sylvaen says. “A free trader took it aboard. After that... I did not look.”\n“Why not?”\n“Because I did not want to know. The Farseer calls that weakness.”\nTurning away, he adds: “I was on the ridge at lift-off. Before the hatch closed, she was calling your name.”"),
-    alt: [AT(F("nellToJorban"), "“旧矿井很深，”西尔凡说，“墓穴的扫描更细。我在山脊上看了三天，没看见他们出来。”\n“也没看见他们被带走？”\n“我走了。我不想知道。先知说这是软弱。”",
+    alt: [AT(F("nellKept"), "“旧矿井很深，”西尔凡说，“墓穴的扫描更细。我在山脊上看了三天，没看见他们出来。”\n“也没看见他们被带走？”\n“我走了。我不想知道。先知说这是软弱。”",
              "“The old mine runs deep,” Sylvaen says. “The tomb's scans run finer. I watched from the ridge three days. I never saw them come out.”\n“Nor taken?”\n“I left. I did not want to know. The Farseer calls that weakness.”")],
     effects: {sanity: 5, renown: 3},
     choices: [
       C("谢谢他告诉你", "Thank him for telling you", "eld_508",
-        RS("他点点头，好像这比那一拳更难挨。", "He nods, as if this is harder to take than the punch."))
+        RS("他点点头，好像道谢比挨骂更难受。", "He nods, as if thanks were harder to take than blame."))
     ]};
 
   N.eld_508 = {chapter: 5, scene: "craftworld", speaker: MIRETH, time: {d: 6}, eventRoll: 0.4,
@@ -1099,7 +1103,7 @@
   N.eld_510 = {chapter: 5, scene: "craftworld", speaker: TAETHRA, time: {d: 2},
     text: L("先知召见你，这次没有符文，也没有水晶。\n“我们去伊尔达涅斯。你也去，米瑞丝护送你。你该亲眼看看四千一百万换来了什么。”\n“你在那里看见了什么？”\n“一把刀，”她说，“没看见握刀的手。”",
             "The Farseer summons you. This time, no runes, no crystal.\n“We go to Ildaneth. You will come; Mireth will escort you. You should see with your own eyes what forty-one million purchased.”\n“What did you see there?”\n“A blade,” she says. “Not the hand that holds it.”"),
-    alt: [A(F("askedValda"), "“你问过瓦尔达剩下什么。现在去看看它换来了什么。”", "“You asked what is left of Valda. Now see what it bought.”")],
+    alt: [A(F("askedValda"), "“你问过瓦尔达还剩下什么。答案的另一半在那里。”", "“You asked what is left of Valda. The other half of the answer is there.”")],
     choices: [
       C("“好。”", "“Fine.”", "eld_600",
         E({renown: 2}, "她点头，像在一本账上记了一笔。", "She nods, as if making an entry in a ledger.")),
@@ -1179,7 +1183,7 @@
     ]};
 
   N.eld_604 = {chapter: 6, scene: "maiden_world", speaker: SEYL, time: {d: 1},
-    text: L("第二天，一艘陌生的船降落，来人的盔甲上刻着骷髅与新芽。\n“我是赛尔，伊芙蕾恩的使者。”她看向先知，“听说塞卢纳的先知为这片林子，喂掉了一整颗猿人世界。我来看看值不值。”",
+    text: L("第二天，一艘陌生的船降落，来人的盔甲上刻着骷髅与新芽。\n“我是赛尔，伊芙蕾恩的使者。”她看向先知，“听说塞卢纳的先知为这片林子，喂掉了一整颗猿人星球。我来看看值不值。”",
             "Next day a strange ship lands. The newcomer's armour bears skulls and new shoots.\n“I am Seyl, herald of Yvraine.” She looks at the Farseer. “I hear Selunar's seer fed a whole mon-keigh world to keep this forest. I came to see whether it was worth it.”"),
     codex: ["eld_ynnari", "eld_yvraine"],
     choices: [
@@ -1256,8 +1260,8 @@
     ]};
 
   N.eld_609 = {chapter: 6, scene: "maiden_world", speaker: VHESSRA, foe: "drukhari_raider", time: {h: 1},
-    text: L("你抱起孩子往后撤。钩子落下时，米瑞丝挡在了你们身后。\n领头的女人抽回钩子，笑容停了一下：“姐姐，你还是这么慢。”\n快艇撤了。她回头说：“网道里那个大家伙在附近，我可不想被它闻见。”",
-            "You lift the child and fall back. When the hook comes down, Mireth is behind you both.\nTheir leader pulls the hook free and looks at Mireth on the ground. Her smile falters. “Still so slow, sister.”\nThe skiffs pull out. She calls back: “The big one in the webway is close. I'd rather it didn't smell me.”"),
+    text: L("你抱起一个孩子往后撤。钩子落下时，米瑞丝挡在了你们身后。\n领头的女人抽回钩子，笑容停了一下：“姐姐，你还是这么慢。”\n快艇撤了。她回头说：“网道里那个大家伙在附近，我可不想被它闻见。”",
+            "You scoop up a child and fall back. When the hook comes down, Mireth is behind you both.\nTheir leader pulls the hook free and looks at Mireth on the ground. Her smile falters. “Still so slow, sister.”\nThe skiffs pull out. She calls back: “The big one in the webway is close. I'd rather it didn't smell me.”"),
     effects: {renown: 10, sanity: -5, set: {savedChild: true, maidenOK: true}},
     codex: ["eld_drukhari"],
     choices: [
@@ -1266,8 +1270,8 @@
     ]};
 
   N.eld_609m = {chapter: 6, scene: "maiden_world", speaker: MIRETH, time: {h: 1},
-    text: L("米瑞丝靠着树坐下，伤得很重。“她叫维丝拉，”她说，“陨落之后很久，她选了另一条路。”\n她把灵魂石按进你手心：“替我拿着。别让她……”\n石头在你掌心亮了一下，像一次心跳。然后稳稳地亮着。",
-            "Mireth sits against a tree, badly hurt. “Her name is Vhessra,” she says. “Long after the Fall, she chose the other road.”\nShe presses her spirit stone into your palm. “Hold this for me. Don't let Her...”\nThe stone flares once in your hand, like a heartbeat. Then it glows, steady."),
+    text: L("米瑞丝靠着树坐下，伤得很重。“她叫维丝拉，”她说，“很多年前，她选了另一条路。”\n她把灵魂石按进你手心：“替我拿着。别让她……”\n石头在你掌心亮了一下，像一次心跳。然后稳稳地亮着。",
+            "Mireth sits against a tree, badly hurt. “Her name is Vhessra,” she says. “Many years ago she chose the other road.”\nShe presses her spirit stone into your palm. “Hold this for me. Don't let Her...”\nThe stone flares once in your hand, like a heartbeat. Then it glows, steady."),
     alt: [A(F("mirethFlower"), "那朵猿人送的花还别在石头旁边，已经蔫了。", "The mon-keigh's flower is still tucked beside the stone, wilted now."),
           A(F("mirethKnowsNell"), "“妮尔，”她说，“我答应过记住她。现在换你。”", "“Nell,” she says. “I promised to remember her. Now it's your turn.”")],
     effects: {sanity: -5, hp: -10, set: {carryStone: true, mirethDead: true}},
@@ -1312,7 +1316,7 @@
     gather: G("葬礼", "funeral"),
     text: L("全族流亡者都来参加葬礼，把死者埋进树根下，唱着你听不懂的歌。被掳走的孩子没有坟。\n先知轻声算了一遍：“六千，减十四。”第一次不像在报天气。\n“我看见了刀，”她说，“没看见是谁。”",
             "Every Exodite comes to the funeral. They bury the dead beneath the tree roots, singing a song you don't understand. The stolen children have no graves.\nThe Farseer, beside you, counts under her breath. “Six thousand, less fourteen.” For once it isn't a weather report.\n“I saw the blade,” she says. “Not whom.”"),
-    alt: [A(F("savedChild"), "被你扑倒的那个孩子站在长老身边，没让她算进那个数里。", "The child you knocked down stands beside the elder, not counted in that number."),
+    alt: [A(F("savedChild"), "被你救下的那个孩子站在长老身边，没让她算进那个数里。", "The child you saved stands beside the elder, not counted in that number."),
           A(F("elderKnows"), "长老在树根边给你留了一个位置，在她的族人中间。", "The elder has kept you a place by the roots, among her people.")],
     choices: [
       C("“值得吗？”", "“Was it worth it?”", "eld_700",
@@ -1328,8 +1332,8 @@
   /* ============ Chapter 7 · She Who Thirsts ============ */
   N.eld_700 = {chapter: 7, scene: "webway", speaker: TAETHRA, time: {d: 3, warp: true}, bridge: true,
     jump: J("穿过网道回塞卢纳", "Back to Selunar through the webway"),
-    text: L("回塞卢纳的船上，只有你和先知。三天里，她第一次主动开口。\n“墙里的声音在变少，”她说，“网道里有东西在吃，一口一口。从我们去伊尔达涅斯那天起，它吃得更快了。”",
-            "On the ship back to Selunar there is only you and the Farseer. In three days, for the first time, she speaks first.\n“The voices in the walls are thinning,” she says. “Something in the webway is eating, mouthful by mouthful. Since we went to Ildaneth, it eats faster.”"),
+    text: L("回塞卢纳的船舱里，只有你和先知。三天里，她第一次主动开口。\n“墙里的声音在变少，”她说，“网道里有东西在吃，一口一口。从我们去伊尔达涅斯那天起，它吃得更快了。”",
+            "In the cabin of the ship back to Selunar there is only you and the Farseer. In three days, for the first time, she speaks first.\n“The voices in the walls are thinning,” she says. “Something in the webway is eating, mouthful by mouthful. Since we went to Ildaneth, it eats faster.”"),
     alt: [A(F("carryStone"), "她看着你握紧的手：“你拿着她。它会闻到的。”", "She looks at your closed hand. “You carry her. It will smell that.”"),
           A(F("askedWorth"), "“你问我值不值得，”她说，“我还在数。”", "“You asked if it was worth it,” she says. “I am still counting.”")],
     choices: [
@@ -1511,8 +1515,9 @@
 
   /* ============ Chapter 8 · The Last Dance ============ */
   N.eld_800 = {chapter: 8, scene: "webway", speaker: TAETHRA, time: {h: 1}, bridge: true,
-    text: L("光门前，你停下来，回头看先知。“如果我回不来——”\n“那我会记住你，”她说，“像米瑞丝答应记住那个孩子一样。我们记得很久。”\n她第一次碰了碰你的额头，很轻，像试探一块新骨头的温度。",
-            "At the gate you stop and look back at the Farseer. “If I don't come back—”\n“Then I will remember you,” she says, “as Mireth promised to remember the child. We remember a long time.”\nShe reaches out and, for the first time, touches your brow, lightly, as if testing the warmth of new bone."),
+    text: L("光门前，你停下来，回头看先知。“如果我回不来——”\n“那我会记住你，”她说，“我们记得很久。”\n她第一次碰了碰你的额头，很轻，像试探一块新骨头的温度。",
+            "At the gate you stop and look back at the Farseer. “If I don't come back—”\n“Then I will remember you,” she says. “We remember a long time.”\nShe reaches out and, for the first time, touches your brow, lightly, as if testing the warmth of new bone."),
+    alt: [A(F("mirethKnowsNell"), "“就像米瑞丝记住了那个孩子的名字。”", "“As Mireth remembered the child's name.”")],
     effects: {renown: 5, sanity: 5, set: {saidGoodbye: true}},
     choices: [
       C("转身，走进网道", "Turn and walk into the webway", "eld_801",
@@ -1638,7 +1643,7 @@
     text: L("封印合上了。网道深处，大魔的尖啸越来越远，最后变成一段听不清的歌。\n先知站在你面前，看了你很久。\n“线还在，”她说。然后她做了一件从没做过的事——问你：“你想去哪里？”",
             "The seal is closed. Deep in the webway the daemon's shriek recedes until it's only a song you can't make out.\nThe Farseer stands before you, looking at you a long time.\n“The thread holds,” she says. Then she does something she has never done. She asks: “Where do you wish to go?”"),
     alt: [A(F("loyal"), "“你在伊尔达涅斯站在我这边，”她说，“这次我站你这边。”", "“On Ildaneth you stood with me,” she says. “This time I stand with you.”"),
-          A(F("honestDontKnow"), "“你说过你不知道死后去哪。现在，至少知道活着去哪。”", "“You once said you did not know where souls go. Now at least choose where the living go.”")],
+          A(F("honestDontKnow"), "“米瑞丝说，你不知道猿人死后去哪。那至少选一选活着去哪。”", "“Mireth told me you did not know where your souls go. Then at least choose where the living go.”")],
     effects: {sanity: 10, renown: 10},
     choices: [
       C("“伊尔达涅斯。去种地。”", "“Ildaneth. To farm.”", "eld_end_maiden", M({require: {flag: "maidenOK"}},
@@ -1675,7 +1680,7 @@
     text: L("三年后，伊尔达涅斯河边多了一块麦田，是一个猿人种的。\n你教流亡者的孩子唱收割歌。他们唱得比你还难听。\n有时先知会来，站在田埂上，什么也不说，只看着麦子。",
             "Three years on, a wheat field grows by Ildaneth's river, planted by a mon-keigh.\nYou teach the Exodite children the harvest song. They sing it even worse than you.\nSometimes the Farseer visits, stands at the field's edge, says nothing, and watches the wheat."),
     alt: [A(F("ateFruit"), "孩子们管它叫“会哭的人的田”。是给你果子的那个孩子起的名。", "The children call it “the field of the one who cries”. The child with the fruit named it."),
-          A(F("savedChild"), "被你从钩子下扑倒的那个孩子，每年都来帮你收麦。", "The child you pulled from under the hooks comes every year to help you harvest.")],
+          A(F("savedChild"), "被你从掠夺者手里救下的那个孩子，每年都来帮你收麦。", "The child you saved from the raiders comes every year to help you harvest.")],
     ending: {kind: "good", title: L("处女世界的麦田", "Wheat on a Maiden World"), cause: L("在伊尔达涅斯种麦", "Farming on Ildaneth")}};
 
   N.eld_end_guest = {chapter: 8, scene: "craftworld", speaker: ELLARIS, time: {y: 5},
@@ -1713,10 +1718,12 @@
 
   /* ============ Claim endings (SPEC §19): a Chaos god's claim, accepted or forced. Reached via the claim events' goto. ============ */
   N.eld_end_claim_khorne = {scene: "webway", speaker: S("daemon_khorne", "铁与火的轰鸣", "Roar of Iron and Fire"), time: {d: 30, warp: true},
-    text: L("那一拳之后，你的手再也没真正松开过。灵族有道途约束杀意，你没有。\n守护者把你送出了网道。你一路杀进黑暗，没回过头。\n凯恩的怒火属于灵族。你的，被另一位神接住了。他不讲道途，只要头骨。",
-            "Since that first blow your hands have never truly unclenched. The Aeldari have their Paths to cage the urge to kill. You have none.\nThe Guardians see you out of the webway. You fight your way into the dark and never look back.\nKhaine's rage belongs to the Aeldari. Yours was caught by another god. He keeps no Paths. He wants skulls."),
+    text: L("心里那团火一旦点着，就再也没熄过。灵族有道途约束杀意，你没有。\n守护者把你送出了网道。你一路杀进黑暗，没回过头。\n凯恩的怒火属于灵族。你的，被另一位神接住了。他不讲道途，只要头骨。",
+            "Once the fire in you caught, it never went out. The Aeldari have their Paths to cage the urge to kill. You have none.\nThe Guardians see you out of the webway. You fight your way into the dark and never look back.\nKhaine's rage belongs to the Aeldari. Yours was caught by another god. He keeps no Paths. He wants skulls."),
     alt: [AT(F("woreMask"), "你心里那张面具再也摘不下来了。灵族有道途约束杀意，你没有。\n守护者把你送出了网道。你一路杀进黑暗，没回过头。\n凯恩的怒火属于灵族。你的，被另一位神接住了。他不讲道途，只要头骨。",
              "The mask in your heart will not come off. The Aeldari have their Paths to cage the urge to kill. You have none.\nThe Guardians see you out of the webway. You fight your way into the dark and never look back.\nKhaine's rage belongs to the Aeldari. Yours was caught by another god. He keeps no Paths. He wants skulls."),
+          AT(F("punchedSylvaen"), "那一拳之后，你的手再也没真正松开过。灵族有道途约束杀意，你没有。\n守护者把你送出了网道。你一路杀进黑暗，没回过头。\n凯恩的怒火属于灵族。你的，被另一位神接住了。他不讲道途，只要头骨。",
+             "Since that blow on the docks your hands have never truly unclenched. The Aeldari have their Paths to cage the urge to kill. You have none.\nThe Guardians see you out of the webway. You fight your way into the dark and never look back.\nKhaine's rage belongs to the Aeldari. Yours was caught by another god. He keeps no Paths. He wants skulls."),
           A(F("followedAvatar"), "你跟着燃烧的化身走过广场。那一刻起，你就没再回头。", "You walked beside the burning Avatar across the plaza. From then on, you never looked back.")],
     codex: ["god_khorne"],
     ending: {kind: "bad", title: L("摘不下的战面", "The Mask That Stays"), cause: L("被恐虐收走", "Claimed by Khorne")}};
@@ -1745,7 +1752,9 @@
   N.eld_death_hp = {scene: "webway", speaker: null,
     text: L("你倒下了。灵族们停下脚步，低头看了你一会儿，很有礼貌。\n没有灵魂石接住你。你的灵魂升起来，又亮又干净，像一盏灯，被远处某个很饿的东西看见了。\n先知在符文上，轻轻划掉了一根线。",
             "You fall. The Aeldari pause and look down at you a moment, politely.\nNo spirit stone catches you. Your soul rises, bright and clean as a lamp, and something very hungry far away notices it.\nOn her runes, the Farseer gently strikes out a thread."),
-    alt: [AT({fromChapter: {max: 2}}, "你倒在瓦尔达的麦茬里，再也没站起来。\n没有灵魂石接住你。你的灵魂升起来，又亮又干净，像一盏灯，被远处某个很饿的东西看见了。\n山脊上，有个披斗篷的人在账上划掉了一笔。",
+    alt: [AT(FROM("eld_308", "eld_309", "eld_310", "eld_801", "eld_801s", "eld_802", "eld_803", "eld_804", "eld_805", "eld_807"), "你倒在网道里，身边一个人也没有。\n没有灵魂石接住你。你的灵魂升起来，又亮又干净，像一盏灯，被近处某个很饿的东西看见了。\n很远的地方，先知在符文上，轻轻划掉了一根线。",
+             "You fall in the webway with no one beside you.\nNo spirit stone catches you. Your soul rises, bright and clean as a lamp, and something very hungry close by notices it.\nFar away, on her runes, the Farseer gently strikes out a thread."),
+          AT({fromChapter: {max: 2}}, "你倒在瓦尔达的麦茬里，再也没站起来。\n没有灵魂石接住你。你的灵魂升起来，又亮又干净，像一盏灯，被远处某个很饿的东西看见了。\n山脊上，有个披斗篷的人在账上划掉了一笔。",
              "You fall in Valda's stubble and do not rise.\nNo spirit stone catches you. Your soul rises, bright and clean as a lamp, and something very hungry far away notices it.\nOn the ridge, a cloaked figure strikes a line from his ledger."),
           A({all: [F("mirethDead"), F("carryStone")]}, "米瑞丝托你拿着的东西，从你手里滚了出去。", "What Mireth asked you to hold rolls out of your hand."),
           A(F("bait"), "诱饵倒下了。网道深处，有什么东西失望地叹了口气。", "The bait has fallen. Deep in the webway, something sighs in disappointment.")],
@@ -1754,9 +1763,11 @@
   N.eld_death_sanity = {scene: "craftworld", speaker: null,
     text: L("你开始听见墙里所有的声音，一万个死去的灵族同时说话，你一个也挡不住。\n你给每个声音起了名字，日夜和他们聊天。\n灵族把你送进一间安静的房间，天花板很矮，按猿人规格。",
             "You begin to hear every voice in the walls, ten thousand dead Aeldari speaking at once, and you can shut out none of them.\nYou name each voice and talk with them day and night.\nThe Aeldari place you in a quiet room with a low ceiling, built to mon-keigh specifications."),
-    alt: [AT({fromChapter: {max: 3}}, "你开始听见所有的声音：风里的，麦子里的，光墙后面的。你一个也挡不住。\n你给每个声音起了名字，日夜和他们聊天。\n后来，有人把你带到一个很安静的地方，再也没来接你。",
+    alt: [AT(FROM("eld_801", "eld_801s", "eld_802", "eld_803", "eld_804", "eld_805", "eld_807"), "你开始听见网道里所有的声音：光墙后面的，甜味里的。你一个也挡不住。\n你给每个声音起了名字，日夜和他们聊天。\n后来，门在你身后合上了。没有人来接你，只有一个声音一直陪你聊。",
+             "You begin to hear every voice in the webway: behind the walls of light, inside the sweetness. You can shut out none of them.\nYou name each voice and talk with them day and night.\nIn time the gate closes behind you. No one comes for you; only one voice keeps you company."),
+          AT({fromChapter: {max: 3}}, "你开始听见所有的声音：风里的，麦子里的，光墙后面的。你一个也挡不住。\n你给每个声音起了名字，日夜和他们聊天。\n后来，有人把你带到一个很安静的地方，再也没来接你。",
              "You begin to hear every voice: in the wind, in the wheat, behind the walls of light. You can shut out none of them.\nYou name each voice and talk with them day and night.\nIn the end someone leads you somewhere very quiet, and never comes back for you."),
-          A(F("watched"), "门外，那个灵骨巨人又站回了原来的位置。", "Outside the door, the wraithbone giant has taken up its old post again."),
+          A({all: [F("watched"), {not: FROM("eld_801", "eld_801s", "eld_802", "eld_803", "eld_804", "eld_805", "eld_807")}]}, "门外，那个灵骨巨人又站回了原来的位置。", "Outside the door, the wraithbone giant has taken up its old post again."),
           A(F("countedVoices"), "你数到了第一万个。第三百个，仍然在叫你的名字。", "You count to ten thousand. The three-hundredth still says your name.")],
     ending: {kind: "death", title: L("墙里的客人", "Guest of the Walls"), cause: L("理智崩溃", "Mind shattered")}};
 

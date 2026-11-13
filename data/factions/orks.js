@@ -122,7 +122,8 @@
       C("挺起胸膛，装作能打", "Puff up your chest, look tough", "ork_107", O(X({hp: -10, taint: {khorne: 10}},
         "一个头目捏了捏你的胳膊，大笑：“软！”你被一脚踢进了史奎格圈。",
         "A nob squeezes your arm and roars with laughter. “SOFT!” One kick and you're in the squig pen."),
-        {resultAlt: [{if: {flag: "playedDead"}, text: L("头目凑近闻了闻：“装死的那个！现在装能打？”他笑着把你踢进了史奎格圈。", "The nob sniffs you. “Da one wot played dead! Now ya play 'ard?” Laughing, he boots you into the squig pen.")}]})),
+        {resultAlt: [{if: {flag: "playedDead"}, text: L("头目凑近闻了闻：“装死的那个！现在装能打？”他笑着把你踢进了史奎格圈。", "The nob sniffs you. “Da one wot played dead! Now ya play 'ard?” Laughing, he boots you into the squig pen.")},
+                     {if: {flag: "hitOrk"}, text: L("又是那个头目。他又捏了捏你的胳膊：“还是软！”一脚把你踢进了史奎格圈。", "That nob again. He squeezes your arm once more. “STILL soft!” One kick and you're in the squig pen.")}]})),
       C("缩着脖子，显得没用", "Hunch down, look useless", "ork_107", X({sanity: -5},
         "你成功地显得很没用。于是你被分去了史奎格那边。",
         "You succeed in looking useless. So you're sorted toward the squigs.")),
@@ -296,7 +297,7 @@
   N.ork_o_ganger_4 = {chapter: 1, scene: "ork_scrapyard", speaker: REDGOB, time: {d: 3},
     jump: L("三天搬运之后，废铁场", "Three days of hauling later, the scrapyard"),
     text: L("你跟着海盗搬了三天金框画。然后海盗船要起飞，船上没有人仔的位置。\n红戈布把你推给一个挂满扳手的机械佬，换了一把定做的突突枪。\n“别哭，”船长拍拍你的脸，“零件还齐的话，俺回来买你。”",
-            "For three days you haul gilt frames for the pirates, seventeen trips. Then the ship is lifting off, with no room for 'umies.\nRedgob shoves you at a Mek hung with spanners, in trade for a custom shoota.\n“Don't cry,” the kaptin pats your cheek. “Still got all yer bits, I'll buy ya back.”"),
+            "For three days you haul gilt frames for the pirates. Then the ship is lifting off, with no room for 'umies.\nRedgob shoves you at a Mek hung with spanners, in trade for a custom shoota.\n“Don't cry,” the kaptin pats your cheek. “Still got all yer bits, I'll buy ya back.”"),
     alt: [
       {if: {flag: "redgobDistrust"}, add: L("“跑过一次的人仔，”他又补一句，“俺得多想想。”", "“'Umie wot ran once,” he adds, “I'll 'ave to fink about.”")}
     ],
@@ -539,9 +540,9 @@
     text: L("堡垒集市里每个摊子都在吼，兽人、地精和几个戴铁牌的人仔挤成一团。\n瓦兹格布给你发了第一笔工钱：一颗兽人牙，还带着点血。“工钱！”\n人群里，一个戴羽毛帽的海盗在收人仔认得的零件。",
             "At the fort market every stall is shouting; orks, grots and a few tagged 'umies jostle together.\nWazgob pays your first wage: one ork tooth, still a bit bloody. “Wages!”\nIn the crowd, a pirate in a feathered hat is buying parts only 'umies can name."),
     alt: [
-      {if: {flag: "askedPay"}, add: L("“你问过能给啥。”他又扔给你一颗，“兽人说话算话。有时候。”", "“You asked wot's in it.” He tosses you another. “Orks keep their word. Sometimes.”")},
-      {if: {flag: "teefPockets"}, add: L("他瞥见你叮当响的口袋，抓走一半：“谁拳头大归谁。”", "He spots your clinking pockets and scoops out half. “Biggest fist keeps it.”")},
-      {if: {flag: "origin_ganger"}, add: L("那顶羽毛帽你认得：红戈布的船还停在城外。", "You know that hat: Redgob's ship still sits outside the walls.")}
+      {if: {flag: "askedPay"}, add: L("“你问过能给啥。”瓦兹格布又扔给你一颗，“兽人说话算话。有时候。”", "“You asked wot's in it.” Wazgob tosses you another. “Orks keep their word. Sometimes.”")},
+      {if: {flag: "teefPockets"}, add: L("瓦兹格布瞥见你叮当响的口袋，抓走一半：“谁拳头大归谁。”", "Wazgob spots your clinking pockets and scoops out half. “Biggest fist keeps it.”")},
+      {if: {flag: "origin_ganger"}, add: L("那顶羽毛帽你认得：红戈布的船又落在了城外。", "You know that hat: Redgob's ship has set down outside the walls again.")}
     ],
     effects: {renown: 3},
     codex: ["ork_teef"],
@@ -659,7 +660,7 @@
     text: L("“人仔有用？证明！”格鲁卡把一个地精仔推到你面前，“打赢它。”\n地精仔比你还害怕，举着一把小刀，刀在抖。\n围观的兽人开始下注。",
             "“'Umie useful? PROVE it!” Grukka shoves a grot in front of you. “Beat it.”\nThe grot is more scared than you. It holds up a little knife. The knife shakes.\nThe watching orks start betting."),
     alt: [
-      {if: {flag: "knelt"}, add: L("格鲁卡还在为你那一跪生气：东西没找着。", "Grukka is still cross about your kneeling: nothing was found.")}
+      {if: {flag: "knelt"}, add: L("格鲁卡还在生气：刚才帮你在地上找了半天，啥也没找着。", "Grukka is still cross: he helped you search the ground and found nothing.")}
     ],
     choices: [
       C("打", "Fight", "ork_308", X({hp: -10, renown: 3, set: {beatGrot: true}, taint: {khorne: 10}},
@@ -714,7 +715,7 @@
     text: L("三个月过去了。你脖子上的铁牌磨得发亮，堡垒的守卫看见它就挥手放行。\n这天，瓦兹格布派你带几个地精去旧居住区的地下室拆铜管。\n地下室的门一推开，一股潮乎乎的甜味扑了出来。",
             "Three months pass. The tag round your neck is worn shiny; the fort's guards wave you through at the sight of it.\nToday Wazgob sends you with a few grots to strip copper pipe in the old hab cellars.\nWhen the cellar door swings open, a damp, sweet smell rolls out."),
     alt: [
-      {if: {flag: "ednaCircle"}, add: L("临走前，奴隶圈有人捎话：埃德娜让你今晚去找她。", "Before you go, word comes from the slave pen: Edna wants to see you tonight.")},
+      {if: {flag: "ednaCircle"}, add: L("临走前，奴隶圈有人捎话：埃德娜让你这两天夜里去找她。", "Before you go, word comes from the slave pen: Edna wants to see you, some night soon.")},
       {if: {flag: "wronged_edna"}, add: L("路过奴隶圈时，里面的人看见你的铁牌，都把脸转开了。", "Passing the slave pen, the people inside see your tag and turn their faces away.")}
     ],
     choices: [
@@ -831,8 +832,8 @@
     effects: {set: {flare: true}},
     choices: [
       C("“中士，是我。”", "“Sergeant. It's me.”", "ork_405", O(Q({flag: "origin_guard"}, true), X({sanity: 10, set: {vossTrust: true}},
-        "沃斯盯着你看了很久，然后抱住了你，抱得很重。“我以为整个排都没了。”",
-        "Voss stares a long time, then hugs you hard. “I thought the whole platoon was gone.”"))),
+        "沃斯一把抱住了你，抱得很重。“我以为整个排都没了。”",
+        "Voss pulls you into a hug, a hard one. “I thought the whole platoon was gone.”"))),
       C("交出你画的位置图", "Hand over your map", "ork_405", O(Q({flag: "mapped"}, true), X({set: {vossTrust: true}},
         "沃斯把铁皮摊在棺材盖上，看了很久。“这值一百条命。”他说的是我们的人。",
         "Voss lays the tin on a coffin lid and studies it. “That's worth a hundred lives.” Ours, he means."))),
@@ -986,8 +987,8 @@
     ]};
 
   N.ork_504 = {chapter: 5, scene: "ork_fort", speaker: null, foe: "ork_weirdboy", time: {d: 2},
-    text: L("小子们打了一整夜架。佐格拉克的脑袋亮得像一颗绿太阳。\n牵铜杆的兽人跑了。他在膨胀，在尖叫，在往外漏闪电。\n你离他只有十步。",
-            "The boyz have brawled all night. Zograk's head glows like a green sun.\nThe pole-minders have fled. He's swelling, shrieking, leaking lightning.\nYou're ten paces away."),
+    text: L("小子们打了一整夜架。佐格拉克的脑袋亮得像一颗绿太阳。\n牵铜杆的兽人都跑了。佐格拉克在膨胀，在尖叫，在往外漏闪电。\n你离他只有十步。",
+            "The boyz have brawled all night. Zograk's head glows like a green sun.\nThe pole-minders have fled. Zograk is swelling, shrieking, leaking lightning.\nYou're ten paces away."),
     alt: [
       {if: {flag: "zogFriend"}, add: L("他在光里找到了你的脸：“安静的人仔……帮帮俺。”", "In the glare he finds your face. “Quiet 'umie… 'elp me.”")}
     ],
@@ -1018,8 +1019,8 @@
     ]};
 
   N.ork_506 = {chapter: 5, scene: "ork_fort", speaker: WAZ, time: {d: 6}, eventRoll: 0.35,
-    text: L("佐格拉克昏睡了六天。第七天，格鲁卡的牵杆兽人来领人：大老大要留着他，选老大那天用。\n瓦兹格布拦在门口，冲你挤眼：“怪小子脑子里的Waaagh!，够给大亮闪充十回电。”\n两边都看着你。",
-            "Zograk sleeps six days. On the seventh, Grukka's pole-minders come for him: the boss wants him kept for boss-choosing day.\nWazgob blocks the door and winks at you. “Dat Weirdboy's 'ead 'as enough Waaagh! to charge Big Shiny ten times.”\nBoth sides look at you."),
+    text: L("佐格拉克昏睡了六天。第七天，格鲁卡的牵杆兽人来领人：大老大要留着他，选老大那天用。\n瓦兹格布挡在他身前，冲你挤眼：“怪小子脑子里的Waaagh!，够给大亮闪充十回电。”\n两边都看着你。",
+            "Zograk sleeps six days. On the seventh, Grukka's pole-minders come for him: the boss wants him kept for boss-choosing day.\nWazgob plants himself in front of the Weirdboy and winks at you. “Dat Weirdboy's 'ead 'as enough Waaagh! to charge Big Shiny ten times.”\nBoth sides look at you."),
     alt: [
       {if: {flag: "polePlanted"}, add: L("你插的那根铜杆还立在地里，小子们都绕着走。", "The copper pole you drove in still stands; the boyz walk round it.")}
     ],
@@ -1102,8 +1103,8 @@
     ]};
 
   N.ork_603 = {chapter: 6, scene: "ork_scrapyard", speaker: CULT, time: {h: 6},
-    text: L("一个披着红布的人类在废料堆里找到了你。他也是奴隶，曾经是。\n“兽人把我们当工具。血神不一样，他只要你拿起刀。谁的血都行，兽人的也行。”\n他递过来一把刻着记号的匕首。",
-            "A human in red rags finds you among the scrap. A slave too, once.\n“Orks treat us as tools. The Blood God's different. He only asks that you pick up a blade. Any blood will do. Ork blood too.”\nHe holds out a dagger carved with a mark."),
+    text: L("仗还在打，一个披着红布的人类找到了你。他也是奴隶，曾经是。\n“兽人把我们当工具。血神不一样，他只要你拿起刀。谁的血都行，兽人的也行。”\n他递过来一把刻着记号的匕首。",
+            "The fighting still rages when a human in red rags finds you. A slave too, once.\n“Orks treat us as tools. The Blood God's different. He only asks that you pick up a blade. Any blood will do. Ork blood too.”\nHe holds out a dagger carved with a mark."),
     alt: [
       {if: {flag: "heldAxe"}, add: L("他盯着你还在发抖的手：“你已经拿起过刀了。”", "He eyes your still-shaking hands. “You've already picked up a blade.”")}
     ],
@@ -1163,7 +1164,7 @@
     text: L("十天里，瓦兹格布把红甲战舰的零件全用上了。大亮闪现在浑身尖刺，能喷火，胸口装着瓦尔达的反应堆。\n“就差一样，”他说，“一个好名字。”\n他看着你，等你开口。",
             "In ten days Wazgob uses every part off the red warship. Da Big Shiny now bristles with spikes and flamers, the Valda reactor in its chest.\n“Just one fing missin',” he says. “A good name.”\nHe looks at you, waiting."),
     alt: [
-      {if: {flag: "sabotaged"}, add: L("改装拆开了半副盔甲。你趁乱把那根假线又做了一遍，手心全是汗。", "The refit opens half the armour. In the bustle you redo the fake join, palms slick with sweat.")},
+      {if: {flag: "sabotaged"}, add: L("改装拆开了半副盔甲。你趁乱摸到动力管线，把那处假接头弄妥当，手心全是汗。", "The refit opens half the armour. In the bustle you reach the power line and make sure of the fake join, palms slick with sweat.")},
       {if: {flag: "zogWired"}, add: L("佐格拉克的铜杆还接在盔甲背上，时不时冒一串绿火花。", "Zograk's copper pole is still wired to the armour's back, spitting green sparks now and then.")}
     ],
     choices: [
@@ -1256,7 +1257,7 @@
     text: L("通讯器里，黑尔政委的声音压过了炮火。\n“星际战士要攻堡垒，门是铁的，太厚。从里面打开它，士兵。从里面。”\n大门的绞盘就在你面前，四个兽人守着它。",
             "Through the vox, Commissar Hale's voice cuts through the shellfire.\n“The Astartes are hitting the fort. The gate's iron and too thick. Open it from inside, soldier. From inside.”\nThe gate winch is right before you, guarded by four orks."),
     alt: [
-      {if: {flag: "flare"}, add: L("你打响的信号弹还挂在天上。城墙外的炮火立刻往这边压了过来。", "Your flare still hangs in the sky. The guns beyond the wall walk their fire this way at once.")}
+      {if: {flag: "flare"}, add: L("你把沃斯给的信号弹打上了天。城墙外的炮火立刻往这边压了过来。", "You fire Voss's flare into the sky. The guns beyond the wall walk their fire this way at once.")}
     ],
     choices: [
       C("喊“那边打得更凶！”引开守卫", "Yell “Bigger fight over there!”", null, R(0.55, "renown", "ork_705", "ork_702b",
@@ -1329,6 +1330,7 @@
     text: L("你被押到黑尔政委面前。他的大衣沾满泥，眼神比泥还冷。\n“你替绿皮修了几个月机器，”他说，“那些机器杀了我们的人。”\n他的手搭在枪套上。",
             "You're marched before Commissar Hale. His greatcoat is caked in mud; his eyes are colder than the mud.\n“You fixed the greenskins' machines for months,” he says. “Those machines killed our people.”\nHis hand rests on his holster."),
     alt: [
+      {if: {fromNode: ["ork_705"]}, add: L("大门是你打开的。可押你来的人只说了一句：他手上长着绿指头。", "You're the one who opened the gate. But the men who brought you report only one thing: a green finger on your hand.")},
       {if: {flag: "betrayedResistance"}, add: L("他翻着一张名单：“地窖那晚，给兽人带路的是个人仔。”", "He leafs through a list. “The night of the crypt, a human led the orks in.”")},
       {if: {flag: "laughedCellar"}, add: L("人群里一个缠绷带的人指着你：“地窖口笑的就是他！”", "A bandaged man in the crowd points at you. “That's the one who laughed at the crypt!”")},
       {if: {flag: "prayerBook"}, add: L("你怀里的祷文书掉了出来。政委看了一眼，没有捡。", "The prayer book falls from your coat. The commissar looks at it and doesn't pick it up.")}
@@ -1368,11 +1370,15 @@
     ]};
 
   N.ork_708 = {chapter: 7, scene: "trench", speaker: MARINE, time: {d: 1},
-    text: L("城外山上，星际战士的营地静得吓人。一位老兵摘下头盔，脸上的疤比你的年纪还长。\n“兽人选新老大时会聚在一起。回去，做我们的眼睛。到那天，按下这个。”\n夜里，他们把你送到排水沟口。",
-            "In the hills, the Marines' camp is frighteningly quiet. A veteran removes his helmet; his scars are older than you.\n“The orks will choose a new boss, and they'll gather for it. Go back. Be our eyes. On that day, press this.”\nAt night they take you to the mouth of the fort's drain."),
+    text: L("城外山上，星际战士的营地静得吓人。一位老兵摘下头盔，脸上的疤比你的年纪还长。\n“兽人选老大时会聚在一起。回去，当我们的眼睛。到那天，按下这个。”\n天黑后，他们会送你回排水沟口。",
+            "In the hills, the Marines' camp is frighteningly quiet. A veteran removes his helmet; his scars are older than you.\n“The orks will choose a new boss, and they'll gather for it. Go back. Be our eyes. On that day, press this.”\nAfter dark they'll take you back to the mouth of the fort's drain."),
     alt: [
-      {if: {fromNode: ["ork_701"]}, add: L("你在山里躲了一天一夜，是星际战士的哨兵发现了你。", "You hid in the hills a day and a night before a Marine sentry found you.")},
-      {if: {fromNode: ["ork_706"]}, add: L("政委把你交给了他们，没有道别。", "The commissar handed you over without a word of farewell.")}
+      {if: {fromNode: ["ork_701"]}, text: L("你在山里躲了一天一夜，被哨兵带进营地。一位老兵摘下头盔，脸上的疤比你的年纪还长。\n“兽人选老大时会聚在一起。回去，当我们的眼睛。到那天，按下这个。”\n天黑后，他们会送你回排水沟口。",
+        "You hide in the hills a day and a night before a Marine sentry brings you into camp. A veteran removes his helmet; his scars are older than you.\n“The orks will choose a new boss, and they'll gather for it. Go back. Be our eyes. On that day, press this.”\nAfter dark they'll take you back to the mouth of the fort's drain.")},
+      {if: {fromNode: ["ork_706"]}, text: L("政委把你交给了星际战士，没有道别。山上，一位老兵摘下头盔，脸上的疤比你的年纪还长。\n“兽人选老大时会聚在一起。回去，当我们的眼睛。到那天，按下这个。”\n天黑后，他们会送你回排水沟口。",
+        "The commissar hands you to the Marines without a word of farewell. In the hills a veteran removes his helmet; his scars are older than you.\n“The orks will choose a new boss, and they'll gather for it. Go back. Be our eyes. On that day, press this.”\nAfter dark they'll take you back to the mouth of the fort's drain.")},
+      {if: {fromNode: ["ork_705b"]}, text: L("城外山上，营地静得吓人。把你夹出来的老兵摘下头盔，脸上的疤比你的年纪还长。\n“兽人选老大时会聚在一起。回去，当我们的眼睛。到那天，按下这个。”\n天黑后，他们会送你回排水沟口。",
+        "In the hills, the Marines' camp is frighteningly quiet. The veteran who carried you out removes his helmet; his scars are older than you.\n“The orks will choose a new boss, and they'll gather for it. Go back. Be our eyes. On that day, press this.”\nAfter dark they'll take you back to the mouth of the fort's drain.")}
     ],
     effects: {set: {beacon: true}},
     choices: [
@@ -1545,8 +1551,8 @@
         "几千个兽人同时想起盔甲是红的。大亮闪的拳头快得看不见。",
         "Thousands of orks remember at once that the armour is red. Big Shiny's fist moves too fast to see."))),
       C("看着它熄火", "Watch it die", "ork_814", O(Q({flag: "shinyDead"}, true), X({sanity: -5},
-        "嗡嗡声停了。就在那一刻，正是政委要的那一刻。",
-        "The hum stops. At exactly the moment the commissar wanted.")))
+        "你一动不动地看着。就是现在，正是政委要的那一刻。",
+        "You watch, not moving. This is it: the very moment the commissar wanted.")))
     ]};
 
   N.ork_803b = {chapter: 8, scene: "ork_fort", speaker: null, foe: "ork_boss", time: {h: 1},
@@ -1680,7 +1686,7 @@
     ],
     effects: {sanity: -5, set: {pitStrike: true}},
     choices: [
-      C("按下信标，等他们来接", "Press the beacon and wait", "ork_808", O(Q({flag: "beacon"}, true), X({hp: -5},
+      C("举起信标，等他们来接", "Hold up the beacon and wait", "ork_808", O(Q({flag: "beacon"}, true), X({hp: -5},
         "信标的红点在烟里一闪一闪。一艘炮艇调转了机头。",
         "The beacon's red light blinks through the smoke. One gunship swings its nose round."))),
       C("往炮艇降落的方向跑", "Run toward where the gunships land", null, O({effects: {set: {ranToGunship: true}}}, R(0.5, "hp", "ork_808", "ork_809",
@@ -1720,7 +1726,7 @@
     ],
     codex: ["place_aurex"],
     choices: [
-      C("“我跟你走，大机械佬。”", "“I'm with you, Mek.”", "ork_end_big_umie", O(Q([{flag: "mekLoyal"}, {stat: "renown", min: 45}]), {grudge: {npc: "wazgob", effects: {renown: -10}, note: L("瓦兹格布还记着你骗过他：“骗子人仔，先交十颗牙。”", "Wazgob still remembers your lie. “Lyin' 'umie. Ten teef first.”")}}, X({renown: 5},
+      C("“我跟你走，机械佬。”", "“I'm with you, Mek.”", "ork_end_big_umie", O(Q([{flag: "mekLoyal"}, {stat: "renown", min: 45}]), {grudge: {npc: "wazgob", effects: {renown: -10}, note: L("瓦兹格布还记着你骗过他：“骗子人仔，先交十颗牙。”", "Wazgob still remembers your lie. “Lyin' 'umie. Ten teef first.”")}}, X({renown: 5},
         "瓦兹格布把一副护目镜扣在你脸上。“俺的人仔，”他说，“不卖。”",
         "Wazgob snaps a pair of goggles onto your face. “My 'umie,” he says. “Not for sale.”"))),
       C("跟着大军走", "Follow the horde", "ork_end_grot", X({sanity: -10},
@@ -1771,8 +1777,8 @@
     ]};
 
   N.ork_808 = {chapter: 8, scene: "burning_city", speaker: MARINE, time: {h: 2},
-    text: L("一艘炮艇贴着绿色雷暴俯冲下来，舱门大开。\n一位疤脸老兵伸出手：“你看到的，全部告诉我们。”\n身后，兽人们根本没注意。它们都在看天上的先知。",
-            "A gunship dives beneath the green storm, hatch wide.\nA scarred veteran reaches out. “Everything you saw. Tell us all of it.”\nBehind you the orks don't even notice. They're all watching da Prophet in the sky."),
+    text: L("一艘炮艇贴着绿色雷暴俯冲下来，舱门大开。\n舱口，疤脸老兵伸出手：“你看到的，全部告诉我们。”\n身后，兽人们根本没注意。它们都在看天上的先知。",
+            "A gunship dives beneath the green storm, hatch wide.\nAt the hatch the scarred veteran reaches out. “Everything you saw. Tell us all of it.”\nBehind you the orks don't even notice. They're all watching da Prophet in the sky."),
     alt: [
       {if: {flag: "marineOath"}, add: L("“你说话算话，”老兵说，“我也是。”", "“You kept your word,” the veteran says. “So do I.”")},
       {if: {flag: "begged"}, add: L("“他们会审你很久，”老兵说，“可你会活着。”", "“They'll question you a long time,” the veteran says. “But you'll live.”")},
@@ -1826,7 +1832,7 @@
     alt: [
       {if: {fromNode: ["ork_807"]}, text: L("海盗船飞走了。牧地精兽人一鞭子把你赶进了奴隶堆。\n你跟着大Waaagh!走了十年，从一颗星球到另一颗。没人记得你的名字，地精们管你叫“大地精”。\n你不再数日子了。兽人不数，你也不数。",
         "The pirate ship is gone. The runtherd whips you in among the slaves.\nYou follow the Great Waaagh! for ten years, world to world. Nobody remembers your name; the grots call you Big Grot.\nYou stop counting days. Orks don't. Neither do you.")},
-      {if: {flag: "snagFriend"}, add: L("斯纳吉特一直跟在你身边。“大地精”这名字，是他起的，地精最高的敬称。", "Snaggit stays at your side all along. ‘Big Grot’ was his idea: the highest honour a grot can give.")},
+      {if: {all: [{flag: "snagFriend"}, {notFlag: "wronged_snaggit"}]}, add: L("斯纳吉特一直跟在你身边。“大地精”这名字，是他起的，地精最高的敬称。", "Snaggit stays at your side all along. ‘Big Grot’ was his idea: the highest honour a grot can give.")},
       {if: {flag: "petSquig"}, add: L("“抽屉”也一直跟着你，长得比你还高。", "Drawer stays with you too, and grows taller than you.")}
     ],
     ending: {kind: "bad", title: L("大地精", "Big Grot"), cause: L("当了一辈子奴隶", "A lifetime slaving for the Waaagh!")}};

@@ -122,8 +122,8 @@
 
   // bridge-in-chapter: the three days between the list and the transport (audit D36/D09)
   N.imp_106b = {chapter: 1, scene: "barracks", speaker: PELL, time: {h: 4}, gather: L("征兵仓", "Holding pen"),
-    alt: [ALT(F("reportedMina"), "巢都底层的征兵仓。几百个被抽中的人挤在铺位上等运兵车，有人祈祷，有人哭。\n佩尔睡在最远的铺位上，背对着你。有人说，昨夜一艘不亮灯的黑船带走了他妹妹。",
-              "The holding pen at the hive's foot. Hundreds of the chosen wait on bunks for the transport, praying or weeping.\nPell has the farthest bunk and keeps his back to you. People say a ship with no lights took his sister last night."),
+    alt: [ALT(F("reportedMina"), "巢都底层的征兵仓。几百个被抽中的人挤在铺位上等运兵车，有人祈祷，有人哭。\n佩尔睡在最远的铺位上，背对着你。有人说，天黑前一艘不亮灯的黑船带走了他妹妹。",
+              "The holding pen at the hive's foot. Hundreds of the chosen wait on bunks for the transport, praying or weeping.\nPell has the farthest bunk and keeps his back to you. People say a ship with no lights took his sister before dark."),
           ALT(F("marked"), "巢都底层的征兵仓。几百个被抽中的人挤在铺位上等运兵车。你被押进来时，所有人都看着你档案上的红章。\n佩尔愣了一下，往旁边挪了挪：“逃不掉的。坐吧。”",
               "The holding pen at the hive's foot. Hundreds of the chosen wait on bunks for the transport. When they march you in, everyone stares at the red stamp on your file.\nPell blinks, then shifts over. “Nobody gets out. Sit.”"),
           ADD(F("hidMina"), "夜里，米娜偷偷来过栅栏外，塞进来一条旧围巾。", "That night Mina creeps up to the fence and pushes an old scarf through.")],
@@ -264,7 +264,7 @@
 
   /* ============ Chapter 2 · The Making of a Guardsman ============ */
   N.imp_200 = {chapter: 2, scene: "ship_interior", speaker: VOSK, time: {h: 10}, bridge: true,
-    alt: [ADD(F("deserter"), "念到你时，她看了一眼档案上逃兵的红章，什么也没说。", "At your name she glances at the deserter's red stamp on your file and says nothing."),
+    alt: [ADD({anyFlag: ["deserter", "marked"]}, "念到你时，她看了一眼档案上逃兵的红章，什么也没说。", "At your name she glances at the deserter's red stamp on your file and says nothing."),
           ADD(F("giltBook"), "有人盯着你怀里那抹金边，舔了舔嘴唇。", "Someone eyes the glint of gilt at your chest and licks his lips.")],
     text: L("轨道港。三辆运兵车的新兵被赶进运兵舰“铁誓”号的机库，挤成一团。\n一个独眼女人跳上弹药箱：“我是沃斯克中士。训练就在这艘船上。从今天起，你们的命归帝皇，由我保管。”",
             "Orbital dock. Recruits from three transports are herded into the hangar of the troopship Oath of Iron.\nA one-eyed woman jumps onto an ammo crate. “I'm Sergeant Vosk. You train aboard this ship. From today your lives belong to the Emperor, and I hold them for Him.”"),
@@ -397,7 +397,8 @@
     text: L("兽人倒在你一臂远的地方，倒下前还冲你竖了个大拇指。\n佩尔趴在你旁边，笑得发抖：“它在夸你！它在夸你！”\n你没笑。你的手停不下来。",
             "The ork drops an arm's length away—giving you a thumbs-up on the way down.\nPell lies beside you, shaking with laughter. “It complimented you! It complimented you!”\nYou don't laugh. Your hands won't stop shaking."),
     effects: {renown: 5, sanity: -5},
-    alt: [ADD(F("apologizedPell"), "他笑完才想起还在生你的气，别过脸去，嘴角却没放下来。", "Done laughing, he remembers he's still angry with you and looks away—but the grin doesn't quite go.")],
+    alt: [ADD(F("apologizedPell"), "他笑完才想起还在生你的气，别过脸去，嘴角却没放下来。", "Done laughing, he remembers he's still angry with you and looks away—but the grin doesn't quite go."),
+          ADD({all: [F("wronged_pell"), NF("apologizedPell")]}, "笑完，他才想起你是谁，脸一沉，往旁边挪开了一截。", "Done laughing, he remembers who you are. His face shuts, and he shifts away.")],
     choices: [
       C("重新装填", "Reload", "imp_306", {result: L("你的手指终于不抖了，正好够把电池按进去。", "Your fingers finally stop shaking, just enough to seat the power pack.")})
     ]};
@@ -431,8 +432,8 @@
     ]};
 
   N.imp_end_commissar = {chapter: 3, scene: "trench", speaker: CHAP, time: {d: 1},
-    alt: [ALT({fromNode: ["imp_518"]}, "德拉维克没有再递笔。那一声枪响，你没听见。\n第二天的阵亡名单上，你的名字后面写着两个字：怯战。\n随军牧师念到这里没有停顿，语气仍然是感恩的。",
-              "Dravik offers no pen this time. You never hear the shot.\nOn the next day's casualty list, your name is followed by one word: cowardice.\nThe regimental priest reads it without pausing. He still sounds grateful.")],
+    alt: [ALT({fromNode: ["imp_518"]}, "德拉维克合上了名单。那一声枪响，你没听见。\n第二天的阵亡名单上，你的名字后面写着两个字：怯战。\n随军牧师念到这里没有停顿，语气仍然是感恩的。",
+              "Dravik closes the manifest. You never hear the shot.\nOn the next day's casualty list, your name is followed by one word: cowardice.\nThe regimental priest reads it without pausing. He still sounds grateful.")],
     text: L("你没听见第二声枪响。\n第二天的阵亡名单上，你的名字后面写着两个字：怯战。\n随军牧师念到这里没有停顿，语气仍然是感恩的。",
             "You never hear the second shot.\nOn the next day's casualty list, your name is followed by one word: cowardice.\nThe regimental priest reads it without pausing. He still sounds grateful."),
     ending: {kind: "bad", title: L("政委的子弹", "The Commissar's Bullet"), cause: L("临阵脱逃，被政委处决", "Shot for desertion")}};
@@ -528,7 +529,7 @@
     choices: [
       C("接过他递来的匕首", "Take the dagger he offers", "imp_407", {effects: {corruption: 10, taint: {tzeentch: 40}, set: {cultist: true}}, result: L("你伸出手。念诵声戛然而止，几十双眼睛同时转向你。", "You reach out. The chanting stops dead, and dozens of eyes turn to you at once.")}),
       C("假装入会，打探消息", "Pretend to join and gather intel", "imp_408", {result: L("你学着他们的样子低下头。镜面人看了你很久，面具里映着你自己的脸。", "You bow your head like the rest. The Mirrored Man studies you a long time; his mask shows you your own face.")}),
-      C("转身冲出地窖", "Turn and bolt from the cellar", "imp_405", {effects: {sanity: -5}, result: L("你撞翻蜡烛冲上台阶，没人追。他们只是一起笑了一声。", "You knock over candles and bolt up the stairs. Nobody follows. They just laugh, once, all together.")})
+      C("转身冲出地窖", "Turn and bolt from the cellar", "imp_405", {effects: {sanity: -5}, result: L("你撞翻蜡烛冲上台阶，没人追，他们只是一起笑了一声。你一路跑到政委的帐篷前。", "You knock over candles and bolt up the stairs. Nobody follows; they just laugh, once, all together. You run all the way to the commissar's tent.")})
     ]};
 
   N.imp_407 = {chapter: 4, scene: "cult_shrine", speaker: S("cult_magus", "镜面人", "The Mirrored Man"), time: {h: 3},
@@ -595,8 +596,8 @@
 
   N.imp_end_servitor = {chapter: 4, scene: "ship_interior", speaker: S("servitor", "机仆", "Servitor"), time: {y: 3},
     alt: [ADD(F("lullaby"), "有时它会哼出下一句，然后停住，像想起了谁。", "Sometimes it hums the next line, then stops, as if remembering someone.")],
-    text: L("很多年后，某艘运兵舰的机库里，一个机仆在搬弹药箱。\n它一直哼着半句摇篮曲，没人知道下一句。\n偶尔有新兵停下来看它，好像认出了什么。",
-            "Years later, in a troopship hangar, a servitor hauls ammunition crates.\nIt hums half a lullaby, over and over. No one knows the next line.\nNow and then a new recruit stops and stares, as if recognising something."),
+    text: L("很多年后，某艘运兵舰的机库里，一个机仆在搬弹药箱。\n它一直哼着半句摇篮曲，没人接得上下一句。\n偶尔有新兵停下来看它，好像认出了什么。",
+            "Years later, in a troopship hangar, a servitor hauls ammunition crates.\nIt hums half a lullaby, over and over. No one can supply the next line.\nNow and then a new recruit stops and stares, as if recognising something."),
     ending: {kind: "bad", title: L("机魂需要双手", "The Machine Needs Hands"), cause: L("被改造成机仆", "Rebuilt as a servitor")}};
 
   N.imp_412 = {chapter: 4, scene: "cult_shrine", speaker: HAAK, foe: "cult_magus", time: {h: 6},
@@ -624,12 +625,12 @@
   N.imp_415 = {chapter: 4, scene: "burning_city", speaker: HAAK, time: {d: 2},
     alt: [ADD({all: [F("caughtAtGate"), NF("haakLeash")]}, "她看着你：“你开过一次门。我会记着。”", "She looks at you. “You opened a door once. I'll remember.”"),
           ADD(F("haakLeash"), "她没给你硬币，只按了按你颈后的烙印：“绳子在我手里。”", "She gives you no coin. She only presses the brand on your neck. “The leash is in my hand.”")],
-    text: L("两天后，维瑟尔上城区被封锁了。哈克说“净化”，政委说“必要”，没人说“烧”。\n“天上的朋友也来了，”哈克说，“被我们打了下来。船身上画着一只睁开的眼。”",
+    text: L("两天后，维瑟尔上城区被封锁了。哈克说“净化”，政委说“必要”，没人说“烧”。\n“他们天上的朋友也来了，”哈克说，“被我们打了下来。船身上画着一只睁开的眼。”",
             "Two days later Vessel's upper districts are sealed. Haak says “purged.” The commissar says “necessary.” Nobody says “burned.”\n“Their friends from the sky came too,” Haak says. “We shot them down. The hull bore an open eye.”"),
     effects: {sanity: -5},
     choices: [
       C("接住她弹来的硬币", "Catch the coin she flips you", "imp_500", {require: {notFlag: "haakLeash"}, hideIfLocked: true, effects: {set: {inqCoin: true}}, result: L("“你眼神不错。哪天我需要一双眼睛，会来找你。”硬币比看上去沉，你把它缝进了军服内衬。", "“You've got good eyes. Some day I'll need a pair.” The coin is heavier than it looks. You sew it into your tunic lining."),
-        resultAlt: [{if: F("spy"), text: L("“你在他们中间待了五晚，还能回来。”她弹来硬币，“哪天我需要一双眼睛，会来找你。”", "“Five nights among them, and you came back.” She flips you the coin. “Some day I'll need a pair of eyes.”")},
+        resultAlt: [{if: F("spy"), text: L("“你在他们中间待了五晚，还能回来。”她又弹来一枚，跟巷子里那枚一模一样，“哪天我需要一双眼睛，会来找你。”", "“Five nights among them, and you came back.” She flips you another coin, twin to the one from the alley. “Some day I'll need a pair of eyes.”")},
                     {if: F("informer"), text: L("“你说出了名字。这比勇敢更难。”她弹来硬币，“哪天我需要一双眼睛，会来找你。”", "“You gave up a name. That's harder than courage.” She flips you the coin. “Some day I'll need eyes.”")},
                     {if: F("sawAltar"), text: L("“你没数完那些颜色。很好。”她弹来硬币，“哪天我需要一双眼睛，会来找你。”", "“You didn't finish counting the colours. Good.” She flips you the coin. “Some day I'll need eyes.”")},
                     {if: F("toldInq"), text: L("“你一个字都没漏。”她弹来硬币，“哪天我需要一双眼睛，会来找你。”你把它缝进了内衬。", "“You left nothing out.” She flips you the coin. “Some day I'll need eyes.” You sew it into your lining.")}]}),
@@ -665,7 +666,7 @@
     choices: [
       C("去村里的礼拜堂看看", "Check the village chapel", "imp_503"),
       C("去谷仓搜索", "Search the granary", "imp_504"),
-      C("掰开一株麦穗看看", "Split open an ear of wheat", "imp_504", {require: {flag: "origin_agri"}, hideIfLocked: true, effects: {sanity: -3, renown: 2}, result: L("麦粒是空的。这片地种了一整季，却没人收割。谷仓的门，从里面闩上了。", "The ear is empty. A whole season grown, and nobody has harvested it. The granary door is barred from inside.")})
+      C("掰开一株麦穗看看", "Split open an ear of wheat", "imp_504", {require: {flag: "origin_agri"}, hideIfLocked: true, effects: {sanity: -3, renown: 2}, result: L("麦粒是空的。这片地种了一整季，却没人收割。谷仓的门虚掩着，里面有动静。", "The ear is empty. A whole season grown, and nobody has harvested it. The granary door stands ajar; something moves inside.")})
     ]};
 
   N.imp_503 = {chapter: 5, scene: "cathedral", speaker: S("preacher", "年轻神父", "Young Priest"), time: {h: 2},
@@ -865,7 +866,7 @@
       C("敬礼", "Salute", "imp_605", {result: L("项圈随着你的动作轻轻响了一声。她回了礼，分毫不差。", "Your collar chimes faintly as you move. She returns the salute, precise to the millimetre.")})
     ]};
 
-  N.imp_605 = {chapter: 6, scene: "ship_interior", speaker: MINA, time: {d: 3},
+  N.imp_605 = {chapter: 6, scene: "ship_interior", speaker: S("psyker", "结霜的女孩", "Frost-Fingered Girl"), time: {d: 3},   // unnamed: agri/noble never met Mina; the hive player names her via the first choice
     grudgeLine: {npc: "mina", text: L("她顿了顿：“还有一个梦。你站在执事面前，开了口。”", "She pauses. “Another dream. You, standing before the deacon, opening your mouth.”")},
     alt: [ADD(F("hidMina"), "黑船还是找到了她。不是你说的，她知道。", "The Black Ship found her anyway. Not through you. She knows."),
           ADD(F("sawBlackShip"), "“你看着我的船飞走，”她说，“我也看见你了。”", "“You watched my ship leave,” she says. “I saw you too.”")],
@@ -874,7 +875,7 @@
     effects: {sanity: -5},
     codex: ["imp_psyker", "imp_black_ships"],
     choices: [
-      C("米娜？佩尔一直在找你", "Mina? Pell's been looking for you", "imp_607", {require: {flag: "sawMina"}, effects: {sanity: 5, set: {minaMessage: true}}, result: L("她的嘴角动了一下，像是想笑。“替我告诉他，我不冷。”", "Her mouth twitches, almost a smile. “Tell him I'm not cold.”")}),
+      C("米娜？佩尔一直在找你", "Mina? Pell's been looking for you", "imp_607", {require: {flag: "sawMina"}, hideIfLocked: true, effects: {sanity: 5, set: {minaMessage: true}}, result: L("她的嘴角动了一下，像是想笑。“替我告诉他，我不冷。”", "Her mouth twitches, almost a smile. “Tell him I'm not cold.”")}),
       C("你看见了什么？", "What did you see?", "imp_607", {grudge: {npc: "mina", effects: {sanity: -4}, note: L("米娜梦见过是谁向执事说了她的名字。", "Mina dreamed who gave her name to the deacon.")}}),
       C("离我远点，巫婆", "Get away from me, witch", "imp_607", {effects: {renown: 2, sanity: -5, set: {spurnedMina: true}}, grudge: {npc: "mina", effects: {hp: -6}, note: L("你告发过她，还骂她巫婆；她指尖的霜咬了你。", "You reported her, then called her witch. Her frost bites.")}, result: L("押送的士兵笑了，用枪托推了她一把。她踉跄一下，还是朝你伸出了手。", "The escort laughs and shoves her with his rifle butt. She stumbles, but still reaches for you.")}),
       C("“对不起，米娜。是我说的。”", "“I'm sorry, Mina. It was me.”", "imp_607", {require: {flag: "wronged_mina"}, hideIfLocked: true, effects: {sanity: -5, set: {forgiven_mina: true}}, result: L("她没说原谅。只是把结霜的手，轻轻放在你手背上：“我知道。我梦见过。”", "She doesn't say she forgives you. She only lays a frosted hand on yours. “I know. I dreamed it.”")})
@@ -956,10 +957,10 @@
               "Dome Seven is too far out; Hallow finds one line: the ash-plain farms have been made refugee camps.\n“Your father sent word,” he says. “That last row: he cut it for you.”"),
           ALT(F("origin_agri"), "七号穹顶离巢都太远，哈洛只查到一行：灰原的农庄都被征作难民营。\n他翻到一页：“七号穹顶……交粮最多的一个。你父亲还在割麦。”",
               "Dome Seven is too far out; Hallow finds one line: the ash-plain farms have been made refugee camps.\nHe turns a page. “Dome Seven... delivered the most grain of any. Your father is still reaping.”"),
-          ALT({flags: ["origin_noble", "ringReturned"]}, "赛伦家打开地窖收容难民。你找到地窖时，父亲正在分粥。\n“你哥哥用那枚戒指，给难民换了三车水，”他说，“然后穿上那身军服，去了城墙。”",
-              "House Serrin has opened its cellars to refugees. When you find them, your father is ladling soup.\n“Your brother traded that ring for three carts of water,” he says. “Then he put on that uniform and went to the walls.”"),
-          ALT(F("origin_noble"), "赛伦家打开地窖收容难民。你找到地窖时，父亲正在分粥，勺子停在半空。\n“你哥哥去了城墙，”他说，“他说欠你的，总得还一点。”",
-              "House Serrin has opened its cellars to refugees. When you find them, your father is ladling soup; the ladle stops in mid-air.\n“Your brother went to the walls,” he says. “He said he owed you, and had to pay some of it.”")],
+          ALT({flags: ["origin_noble", "ringReturned"]}, "赛伦家打开地窖收容难民。哈洛领你下到地窖时，父亲正在分粥。\n“你哥哥用那枚戒指，给难民换了三车水，”他说，“然后穿上那身军服，去了城墙。”",
+              "House Serrin has opened its cellars to refugees. When Hallow leads you down, your father is ladling soup.\n“Your brother traded that ring for three carts of water,” he says. “Then he put on that uniform and went to the walls.”"),
+          ALT(F("origin_noble"), "赛伦家打开地窖收容难民。哈洛领你下到地窖时，父亲正在分粥，勺子停在半空。\n“你哥哥去了城墙，”他说，“他说欠你的，总得还一点。”",
+              "House Serrin has opened its cellars to refugees. When Hallow leads you down, your father is ladling soup; the ladle stops in mid-air.\n“Your brother went to the walls,” he says. “He said he owed you, and had to pay some of it.”")],
     text: L("三号塔塌了一半。十四层还在，楼梯间的咖啡摊被人改成了包扎点。\n哈洛说，你的邻居大多躲进了大教堂。墙上那幅帝皇像，还剩一双眼睛。",
             "Tower Three is half collapsed. Level fourteen still stands; the stairwell recaff stall has become a dressing station.\nHallow says most of your neighbours have taken refuge in the cathedral. On the wall, the Emperor's portrait still has its eyes."),
     codex: ["place_tower_three"],
@@ -1008,8 +1009,8 @@
 
   N.imp_707 = {chapter: 7, scene: "ruins", speaker: BRIN, time: {h: 8}, eventRoll: 0.42,
     grudgeLine: {npc: "brin", text: L("她递汤的手停了停：“孩子，你把我的地窖，指给了别人。”", "Her hand stalls. “Child, you showed my cellar to others.”")},
-    alt: [ALT(F("forgiven_brin"), "夜里，废墟里响起一个熟悉的声音。是布琳，真的布琳：她从维瑟尔逃了出来，脸上长满了疮，笑得很慈祥。\n“你救过我一次，孩子。我来还。”她捧着一碗冒热气的汤。",
-              "At night in the ruins, a familiar voice. It's Brin, truly Brin: she escaped Vessel, her face is covered in sores, and her smile is kind.\n“You saved me once, child. I've come to repay you.” She holds out a steaming bowl."),
+    alt: [ALT(F("forgiven_brin"), "夜里，废墟里响起一个熟悉的声音。是布琳——至少她说是：从维瑟尔逃出来的，脸上长满了疮，笑得很慈祥。\n“你救过我一次，孩子。我来还。”她捧着一碗冒热气的汤。",
+              "At night in the ruins, a familiar voice. It's Brin, or so she says: escaped from Vessel, her face covered in sores, her smile kind.\n“You saved me once, child. I've come to repay you.” She holds out a steaming bowl."),
           ADD(F("painkillers"), "“你一直在找那种不疼的感觉，”她说，“我这儿有。”", "“You've been looking for that painless feeling all along,” she says. “I have it here.”")],
     text: L("夜里，废墟里响起一个熟悉的声音。是布琳——或者是披着布琳样子的东西。\n她捧着一碗冒热气的汤：“你的帝皇没来，孩子。来的是黑色的战帅。他会让活下来的人吃饱。”",
             "At night in the ruins, a familiar voice. Brin—or something wearing Brin.\nShe holds out a steaming bowl of soup. “Your Emperor didn't come, child. The black Warmaster did. He'll feed whoever survives.”"),
@@ -1018,7 +1019,7 @@
     choices: [
       C("喝下那碗汤", "Drink the soup", "imp_708", {effects: {corruption: 20, hp: 30, taint: {nurgle: 65}}, grudge: {npc: "brin", effects: {hp: -6}, note: L("你出卖过布琳；汤里有烧焦的味道。", "You betrayed Brin. The soup tastes of smoke.")}, result: L("你接过碗。这一次，你没有问汤里放了什么。", "You take the bowl. This time you don't ask what's in it.")}),
       C("开枪", "Shoot", "imp_709", {effects: {sanity: -5}, result: L("激光穿过她的身体，打在后面的墙上。她没倒，只是叹了口气。", "The las-bolt passes through her and hits the wall behind. She doesn't fall. She only sighs.")}),
-      C("念出阵亡者的名字", "Recite the names of the dead", "imp_709", {effects: {sanity: 10, renown: 3, taint: {all: -10}}, grudge: {npc: "brin", effects: {sanity: -4}, note: L("布琳不在你的名单里；她正看着你。", "Brin isn't on your list. She is watching you.")}, result: L("你从训练营里那个被处决的新兵念起。每念一个名字，她就淡一分。", "You begin with the recruit shot in training. With every name you say, she fades a little more."),
+      C("念出阵亡者的名字", "Recite the names of the dead", "imp_709", {effects: {sanity: 10, renown: 3, taint: {all: -10}}, grudge: {npc: "brin", effects: {sanity: -4}, note: L("布琳不在你的名单里；她正看着你。", "Brin isn't on your list. She is watching you.")}, result: L("你从训练时那个被处决的新兵念起。每念一个名字，她就淡一分。", "You begin with the recruit shot in training. With every name you say, she fades a little more."),
         resultAlt: [{if: F("deliveredLetter"), text: L("你从那个新兵念起——十四层的老妇人今天才知道他的名字。每念一个，她就淡一分。", "You begin with the recruit; the old woman on fourteen learned his name only today. With every name, she fades a little more.")}]})
     ]};
 
@@ -1056,7 +1057,7 @@
     ]};
 
   N.imp_711 = {chapter: 7, scene: "underhive", speaker: DRAVIK, time: {h: 14},
-    alt: [ADD(F("underhiveFriend"), "这些管子你认得。三天的逃亡，你闭着眼都能走。", "You know these pipes. Three days on the run; you could walk them blind."),
+    alt: [ADD(F("underhiveFriend"), "这些管子你认得。当年逃亡走过的路，你闭着眼都能走。", "You know these pipes. The road you fled down once; you could walk it blind."),
           ADD(F("penal"), "惩戒连被放在最前面当诱饵，项圈的红灯在黑暗里一闪一闪。", "The penal company goes first, as bait, collars blinking red in the dark.")],
     text: L("你们在下水道口等了一夜。黎明时，第一批邪教徒爬了出来，手里还捧着蜡烛。\n埋伏只用了几分钟。德拉维克没问你是怎么知道的。\n“有些问题，”她说，“最好别问。”",
             "You wait all night at the drain mouth. At dawn the first cultists climb out, still carrying candles.\nThe ambush takes minutes. Dravik doesn't ask how you knew.\n“Some questions,” she says, “are better left unasked.”"),
@@ -1184,8 +1185,8 @@
   N.imp_806 = {chapter: 8, scene: "hive_spire", speaker: S("psyker", "老星语者", "Old Astropath"), time: {h: 9},
     alt: [ADD(F("forgiven_mina"), "塔顶亮着一点金光，很小，跟米娜给你看的一样。", "A small gold light burns at the tower's top, just as Mina showed you."),
           ADD(F("weighedKneel"), "另一个星语者转向你，皱起鼻子：“你身上有他的味道。”", "Another astropath turns toward you and wrinkles her nose. “You smell of him.”")],
-    text: L("你爬上星语塔顶。角落里放着那个守塔星际战士的蓝灰色头盔。十几个星语者围坐成圈，念着同一句话，从黑船落下就没停过。\n一个忽然停下，空洞的眼眶转向你：“有回应了。是……更大的东西。”",
-            "You climb to the top of the tower. In a corner lies the blue-grey helm of the Marine who guarded it. A dozen astropaths sit in a circle chanting one phrase, as they have since the black ships fell.\nOne stops and turns her empty sockets toward you. “An answer. Something... bigger.”"),
+    text: L("你爬上星语塔顶。角落里放着那个守塔星际战士的蓝灰色头盔。十几个星语者围坐成圈，念着同一句话，从黑色舰队落下就没停过。\n一个忽然停下，空洞的眼眶转向你：“有回应了。是……更大的东西。”",
+            "You climb to the top of the tower. In a corner lies the blue-grey helm of the Marine who guarded it. A dozen astropaths sit in a circle chanting one phrase, as they have since the black fleet fell.\nOne stops and turns her empty sockets toward you. “An answer. Something... bigger.”"),
     effects: {sanity: 10},
     choices: [
       C("握住她的手", "Hold her hand", "imp_808", {require: {notFlag: "hidKiss"}, hideIfLocked: true, effects: {sanity: 5, set: {heldAstropath: true}}, result: L("她的手冷得像冰，却握得很紧。你们一起等着，谁也没说话。", "Her hand is ice-cold but grips tight. You wait together, saying nothing.")}),
@@ -1217,7 +1218,7 @@
           ALT(F("deliveredLetter"), "一年后，你在重建的楼梯间卖掺水的咖啡。十四层的老妇人每天来喝一杯，从不付钱。\n哈洛念阵亡名单，念到佩尔时放慢了，像在道谢。\n帝皇从没看过你一眼。但你看见了他的人民。",
               "A year later you sell watered recaff in the rebuilt stairwell. The old woman from fourteen drinks a cup every day and never pays.\nHallow reads the names of the dead. At Pell's he slows, like a thank-you.\nThe Emperor never looked your way. But you saw his people."),
           ADD(F("blewBridge"), "每年桥塌的那天，你都去桥墩下放一杯咖啡。", "Every year, on the day the bridge fell, you leave a cup of recaff at the pylons."),
-          ADD(F("sparedRunner"), "那个你没让他死的新兵，后来在楼梯间帮你烧水。", "The recruit you didn't let die ends up boiling water for you in the stairwell.")],
+          ADD(F("sparedRunner"), "那个你没让他死的新兵，后来一直跟在你身边帮忙。", "The recruit you didn't let die stays at your side and helps, every day.")],
     text: L("一年后，你站在重建的楼梯间里，卖掺三成水的再生咖啡。今天免费。\n哈洛念阵亡名单，念到佩尔时放慢了，像在道谢。\n帝皇从没看过你一眼。但你看见了他的人民。",
             "A year later you stand in the rebuilt stairwell selling recaff, a third of it water. Free today.\nHallow reads the names of the dead. At Pell's he slows down, like a thank-you.\nThe Emperor never looked your way. But you saw his people."),
     ending: {kind: "good", title: L("防线未破", "The Line Held"), cause: L("留守故乡，重建巢都", "Stayed home to rebuild")}};

@@ -36,7 +36,7 @@ const NEW_MOODS = {aeldari: {bpm: [64, 76], tones: 75}, necron: {bpm: [80, 96], 
                    gsc: {bpm: [60, 72], tones: 75, drums: ["i"], stacks: [11, -6]},
                    mechanicus: {bpm: [90, 104], tones: 75, drums: ["a", "m"], stacks: [7]}};
 const API = ["unlock", "setMood", "stop", "sfx", "setMusicVolume", "setSfxVolume", "mute", "isMuted", "moodFor", "current",
-             "getStyles", "getStyle", "setStyle", "previewStyle"];
+             "getStyles", "getStyle", "setStyle", "previewStyle", "getMoods", "getTrack", "setTrack", "getPlayingMood", "previewMood", "onChange"];
 const WAVES = new Set(["p12", "p25", "p50", "tri", "sine", "saw", "sq", "organ", "reed", "flute", "pno"]);
 const ARGS = process.argv.slice(2), opt = (n, d) => (ARGS.includes(n) && ARGS[ARGS.indexOf(n) + 1] && !ARGS[ARGS.indexOf(n) + 1].startsWith("--") ? ARGS[ARGS.indexOf(n) + 1] : d);
 const ONLY_STYLES = opt("--styles", "").split(",").filter(Boolean), ONLY_MOODS = opt("--moods", "").split(",").filter(Boolean);
@@ -118,6 +118,30 @@ A.setStyle("chip");
 if (A.getStyle() !== "chip") err("setStyle('chip') did not restore chip");
 try { if (A.previewStyle(firstNew) !== false) err("previewStyle without an AudioContext must return false"); } catch (e) { err("previewStyle threw: " + e.message); }
 console.log("  styles: " + styleIds.join(", "));
+
+console.log("\nTrack selection (SPEC §29b)");
+{
+  const MI = A.getMoods(), GROUPS = ["calm", "tense", "fight", "end", "faction"];
+  if (MI.length !== A.moods.length || A.moods.some((m) => !MI.some((x) => x.id === m))) err("getMoods() must list every mood exactly once");
+  MI.forEach((x) => {
+    if (!x.zh || !x.en) err("getMoods(): " + x.id + " needs zh and en names");
+    if (!GROUPS.includes(x.group)) err("getMoods(): " + x.id + " has unknown group " + x.group);
+    if (/[^\u4e00-\u9fa5A-Za-z' ]/.test(x.zh + x.en)) warn("getMoods(): odd characters in the name of " + x.id);
+  });
+  if (new Set(MI.map((x) => x.zh)).size !== MI.length || new Set(MI.map((x) => x.en)).size !== MI.length) err("getMoods(): names must be unique");
+  GROUPS.forEach((g) => { if (!MI.some((x) => x.group === g)) err("getMoods(): group " + g + " is empty"); });
+  if (A.getTrack() !== "auto") err("default track must be auto");
+  if (A.setTrack("no-such-mood") !== "auto" || A.getTrack() !== "auto") err("setTrack(unknown) must give auto");
+  if (A.setTrack("battle") !== "battle" || A.getTrack() !== "battle") err("setTrack(id) / getTrack() mismatch");
+  if (A.setMood("calm") !== true || A.wanted() !== "calm") err("setMood before unlock must still remember the story mood while a track is fixed");
+  A.setTrack("auto");
+  if (A.getTrack() !== "auto") err("setTrack('auto') did not restore auto");
+  try { if (A.previewMood("battle") !== false) err("previewMood without an AudioContext must return false"); if (A.previewMood("no-such-mood") !== false) err("previewMood(unknown) must return false"); } catch (e) { err("previewMood threw: " + e.message); }
+  if (A.getPlayingMood() !== null) err("getPlayingMood() must be null before any playback");
+  let seen = 0; const off = A.onChange(() => { seen++; }); off();
+  if (typeof off !== "function") err("onChange must return an unsubscribe function");
+  console.log("  " + MI.length + " tracks: " + GROUPS.map((g) => g + " " + MI.filter((x) => x.group === g).map((x) => x.zh + "/" + x.en).join(", ")).join(" | "));
+}
 
 const DRUM_END = {c: 1.5, w: 2.6, z: 0.6, a: 0.8, T: 0.6, g: 3.8, b: 0.7};
 function polyphony(id, st) {                      // notes / oscillators / drum voices alive at once (same rule as Engine.voiceOk), 2 passes of the loop

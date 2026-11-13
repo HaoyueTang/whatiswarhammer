@@ -12,15 +12,16 @@
  *   if (step.kind === "event") { g.eventChoices(); var r = g.eventChoose(1); step = g.eventContinue(); }
  *   SPEC §19: faction.taintMod scales positive taint; event choices may `goto` a node (string or {faction:id});
  *   claim events fire at most twice per god (2nd only if flag resisted_<god>); claim endings = ids with "_end_claim_<god>".
- *   SPEC §20/§20b rumours: entering a node without eventRoll (not an ending, no pending death), unseen eligible rumours whose
- *   `when` matches this node (scene / speaker+foe sprite / codex unlocked here / run flags / keywords in the zh+en text) are
- *   scored (criteria matched); the best one fires with p 0.6 (score ≥2) or 0.35 (score 1), ties random — at least 3 nodes since
- *   the last rumour, at most 2 per chapter; rumours without `when` never fire. Own seeded stream, so the main RNG sequence is
- *   unchanged. → step.rumor / step.rumorScore / step.rumorCodex, g.currentRumor(), g.rumorMatches(nodeId).
+ *   SPEC §20/§20b/§20c rumours: heard ONLY on gathering-place nodes (`node.gather = {zh, en}` label; mess hall, market, hab-block
+ *   commons …) — nodes without `gather`, endings, pending deaths and eventRoll nodes never roll. At a gather node every unseen eligible
+ *   rumour is a candidate and is scored by its `when` matches (scene / speaker+foe sprite / codex unlocked here / run flags / keywords
+ *   in the zh+en text; 0 matches is allowed = idle chatter); the best score wins (ties random) and fires with p 0.7 (score ≥2),
+ *   0.6 (score 1) or 0.45 (score 0) — at least 3 nodes since the last rumour, at most 2 per chapter. Own seeded stream, so the main
+ *   RNG sequence is unchanged. → step.rumor / step.rumorScore / step.rumorCodex, g.currentRumor(), g.rumorMatches(nodeId).
  *   new WH.Game(fid, {rumors:false}) or g.rumors = false turns them off (UI setting 传闻); opts.rumorChance forces p (tests).
- *   SPEC §27 echoes: g.echoPool = [{runId, echo:{faction, role, world, cause, kind, dateKey, claimedBy}}] (past bad/death runs, set by
- *   the UI from the run records); at most ONE per run, p 0.15 on nodes with chapter ≥2, no eventRoll, not an ending, no rumour here and
- *   ≥3 nodes since the last rumour; only echoes dated ≤ now; other routes preferred; text from WH.echoTemplates → state.echo / step.echo.
+ *   SPEC §27/§20c echoes: g.echoPool = [{runId, echo:{faction, role, world, cause, kind, dateKey, claimedBy}}] (past bad/death runs, set by
+ *   the UI from the run records); heard like a rumour, so only on gather nodes; at most ONE per run, p 0.3 on gather nodes with chapter ≥2,
+ *   no eventRoll, not an ending, no rumour here and ≥3 nodes since the last rumour; only echoes dated ≤ now; other routes preferred; text from WH.echoTemplates → state.echo / step.echo.
  *   Own seeded stream (echoRng); opts.echoes:false or g.echoes = false turns them off; opts.echoChance forces p (tests).
  *   SPEC §23: origin.max:{hp,sanity} (70–130, default 100) → state.max; hp/sanity clamp to g.cap(k); start values default to the caps.
  *   SPEC §28 grudges: faction.npcs + choice.grudge {npc, p?, effects?, note} + node.grudgeLine {npc, text}. A grudge is ACTIVE while
@@ -32,6 +33,12 @@
  *   (deep copy of g.state + the three RNG states) before applying a choice (not for the forced "you die" choice); max 30 deep, in memory only.
  *   g.canRewind() / g.rewind() → true|false pops one snapshot and restores it (same RNG → re-picking a roll gives the same result); g.rewindCount =
  *   rewinds used this run (saved as rec.rewinds). Knowledge is not rewound: state.codex stays a superset, playMs keeps running. Off = no snapshots.
+ *   SPEC §32 story overhaul: node.alt [{if:Cond, text|add}] is resolved on ARRIVAL (before the node's own effects, no RNG) into state.altSel =
+ *   {node, t:index|-1, a:[indexes]} (saved as rec.altSel; reload / rewind / validator sims show the same text): g.altText(), g.altAdds(), g.nodeBody()
+ *   (alt-resolved text + adds joined by "\n\n"), g.nodeText() = nodeBody + grudge line. The "previous node" of the from* conditions is the node
+ *   before the current one in state.history. choice.resultAlt [{if, text}] → first match replaces choice.result in the consequence (state BEFORE the
+ *   choice's effects). eligibleEvents(chapter, node) filters by event.where / excludeFactions (WH.Rules.whereOK, WH.Rules.condOK).
+ *   Save fallback: fromRecord() with an unknown node id → WH.Game.fallbackNode(faction, chapter, origin), g.fallbackFrom = the missing id.
  *   g.toRecord() / WH.Game.fromRecord(rec)
  */
 (function (root) {
@@ -50,9 +57,10 @@
   var WARP_MIN = 0.4, WARP_MAX = 3.0;
   var HISTORY_MAX = 30;
   var RUMOR_P = 0.25;                                            // SPEC §20 (v0.2.2 flat roll; kept for reference)
-  var RUMOR_P2 = 0.6, RUMOR_P1 = 0.35;                           // SPEC §20b: chance when the best match scores ≥2 / 1
+  var RUMOR_P2 = 0.7, RUMOR_P1 = 0.6, RUMOR_P0 = 0.45;            // SPEC §20c: chance at a gather node when the best match scores ≥2 / 1 / 0
   var RUMOR_GAP = 3, RUMOR_PER_CHAPTER = 2;                      // SPEC §20b: ≥3 nodes since the last rumour, ≤2 per chapter
-  var ECHO_P = 0.15;                                             // SPEC §27: chance of a past life's echo on an eligible node
+  var ECHO_P = 0.3;                                              // SPEC §27/§20c: chance of a past life's echo on an eligible gather node
+  var ALT_ADD_MAX = 2;                                           // SPEC §32.2: at most 2 alt `add` paragraphs per node
   var CAP_MIN = 70, CAP_MAX = 130, CAP_DEFAULT = 100;            // SPEC §23: per-run caps for hp / sanity
   var CAPPED = ["hp", "sanity"];
   /* SPEC §23: the run's caps from an origin's max:{hp,sanity} (missing → 100, clamped 70–130) */
@@ -140,6 +148,55 @@
     return true;
   }
 
+  /* ---------- SPEC §32.2 conditions (node.alt / choice.resultAlt) ----------
+   * Cond = {flag} | {notFlag} | {flags:[…]} (all) | {anyFlag:[…]} | {stat, min, max} | {taint:"god", min, max} | {fromChapter:{min,max}} |
+   *        {fromScene:[…]} | {fromNode:[…]} | {any:[Cond…]} | {all:[Cond…]} | {not:Cond}; several keys in one object = all of them.
+   * ctx = {state, prev:{id, scene, chapter}|null} — prev = the previously played node. Unknown keys are ignored (the validator rejects them). */
+  function inRange(r, v) {
+    if (r === undefined || r === null) return true;
+    if (typeof r === "number") return v === r;
+    if (typeof v !== "number") return false;
+    if (r.min !== undefined && r.min !== null && v < r.min) return false;
+    if (r.max !== undefined && r.max !== null && v > r.max) return false;
+    return true;
+  }
+  function condOK(cond, ctx) {
+    if (cond === undefined || cond === null || cond === true) return true;
+    if (Array.isArray(cond)) { for (var a = 0; a < cond.length; a++) if (!condOK(cond[a], ctx)) return false; return true; }
+    if (typeof cond !== "object") return false;
+    var st = ctx.state, fl = (st && st.flags) || {}, prev = ctx.prev || null, i, l;
+    if (has(cond, "flag") && !fl[cond.flag]) return false;
+    if (has(cond, "notFlag") && fl[cond.notFlag]) return false;
+    if (has(cond, "flags")) { l = [].concat(cond.flags); for (i = 0; i < l.length; i++) if (!fl[l[i]]) return false; }
+    if (has(cond, "anyFlag")) { l = [].concat(cond.anyFlag); var any = false; for (i = 0; i < l.length; i++) if (fl[l[i]]) { any = true; break; } if (!any) return false; }
+    if (cond.stat !== undefined || cond.taint !== undefined) { if (!requireOK({stat: cond.stat, taint: cond.taint, min: cond.min, max: cond.max}, st)) return false; }
+    if (has(cond, "fromChapter") && !(prev && typeof prev.chapter === "number" && inRange(cond.fromChapter, prev.chapter))) return false;
+    if (has(cond, "fromScene") && !(prev && prev.scene && [].concat(cond.fromScene).indexOf(prev.scene) >= 0)) return false;
+    if (has(cond, "fromNode") && !(prev && prev.id && [].concat(cond.fromNode).indexOf(prev.id) >= 0)) return false;
+    if (has(cond, "any")) { l = [].concat(cond.any); var ok = false; for (i = 0; i < l.length; i++) if (condOK(l[i], ctx)) { ok = true; break; } if (!ok) return false; }
+    if (has(cond, "all")) { l = [].concat(cond.all); for (i = 0; i < l.length; i++) if (!condOK(l[i], ctx)) return false; }
+    if (has(cond, "not") && condOK(cond.not, ctx)) return false;
+    return true;
+  }
+  /* SPEC §32.3: event.where against the node about to be entered (node, id) and the arrival state; absent → always true */
+  function listOf(x) { return x === undefined || x === null ? null : [].concat(x); }
+  function whereOK(w, node, id, state) {
+    if (!w || typeof w !== "object") return true;
+    var l, fl = (state && state.flags) || {}, i;
+    var sc = node && node.scene, ch = node && typeof node.chapter === "number" ? node.chapter : (state && state.chapter);
+    if ((l = listOf(w.scenes)) && l.indexOf(sc) < 0) return false;
+    if ((l = listOf(w.notScenes)) && l.indexOf(sc) >= 0) return false;
+    if ((l = listOf(w.nodes)) && l.indexOf(id) < 0) return false;
+    if ((l = listOf(w.notNodes)) && l.indexOf(id) >= 0) return false;
+    if (w.chapter !== undefined && w.chapter !== null && !inRange(w.chapter, ch)) return false;
+    if (w.flag && !fl[w.flag]) return false;
+    if (w.notFlag && fl[w.notFlag]) return false;
+    if ((l = listOf(w.flags))) for (i = 0; i < l.length; i++) if (!fl[l[i]]) return false;
+    if ((l = listOf(w.anyFlag))) { var any = false; for (i = 0; i < l.length; i++) if (fl[l[i]]) { any = true; break; } if (!any) return false; }
+    if (w.stat !== undefined || w.taint !== undefined) { if (!requireOK({stat: w.stat, taint: w.taint, min: w.min, max: w.max}, state)) return false; }
+    return true;
+  }
+
   function timeHours(t) {
     if (!t) return 0;
     return (+t.h || 0) + (+t.d || 0) * 24 + (+t.w || 0) * 168 + (+t.y || 0) * HOURS_PER_YEAR;
@@ -195,12 +252,13 @@
     for (var i = 0; i < STATS.length; i++) if (d[STATS[i]]) return true;
     return false;
   }
-  function consequenceOf(c, step, isEvent) {
-    var text = null, roll = step.roll || null;
+  /* resText = the matching choice.resultAlt entry's text (SPEC §32.2), replaces choice.result; a roll's own rollResult still wins */
+  function consequenceOf(c, step, isEvent, resText) {
+    var text = null, roll = step.roll || null, base = resText || c.result || null;
     if (c.roll && roll) {
       var rr = c.rollResult || {};
-      text = (roll.success ? rr.success : rr.fail) || c.result || null;
-    } else text = c.result || null;
+      text = (roll.success ? rr.success : rr.fail) || base;
+    } else text = base;
     var d = step.choiceDeltas || {}, dl = hasDeltas(d);
     var eff = c.effects || {};
     var gr = step.grudge || null;
@@ -240,7 +298,7 @@
     /* SPEC §20: rumours draw from their own stream (derived from the main seed) so turning them on/off never changes
      * rolls, events or warp time of a seeded run */
     this.rumors = opts.rumors !== false;
-    this.rumorChance = typeof opts.rumorChance === "number" ? opts.rumorChance : null;     // null = SPEC §20b 0.6 / 0.35
+    this.rumorChance = typeof opts.rumorChance === "number" ? opts.rumorChance : null;     // null = SPEC §20c 0.7 / 0.6 / 0.45
     var seed0 = this.rng.getState ? this.rng.getState() : Math.floor(Math.random() * 4294967296);
     this.rumorRng = opts.rumorRng || RNG((seed0 ^ 0x2545F491) >>> 0);
     this.echoes = opts.echoes !== false;                             // SPEC §27
@@ -275,7 +333,7 @@
       runId: Date.now().toString(36) + Math.floor(Math.random() * 1e8).toString(36),
       flags: {}, codex: [], seenEvents: [], seenRumors: [], rumor: null, rumorLog: [], echo: null, echoRun: null, hours: startHours(f), taint: zeroTaint(), claims: {},
       pendingEvent: null, pendingNext: null, eventChoice: null, eventDeath: null,
-      deathPending: null, history: [], visits: 0, playMs: 0, ended: false
+      deathPending: null, history: [], visits: 0, playMs: 0, ended: false, altSel: null     // SPEC §32.2 (additive)
     };
   };
 
@@ -366,6 +424,7 @@
         if (e.trigger !== "claim" || e.god !== god) continue;
         var fs = e.factions || ["*"];
         if (fs.indexOf("*") < 0 && fs.indexOf(st.faction) < 0) continue;
+        if (e.excludeFactions && e.excludeFactions.indexOf(st.faction) >= 0) continue;     // SPEC §32.3
         if (!e.choices || !e.choices.length) continue;
         return e;
       }
@@ -408,10 +467,70 @@
     return "__death_" + cause;
   };
 
+  /* ---------- SPEC §32.2 alt / resultAlt ---------- */
+  /* {id, scene, chapter} of a node id for the from* conditions (null for none / unknown) */
+  Game.prototype._prevInfo = function (id) {
+    if (!id) return null;
+    var n = this.faction.nodes && this.faction.nodes[id];
+    return n ? {id: id, scene: n.scene || null, chapter: typeof n.chapter === "number" ? n.chapter : null} : {id: id, scene: null, chapter: null};
+  };
+  /* id of the node played before the current one (state.history; tolerates a history whose last entry is not the current node) */
+  Game.prototype._prevId = function () {
+    var st = this.state, h = (st && st.history) || [];
+    if (!h.length) return null;
+    return h[h.length - 1] === st.nodeId ? (h.length > 1 ? h[h.length - 2] : null) : h[h.length - 1];
+  };
+  /* node.alt against the arrival state → {node, t:index|-1, a:[indexes]} or null when no entry matches (or the node has no alt). No RNG. */
+  Game.prototype._resolveAlt = function (id, node, prev) {
+    var alt = node && node.alt, ctx = {state: this.state, prev: prev || null}, t = -1, adds = [];
+    if (!Array.isArray(alt) || !alt.length) return null;
+    for (var i = 0; i < alt.length; i++) {
+      var a = alt[i];
+      if (!a || !condOK(a["if"], ctx)) continue;
+      if (a.text) { if (t < 0) t = i; }
+      else if (a.add && adds.length < ALT_ADD_MAX) adds.push(i);
+    }
+    return (t < 0 && !adds.length) ? null : {node: id, t: t, a: adds};
+  };
+  /* the stored selection for node `id` (default: current) → {t, a} or null; a selection of another node is ignored */
+  Game.prototype.altSel = function (id) {
+    var st = this.state, s = st && st.altSel;
+    if (id === undefined) id = st && st.nodeId;
+    return (s && s.node === id) ? s : null;
+  };
+  /* node text {zh,en} with the matching alt `text` entry in place of the main text (no adds, no grudge line) */
+  Game.prototype.altText = function (id) {
+    var node = this.node(id), s = this.altSel(id), e = s && s.t >= 0 && node.alt && node.alt[s.t];
+    return (e && e.text) || node.text || {};
+  };
+  /* matching alt `add` paragraphs → [{zh,en}] (≤ 2, in order) */
+  Game.prototype.altAdds = function (id) {
+    var node = this.node(id), s = this.altSel(id), out = [];
+    if (s && node.alt) for (var i = 0; i < s.a.length; i++) { var e = node.alt[s.a[i]]; if (e && e.add) out.push(e.add); }
+    return out;
+  };
+  /* what the player reads for node `id` (default: current): alt-resolved text + alt adds as separate paragraphs ("\n\n"); no grudge line */
+  Game.prototype.nodeBody = function (id) {
+    var tx = this.altText(id), ad = this.altAdds(id), z = tx.zh || "", e = tx.en || "";
+    for (var i = 0; i < ad.length; i++) { z += "\n\n" + (ad[i].zh || ""); e += "\n\n" + (ad[i].en || ""); }
+    return {zh: z, en: e};
+  };
+  /* SPEC §32.2: first matching choice.resultAlt entry's text for choice c, judged on the state BEFORE the choice's effects; "from" = the
+   * node played before the current one (history). null = none → choice.result. */
+  Game.prototype._resultAlt = function (c) {
+    var ra = c && c.resultAlt, st = this.state;
+    if (!Array.isArray(ra) || !ra.length) return null;
+    var ctx = {state: st, prev: this._prevInfo(this._prevId())};
+    for (var i = 0; i < ra.length; i++) if (ra[i] && ra[i].text && condOK(ra[i]["if"], ctx)) return ra[i].text;
+    return null;
+  };
+
   Game.prototype._enter = function (id, step) {
     var node = this.node(id), st = this.state;
+    var prev = this._prevInfo(st.nodeId);                      // SPEC §32.2: the node played before this one (null at a run's start)
     step.nodeId = id;
     st.nodeId = id;
+    st.altSel = this._resolveAlt(id, node, prev);              // arrival state: before this node's own effects
     st.deathPending = null;
     st.rumor = null;
     st.echo = null;
@@ -502,12 +621,19 @@
     return {scene: node.scene || null, sprites: [node.speaker && node.speaker.sprite, node.foe].filter(Boolean),
             codex: [].concat(node.codex || []), flags: flags || {}, zh: t.zh || "", en: t.en || ""};
   }
-  /* eligible unseen rumours matching node `id` (default: current), best first: [{rumor, score}] — no RNG draws */
+  /* SPEC §20c: rumours are heard only where people gather */
+  function isGather(node) {
+    var g = node && node.gather;
+    return !!(g && typeof g === "object" && (g.zh || g.en));
+  }
+  /* the rumour candidates of node `id` (default: current), best score first: [{rumor, score}] — every eligible unseen rumour
+   * (score 0 = no `when` criterion matches, still allowed in a crowd); [] for nodes that are not gathering places. No RNG draws. */
   Game.prototype.rumorMatches = function (id, chapter) {
     var st = this.state, node = this.node(id === undefined ? st.nodeId : id);
+    if (!isGather(node)) return [];
     var ch = chapter !== undefined ? chapter : (typeof node.chapter === "number" ? node.chapter : st.chapter);
     var ctx = nodeContext(node, st.flags), out = [];
-    this.eligibleRumors(ch).forEach(function (r) { var sc = rumorScore(r, ctx); if (sc > 0) out.push({rumor: r, score: sc}); });
+    this.eligibleRumors(ch).forEach(function (r) { out.push({rumor: r, score: rumorScore(r, ctx)}); });
     out.sort(function (a, b) { return b.score - a.score; });
     return out;
   };
@@ -547,6 +673,7 @@
   };
   Game.prototype._rollEcho = function (node, step) {
     var st = this.state;
+    if (!isGather(node)) return;                           // SPEC §20c: overheard where people gather, like a rumour
     if (!this.echoes || st.echoRun || !(this.echoPool && this.echoPool.length)) return;
     var ch = typeof node.chapter === "number" ? node.chapter : st.chapter;
     if (ch < 2) return;
@@ -565,16 +692,18 @@
   };
   Game.prototype.currentEcho = function () { return this.state && this.state.echo ? this.state.echo : null; };
 
-  /* called by _enter for nodes without eventRoll / ending / pending death; draws from rumorRng only when something matches */
+  /* called by _enter for nodes without eventRoll / ending / pending death; SPEC §20c: acts only on gather nodes; draws from rumorRng
+   * only when a candidate exists */
   Game.prototype._rollRumor = function (node, step) {
     var st = this.state;
+    if (!isGather(node)) return;
     if (!this.rumors || !(this.data.rumors && this.data.rumors.length)) return;
     var ch = typeof node.chapter === "number" ? node.chapter : st.chapter;
     if (!this.rumorAllowed(ch)) return;
     var m = this.rumorMatches(st.nodeId, ch);
     if (!m.length) return;
     var best = m[0].score, top = m.filter(function (x) { return x.score === best; });
-    var p = this.rumorChance !== null && this.rumorChance !== undefined ? this.rumorChance : (best >= 2 ? RUMOR_P2 : RUMOR_P1);
+    var p = this.rumorChance !== null && this.rumorChance !== undefined ? this.rumorChance : (best >= 2 ? RUMOR_P2 : best === 1 ? RUMOR_P1 : RUMOR_P0);
     if (this.rumorRng() >= p) return;
     var pick = top.length > 1 ? top[Math.min(top.length - 1, Math.floor(this.rumorRng() * top.length))] : top[0], r = pick.rumor;
     if (!st.seenRumors) st.seenRumors = [];
@@ -626,7 +755,7 @@
   };
   /* node text {zh,en} with the active grudge line appended */
   Game.prototype.nodeText = function (id) {
-    var node = this.node(id), gl = this.grudgeLine(id), tx = node.text || {};
+    var gl = this.grudgeLine(id), tx = this.nodeBody(id);          // SPEC §32.2: alt-resolved text + alt adds
     if (!gl) return tx;
     return {zh: (tx.zh || "") + (gl.text.zh || ""), en: (tx.en || "") + " " + (gl.text.en || "")};
   };
@@ -649,7 +778,7 @@
       return this._enter(this.deathNodeId(st.deathPending), step);
     }
     if (this.rewindEnabled) this._pushSnapshot();                             // SPEC §30: state + RNG before the choice
-    var c = v.choice, gr = v.grudge || null;
+    var c = v.choice, gr = v.grudge || null, resAlt = this._resultAlt(c);     // SPEC §32.2: judged before the choice's effects
     if (gr) step.grudge = {npc: gr.npc, note: gr.note};                       // SPEC §28
     step.choiceDeltas = this._applyEffects(gr ? mergeEffects(c.effects, gr.effects) : c.effects, step.deltas);
     this._unlock(c.codex, step);
@@ -657,7 +786,7 @@
     if (cause) {
       step.death = cause;
       step = this._enter(this.deathNodeId(cause), step);
-      step.consequence = consequenceOf(c, step);
+      step.consequence = consequenceOf(c, step, false, resAlt);
       return step;
     }
     var target = c.next;
@@ -667,7 +796,7 @@
       target = ok ? c.roll.success : c.roll.fail;
     }
     step = this._goTo(target, step);
-    step.consequence = consequenceOf(c, step);
+    step.consequence = consequenceOf(c, step, false, resAlt);
     return step;
   };
 
@@ -697,13 +826,22 @@
     return true;
   };
 
-  Game.prototype.eligibleEvents = function (chapter) {
-    var out = [], evs = this.data.events || [], st = this.state;
+  /* SPEC §32.3: node = the node about to be entered (id string or node object); with it, events' `where` is matched against that node and the
+   * arrival state. Without it (legacy callers) `where` is ignored. */
+  Game.prototype.eligibleEvents = function (chapter, node) {
+    var out = [], evs = this.data.events || [], st = this.state, nid = null, nobj = null;
+    if (typeof node === "string") { nid = node; nobj = (this.faction.nodes && this.faction.nodes[node]) || null; }
+    else if (node && typeof node === "object") {
+      nobj = node;
+      for (var k in (this.faction.nodes || {})) if (this.faction.nodes[k] === node) { nid = k; break; }
+    }
     for (var i = 0; i < evs.length; i++) {
       var e = evs[i];
       if (st.seenEvents.indexOf(e.id) >= 0) continue;
       var fs = e.factions || ["*"];
       if (fs.indexOf("*") < 0 && fs.indexOf(st.faction) < 0) continue;
+      if (e.excludeFactions && e.excludeFactions.indexOf(st.faction) >= 0) continue;
+      if (nobj && e.where && !whereOK(e.where, nobj, nid, st)) continue;
       if ((e.minChapter || 0) > chapter) continue;
       if (e.trigger === "claim") continue;                 // claim events only fire from claimDue()
       if (!e.choices || !e.choices.length) continue;
@@ -729,7 +867,7 @@
     }
     if (node.eventRoll && !node.ending && this.rng() < node.eventRoll) {
       var ch = typeof node.chapter === "number" ? node.chapter : this.state.chapter;
-      var pool = this.eligibleEvents(ch);
+      var pool = this.eligibleEvents(ch, target);
       if (pool.length) {
         var tot = 0, i, w = [];
         for (i = 0; i < pool.length; i++) { w.push(this.eventWeight(pool[i])); tot += w[i]; }
@@ -825,6 +963,7 @@
       history: st.history.slice(), visits: st.visits, playMs: Math.round(st.playMs), ended: st.ended
     };
     if (this.rewindCount) rec.rewinds = this.rewindCount;                                  // SPEC §30 (absent = 0, no schema change)
+    if (st.altSel) rec.altSel = JSON.parse(JSON.stringify(st.altSel));                     // SPEC §32.2 (additive: the alt entries chosen on arrival)
     if (extra) for (var k in extra) rec[k] = extra[k];
     // SPEC §22: fields this version doesn't know (written by a newer/older build) survive a load → save round trip
     if (this.extraFields) for (var x in this.extraFields) if (!has(rec, x)) rec[x] = this.extraFields[x];
@@ -832,7 +971,45 @@
   };
   var RECORD_KEYS = ["schema", "gameVersion", "savedAt", "faction", "origin", "runId", "nodeId", "chapter", "max", "stats", "flags", "codex",
     "seenEvents", "seenRumors", "rumor", "rumorLog", "echo", "echoRun", "hours", "taint", "claims", "pendingEvent", "pendingNext", "eventChoice", "eventDeath",
-    "deathPending", "history", "visits", "playMs", "ended", "lang", "rewinds"];
+    "deathPending", "history", "visits", "playMs", "ended", "lang", "rewinds", "altSel"];
+
+  /* ---------- SPEC §32.4 save fallback ----------
+   * A saved node id that no longer exists → the first node of the saved chapter: chapter 1 → the origin's startNode; otherwise the chapter's
+   * lowest-numbered `bridge` node, else its lowest-numbered entry node (reached from an earlier chapter), else its lowest-numbered node
+   * (endings and origin prologue nodes `<prefix>o_*` excluded). A chapter without nodes falls back to the previous chapters, then the start node. */
+  function natCmp(a, b) {
+    var x = String(a).split(/(\d+)/), y = String(b).split(/(\d+)/);
+    for (var i = 0; i < Math.max(x.length, y.length); i++) {
+      if (x[i] === y[i]) continue;
+      if (x[i] === undefined) return -1;
+      if (y[i] === undefined) return 1;
+      var p = parseInt(x[i], 10), q = parseInt(y[i], 10);
+      if (i % 2 === 1 && !isNaN(p) && !isNaN(q) && p !== q) return p - q;
+      return x[i] < y[i] ? -1 : 1;
+    }
+    return 0;
+  }
+  function fallbackNode(f, chapter, originId) {
+    var nodes = (f && f.nodes) || {}, ids = Object.keys(nodes), o = findOrigin(f, originId);
+    var startId = (o && o.startNode && nodes[o.startNode]) ? o.startNode : (nodes[f.startNode] ? f.startNode : ids.sort(natCmp)[0]);
+    chapter = Math.floor(+chapter);
+    if (!isFinite(chapter) || chapter <= 1) return startId;
+    var entered = {};
+    ids.forEach(function (id) {
+      (nodes[id].choices || []).forEach(function (c) {
+        [c.next, c.roll && c.roll.success, c.roll && c.roll.fail].forEach(function (t) {
+          if (t && nodes[t] && typeof nodes[id].chapter === "number" && nodes[t].chapter > nodes[id].chapter) entered[t] = 1; });
+      });
+    });
+    for (var ch = chapter; ch > 1; ch--) {
+      var inCh = ids.filter(function (id) { var n = nodes[id]; return n.chapter === ch && !n.ending && !/^[a-z]+_o_/.test(id); }).sort(natCmp);
+      if (!inCh.length) continue;
+      var br = inCh.filter(function (id) { return nodes[id].bridge; }), en = inCh.filter(function (id) { return entered[id]; });
+      return (br.length ? br : en.length ? en : inCh)[0];
+    }
+    return startId;
+  }
+  Game.fallbackNode = fallbackNode;
 
   Game.fromRecord = function (rec, opts) {
     var g = new Game(rec.faction, opts);
@@ -869,14 +1046,36 @@
     st.playMs = rec.playMs || 0;
     st.ended = !!rec.ended;
     if (st.pendingEvent && !g.event(st.pendingEvent)) { st.pendingEvent = null; }
+    /* SPEC §32.4: the saved node (or the node an event was going to resume) no longer exists → chapter start, stats / flags kept */
+    var nodeOK = function (id) { return !!(id && ((g.faction.nodes && g.faction.nodes[id]) || String(id).indexOf("__death_") === 0)); };
+    var missing = !nodeOK(rec.nodeId) ? rec.nodeId : (st.pendingEvent && st.pendingNext && !nodeOK(st.pendingNext) ? st.pendingNext : null);
+    if (missing) {
+      var fb = fallbackNode(g.faction, st.chapter, st.origin);
+      g.fallbackFrom = String(missing);
+      if (st.deathPending || st.ended) {                              // a death or ending that belonged to the vanished node must not carry over
+        if (st.stats.hp <= 0) st.stats.hp = 1;
+        if (st.stats.sanity <= 0) st.stats.sanity = 1;
+        if (st.stats.corruption >= 100) st.stats.corruption = 99;
+      }
+      st.nodeId = fb; st.deathPending = null; st.ended = false; st.rumor = null; st.echo = null;
+      st.pendingEvent = null; st.pendingNext = null; st.eventChoice = null; st.eventDeath = null;
+      st.history.push(fb);
+      if (st.history.length > HISTORY_MAX) st.history.shift();
+    }
     g.state = st;
     g.rewindCount = Math.max(0, Math.floor(+rec.rewinds || 0));
     g.extraFields = {};
     for (var rk in rec) if (has(rec, rk) && RECORD_KEYS.indexOf(rk) < 0) g.extraFields[rk] = JSON.parse(JSON.stringify(rec[rk]));
     if (!rec.claims) st.seenEvents.forEach(function (id) {             // pre-§19 saves: each claim event fired once
       var e = g.event(id); if (e && e.trigger === "claim" && GODS.indexOf(e.god) >= 0) st.claims[e.god] = Math.min(CLAIM_MAX, (st.claims[e.god] || 0) + 1); });
-    var n = g.node(); // throws if node missing
+    var n = g.node();
     if (typeof n.chapter === "number") st.chapter = n.chapter;
+    /* SPEC §32.2: the alt entries chosen on arrival come from the record when they still fit this node; older records / a changed node → re-resolved */
+    var sel = rec.altSel, selOK = !missing && sel && typeof sel === "object" && sel.node === st.nodeId && typeof sel.t === "number" && Array.isArray(sel.a)
+      && Array.isArray(n.alt) && sel.t < n.alt.length && sel.a.every(function (x) { return typeof x === "number" && x >= 0 && x < n.alt.length; });
+    if (selOK) st.altSel = {node: sel.node, t: sel.t, a: sel.a.slice(0, ALT_ADD_MAX)};
+    else if (Array.isArray(n.alt) && n.alt.length) st.altSel = g._resolveAlt(st.nodeId, n, g._prevInfo(missing ? null : g._prevId()));
+    else st.altSel = null;
     return g;
   };
 
@@ -985,10 +1184,11 @@
     return {game: g, step: g.start(originId)};
   };
   WH.Rules = {
+    condOK: condOK, whereOK: whereOK, fallbackNode: fallbackNode,
     STATS: STATS, GODS: GODS, zeroTaint: zeroTaint, CLAIM_MAX: CLAIM_MAX, claimGodOf: claimGodOf, godCodexId: godCodexId, clamp: clamp, rollChance: rollChance, requireOK: requireOK, grudgeActive: grudgeActive, grudgeOf: grudgeOf, mergeEffects: mergeEffects,
     timeHours: timeHours, dateParts: dateParts, startHours: startHours, consequenceOf: consequenceOf, hasDeltas: hasDeltas,
-    WARP_MIN: WARP_MIN, WARP_MAX: WARP_MAX, HOURS_PER_YEAR: HOURS_PER_YEAR, RUMOR_P: RUMOR_P, RUMOR_P1: RUMOR_P1, RUMOR_P2: RUMOR_P2, RUMOR_GAP: RUMOR_GAP, RUMOR_PER_CHAPTER: RUMOR_PER_CHAPTER,
-    rumorEligible: rumorEligible, rumorScore: rumorScore, nodeContext: nodeContext,
+    WARP_MIN: WARP_MIN, WARP_MAX: WARP_MAX, HOURS_PER_YEAR: HOURS_PER_YEAR, RUMOR_P: RUMOR_P, RUMOR_P0: RUMOR_P0, RUMOR_P1: RUMOR_P1, RUMOR_P2: RUMOR_P2, RUMOR_GAP: RUMOR_GAP, RUMOR_PER_CHAPTER: RUMOR_PER_CHAPTER,
+    rumorEligible: rumorEligible, rumorScore: rumorScore, nodeContext: nodeContext, isGather: isGather,
     ECHO_P: ECHO_P, dateKey: dateKey, fillEcho: fillEcho,
     capsOf: capsOf, CAP_MIN: CAP_MIN, CAP_MAX: CAP_MAX, CAP_DEFAULT: CAP_DEFAULT, CAPPED: CAPPED
   };

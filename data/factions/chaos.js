@@ -168,7 +168,7 @@
     text: L("执法官凯德带队扫荡污池，手里举着一张通缉单，上面印着一张穿军装的脸。\n“逃兵。星界军出赏金，死活一个价。”\n头盔灯一张脸一张脸地扫过来。离你还有三个窝棚。",
             "Enforcer Kade sweeps the Sump holding up a wanted sheet, a face in uniform printed on it.\n“Deserter. The Guard pays a bounty, dead or alive, same price.”\nHis helmet lamp rakes face after face. Three shacks to go."),
     alt: [
-      {if: {flag: "soldBoots"}, add: L("巷口躺着一具尸体，脚上穿着你那双军靴。执法官以为逮到了你，开了火。", "At the alley mouth lies a body wearing your army boots. The enforcers thought they'd found you, and fired.")}
+      {if: {flag: "soldBoots"}, add: L("巷口躺着一具刚被打死的尸体，脚上穿着你那双军靴。凯德还没顾上看他的脸。", "At the alley mouth lies a freshly shot body wearing your army boots. Kade hasn't checked its face yet.")}
     ],
     effects: {sanity: -5},
     codex: ["imp_arbites", "imp_guard"],
@@ -335,7 +335,7 @@
     codex: ["chaos_warp"],
     choices: [
       C("在梦里推开那扇门", "Push the door open in the dream", "cha_208", {effects: {corruption: 7, renown: 5, sanity: -5, taint: {all: 5}, set: {openedDoor: true}}, result: L("门开了一条缝。四个声音同时安静，又叫出你的名字。醒来时烙印烫得发亮。二十天后，维勒姆召集了所有人。", "The door opens a crack. The four voices hush, then speak your name at once. You wake with the brand glowing. Twenty days later, Vellum calls everyone together.")}),
-      C("醒来，用冷水洗脸", "Wake up and splash cold water on your face", "cha_208", {effects: {sanity: 5, corruption: -5, set: {coldWater: true}}, result: L("冷水刺得你一哆嗦。烙印暗了下去。暂时。二十天后，维勒姆召集了所有人。", "The cold water makes you gasp. The mirror shows only you, and the brand dims. For now. Twenty days later, Vellum calls everyone together.")})
+      C("醒来，用冷水洗脸", "Wake up and splash cold water on your face", "cha_208", {effects: {sanity: 5, corruption: -5, set: {coldWater: true}}, result: L("冷水刺得你一哆嗦。镜子里只有你自己，烙印暗了下去。暂时。二十天后，维勒姆召集了所有人。", "The cold water makes you gasp. The mirror shows only you, and the brand dims. For now. Twenty days later, Vellum calls everyone together.")})
     ]};
 
   N.cha_208 = {chapter: 2, scene: "manufactorum", speaker: VELLUM, time: {d: 20}, jump: L("二十天后，起事的准备", "Twenty days on: preparing the rising"),
@@ -432,8 +432,9 @@
             "The prison holds people who “owed the tithe.” You pry open door after door. Not one of the freed goes home; all walk toward the fire.\nIn the last cell crouches a mutant with gills on his neck. People call him Whistle. He sees you and lets out one long note."),
     alt: [
       {if: {flag: "whistleOwes"}, add: L("那天他逃掉了。三天后，还是被抓了进来。", "He got away that day. Three days later, they caught him anyway.")},
-      {if: {flag: "betrayedWhistle"}, add: L("他认得你。是你那天伸手指了他。", "He knows you. You're the one who pointed him out.")},
-      {if: {flag: "robbedWhistle"}, add: L("他认得你。是你偷了他的水桶。", "He knows you. You're the one who stole his bucket.")}
+      {if: {flags: ["betrayedWhistle", "robbedWhistle"]}, add: L("他认得你。偷他水桶的是你，伸手指认他的也是你。", "He knows you. You stole his bucket, and you pointed him out.")},
+      {if: {all: [{flag: "betrayedWhistle"}, {notFlag: "robbedWhistle"}]}, add: L("他认得你。是你那天伸手指了他。", "He knows you. You're the one who pointed him out.")},
+      {if: {all: [{flag: "robbedWhistle"}, {notFlag: "betrayedWhistle"}]}, add: L("他认得你。是你偷了他的水桶。", "He knows you. You're the one who stole his bucket.")}
     ],
     choices: [
       C("“对不起。”", "“I'm sorry.”", "cha_303a", {require: {flag: "wronged_whistle"}, hideIfLocked: true, effects: {sanity: -5, set: {whistleJoined: true, forgiven_whistle: true}}, result: L("哨子看了你很久，吹了个短音，伸手让你拉他起来。他什么都没说，这比骂你更难受。", "Whistle looks at you a long time. Then one short note, and he reaches for your hand. He says nothing. That's worse than cursing.")}),
@@ -506,7 +507,7 @@
       C("朝他吐口水", "Spit at him", "cha_308", {effects: {renown: 5, hp: -5, set: {spatKade: true}}, grudge: {npc: "kade", effects: {hp: -4}, note: L("你把他的名字递给了诗班；他下手更重。", "You handed his name to the Choir. He hits harder.")}, result: L("口水落在他的护目镜上。凯德慢慢擦掉，然后用枪托回了你一下。", "It lands on his visor. Kade wipes it off slowly, then answers with the butt of his flamer.")})
     ]};
 
-  N.cha_308 = {chapter: 3, scene: "cathedral", speaker: STRAND, time: {h: 5},
+  N.cha_308 = {chapter: 3, scene: "barracks", speaker: STRAND, time: {h: 5},
     text: L("囚车停在一座白塔下。一个穿灰大衣的女人等着你，白手套，袖口一尘不染。\n“斯特兰德审判官。”凯德的声音里第一次有了害怕。\n“我只问一个问题，”她说，“谁教你们唱那首歌的？”",
             "The wagon stops beneath a white tower. A woman in a grey greatcoat waits: white gloves, spotless cuffs.\n“Inquisitor Strand,” Kade murmurs. For the first time, he sounds afraid.\n“One question,” she says. “Who taught you that song?”"),
     alt: [
@@ -555,8 +556,8 @@
     ]};
 
   N.cha_310 = {chapter: 3, scene: "burning_city", speaker: null, foe: "astartes", time: {d: 6}, eventRoll: 0.42,
-    text: L("第六天，天上落下几颗燃烧的“流星”，裂开的舱门里走出蓝甲巨人。他们不问谁信什么，所过之处没有一个站着的人。\n他们身后，一个灰大衣的女人慢慢走着，记名字。\n诗班的歌声，第一次停了。",
-            "On day six, burning “meteors” fall from the sky, and blue-armoured giants step from the pods. They ask no one what they believe; nothing stays standing in their wake.\nBehind them a woman in a grey greatcoat walks slowly, writing names in a notebook.\nFor the first time, the Choir falls silent."),
+    text: L("第六天，燃烧的“流星”落下，舱门里走出蓝甲巨人。他们不问谁信什么，所过之处无人站着。\n他们身后，一个灰大衣的女人边走边记名字。有人认出她：斯特兰德审判官。\n诗班的歌声，第一次停了。",
+            "On day six, burning “meteors” fall from the sky, and blue-armoured giants step from the pods. They ask no one what they believe; nothing stays standing in their wake.\nBehind them a woman in a grey greatcoat walks slowly, writing names in a notebook. Someone knows her: Inquisitor Strand.\nFor the first time, the Choir falls silent."),
     alt: [
       {if: {flag: "strandWatching"}, add: L("是白塔里那个女人。她抬起头，正好看向你。", "It's the woman from the white tower. She looks up, straight at you.")}
     ],
@@ -724,6 +725,7 @@
     alt: [
       {if: {anyFlag: ["leftVellum", "namedVellum"]}, text: L("清剿结束了。诗班只剩下四十几个人，挤在污池最底下。\n他们没有看你。有人知道你丢下过维勒姆，或者说出过他。\n蒂卡披上了维勒姆的灰袍，转头对你说：“你当我的右手。”",
         "The purge ends. Forty-odd Choir members remain, huddled at the bottom of the Sump.\nThey don't look at you. Some know you left Vellum behind, or gave up his name.\nTikka puts on Vellum's grey robe and turns to you. “You'll be my right hand.”")},
+      {if: {flag: "leftTikka"}, add: L("蒂卡是从泥塘那边回来的，身上还带着潮气，小东西在她脚边哼歌。", "Tikka has come back from the bubbling pool, still damp, little things humming at her feet.")},
       {if: {flag: "namedNeighbor"}, add: L("老鞋匠也在里面，嗓子全哑了，一直看着你。", "The old cobbler is among them, voice gone, watching you the whole time.")},
       {if: {flag: "fakeName"}, add: L("老锈也活下来了。他教大家唱歌，比谁都虔诚。", "Old Rust survived too. He leads the singing, more devout than anyone.")}
     ],
@@ -736,16 +738,16 @@
   /* ============ Chapter 5 · The Warmaster's Call ============ */
   N.cha_412 = {chapter: 5, scene: "underhive", speaker: IXARIL, time: {d: 39}, bridge: true,
     gather: L("藏身处", "Hideout"),
-    text: L("诗班残众在污池底的藏身处熬了三十九天。蓝甲巨人早走了，留下白塔和名单。\n四十几人挤着分面包、低声说话。第三十九夜，伊克萨里尔从管道里走出来：\n“你们的歌，战帅听见了。明晚，抬头看。”",
-            "For thirty-nine days the Choir's remnant endures in a hideout at the bottom of the Sump. The blue giants left long ago, leaving only a white tower and a list.\nForty-odd people huddle, sharing bread, talking low. On the thirty-ninth night Ixaril steps out of a pipe.\n“The Warmaster heard your song. Tomorrow night, look up.”"),
+    text: L("诗班残众在污池底的藏身处熬了三十九天。蓝甲巨人走了，留下白塔和名单。\n四十几人挤着分面包。第三十九夜，羽毛斗篷的人钻出管道，自称伊克萨里尔：\n“你们的歌，战帅听见了。明晚，抬头看。”",
+            "For thirty-nine days the Choir's remnant endures in a hideout at the bottom of the Sump. The blue giants left long ago, leaving only a white tower and a list.\nForty-odd people huddle, sharing bread. On the thirty-ninth night the feathered stranger steps out of a pipe and gives his name: Ixaril.\n“The Warmaster heard your song. Tomorrow night, look up.”"),
     alt: [
-      {if: {flag: "heardWarmaster"}, add: L("你想起钟楼上维勒姆指的那道伤痕。回信来了。", "You remember the scar Vellum pointed at from the bell tower. The reply has come.")},
       {if: {flag: "choirSang"}, add: L("这三十九夜，你们每夜都唱。伊克萨里尔说，正是这歌声引来了回信。", "You have sung every one of those nights. Ixaril says it was the singing that drew the reply.")},
       {if: {flag: "choirLoyal"}, add: L("有人把最后一块面包留给了你。", "Someone has saved the last piece of bread for you.")},
       {if: {flag: "wearHelmet"}, add: L("你一直戴着凯德的头盔。孩子们管你叫“执法官”。", "You've worn Kade's helmet the whole time. The children call you “Enforcer.”")},
       {if: {flag: "closedKadeEyes"}, add: L("凯德的尸体还靠在那根管道上。没人收，你也没再去看。", "Kade's body still leans against that pipe. Nobody has claimed it. You haven't gone back to look.")},
       {if: {all: [{flag: "wronged_kade"}, {notFlag: "kadeDead"}]}, add: L("传闻说，凯德被调去了上巢，再也没下来。", "Word is Kade was posted up-spire and never came down again.")},
-      {if: {flag: "whistleGone"}, add: L("夜里，水道深处偶尔传来一声长哨。", "Some nights, a long whistle carries from deep in the channels.")}
+      {if: {flag: "whistleGone"}, add: L("夜里，水道深处偶尔传来一声长哨。", "Some nights, a long whistle carries from deep in the channels.")},
+      {if: {flag: "heardWarmaster"}, add: L("你想起钟楼上维勒姆指的那道伤痕。回信来了。", "You remember the scar Vellum pointed at from the bell tower. The reply has come.")}
     ],
     effects: {sanity: 5},
     choices: [
@@ -805,7 +807,7 @@
     ]};
 
   N.cha_504b = {chapter: 5, scene: "ruins", speaker: TIKKA, time: {h: 4},
-    text: L("登陆艇停在广场上，舷梯放下来了。幸存者被一串串赶上去，诗班的残众也在里面。\n蒂卡挤到你身边，攥住你的袖子，跟小时候一样。\n你最后看了一眼卡尔卡罗斯。上巢还在烧，像一根插在天上的蜡烛。",
+    text: L("登陆艇停在广场上，舷梯放下来了。幸存者被一串串赶上去，诗班的残众也在里面。\n蒂卡挤到你身边，攥住你的袖子，跟在污池时一样。\n你最后看了一眼卡尔卡罗斯。上巢还在烧，像一根插在天上的蜡烛。",
             "The landers sit in the square, ramps down. Survivors are driven up in strings, the Choir's remnant among them.\nTikka pushes in beside you and grips your sleeve, the way she always has.\nYou take a last look at Carcharos. The spire is still burning, a candle stuck into the sky."),
     alt: [
       {if: {flag: "leftTikka"}, text: L("登陆艇停在广场上。幸存者被一串串赶上舷梯，诗班残众也在里面。\n蒂卡不在队伍里。她站在一根管道口，身边围着哼歌的小东西，朝你挥挥手，没有过来。\n上巢还在烧，像一根插在天上的蜡烛。",
@@ -1066,9 +1068,9 @@
       C("把旧团臂章塞给他", "Press your old regiment patch on him", "cha_703a", {require: {flag: "origin_deserter"}, hideIfLocked: true, effects: {sanity: 10, renown: -5, set: {sparedGuard: true}}, result: L("你把他拖出来，撕下藏在衣里的旧臂章：“跟你们团说，我死了。”", "You drag him free and tear out the patch hidden in your coat. “Tell your regiment I'm dead.”")})
     ]};
 
-  N.cha_703a = {chapter: 7, scene: "ruins", speaker: S("guardsman", "黑尔下士", "Corporal Hale"), time: {h: 1},
-    text: L("他喘匀了气：“黑尔，阿尔德林第九团。”\n“南塔有个撤离码头，只收神职和护送圣物的人。要是你哪天到了那儿，就说黑尔下士欠你一条命。”\n他一瘸一拐地跑了，跑出几步又回头：“你真的没有角。”",
-            "He gets his breath back. “Hale. Aldrin Ninth.”\n“There's an evacuation dock at the south spire. Clergy and relic escorts only. If you ever get there, tell them Corporal Hale owes you his life.”\nHe limps off, then turns back after a few steps. “You really don't have horns.”"),
+  N.cha_703a = {chapter: 7, scene: "ruins", speaker: S("guardsman", "安瑟尔下士", "Corporal Ansel"), time: {h: 1},
+    text: L("他喘匀了气：“安瑟尔，阿尔德林第九团。”\n“南塔有撤离码头，只收神职和护送圣物的人。哪天你到了那儿，就说安瑟尔下士欠你一条命。”\n他一瘸一拐地跑了，跑出几步又回头：“你真的没有角。”",
+            "He gets his breath back. “Ansel. Aldrin Ninth.”\n“There's an evacuation dock at the south spire. Clergy and relic escorts only. If you ever get there, tell them Corporal Ansel owes you his life.”\nHe limps off, then turns back after a few steps. “You really don't have horns.”"),
     choices: [
       C("记住那个码头", "Remember that dock", "cha_705", {result: L("你钻进一条小巷。巷子里很安静，太安静了。", "You duck into an alley. It's quiet. Too quiet.")})
     ]};
@@ -1158,8 +1160,8 @@
 
   N.cha_711 = {chapter: 7, scene: "ruins", speaker: TIKKA, time: {h: 2},
     gather: L("病患营地", "Sick camp"),
-    text: L("蒂卡在阿尔德林的废墟里搭了个病患营地，几十个病人躺着，低声说着这颗星球的事。她不跟船走了。\n“这里的人病得好苦，”她说，“老爷爷让我留下来照顾他们。”\n她记得你爱吃哪种面包。",
-            "Tikka has set up a sick camp in Aldrin's ruins; dozens of patients lie murmuring about their dying world. She isn't leaving with the ships.\n“The people here are so sick and sad,” she says. “Grandfather wants me to stay and look after them.”\nShe remembers which bread you like."),
+    text: L("蒂卡乘着苍蝇船也来了阿尔德林，在废墟里搭了个病患营地，几十个病人低声说着这颗星球的事。\n“这里的人病得好苦，”她说，“老爷爷让我留下照顾他们。”她不跟船走了。\n她记得你爱吃哪种面包。",
+            "Tikka came to Aldrin too, on a ship full of flies, and has set up a sick camp in the ruins; dozens of patients lie murmuring about their dying world.\n“The people here are so sick and sad,” she says. “Grandfather wants me to stay and look after them.” She isn't leaving with the ships.\nShe remembers which bread you like."),
     alt: [
       {if: {flag: "soldMotherFace"}, add: L("她问你妈妈长什么样。你张了张嘴，答不上来。", "She asks what your mother looked like. You open your mouth, and can't answer.")},
       {if: {flag: "nurgleHealed"}, add: L("“你的伤是我治的，”她说，“留下来帮我吧。”", "“I healed you,” she says. “Stay and help me.”")}
@@ -1174,8 +1176,8 @@
 
   /* ============ Chapter 8 · Grey Light ============ */
   N.cha_711a = {chapter: 8, scene: "ruins", speaker: TIKKA, time: {h: 2}, bridge: true,
-    text: L("两小时后，天上出现一圈银光，像一枚巨大的硬币。\n蒂卡领你在下水道里走，一直走到南塔撤离码头底下的一个井盖。她停住了：“我的病人还在等我。”\n她把你推了上去，像小时候推你钻管道那样。",
-            "Two hours later a ring of silver light appears in the sky, like an enormous coin.\nTikka leads you through the sewers to a manhole beneath the south spire's evacuation dock. There she stops. “My patients are waiting.”\nShe pushes you up, the way she used to push you into the pipes."),
+    text: L("两小时后，天上出现一圈银光，像一枚巨大的硬币。\n蒂卡领你在下水道里走，一直走到南塔撤离码头底下的一个井盖。她停住了：“我的病人还在等我。”\n她把你推上去，像当年在污池推你钻管道那样。",
+            "Two hours later a ring of silver light appears in the sky, like an enormous coin.\nTikka leads you through the sewers to a manhole beneath the south spire's evacuation dock. There she stops. “My patients are waiting.”\nShe pushes you up, the way she used to shove you into the Sump's pipes."),
     effects: {set: {tikkaEscort: true}},
     choices: [
       C("爬上去", "Climb up", "cha_802", {result: L("井盖下面最后一眼，她在冲你挥手。", "Your last look down the hole: she's waving.")})
@@ -1186,7 +1188,7 @@
             "Two hours later a ring of silver light appears in the sky, like an enormous coin.\nOn an Imperial channel the warband has captured, Strand addresses the defenders. “Aldrin is beyond redemption. Exterminatus in six hours. Clergy and relic escorts evacuate from the south spire dock. The rest, leave to the Grey Knights.”"),
     alt: [
       {if: {flag: "fled"}, add: L("你已经离开了沃加斯。南塔码头，是你唯一想得到的地方。", "You've already left Vorgath. The south spire dock is the only place you can think of.")},
-      {if: {flag: "sparedGuard"}, add: L("南塔码头。黑尔下士说过的那个。", "The south spire dock. The one Corporal Hale told you about.")}
+      {if: {flag: "sparedGuard"}, add: L("南塔码头。安瑟尔下士说过的那个。", "The south spire dock. The one Corporal Ansel told you about.")}
     ],
     effects: {sanity: -10},
     codex: ["imp_exterminatus", "imp_grey_knights", "imp_ordo_malleus", "imp_inquisition"],
@@ -1201,14 +1203,14 @@
     text: L("你用泥巴盖住烙印，挤进南塔撤离码头的人群：朝圣者、神父、抱圣物箱的人。\n一个审判庭士兵正用一盏小灯照每个人的眼睛。人群里有人祈祷，有人交换消息。\n还有十个人，就轮到你了。",
             "You smear mud over the brand on your wrist and squeeze into the crowd at the south spire's evac dock: pilgrims, priests, people clutching reliquaries.\nAn Inquisition trooper shines a little lamp into each person's eyes. Around you, people whisper prayers and trade rumours.\nTen more people, then it's you."),
     alt: [
-      {if: {all: [{flag: "commissarKnows"}, {notFlag: "fakedDeath"}]}, add: L("门边的名单上有一张旧团的通缉照，那张脸是你。", "The list by the gate carries a regimental wanted picture. The face is yours.")},
+      {if: {all: [{flag: "commissarKnows"}, {notFlag: "fakedDeath"}]}, add: L("门边审判庭的名单上，钉着卡尔卡罗斯发来的逃兵通缉照：你的脸。", "On the Inquisition's list by the gate is a deserter's wanted picture sent from Carcharos. Your face.")},
       {if: {flag: "fakedDeath"}, add: L("你在门边的名单上找到了自己的名字，后面写着：已死亡。", "On the list by the gate you find your own name. Beside it: deceased.")},
       {if: {flag: "mutated"}, add: L("你把变黑的指甲藏进袖子。它们藏不住多久。", "You hide your blackened nails in your sleeves. They won't stay hidden long.")}
     ],
     choices: [
       C("低头，平静呼吸", "Head down. Breathe slowly.", null, R(0.45, "sanity", "cha_end_vanish", "cha_end_purged", RR(L("小灯照进你的眼睛。一秒，两秒。士兵挥挥手：“下一个。”", "The lamp shines into your eyes. One second. Two. The trooper waves you on. “Next.”"), L("小灯照进你的眼睛。士兵的手停住了。你的瞳孔里，有什么在回望他。", "The lamp shines into your eyes. The trooper's hand freezes. Something in your pupils is looking back at him.")), {require: {notFlag: "mutated"}})),
       C("低头，把手藏好", "Head down. Hide your hands.", null, R(0.25, "sanity", "cha_end_vanish", "cha_end_purged", RR(L("小灯照进你竖着的瞳孔。士兵眨了眨眼，以为是灯坏了：“下一个。”", "The lamp shines into your slitted pupils. The trooper blinks, blames the lamp. “Next.”"), L("士兵抓住你的袖子一拉。黑色的指甲露了出来。", "The trooper tugs your sleeve. The black nails show.")), {require: {flag: "mutated"}, hideIfLocked: true})),
-      C("说黑尔下士欠你一条命", "Say Corporal Hale owes you his life", "cha_end_vanish", {require: {flag: "sparedGuard"}, hideIfLocked: true, result: L("士兵愣住，回头喊了一声。黑尔一瘸一拐地挤过来，看了你一眼：“他是我的人。”你上了船。", "The trooper hesitates and calls back. Hale limps through the crowd and looks at you. “Mine.” You board.")}),
+      C("说安瑟尔下士欠你一条命", "Say Corporal Ansel owes you his life", "cha_end_vanish", {require: {flag: "sparedGuard"}, hideIfLocked: true, result: L("士兵愣住，回头喊了一声。安瑟尔一瘸一拐地挤过来，看了你一眼：“他是我的人。”你上了船。", "The trooper hesitates and calls back. Ansel limps through the crowd and looks at you. “Mine.” You board.")}),
       C("报出斯特兰德给你的数字", "Speak the numerals Strand gave you", "cha_end_vanish", {require: {flag: "toldStrand"}, hideIfLocked: true, result: L("士兵听完，脸色一白，亲手把你推上了船，一个字也没多问。", "The trooper hears it, goes pale, and personally shoves you aboard without another word.")})
     ]};
 
@@ -1227,8 +1229,8 @@
     ]};
 
   N.cha_809 = {chapter: 8, scene: "ruins", speaker: STRAND, time: {h: 1},
-    text: L("废墟的入口亮起银光。斯特兰德审判官走在光的前面，这回是她本人，白手套上一尘不染。\n她展开一张名单，划掉一个名字，又一个。\n“你，”她看着你，“卡尔卡罗斯广场上，我记下了你的脸。”",
-            "Silver light kindles at the ruins' entrance. Inquisitor Strand walks before it, in person this time, white gloves spotless.\nShe unrolls a list and strikes out a name with her pen. Then another.\n“You,” she says, looking at you. “On Carcharos, I wrote down your face.”"),
+    text: L("废墟的入口亮起银光。斯特兰德审判官亲自走在光的前面，白手套上一尘不染。\n她展开一张名单，划掉一个名字，又一个。\n“你，”她看着你，“卡尔卡罗斯广场上，我记下了你的脸。”",
+            "Silver light kindles at the ruins' entrance. Inquisitor Strand walks before it in person, white gloves spotless.\nShe unrolls a list and strikes out a name with her pen. Then another.\n“You,” she says, looking at you. “On Carcharos, I wrote down your face.”"),
     alt: [
       {if: {flag: "strandWatching"}, add: L("“我放你出白塔，是想看你会领我找到谁。”", "“I let you out of the white tower to see whom you'd lead me to.”")}
     ],
@@ -1282,6 +1284,8 @@
     text: L("你张开双臂。门后的四个声音同时停止了争吵。\n骨头在拉长，背上撕开了翅膀，你的影子终于站起来，和你合为一体。\n灰骑士的戟停在你面前一寸。你低头看着那名骑士。第一次，你比他高。",
             "You spread your arms. The four voices behind the door fall silent at once.\nYour bones lengthen. Wings tear open across your back. Your shadow finally stands and becomes one with you.\nA Grey Knight's halberd halts an inch away. You look down at the knight. For the first time, you are taller."),
     alt: [
+      {if: {fromNode: ["cha_806"]}, text: L("你张开双臂。门后的四个声音同时停止了争吵。\n骨头在拉长，背上撕开了翅膀，墓穴的墙被你撑塌了。\n墙外，灰骑士的戟停在你面前一寸。你低头看着那名骑士。第一次，你比他高。",
+        "You spread your arms. The four voices behind the door fall silent at once.\nYour bones lengthen, wings tear open across your back, and the crypt wall gives way around you.\nOutside, a Grey Knight's halberd halts an inch away. You look down at the knight. For the first time, you are taller.")},
       {if: {flag: "devoted_khorne"}, add: L("你的皮肤变成了红铜色。", "Your skin turns to brass.")},
       {if: {flag: "devoted_nurgle"}, add: L("你身上开满了绿色的花。", "Green flowers bloom all over you.")},
       {if: {flag: "devoted_tzeentch"}, add: L("你的翅膀是蓝色的火。", "Your wings are blue fire.")},
@@ -1339,7 +1343,7 @@
     text: L("你手腕上的烙印烧成了红铜色，心跳变成了鼓点。周围的一切都褪成了红色。\n“你，”那个声音像铁砧，“跑够了。现在，冲。”\n另外三个声音，同时闭上了嘴。",
             "The brand on your wrist burns copper-red; your heartbeat has become a drum. Everything around you fades to red.\n“You,” says a voice like an anvil. “Enough running. Now, charge.”\nThe other three voices fall silent at once."),
     alt: [
-      {if: {fromChapter: {max: 1}}, text: L("你的手腕上还没有烙印，可心跳已经变成了鼓点。周围的一切都褪成了红色。\n“你，”一个声音像铁砧，“跑够了。现在，冲。”",
+      {if: {any: [{fromChapter: {max: 1}}, {fromNode: ["cha_201", "cha_202", "cha_203", "cha_204", "cha_206"]}]}, text: L("你的手腕上还没有烙印，可心跳已经变成了鼓点。周围的一切都褪成了红色。\n“你，”一个声音像铁砧，“跑够了。现在，冲。”",
         "There's no brand on your wrist yet, but your heartbeat has already become a drum. Everything fades to red.\n“You,” says a voice like an anvil. “Enough running. Now, charge.”")}
     ],
     codex: ["god_khorne"],
@@ -1373,6 +1377,9 @@
     text: L("你在最近的一摊烂泥里躺下，再也不想起来。苍蝇在你身上安了家，菌菇从指缝里长出来。\n路过的人都爱在你身边歇脚，说你身上暖洋洋的，像个炉子。\n慈父的花园里没有谁是多余的，也没有谁能离开。",
             "You lie down in the nearest patch of mud and never want to get up. Flies make a home of you; mushrooms sprout between your fingers.\nPassers-by like to rest beside you. You're warm, they say, like a stove.\nIn Grandfather's garden no one is unwanted, and no one ever leaves."),
     codex: ["god_nurgle"],
+    alt: [
+      {if: {flag: "pistol"}, add: L("那里离卡尔卡罗斯很远。可路过的人都说，你躺着的样子，像是从哪个污池里来的。", "It is far from Carcharos. Yet passers-by say the way you lie there, you must have come from some Sump.")}
+    ],
     ending: {kind: "bad", title: L("污池里的暖炉", "The Warm Stove in the Sump"), cause: L("沦为纳垢的苗床", "Became a seedbed for Nurgle")}};
 
   N.cha_end_claim_nurgle_chosen = {scene: "daemon_world", speaker: S("daemon_prince", "慈父的园丁", "Grandfather's Gardener"), time: {y: 30, warp: true}, jump: L("尾声：三十年后", "Epilogue: thirty years on"),
@@ -1446,7 +1453,7 @@
             "The gods gave you too many gifts at once: tentacles, eyes, wings, mouths, everything.\nYour body couldn't hold them.\nLater, people saw a beast that chases its own tails. Sometimes it stops, as if trying to recall a name."),
     alt: [
       {if: {fromChapter: {max: 4}}, add: L("下巢的人用火把把它赶进了污池深处。", "The underhivers drove it into the depths of the Sump with torches.")},
-      {if: {fromChapter: {min: 5}}, add: L("沃加斯的战团把它拴在了船上，当看门狗。", "Vorgath's warband chained it aboard ship as a watchdog.")}
+      {if: {fromChapter: {min: 5}}, add: L("黑色军团把它拴在了船上，当看门狗。", "The Black Legion chained it aboard ship as a watchdog.")}
     ],
     codex: ["chaos_spawn"],
     ending: {kind: "death", title: L("混沌卵", "Chaos Spawn"), cause: L("沦为混沌卵", "Became Chaos Spawn")}};

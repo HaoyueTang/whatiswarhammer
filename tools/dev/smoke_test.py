@@ -4,6 +4,10 @@
     python3 tools/dev/smoke_test.py            # sample data (index.html?sample=1)
     python3 tools/dev/smoke_test.py --real     # real data/ + assets/ (skips sample-specific checks)
     python3 tools/dev/smoke_test.py --only-grudge [--real]   # just the SPEC §28 grudge checks
+    python3 tools/dev/smoke_test.py --only-track [--real]    # just the SPEC §29b track-selection checks (also part of the default and --real runs)
+    python3 tools/dev/smoke_test.py --only-gather [--real]   # just the SPEC §20c gathering-place checks (tag, rumours / echoes only on gather nodes; also part of the default and --real runs)
+    python3 tools/dev/smoke_test.py --only-v034 [--real]     # just the SPEC §31 ending-illustration checks (also part of the default and --real runs)
+    python3 tools/dev/smoke_test.py --only-v040 [--real]     # just the SPEC §32 story-overhaul checks: alt / resultAlt / event where / save fallback (also part of the default and --real runs)
     options: --chrome /usr/bin/google-chrome   --out tools/dev/screenshots   --headed
 
 Boots index.html via file://, asserts no console errors, plays through: race → origin select, choices with
@@ -12,7 +16,7 @@ type tabs, search, sort, NEW badges), settings, lore-card modes, ⌂ Home, an en
 (desktop + mobile) and — with --real — any new route whose data exists; takes desktop (1280x720) and mobile
 (390x844) screenshots.
 """
-import json, os, re, sys, time, random
+import io, json, os, re, sys, time, random
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -34,6 +38,9 @@ def check(name, cond, detail=""):
 def attach_console(page, tag):
     def on_console(m):
         if m.type in ("error",):
+            # SPEC §31 test: one ending key is registered with a PNG that does not exist on purpose (fallback path)
+            if "test_art/missing" in ((getattr(m, "location", None) or {}).get("url", "") + m.text):
+                return
             # missing optional data/asset files under file:// are expected while the team works in parallel
             if REAL is False and ("ERR_FILE_NOT_FOUND" in m.text or "Failed to load resource" in m.text):
                 return
@@ -155,10 +162,10 @@ def run_desktop(p):
     check("factions registered", nf > 0, f"{nf}")
 
     # language toggle on title
-    page.locator("#scr-title .corner button:not(.sound-btn)").click(); page.wait_for_timeout(150)
+    page.locator("#scr-title .corner button:not(.sound-btn):not(.music-btn)").click(); page.wait_for_timeout(150)
     check("title re-renders in English", "What is Warhammer" in page.locator(".title-main").inner_text())
     shot(page, "02_title_en")
-    page.locator("#scr-title .corner button:not(.sound-btn)").click(); page.wait_for_timeout(150)
+    page.locator("#scr-title .corner button:not(.sound-btn):not(.music-btn)").click(); page.wait_for_timeout(150)
 
     # faction select
     page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(250)
@@ -194,10 +201,10 @@ def run_desktop(p):
         cards.first.click(); page.wait_for_timeout(200)
         page.keyboard.press("Escape"); page.wait_for_timeout(150)
         check("Esc on origin step returns to races", page.locator(".fcard").count() == nf)
-        page.locator("#scr-select .corner button:not(.sound-btn)").last.click(); page.wait_for_timeout(150)
+        page.locator("#scr-select .corner button:not(.sound-btn):not(.music-btn)").last.click(); page.wait_for_timeout(150)
         cards.first.click(); page.wait_for_timeout(200)
         check("origin step re-renders in English", "Choose your origin" in page.locator("#scr-select h2").inner_text())
-        page.locator("#scr-select .corner button:not(.sound-btn)").last.click(); page.wait_for_timeout(150)
+        page.locator("#scr-select .corner button:not(.sound-btn):not(.music-btn)").last.click(); page.wait_for_timeout(150)
         check("language switch keeps the origin step", page.locator(".ocard").count() == n_or)
         page.locator(".ocard").first.click()
     else:
@@ -356,10 +363,10 @@ def run_desktop(p):
     shot(page, "16_ending_screen")
     page.locator("#scr-ending .ending-scroll").evaluate("e => e.scrollTop = e.scrollHeight"); page.wait_for_timeout(100)
     shot(page, "16b_ending_gods")
-    page.locator("#scr-ending .corner button:not(.sound-btn)").click(); page.wait_for_timeout(200)
+    page.locator("#scr-ending .corner button:not(.sound-btn):not(.music-btn)").click(); page.wait_for_timeout(200)
     check("ending screen re-renders in English", "You met" in page.locator("#scr-ending").inner_text())
     shot(page, "17_ending_en")
-    page.locator("#scr-ending .corner button:not(.sound-btn)").click(); page.wait_for_timeout(150)
+    page.locator("#scr-ending .corner button:not(.sound-btn):not(.music-btn)").click(); page.wait_for_timeout(150)
 
     # death path
     if not REAL:
@@ -753,33 +760,47 @@ def run_v022(p):
         return {nodes: g.state.history.join(), hours: g.state.hours, seen: g.state.seenRumors.slice()}; };
       const a = play(true), a2 = play(true), off = play(false);
       const g = new WH.Game('sample', {rng: WH.RNG(3), rumorChance: 1}); g.start('hive'); g.state.chapter = 2;
-      const pool = g.eligibleRumors(2).map(r => r.id), pool4 = g.eligibleRumors(4).map(r => r.id), pool1 = g.eligibleRumors(1).length;
-      return {same: JSON.stringify(a) === JSON.stringify(a2), mainSame: a.nodes === off.nodes && a.hours === off.hours, offNone: off.seen.length === 0, pool, pool4, pool1}; }""")
+      const pool = g.eligibleRumors(2).map(r => r.id), pool4 = g.eligibleRumors(4).map(r => r.id), pool1 = g.eligibleRumors(1).length, pool5 = g.eligibleRumors(5).map(r => r.id);
+      return {same: JSON.stringify(a) === JSON.stringify(a2), mainSame: a.nodes === off.nodes && a.hours === off.hours, offNone: off.seen.length === 0, pool, pool4, pool1, pool5}; }""")
     check("rumours: seeded engine is deterministic", eng["same"])
     check("rumours: on/off never changes the main RNG stream (nodes, time)", eng["mainSame"] and eng["offNone"], str(eng))
-    check("rumours: eligibility by faction + chapter window", sorted(eng["pool"]) == ["smp_rum_cadia", "smp_rum_never", "smp_rum_wall"]
-          and sorted(eng["pool4"]) == ["smp_rum_cadia", "smp_rum_wall"] and eng["pool1"] == 1, str(eng))
-    # SPEC §20b: relevance (when), scoring, spacing, chapter cap — engine level, seeded
+    check("rumours: eligibility by faction + chapter window", sorted(eng["pool"]) == ["smp_rum_cadia", "smp_rum_wall"]
+          and sorted(eng["pool4"]) == ["smp_rum_cadia", "smp_rum_wall"] and eng["pool1"] == 0 and sorted(eng["pool5"]) == ["smp_rum_cadia", "smp_rum_never"], str(eng))
+    # SPEC §20b/§20c: relevance (when) is a preference at gather nodes, spacing, chapter cap — engine level, seeded.
+    # The sample has only two gather nodes (smp_002, smp_004), so the random-walk statistics mark EVERY non-ending node as a crowd in-page (crowd(true)).
     rel = page.evaluate("""() => {
-      const m = (id, ch) => { const g = new WH.Game('sample', {rng: WH.RNG(1)}); g.start('hive'); return g.rumorMatches(id, ch).map(x => x.rumor.id + ':' + x.score); };
-      WH.rumors.push({id: 'smp_rum_nowhen', factions: ['*'], speaker: null, text: {zh: '无条件', en: 'no when'}, codex: []});
-      const runs = (forced) => { const out = {seen: {}, gapOK: true, capOK: true, n: 0, runs: 0};
+      const N = WH.factions.sample.nodes, marked = [];
+      const crowd = (on) => { Object.keys(N).forEach((id) => { if (on) { if (!N[id].ending && !N[id].gather) { N[id].gather = {zh: '人群', en: 'crowd'}; marked.push(id); } } else if (marked.includes(id)) delete N[id].gather; }); if (!on) marked.length = 0; };
+      const m = (id, ch) => { const g = new WH.Game('sample', {rng: WH.RNG(1), rumors: false, echoes: false}); g.start('hive'); return g.rumorMatches(id, ch).map(x => x.rumor.id + ':' + x.score); };
+      WH.rumors.push({id: 'smp_rum_nowhen', factions: ['*'], minChapter: 2, speaker: null, text: {zh: '无条件', en: 'no when'}, codex: []});
+      const runs = (forced) => { const out = {seen: {}, gapOK: true, capOK: true, n: 0, runs: 0, zeroOK: true, maxPer: 0};
         for (let k = 0; k < 400; k++) { const g = new WH.Game('sample', {rng: WH.RNG(1000 + k), rumorChance: forced ? 1 : undefined});
           g.start(['hive', 'scav', 'clerk'][k % 3]); const r = WH.RNG(k);
           while (!g.state.ended && g.state.visits < 60) { if (g.state.pendingEvent) { const v = g.eventChoices().filter(x => !x.locked); g.eventChoose(v[0].index); g.eventContinue(); continue; }
             const all = g.choices(), cs = all.filter(c => !c.locked); g.choose(all.indexOf(cs[Math.floor(r() * cs.length)])); }
-          const log = g.state.rumorLog; out.runs++; out.n += log.length;
-          log.forEach((x, i) => { out.seen[x.id] = (out.seen[x.id] || 0) + 1; if (i && x.visit - log[i - 1].visit < 3) out.gapOK = false; });
+          const log = g.state.rumorLog; out.runs++; out.n += log.length; out.maxPer = Math.max(out.maxPer, log.length);
+          log.forEach((x, i) => { out.seen[x.id] = (out.seen[x.id] || 0) + 1; if (i && x.visit - log[i - 1].visit < 3) out.gapOK = false; if (x.id === 'smp_rum_nowhen' && x.score !== 0) out.zeroOK = false; });
           const per = {}; log.forEach(x => { per[x.chapter] = (per[x.chapter] || 0) + 1; if (per[x.chapter] > 2) out.capOK = false; }); }
         return out; };
-      const a = runs(false), b = runs(true);
+      const m4 = m('smp_004'), m2 = m('smp_002'), m1 = m('smp_001'), m7off = m('smp_007', 4);
+      const c = runs(true);                                   // only the two real gather nodes
+      crowd(true);
+      const m7 = m('smp_007', 4), a = runs(false), b = runs(true);
+      crowd(false);
       WH.rumors.pop();
-      return {m4: m('smp_004'), m1: m('smp_001'), m7: m('smp_007', 4), a, b}; }""")
-    check("§20b: a matching `when` scores its criteria (smp_004: commissar sprite + 政委 → 2)", rel["m4"] == ["smp_rum_cadia:2"] and rel["m1"] == [], str(rel["m4"]))
-    check("§20b: best match first (smp_007 trench + ork + 绿皮 → wall 3, cadia 1)", rel["m7"] == ["smp_rum_wall:3", "smp_rum_cadia:1"], str(rel["m7"]))
-    check("§20b: rumours with a matching `when` appear in seeded runs", rel["a"]["seen"].get("smp_rum_cadia", 0) > 0 and rel["a"]["seen"].get("smp_rum_wall", 0) > 0, str(rel["a"]["seen"]))
-    check("§20b: a rumour that matches nothing — or has no `when` — never appears", "smp_rum_never" not in rel["a"]["seen"] and "smp_rum_never" not in rel["b"]["seen"]
-          and "smp_rum_nowhen" not in rel["a"]["seen"] and "smp_rum_nowhen" not in rel["b"]["seen"], str(rel["b"]["seen"]))
+      return {m4, m2, m1, m7off, m7, a, b, c, left: Object.keys(N).filter(id => N[id].gather).join()}; }""")
+    check("§20c: at a gather node a rumour's `when` is a preference, not a gate (smp_004 mess hall: cadia 2, then score-0 wall / no-when)",
+          rel["m4"] == ["smp_rum_cadia:2", "smp_rum_wall:0", "smp_rum_nowhen:0"], str(rel["m4"]))
+    check("§20c: no candidates where nothing is eligible (smp_002 chapter 1) and none at all on non-gather nodes (smp_001, fight smp_007)",
+          rel["m2"] == [] and rel["m1"] == [] and rel["m7off"] == [], str([rel["m2"], rel["m1"], rel["m7off"]]))
+    check("§20b: best match first (smp_007 trench + ork + 绿皮 → wall 3, cadia 1, no-when 0 — when marked as a crowd)", rel["m7"] == ["smp_rum_wall:3", "smp_rum_cadia:1", "smp_rum_nowhen:0"], str(rel["m7"]))
+    check("§20c: the in-page crowd marking was removed again", rel["left"] == "smp_002,smp_004", rel["left"])
+    check("§20b: rumours with a matching `when` appear in seeded runs (crowd everywhere)", rel["a"]["seen"].get("smp_rum_cadia", 0) > 0 and rel["a"]["seen"].get("smp_rum_wall", 0) > 0, str(rel["a"]["seen"]))
+    check("§20c: a rumour whose window has no gather node never appears; score-0 chatter does, always logged with score 0",
+          "smp_rum_never" not in rel["a"]["seen"] and "smp_rum_never" not in rel["b"]["seen"] and "smp_rum_never" not in rel["c"]["seen"]
+          and rel["b"]["seen"].get("smp_rum_nowhen", 0) > 0 and rel["a"]["zeroOK"] and rel["b"]["zeroOK"], str(rel["b"]["seen"]))
+    check("§20c: on the real sample (2 gather nodes) a forced rumour is heard only at the mess hall — at most one per run, always cadia",
+          list(rel["c"]["seen"].keys()) == ["smp_rum_cadia"] and rel["c"]["maxPer"] == 1 and rel["c"]["n"] > 50, str(rel["c"]))
     check("§20b: ≥3 nodes between rumours and ≤2 per chapter (even at chance 1)", rel["a"]["gapOK"] and rel["a"]["capOK"] and rel["b"]["gapOK"] and rel["b"]["capOK"] and rel["b"]["n"] > rel["a"]["n"], str({k: rel[k]["n"] for k in "ab"}))
     # UI: force a rumour on the next node (chance 1) — smp_002 → smp_004 (chapter 2, no eventRoll)
     goto_node(page, "smp_002")
@@ -1091,16 +1112,27 @@ def run_real_v022(p):
             check("real data: rumours + chronicle present", False, f"{n_r}/{n_c}"); ctx.close(); b.close(); continue
         page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(150)
         pick_faction(page, "imperium", tap=mobile); wait_idle(page); finish_text(page)
-        page.evaluate("() => { WH.UI.game.rumorChance = 1; }")
-        rng = random.Random(4); seen = False
-        for _ in range(12):
-            if page.locator("#event-overlay").count(): resolve_event(page); continue
-            if state(page)["ended"]: break
-            click_choice(page, None, rng)
+        # SPEC §20c: rumours are heard only at gather nodes → jump to a plain node that leads straight (an unconditional choice) into a gather node
+        # of the imperium route with an eligible rumour, then take that choice with chance 1
+        hop = page.evaluate("""() => { const g = WH.UI.game, N = g.faction.nodes, G = WH.Rules.isGather;
+            for (const id of Object.keys(N)) { const n = N[id]; if (n.ending || n.eventRoll || !G(n) || !g.eligibleRumors(n.chapter).length) continue;
+              for (const pid of Object.keys(N)) { const pn = N[pid]; if (pn.ending || pn.eventRoll || G(pn)) continue;
+                const ci = (pn.choices || []).findIndex(c => c.next === id && !c.require && !c.roll);
+                if (ci >= 0) return {pid, ci, id, text: pn.choices[ci].text.zh}; } }
+            return null; }""")
+        seen = False
+        if hop is None:
+            print(f"  (SPEC §20c) no imperium gather node with an eligible rumour yet — the real-data rumour footer test is skipped")
+        else:
+            goto_node(page, hop["pid"])
+            page.evaluate("() => { WH.UI.game.rumorChance = 1; }")
+            page.locator("#choices button", has_text=hop["text"]).first.click(); page.wait_for_timeout(120)
+            pass_conseq(page); wait_idle(page)
             if page.locator("#event-overlay").count(): resolve_event(page)
             finish_text(page)
-            if page.locator("#dlg-rumor").is_visible(): seen = True; break
-        check(f"real{' mobile' if mobile else ''}: a rumour footer appears on the imperium route", seen and state(page)["rumor"] is not None)
+            seen = page.locator("#dlg-rumor").is_visible()
+            check(f"real{' mobile' if mobile else ''}: a rumour footer appears at a gather node ({hop['id']}) with its 聚集区 tag", seen and state(page)["rumor"] is not None
+                  and page.locator("#gather-tag").is_visible() and "聚集区" in page.locator("#gather-tag").inner_text(), str(hop))
         if seen:
             if mobile: page.screenshot(path=os.path.join(OUT, "m40_real_rumor.png"), full_page=True)
             else: shot(page, "60_real_rumor")
@@ -1223,14 +1255,16 @@ def run_v03(p):
     check("§25: boot re-check does not re-announce", "成就解锁" not in (page.locator(".toasts").inner_text() if page.locator(".toasts").count() else ""))
     # --- §27 echoes ---
     page.evaluate("(r) => { const rs = WH.Save.runs(); rs.unshift(r); localStorage.setItem('whatiswh.runs', JSON.stringify(rs)); }", FAKE_ECHO_RUN)
-    eng = page.evaluate("""(r) => { const mk = (dk) => { const g = new WH.Game('sample', {rng: WH.RNG(5), echoChance: 1, rumorChance: 0,
-          echoPool: [{runId: r.runId, echo: Object.assign({}, r.echo, {dateKey: dk})}]}); g.start('hive'); return g; };
-        const g = mk(r.echo.dateKey), seen = [];
-        const walk = (gg) => { const r2 = WH.RNG(3); while (!gg.state.ended && gg.state.visits < 40) { if (gg.state.pendingEvent) { const v = gg.eventChoices().filter(x => !x.locked); gg.eventChoose(v[0].index); gg.eventContinue(); continue; }
-            const all = gg.choices(), cs = all.filter(c => !c.locked); gg.choose(all.indexOf(cs[Math.floor(r2() * cs.length)])); if (gg.state.echo) seen.push([gg.state.nodeId, gg.state.chapter]); } };
-        walk(g); const fut = mk(43000.5), s2 = seen.slice(); seen.length = 0; walk(fut);
-        return {seen: s2, future: seen.length}; }""", FAKE_ECHO_RUN)
-    check("§27: at most one echo per run, only from chapter 2", len(eng["seen"]) == 1 and all(c >= 2 for _, c in eng["seen"]), str(eng))
+    # SPEC §27 + §20c: echoes are overheard like rumours — only on gather nodes (the sample has one at chapter ≥ 2: smp_004), so walk several seeds
+    eng = page.evaluate("""(r) => { const mk = (dk, seed) => { const g = new WH.Game('sample', {rng: WH.RNG(5 + seed), echoChance: 1, rumorChance: 0,
+          echoPool: [{runId: r.runId, echo: Object.assign({}, r.echo, {dateKey: dk})}]}); g.start(['hive', 'scav', 'clerk'][seed % 3]); return g; };
+        const walk = (gg, seed) => { const r2 = WH.RNG(seed), seenAt = new Map(); while (!gg.state.ended && gg.state.visits < 40) { if (gg.state.pendingEvent) { const v = gg.eventChoices().filter(x => !x.locked); gg.eventChoose(v[0].index); gg.eventContinue(); continue; }
+            const all = gg.choices(), cs = all.filter(c => !c.locked); gg.choose(all.indexOf(cs[Math.floor(r2() * cs.length)])); if (gg.state.echo) seenAt.set(gg.state.nodeId, gg.state.chapter); } return Array.from(seenAt); };   // (the echo stays in state while an event resolves on the same node)
+        const per = [], where = [], fut = [];
+        for (let k = 0; k < 40; k++) { const s1 = walk(mk(r.echo.dateKey, k), 3 + k); per.push(s1.length); s1.forEach(x => where.push(x)); fut.push(walk(mk(43000.5, k), 3 + k).length); }
+        return {per, where, future: fut.reduce((a, b) => a + b, 0)}; }""", FAKE_ECHO_RUN)
+    check("§27: at most one echo per run, only from chapter 2, only where people gather (smp_004)", max(eng["per"]) == 1 and sum(eng["per"]) >= 3
+          and all(c >= 2 and n == "smp_004" for n, c in eng["where"]), str(eng))
     check("§27: an echo dated after 'now' is never heard", eng["future"] == 0)
     page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(200)
     pick_faction(page, "sample", "hive"); wait_idle(page); finish_text(page)
@@ -1597,7 +1631,7 @@ def run_rewind(p):
       g.state.flags.wronged_x = true; g.rewind();
       out.grudgeFlag = JSON.stringify(g.state.flags) === fl0 && g.state.flags.wronged_vik === true && !g.state.flags.wronged_x;
       out.streams = g.rumorRng.getState() === rs0 && g.echoRng.getState() === es0 && g.state.rumor === null && g.state.echo === null && g.state.seenRumors.length === 0 && g.state.echoRun === null;
-      g.choose(0); out.replayRumor = g.state.rumor === after.rumor && (g.state.echo && g.state.echo.runId) === after.echo && JSON.stringify(g.state.seenRumors) === JSON.stringify(after.seen) && g.state.hours === after.hours;
+      g.choose(0); out.replayRumor = g.state.rumor === after.rumor && (g.state.echo && g.state.echo.runId) === after.echo && JSON.stringify(g.state.seenRumors) === JSON.stringify(after.seen) && g.state.hours === after.hours && !!after.rumor;   // (SPEC §20c: smp_004 is the mess hall → a rumour is really heard)
       // time warp + event roll restore the clock exactly (smp_005 → smp_006 has a warp time skip and eventRoll)
       let clockOK = true, evSeen = 0;
       for (let seed = 1; seed <= 60; seed++) { const h = mk({rng: WH.RNG(seed)}); h.state.nodeId = 'smp_005'; h.state.ended = false; h.state.history = ['smp_005']; h.state.hours = 4242;
@@ -1805,10 +1839,880 @@ def run_style(p):
             shot(page, "106_settings_style_en")
         ctx.close(); b.close()
 
+# ---------------------------------------------------------------------------------------------------------------------
+# SPEC §20c gathering places (v0.3.4): the 聚集区 tag, rumours / echoes only on gather nodes, settings hint, zh/en, desktop + mobile
+# ---------------------------------------------------------------------------------------------------------------------
+GATHER_LAYOUT_JS = """() => { const box = (e) => { const b = e.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom]; };
+  const hit = (a, b) => a[0] < b[2] - 0.5 && b[0] < a[2] - 0.5 && a[1] < b[3] - 0.5 && b[1] < a[3] - 0.5;
+  const tg = document.getElementById('gather-tag'), t = box(tg), pl = box(document.getElementById('chapter-plate'));
+  const btn = Array.from(document.querySelectorAll('#tools button')).map(box);
+  return {t, inView: t[0] >= 0 && t[2] <= window.innerWidth + 0.5 && t[1] >= 0 && t[3] <= window.innerHeight * 3, overTools: btn.some(b => hit(t, b)), overPlate: hit(t, pl),
+          scrollW: document.documentElement.scrollWidth, innerW: window.innerWidth, text: tg.textContent}; }"""
+
+def gather_engine_walk(page, rumor_chance, echo_chance):
+    """random walks (300) over the sample with forced chances: where are rumours / echoes heard? {rumors:{node:n}, echoes:{node:n}, bad:[...], nonGather, gather}"""
+    return page.evaluate("""([rc, ec]) => {
+      const pool = [{runId: 'g1', endingId: null, echo: {faction: 'imperium', role: {zh: '工人', en: 'Worker'}, world: {zh: '某地', en: 'Somewhere'}, cause: {zh: '战死', en: 'Fell'}, kind: 'death', dateKey: 0, claimedBy: null}}];
+      const out = {rumors: {}, echoes: {}, bad: [], nonGather: 0, gather: 0};
+      for (let k = 0; k < 300; k++) {
+        const g = new WH.Game('sample', {rng: WH.RNG(500 + k), rumorChance: rc, echoChance: ec, echoPool: pool});
+        let step = g.start(['hive', 'scav', 'clerk'][k % 3]); const r = WH.RNG(k);
+        const note = (s) => { const id = g.state.nodeId, n = g.node(), gat = WH.Rules.isGather(n); if (gat) out.gather++; else out.nonGather++;
+          if (s && s.rumor) { out.rumors[id] = (out.rumors[id] || 0) + 1; if (!gat) out.bad.push('rumor@' + id); }
+          if (s && s.echo) { out.echoes[id] = (out.echoes[id] || 0) + 1; if (!gat) out.bad.push('echo@' + id); } };
+        note(step);
+        while (!g.state.ended && g.state.visits < 60) {
+          if (g.state.pendingEvent) { const v = g.eventChoices().filter(x => !x.locked); g.eventChoose(v[0].index); step = g.eventContinue(); note(step); continue; }
+          const all = g.choices(), cs = all.filter(c => !c.locked); step = g.choose(all.indexOf(cs[Math.floor(r() * cs.length)])); note(step);
+        }
+      }
+      return out; }""", [rumor_chance, echo_chance])
+
+def run_gather(p):
+    """SPEC §20c on sample data (gather nodes: smp_002 break area ch1, smp_004 mess hall ch2 with a rumour match)."""
+    print("\n== v0.3.4 gathering places (SPEC §20c) ==")
+    for mobile in (False, True):
+        lab = "mobile" if mobile else "desktop"
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="gather" + ("-m" if mobile else ""))
+        click = (lambda loc: loc.tap()) if mobile else (lambda loc: loc.click())
+        def settle():
+            for _ in range(3):
+                finish_text(page); page.wait_for_timeout(120)
+        click(page.locator("#scr-title .menu .btn.primary")); page.wait_for_timeout(200)
+        pick_faction(page, "sample", "hive", tap=mobile); wait_idle(page); settle()
+        if not mobile:
+            info = page.evaluate("""() => { const N = WH.factions.sample.nodes, G = WH.Rules.isGather, ids = Object.keys(N).filter(id => G(N[id]));
+              const g = new WH.Game('sample', {rng: WH.RNG(1)}); g.start('hive');
+              return {ids, coherent: ids.every(id => N[id].text.zh.includes(N[id].gather.zh) && N[id].text.en.toLowerCase().includes(N[id].gather.en.toLowerCase())),
+                      forbidden: ids.some(id => N[id].ending || N[id].eventRoll !== undefined), match: g.rumorMatches('smp_004').map(x => x.score)}; }""")
+            check("§20c sample data: exactly two gather nodes (smp_002, smp_004), labels inside the zh + en text, none on an ending / eventRoll node, one with a rumour match",
+                  info["ids"] == ["smp_002", "smp_004"] and info["coherent"] and not info["forbidden"] and info["match"][0] == 2, str(info))
+        tag = page.locator("#gather-tag")
+        check(f"§20c {lab}: no tag on a plain node (smp_001)", state(page)["nodeId"] == "smp_001" and not tag.is_visible())
+        page.evaluate("() => { WH.UI.game.rumorChance = 1; WH.UI.game.echoChance = 1; WH.UI.settings.textSpeed = 'normal'; }")
+        page.locator("#choices button", has_text="去工厂上班").click() if not mobile else page.locator("#choices button", has_text="去工厂上班").tap()
+        page.wait_for_timeout(120); pass_conseq(page); wait_idle(page); settle()
+        st = state(page)
+        check(f"§20c {lab}: gather node smp_002 shows '聚集区 · 工间休息处'", st["nodeId"] == "smp_002" and tag.is_visible() and tag.inner_text().strip() == "聚集区 · 工间休息处", tag.inner_text() if tag.count() else "")
+        check(f"§20c {lab}: no rumour where none is eligible (chapter 1) even at chance 1", st["rumor"] is None and not page.locator("#dlg-rumor").is_visible())
+        lay = page.evaluate(GATHER_LAYOUT_JS)
+        check(f"§20c {lab}: the tag is inside the screen and overlaps neither the chapter plate nor a tool button" + (", no horizontal overflow" if mobile else ""),
+              lay["inView"] and not lay["overTools"] and not lay["overPlate"] and (not mobile or lay["scrollW"] <= 391), str(lay))
+        (shot if not mobile else (lambda pg, n: pg.screenshot(path=os.path.join(OUT, n + ".png"), full_page=True)))(page, ("100_gather_tag" if not mobile else "m70_gather_tag"))
+        page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(150)
+        check(f"§20c {lab} (en): tag reads 'Crowd · Break area'", tag.is_visible() and tag.inner_text().strip() == "Crowd · Break area", tag.inner_text())
+        lay = page.evaluate(GATHER_LAYOUT_JS)
+        check(f"§20c {lab} (en): still inside the screen, no overlap", lay["inView"] and not lay["overTools"] and not lay["overPlate"] and (not mobile or lay["scrollW"] <= 391), str(lay))
+        page.evaluate("() => WH.UI.setLang('zh')"); page.wait_for_timeout(120)
+        # the mess hall: a rumour is heard (chance 1, cadia scores 2), the tag says 食堂
+        (page.locator("#choices button", has_text="拼命干活").tap if mobile else page.locator("#choices button", has_text="拼命干活").click)(); page.wait_for_timeout(100)
+        pass_conseq(page); wait_idle(page); settle()
+        st = state(page)
+        check(f"§20c {lab}: mess hall smp_004 — tag '聚集区 · 食堂' and the rumour footer (cadia, best score)", st["nodeId"] == "smp_004" and tag.inner_text().strip() == "聚集区 · 食堂"
+              and st["rumor"] == "smp_rum_cadia" and page.locator("#dlg-rumor").is_visible(), str((st["nodeId"], st["rumor"], tag.inner_text())))
+        (shot if not mobile else (lambda pg, n: pg.screenshot(path=os.path.join(OUT, n + ".png"), full_page=True)))(page, ("101_gather_mess_rumor" if not mobile else "m71_gather_mess_rumor"))
+        page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(150)
+        check(f"§20c {lab} (en): 'Crowd · Mess hall' + Overheard footer", tag.inner_text().strip() == "Crowd · Mess hall" and "Overheard" in page.locator("#dlg-rumor").inner_text())
+        lay = page.evaluate(GATHER_LAYOUT_JS)
+        check(f"§20c {lab} (en): layout ok at the mess hall", lay["inView"] and not lay["overTools"] and not lay["overPlate"] and (not mobile or lay["scrollW"] <= 391), str(lay))
+        (shot if not mobile else (lambda pg, n: pg.screenshot(path=os.path.join(OUT, n + ".png"), full_page=True)))(page, ("101b_gather_mess_en" if not mobile else "m71b_gather_mess_en"))
+        page.evaluate("() => WH.UI.setLang('zh')"); page.wait_for_timeout(120)
+        # leaving the crowd: the consequence beat keeps the old node (and its tag), the next plain node has none and hears nothing
+        (page.locator("#choices button", has_text="立正").tap if mobile else page.locator("#choices button", has_text="立正").click)(); page.wait_for_timeout(120)
+        check(f"§20c {lab}: consequence beat still shows the node it belongs to (tag kept)", page.locator("#conseq").count() == 1 and tag.is_visible() and "食堂" in tag.inner_text())
+        pass_conseq(page); page.wait_for_timeout(150)
+        if page.locator("#event-overlay").count(): resolve_event(page)
+        wait_idle(page); settle()
+        st = state(page)
+        check(f"§20c {lab}: next plain node (smp_006) — no tag, no rumour / echo footer", st["nodeId"] == "smp_006" and not tag.is_visible() and st["rumor"] is None and st["echo"] is None
+              and not page.locator("#dlg-rumor").is_visible(), str((st["nodeId"], st["rumor"])))
+        # save / load at a gather node shows the tag again; leaving to the title hides it
+        goto_node(page, "smp_004")
+        check(f"§20c {lab}: reloading a record at the mess hall shows the tag", tag.is_visible() and "食堂" in tag.inner_text())
+        page.evaluate("() => WH.UI.show('title')"); page.wait_for_timeout(150)
+        check(f"§20c {lab}: no tag outside the game screen", not tag.is_visible())
+        page.evaluate("() => WH.UI.show('game')"); page.wait_for_timeout(100)
+        # settings hint
+        page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(200)
+        row = page.locator(".modal .setrow", has_text="传闻")
+        check(f"§20c {lab}: Settings → 传闻 shows the hint '只会在聚集区听到'", row.count() == 1 and "只会在聚集区听到" in row.inner_text(), row.inner_text() if row.count() else "")
+        page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(200)
+        row = page.locator(".modal .setrow", has_text="Overheard rumours")
+        check(f"§20c {lab} (en): hint 'Only heard in crowded places'", row.count() == 1 and "Only heard in crowded places" in row.inner_text(), row.inner_text() if row.count() else "")
+        if mobile:
+            check("§20c mobile: settings with the hint do not overflow", page.evaluate("document.documentElement.scrollWidth") <= 391)
+        else:
+            row.scroll_into_view_if_needed(); page.wait_for_timeout(100); shot(page, "102_settings_rumor_hint_en")
+        page.keyboard.press("Escape"); page.wait_for_timeout(100)
+        page.evaluate("() => WH.UI.setLang('zh')")
+        if not mobile:
+            # engine level: rumours / echoes only on gather nodes, whatever the chance
+            w = gather_engine_walk(page, 1, 1)
+            check("§20c engine: rumorChance = echoChance = 1 → nothing is ever heard on a non-gather node (300 walks, many non-gather visits)",
+                  not w["bad"] and w["nonGather"] > 300 and w["gather"] > 100, str((w["bad"][:3], w["nonGather"], w["gather"])))
+            check("§20c engine: at chance 1 a rumour is heard at the mess hall (smp_004) and only there (smp_002 has none eligible in chapter 1)", set(w["rumors"]) == {"smp_004"} and w["rumors"]["smp_004"] > 100, str(w["rumors"]))
+            e = gather_engine_walk(page, 0, 1)
+            check("§20c engine: echoes (rumours off) are heard at the mess hall only, never on a plain node, never in chapter 1", not e["bad"] and set(e["echoes"]) == {"smp_004"} and e["echoes"]["smp_004"] > 100 and not e["rumors"], str((e["echoes"], e["bad"][:3])))
+            z = gather_engine_walk(page, 0, 0)
+            check("§20c engine: chance 0 → silence everywhere", not z["rumors"] and not z["echoes"])
+            # natural probabilities (no override): best score 2 → p 0.7; sample smp_004 is reached by ~⅔ of the walks
+            nat = page.evaluate("""() => { let heard = 0, visits = 0; for (let k = 0; k < 600; k++) { const g = new WH.Game('sample', {rng: WH.RNG(9000 + k)}); g.start('hive'); g.state.nodeId = 'smp_002';
+                const st = g.choose(0); if (g.state.nodeId === 'smp_004') { visits++; if (st.rumor) heard++; } } return {heard, visits}; }""")
+            check("§20c engine: natural chance at a score-2 gather node is ≈ 0.7", nat["visits"] > 200 and 0.62 <= nat["heard"] / nat["visits"] <= 0.78, str(nat))
+        ctx.close(); b.close()
+
+def run_real_gather(p):
+    """SPEC §20c with the real routes: rumours / echoes only on gather nodes (random walks with forced chances), tag text, desktop + mobile tag layout."""
+    print("\n== v0.3.4 gathering places (real data) ==")
+    b, ctx, page = new_ctx(p, tag="real-gather", seed=33)
+    res = page.evaluate("""() => {
+      const pool = [{runId: 'g1', endingId: null, echo: {faction: 'imperium', role: {zh: '工人', en: 'Worker'}, world: {zh: '某地', en: 'Somewhere'}, cause: {zh: '战死', en: 'Fell'}, kind: 'death', dateKey: 0, claimedBy: null}}];
+      const out = {routes: {}, bad: []};
+      Object.keys(WH.factions).forEach((fid) => {
+        const f = WH.factions[fid], origins = WH.Game.origins(f), o = {gatherNodes: Object.keys(f.nodes).filter(id => WH.Rules.isGather(f.nodes[id])).length, rumors: 0, echoes: 0, nonGather: 0};
+        for (let k = 0; k < 40; k++) {
+          const g = new WH.Game(fid, {rng: WH.RNG(700 + k), rumorChance: 1, echoChance: 1, echoPool: pool});
+          let step = g.start(origins[k % origins.length].id); const r = WH.RNG(k);
+          const note = (s) => { const id = g.state.nodeId, n = g.node(), gat = WH.Rules.isGather(n); if (!gat) o.nonGather++;
+            if (s && s.rumor) { o.rumors++; if (!gat) out.bad.push(fid + ':rumor@' + id); }
+            if (s && s.echo) { o.echoes++; if (!gat) out.bad.push(fid + ':echo@' + id); } };
+          note(step);
+          while (!g.state.ended && g.state.visits < 150) {
+            if (g.state.pendingEvent) { const v = g.eventChoices().filter(x => !x.locked); g.eventChoose(v[0].index); step = g.eventContinue(); note(step); continue; }
+            const all = g.choices(), cs = all.filter(c => !c.locked); step = g.choose(all.indexOf(cs[Math.floor(r() * cs.length)])); note(step);
+          }
+        }
+        out.routes[fid] = o;
+      });
+      return out; }""")
+    print("  " + " · ".join(f"{k}: {v['gatherNodes']} gather, {v['rumors']} rumours, {v['echoes']} echoes" for k, v in res["routes"].items()))
+    check("§20c real: with rumorChance = echoChance = 1 nothing is heard on a non-gather node on any route (40 walks each)", not res["bad"] and all(v["nonGather"] > 100 for v in res["routes"].values()), str(res["bad"][:5]))
+    check("§20c real: routes without gather nodes hear nothing; routes with them hear rumours", all(v["gatherNodes"] > 0 or v["rumors"] + v["echoes"] == 0 for v in res["routes"].values()), str(res["routes"]))
+    ctx.close(); b.close()
+    for mobile in (False, True):
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="real-gather" + ("-m" if mobile else ""), seed=33)
+        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(150)
+        pick_faction(page, "imperium", tap=mobile); wait_idle(page); finish_text(page)
+        hop = page.evaluate("""() => { const g = WH.UI.game, N = g.faction.nodes, G = WH.Rules.isGather;
+            for (const id of Object.keys(N)) { const n = N[id]; if (n.ending || !G(n)) continue;
+              for (const pid of Object.keys(N)) { const pn = N[pid]; if (pn.ending || pn.eventRoll || G(pn)) continue;
+                const ci = (pn.choices || []).findIndex(c => c.next === id && !c.require && !c.roll);
+                if (ci >= 0) return {pid, id, text: pn.choices[ci].text.zh, zh: n.gather.zh, en: n.gather.en}; } }
+            return null; }""")
+        if hop is None:
+            print("  (SPEC §20c) no imperium gather node reachable by a plain choice yet — the real-data tag layout test is skipped"); ctx.close(); b.close(); continue
+        goto_node(page, hop["pid"])
+        page.evaluate("() => { WH.UI.game.rumorChance = 0; }")
+        page.locator("#choices button", has_text=hop["text"]).first.tap() if mobile else page.locator("#choices button", has_text=hop["text"]).first.click()
+        page.wait_for_timeout(120); pass_conseq(page); wait_idle(page)
+        if page.locator("#event-overlay").count(): resolve_event(page)
+        for _ in range(3):
+            finish_text(page); page.wait_for_timeout(120)
+        tg = page.locator("#gather-tag")
+        check(f"§20c real {'mobile' if mobile else 'desktop'}: the real gather node {hop['id']} shows '聚集区 · {hop['zh']}'", state(page)["nodeId"] == hop["id"] and tg.is_visible() and tg.inner_text().strip() == f"聚集区 · {hop['zh']}", tg.inner_text() if tg.count() else "")
+        lay = page.evaluate(GATHER_LAYOUT_JS)
+        check(f"§20c real {'mobile' if mobile else 'desktop'}: tag layout (inside the screen, no overlap with plate / tools)", lay["inView"] and not lay["overTools"] and not lay["overPlate"] and (not mobile or lay["scrollW"] <= 391), str(lay))
+        page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(150)
+        check(f"§20c real {'mobile' if mobile else 'desktop'} (en): tag 'Crowd · {hop['en']}'", tg.inner_text().strip() == f"Crowd · {hop['en']}", tg.inner_text())
+        lay = page.evaluate(GATHER_LAYOUT_JS)
+        check(f"§20c real {'mobile' if mobile else 'desktop'} (en): tag layout", lay["inView"] and not lay["overTools"] and not lay["overPlate"] and (not mobile or lay["scrollW"] <= 391), str(lay))
+        if mobile: page.screenshot(path=os.path.join(OUT, "m72_real_gather.png"), full_page=True)
+        else: shot(page, "103_real_gather_en")
+        ctx.close(); b.close()
+
+# ---------------------------------------------------------------------------------------------------------------------
+# SPEC §29b track selection (v0.3.4): settings.musicTrack, Settings → 曲目 list, ♪ quick panel, sync, zh/en, desktop + mobile
+# ---------------------------------------------------------------------------------------------------------------------
+def run_track(p):
+    """SPEC §29b UI wiring: settings.musicTrack, 曲目 list with ▶ preview, 现在播放 line, ♪ popover next to the sound button, both in sync."""
+    print("\n== v0.3.4 track selection (§29b) ==")
+    for mobile in (False, True):
+        tag = "mobile" if mobile else "desktop"
+        sfx_ = "-m" if mobile else ""
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="track" + sfx_)
+        tap = (lambda loc: loc.tap()) if mobile else (lambda loc: loc.click())
+        vw = 390 if mobile else 1280
+        have = page.evaluate("typeof WH.Audio === 'object' && typeof WH.Audio.getMoods === 'function' && typeof WH.Audio.setTrack === 'function'")
+        check(f"§29b {tag}: audio.js exposes getMoods / setTrack / getTrack / getPlayingMood / previewMood / onChange",
+              have and page.evaluate("['getTrack','getPlayingMood','previewMood','onChange'].every(f => typeof WH.Audio[f] === 'function')"))
+        if not have:
+            ctx.close(); b.close(); continue
+        moods = page.evaluate("WH.Audio.getMoods()")
+        ids = [m["id"] for m in moods]
+        page.evaluate("() => { window.__pm = []; const o = WH.Audio.previewMood; WH.Audio.previewMood = function (id) { __pm.push(id); return o.apply(WH.Audio, arguments); };"
+                      " window.__st = []; const s = WH.Audio.setTrack; WH.Audio.setTrack = function (id) { __st.push(id); return s.apply(WH.Audio, arguments); }; }")
+        check(f"§29b {tag}: default settings.musicTrack is auto and the audio module is in auto mode", page.evaluate("WH.UI.settings.musicTrack") == "auto" and page.evaluate("WH.Audio.getTrack()") == "auto")
+        # ---- ♪ quick panel on the title screen
+        mb = page.locator("#scr-title .corner .music-btn")
+        sb = page.locator("#scr-title .corner .sound-btn")
+        bm, bs = mb.bounding_box(), sb.bounding_box()
+        check(f"§29b {tag}: ♪ button sits right next to the sound button", mb.count() == 1 and bm["x"] > bs["x"] and bm["x"] - (bs["x"] + bs["width"]) < 24 and abs(bm["y"] - bs["y"]) < 6,
+              f"{bs} {bm}")
+        check(f"§29b {tag}: ♪ button is labelled + announces a popup", (mb.get_attribute("aria-label") or "") != "" and mb.get_attribute("aria-haspopup") == "dialog" and mb.get_attribute("aria-expanded") == "false")
+        tap(mb); page.wait_for_timeout(250)
+        pop = page.locator(".music-pop")
+        pb = pop.bounding_box()
+        check(f"§29b {tag}: ♪ opens a panel with track + style + mute, fully inside the viewport",
+              pop.count() == 1 and mb.get_attribute("aria-expanded") == "true" and pop.locator("select.track-select").count() == 1 and pop.locator("select.style-select").count() == 1
+              and pop.locator("[data-mute]").count() == 2 and pb["x"] >= 0 and pb["x"] + pb["width"] <= vw + 1 and pb["y"] >= 0 and pb["y"] + pb["height"] <= (844 if mobile else 720) + 1, str(pb))
+        sel = pop.locator("select.track-select")
+        opts = sel.locator("option").evaluate_all("els => els.map(e => e.value)")
+        check(f"§29b {tag}: panel track list = auto + all {len(ids)} moods, grouped", opts == ["auto"] + [m for g in ["calm", "tense", "fight", "end", "faction"] for m in [x['id'] for x in moods if x['group'] == g]]
+              and sel.locator("optgroup").count() == 5, json.dumps(opts))
+        check(f"§29b {tag}: the panel shows a 现在播放 line", "现在播放：" in pop.locator(".track-now").inner_text())
+        check(f"§29b {tag}: focus moves into the panel", page.evaluate("document.activeElement.closest('.music-pop') !== null"))
+        shot(page, ("m" if mobile else "") + "110_music_pop")
+        page.keyboard.press("Escape"); page.wait_for_timeout(150)
+        check(f"§29b {tag}: Esc closes the panel and returns focus to ♪", pop.count() == 0 and page.evaluate("document.activeElement.classList.contains('music-btn')") and mb.get_attribute("aria-expanded") == "false")
+        tap(mb); page.wait_for_timeout(150)
+        page.mouse.click(vw // 2, 120 if not mobile else 700) if not mobile else page.touchscreen.tap(vw // 2, 780)
+        page.wait_for_timeout(200)
+        check(f"§29b {tag}: a press outside closes the panel", page.locator(".music-pop").count() == 0)
+        tap(mb); page.wait_for_timeout(150)
+        tap(mb); page.wait_for_timeout(150)
+        check(f"§29b {tag}: ♪ toggles the panel", page.locator(".music-pop").count() == 0)
+        # ---- pick a track in the panel: applies at once, persists
+        tap(mb); page.wait_for_timeout(150)
+        pop.locator("select.track-select").select_option("battle"); page.wait_for_timeout(150)
+        check(f"§29b {tag}: choosing a track in the panel calls setTrack, persists, and the audio module follows",
+              page.evaluate("__st[__st.length - 1]") == "battle" and page.evaluate("WH.Audio.getTrack()") == "battle"
+              and json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["musicTrack"] == "battle")
+        check(f"§29b {tag}: the panel's now-playing line follows (战斗)", "战斗" in page.locator(".music-pop .track-now").inner_text(), page.locator(".music-pop .track-now").inner_text())
+        page.evaluate("__pm.length = 0")
+        tap(pop.locator(".pop-prev[data-kind='track']")); page.wait_for_timeout(200)
+        check(f"§29b {tag}: panel ▶ previews the selected track (previewMood) without changing it", page.evaluate("__pm[__pm.length - 1]") == "battle" and page.evaluate("WH.Audio.getTrack()") == "battle"
+              and pop.locator(".pop-prev[data-kind='track'].playing").count() == 1 and page.evaluate("WH.Audio.isPreviewing()"))
+        check(f"§29b {tag}: during a preview the now-playing line says so", "试听中：战斗" in pop.locator(".track-now").inner_text(), pop.locator(".track-now").inner_text())
+        pop.locator("select.track-select").select_option("auto"); page.wait_for_timeout(150)
+        check(f"§29b {tag}: 'auto' disables the panel's ▶ and goes back to the story", page.evaluate("WH.Audio.getTrack()") == "auto" and pop.locator(".pop-prev[data-kind='track']").is_disabled()
+              and json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["musicTrack"] == "auto")
+        # style in the panel
+        sty = page.evaluate("WH.Audio.getStyles().map(s => s.id)")
+        if len(sty) > 1:
+            pop.locator("select.style-select").select_option(sty[1]); page.wait_for_timeout(150)
+            check(f"§29b {tag}: choosing a style in the panel sets settings.musicStyle + the audio style", page.evaluate("WH.Audio.getStyle()") == sty[1]
+                  and json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["musicStyle"] == sty[1])
+        # mute in the panel stays in step with the sound button
+        page.evaluate("WH.Audio.stop({fade: 50})"); page.wait_for_timeout(150)          # end the running preview first (it would carry on silently while muted)
+        pop.locator("[data-mute='1']").click() if not mobile else pop.locator("[data-mute='1']").tap()
+        page.wait_for_timeout(200)
+        check(f"§29b {tag}: mute in the panel mutes the game and the sound button follows", page.evaluate("WH.Audio.isMuted()") and page.evaluate("WH.UI.settings.muted") is True
+              and pop.locator("[data-mute='1'][aria-pressed='true']").count() == 1 and "🔇" in page.locator("#scr-title .sound-btn").inner_text() and "静音中" in pop.locator(".track-now").inner_text())
+        page.evaluate("__pm.length = 0")
+        tap(pop.locator(".pop-prev[data-kind='style']")); page.wait_for_timeout(200)
+        check(f"§29b {tag}: while muted ▶ does nothing and says why (toast), no 'playing' mark", not page.evaluate("WH.Audio.isPreviewing()") and pop.locator(".pop-prev.playing").count() == 0
+              and "静音" in page.locator(".toasts").inner_text())
+        pop.locator("[data-mute='0']").click() if not mobile else pop.locator("[data-mute='0']").tap()
+        page.wait_for_timeout(200)
+        check(f"§29b {tag}: unmute from the panel", not page.evaluate("WH.Audio.isMuted()") and "🔊" in page.locator("#scr-title .sound-btn").inner_text())
+        page.keyboard.press("Escape"); page.wait_for_timeout(100)
+        # ---- Settings list
+        page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        row = page.locator(".modal .track-row")
+        row.scroll_into_view_if_needed(); page.wait_for_timeout(100)
+        radios = row.locator('[role="radio"]')
+        check(f"§29b {tag}: Settings → 曲目 row: auto + {len(ids)} radio cards in one radiogroup, exactly one checked (auto)",
+              row.count() == 1 and "曲目" in row.inner_text() and radios.count() == len(ids) + 1 and row.locator('[role="radiogroup"]').count() == 1
+              and row.locator('[aria-checked="true"]').count() == 1 and row.locator('[aria-checked="true"]').get_attribute("data-track") == "auto")
+        check(f"§29b {tag}: first card is 自动（随剧情）; groups are labelled; a ▶ 试听 per track (not for auto)",
+              "自动（随剧情）" in row.locator(".track-auto").inner_text() and row.locator(".track-gh").count() == 5 and row.locator(".track-prev").count() == len(ids)
+              and row.locator(".track-auto .track-prev").count() == 0 and "试听" in (row.locator(".track-prev").first.get_attribute("aria-label") or ""))
+        names_ok = all(m["zh"] in row.locator(f'.track-pick[data-track="{m["id"]}"]').inner_text() for m in moods)
+        check(f"§29b {tag}: every track shows its Chinese name", names_ok)
+        check(f"§29b {tag}: row has a 现在播放 line", "现在播放：" in row.locator(".track-now").inner_text(), row.locator(".track-now").inner_text())
+        if mobile:
+            boxes = [row.locator(".track-item").nth(i).bounding_box() for i in range(row.locator(".track-item").count())]
+            pbx = [row.locator(".track-prev").nth(i).bounding_box() for i in range(row.locator(".track-prev").count())]
+            check("§29b mobile: track cards inside the viewport, no horizontal overflow, ≥ 40px tall, ▶ targets ≥ 40px wide",
+                  all(x["x"] >= 0 and x["x"] + x["width"] <= 391 and x["height"] >= 40 for x in boxes) and all(x["width"] >= 40 and x["height"] >= 40 for x in pbx)
+                  and page.evaluate("document.documentElement.scrollWidth") <= 391, str(boxes[:2]) + str(pbx[:1]))
+            page.screenshot(path=os.path.join(OUT, "m111_track.png"))
+        else:
+            shot(page, "111_settings_track")
+        target = "tense" if "tense" in ids else ids[1]
+        tap(row.locator(f'.track-pick[data-track="{target}"]')); page.wait_for_timeout(150)
+        row = page.locator(".modal .track-row")
+        check(f"§29b {tag}: choosing a track in Settings applies it (setTrack), persists, and moves the check mark",
+              page.evaluate("__st[__st.length - 1]") == target and page.evaluate("WH.Audio.getTrack()") == target
+              and json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["musicTrack"] == target
+              and row.locator('[aria-checked="true"]').get_attribute("data-track") == target and row.locator(".track-item.on").count() == 1)
+        if not mobile:
+            i = ids.index(target)
+            row.locator(f'.track-pick[data-track="{target}"]').focus(); page.keyboard.press("ArrowRight"); page.wait_for_timeout(100)
+            nxt = ids[(i + 1) % len(ids)]
+            check("§29b a11y: arrow keys move the selection through the track radios", row.locator('[aria-checked="true"]').get_attribute("data-track") == nxt
+                  and page.evaluate("document.activeElement.getAttribute('role')") == "radio" and page.evaluate("WH.Audio.getTrack()") == nxt)
+            tap(row.locator(f'.track-pick[data-track="{target}"]'))
+        page.evaluate("__pm.length = 0")
+        last = ids[-1]
+        tap(row.locator(f'.track-prev[data-track="{last}"]')); page.wait_for_timeout(200)
+        check(f"§29b {tag}: ▶ in the list calls previewMood(id) and does not change the chosen track", page.evaluate("__pm[__pm.length - 1]") == last and page.evaluate("WH.Audio.getTrack()") == target
+              and row.locator(".track-prev.playing").count() == 1 and row.locator(".track-prev.playing").get_attribute("data-track") == last)
+        check(f"§29b {tag}: the list's now-playing line shows the previewed track", "试听中：" in row.locator(".track-now").inner_text(), row.locator(".track-now").inner_text())
+        # ---- both controls in sync: settings → panel
+        page.keyboard.press("Escape"); page.wait_for_timeout(200)
+        tap(mb); page.wait_for_timeout(200)
+        check(f"§29b {tag}: the panel shows the track chosen in Settings", page.locator(".music-pop select.track-select").input_value() == target)
+        page.locator(".music-pop select.track-select").select_option("holy"); page.wait_for_timeout(120)
+        page.keyboard.press("Escape"); page.wait_for_timeout(100)
+        page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        row = page.locator(".modal .track-row")
+        check(f"§29b {tag}: …and Settings shows the track chosen in the panel", row.locator('[aria-checked="true"]').get_attribute("data-track") == "holy")
+        # settings export, reload, unknown values
+        check(f"§22/§29b {tag}: musicTrack is part of the exported settings", page.evaluate("WH.Save.exportAll().data.settings.musicTrack") == "holy")
+        page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
+        check(f"§29b {tag}: the track survives a reload and is re-applied at start-up", page.evaluate("WH.UI.settings.musicTrack") == "holy" and page.evaluate("WH.Audio.getTrack()") == "holy")
+        page.evaluate("() => { WH.UI.settings.musicTrack = 'no-such-track'; WH.Save.saveSettings(WH.UI.settings); }")
+        page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
+        page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        check(f"§29b {tag}: an unknown stored track falls back to auto (audio + UI)", page.evaluate("WH.Audio.getTrack()") == "auto"
+              and page.locator('.modal .track-row [aria-checked="true"]').get_attribute("data-track") == "auto")
+        page.evaluate("() => { localStorage.setItem('whatiswh.settings', JSON.stringify({musicTrack: 'a b!'})); }")
+        page.reload(); page.wait_for_selector("#scr-title .title-main")
+        check(f"§29b {tag}: a malformed stored value is sanitised to auto", page.evaluate("WH.UI.settings.musicTrack") == "auto")
+        # ---- in play: the ♪ button lives in the toolbar; a fixed track survives the story; auto follows it
+        (page.locator("#scr-title .menu .btn.primary").tap if mobile else page.locator("#scr-title .menu .btn.primary").click)(); page.wait_for_timeout(250)
+        pick_faction(page, None, 0, tap=mobile); page.wait_for_timeout(300)
+        page.wait_for_selector("#tools .music-btn")
+        page.evaluate("() => { WH.UI.settings.musicTrack = 'tau'; WH.Save.saveSettings(WH.UI.settings); WH.Audio.setTrack('tau'); }")
+        wait_idle(page)
+        click_choice(page, 0); click_choice(page, 0)
+        for _ in range(4):                                                              # lore cards pop up a moment after the text: clear them all
+            finish_text(page); page.wait_for_timeout(350)
+            if not page.locator("#lore-overlay").count(): break
+        check(f"§29b {tag}: a fixed track keeps sounding while the story moves on", page.evaluate("WH.Audio.getTrack()") == "tau" and page.evaluate("WH.Audio.current()") == "tau")
+        tb = page.locator("#tools .music-btn"); sbb = page.locator("#tools .sound-btn")
+        check(f"§29b {tag}: in play ♪ sits next to the sound button in the toolbar", tb.count() == 1 and abs(tb.bounding_box()["y"] - sbb.bounding_box()["y"]) < 40 and tb.bounding_box()["x"] > sbb.bounding_box()["x"] - 2)
+        tap(tb); page.wait_for_timeout(250)
+        pb = page.locator(".music-pop").bounding_box()
+        check(f"§29b {tag}: in play the panel is inside the viewport and the track select shows the fixed track", pb["x"] >= 0 and pb["x"] + pb["width"] <= vw + 1 and pb["y"] >= 0
+              and page.locator(".music-pop select.track-select").input_value() == "tau", str(pb))
+        n0 = page.evaluate("WH.UI.game.state.nodeId")
+        page.keyboard.press("1"); page.wait_for_timeout(250)
+        n1 = page.evaluate("WH.UI.game.state.nodeId")
+        check(f"§29b {tag}: with the panel open, story hotkeys do not fire", n0 == n1 and page.locator(".music-pop").count() == 1)
+        shot(page, ("m" if mobile else "") + "112_music_pop_game")
+        page.locator(".music-pop select.track-select").select_option("auto"); page.wait_for_timeout(150)
+        page.keyboard.press("Escape"); page.wait_for_timeout(100)
+        want = page.evaluate("WH.Audio.moodFor(WH.UI.game.node(), WH.UI.game.state, WH.UI.game.faction)")
+        check(f"§29b {tag}: back to auto = the story mood again", page.evaluate("WH.Audio.getTrack()") == "auto" and page.evaluate("WH.Audio.current()") == want, f"{page.evaluate('WH.Audio.current()')} vs {want}")
+        # now-playing in auto follows the story mood (name from getMoods)
+        page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        nm = next(m["zh"] for m in moods if m["id"] == page.evaluate("WH.Audio.getPlayingMood()"))
+        check(f"§29b {tag}: the 现在播放 line shows the story mood in auto mode ({nm})", nm in page.locator(".modal .track-now").inner_text(), page.locator(".modal .track-now").inner_text())
+        # ---- English
+        page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(250)
+        row = page.locator(".modal .track-row")
+        row.scroll_into_view_if_needed(); page.wait_for_timeout(100)
+        txt = row.inner_text()
+        check(f"§29b en {tag}: Settings track row is translated (label, auto, groups, now playing, names)",
+              "Track" in txt and "Auto (follows the story)" in txt and "Now playing:" in txt and "Quiet" in txt and "Combat" in txt and "Genestealer Cult" in txt and "Sanctum" in txt
+              and "战斗" not in txt, txt[:200].replace("\n", " | "))
+        page.keyboard.press("Escape"); page.wait_for_timeout(200)
+        mbtn = page.locator("#tools .music-btn")
+        tap(mbtn); page.wait_for_timeout(250)
+        ptxt = page.locator(".music-pop").inner_text()
+        check(f"§29b en {tag}: the ♪ panel is translated", "Music" in ptxt and "Track" in ptxt and "Music style" in ptxt and "Sound" in ptxt and "Now playing:" in ptxt and "Auto (follows the story)" in ptxt, ptxt[:160].replace("\n", " | "))
+        shot(page, ("m" if mobile else "") + "113_music_pop_en")
+        # changing the language closes the panel (it is rebuilt in the new language next time)
+        page.evaluate("() => WH.UI.setLang('zh')"); page.wait_for_timeout(200)
+        check(f"§29b {tag}: switching language closes the panel", page.locator(".music-pop").count() == 0)
+        # ---- the audio module is optional: no WH.Audio -> no track row, no ♪, nothing breaks
+        page.evaluate("() => { window.__A = WH.Audio; WH.Audio = undefined; WH.UI.openSettings(); }"); page.wait_for_timeout(250)
+        check(f"§29b {tag}: without WH.Audio the Settings panel has no track row and still opens", page.locator(".modal").count() == 1 and page.locator(".modal .track-row").count() == 0)
+        page.evaluate("() => { WH.Audio = window.__A; }")
+        ctx.close(); b.close()
+
+# ---------------------------------------------------------------------------------------------------------------------
+# SPEC §31 ending illustrations (v0.3.4): UI.endingArt, picture on the ending screen, thumbnails in 往生录, fallbacks, layout
+# ---------------------------------------------------------------------------------------------------------------------
+KIND_RGB = {"good": (227, 196, 124), "bad": (154, 138, 116), "death": (192, 57, 43)}      # style.css .kind.good/.bad/.death
+
+def make_test_art():
+    """tiny 192x108 PNGs under tools/dev/test_art/ (NOT assets/endings/ — that folder belongs to the art role)"""
+    from PIL import Image, ImageDraw
+    d = os.path.join(ROOT, "tools", "dev", "test_art")
+    os.makedirs(d, exist_ok=True)
+    pal = {"good": ((250, 214, 120), (70, 120, 200)), "bad": ((120, 130, 90), (60, 40, 70)), "death": ((70, 20, 24), (14, 8, 12))}
+    for kind, (top, bot) in pal.items():
+        im = Image.new("RGB", (192, 108), top)
+        dr = ImageDraw.Draw(im)
+        for y in range(108):                                  # flat bands, like the scenes
+            t = (y // 12) / 8.0
+            dr.line([(0, y), (191, y)], fill=tuple(int(top[i] + (bot[i] - top[i]) * t) for i in range(3)))
+        dr.rectangle([80, 30, 112, 100], fill=(18, 14, 16))   # a monolith in the middle
+        dr.ellipse([84, 14, 108, 38], fill=(240, 240, 240))
+        dr.rectangle([0, 0, 7, 7], fill=(255, 0, 0)); dr.rectangle([184, 100, 191, 107], fill=(0, 255, 0))      # corner markers: crop / stretch would show
+        im.save(os.path.join(d, f"end_{kind}.png"))
+    return "tools/dev/test_art"
+
+def pixel_at(page, x, y, dsf=1):
+    from PIL import Image
+    im = Image.open(io.BytesIO(page.screenshot())).convert("RGB")
+    return im.getpixel((int(round(x * dsf)), int(round(y * dsf))))
+
+def near(a, b, tol=14):
+    return all(abs(a[i] - b[i]) <= tol for i in range(3))
+
+def endings_of(page, fid):
+    """ending node ids of a route grouped by kind (sorted, deterministic)"""
+    return page.evaluate("""(fid) => { const f = WH.factions[fid], out = {good: [], bad: [], death: []};
+      Object.keys(f.nodes).sort().forEach(id => { const n = f.nodes[id]; if (n.ending) out[n.ending.kind].push(id); }); return out; }""", fid)
+
+def show_ending_of(page, nodeid):
+    goto_node(page, nodeid, ended=True)
+    page.wait_for_selector("#scr-ending .end-pic", timeout=3000)
+    page.wait_for_timeout(250)
+
+def pic_info(page):
+    """geometry + attributes of the ending-screen picture"""
+    return page.evaluate("""() => {
+      const w = document.querySelector('#scr-ending .end-pic'), img = w && w.querySelector('img'), cs = w && getComputedStyle(w);
+      const r = (e) => { const b = e.getBoundingClientRect(); return {x: b.x, y: b.y, w: b.width, h: b.height, r: b.right, b: b.bottom}; };
+      const bg = document.querySelector('#scr-ending .bg img');
+      return {
+        box: w ? r(w) : null, img: img ? r(img) : null, key: img ? img.dataset.key : null, src: img ? img.getAttribute('src') : null,
+        alt: img ? img.alt : null, decoding: img ? img.decoding : null, nw: img ? img.naturalWidth : 0, nh: img ? img.naturalHeight : 0,
+        rendering: img ? getComputedStyle(img).imageRendering : null, border: cs ? [cs.borderTopWidth, cs.borderTopColor] : null,
+        imgs: w ? w.querySelectorAll('img').length : -1, ph: w ? w.querySelectorAll('.ph, .ph-scene, .slime, [data-missing]').length : -1,
+        empty: w ? w.classList.contains('empty') : null, cls: w ? w.className : null,
+        bgKey: bg ? bg.dataset.key : null,
+        panel: r(document.querySelector('#scr-ending .ending-panel')), scroll: r(document.querySelector('#scr-ending .ending-scroll')),
+        btns: r(document.querySelector('#scr-ending .ending-btns')), hero: r(document.querySelector('#scr-ending .ending-hero')),
+        title: r(document.querySelector('#scr-ending .ending-title')), titleText: document.querySelector('#scr-ending .ending-title').textContent,
+        vw: innerWidth, vh: innerHeight, sw: document.documentElement.scrollWidth
+      }; }""")
+
+def run_v034(p):
+    """SPEC §31 on whatever data is loaded (sample, or --real with the art possibly not delivered yet): the art path is tested with
+    injected 192x108 test PNGs registered at runtime (WH.registerScenes), the fallback path with keys that are missing / point at a
+    missing file, so this passes before, during and after the art role delivers."""
+    print("\n== v0.3.4 ending illustrations (SPEC §31) ==")
+    art_dir = make_test_art()
+    fid = "imperium" if REAL else "sample"
+    for mode in ("desktop", "desktop1080", "mobile"):
+        mobile = mode == "mobile"
+        tag = "end-art-" + mode
+        b = p.chromium.launch(executable_path=CHROME, headless="--headed" not in ARGS)
+        if mobile:
+            ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True, locale="zh-CN")
+        elif mode == "desktop1080":
+            ctx = b.new_context(viewport={"width": 1920, "height": 1080}, locale="zh-CN")
+        else:
+            ctx = b.new_context(viewport={"width": 1280, "height": 720}, locale="zh-CN")
+        page = ctx.new_page(); attach_console(page, tag)
+        page.goto(BASE + QS + ("&" if QS else "?") + "seed=21"); page.wait_for_selector("#scr-title .title-main")
+        page.evaluate("() => localStorage.clear()"); page.reload(); page.wait_for_selector("#scr-title .title-main")
+        page.evaluate("() => { WH.UI.settings.loreCards = 'off'; WH.UI.settings.textSpeed = 'instant'; WH.Save.saveSettings(WH.UI.settings); }")
+        dsf = 2 if mobile else 1
+        pre = f"§31 {mode}: "
+        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(200)
+        pick_faction(page, fid, tap=mobile); wait_idle(page); finish_text(page); dismiss_lore(page)
+        E = endings_of(page, fid)
+        gid, bid, did = E["good"][0], E["bad"][0], E["death"][0]
+        fb_id = E["bad"][1] if len(E["bad"]) > 1 else E["bad"][0]            # no end_<id> key → node scene
+        mp_id = E["good"][1] if len(E["good"]) > 1 else E["good"][0]          # key registered, PNG file missing → node scene
+        art = {gid: "good", bid: "bad", did: "death"}
+        page.evaluate("""([fid, art, dir, fb, mp]) => {
+          const reg = {};
+          Object.keys(art).forEach(id => { reg['end_' + id] = {src: dir + '/end_' + art[id] + '.png', w: 192, h: 108, name: WH.factions[fid].nodes[id].ending.title}; });
+          reg['end_' + mp] = {src: dir + '/missing_on_purpose.png', w: 192, h: 108, name: WH.factions[fid].nodes[mp].ending.title};
+          delete WH.scenes['end_' + fb];                                          // real manifest may already have it: force the fallback path
+          WH.registerScenes(reg); }""", [fid, art, art_dir, fb_id, mp_id])
+        # ---- UI.endingArt (key helper) ----
+        k = page.evaluate("""([fid, g, fb]) => [WH.UI.endingArt(fid, g), WH.UI.endingArt(fid, fb), WH.factions[fid].nodes[fb].scene || 'void', WH.UI.endingArt('nope', 'nope'), WH.UI.endingArt(fid, 'no_such_node')]""", [fid, gid, fb_id])
+        check(pre + "UI.endingArt → end_<id> when registered, else the node scene, else 'void' (never throws)", k[0] == "end_" + gid and k[1] == k[2] and k[3] == "void" and k[4] == "void", str(k))
+
+        # ---- art path: each kind, ending screen ----
+        for kind, nid in (("good", gid), ("bad", bid), ("death", did)):
+            show_ending_of(page, nid)
+            pi = pic_info(page)
+            ratio = pi["img"]["w"] / pi["img"]["h"] if pi["img"] else 0
+            check(pre + f"{kind}: ending screen shows end_{nid} in the picture box (decoded 192x108, async decoding, alt = title)",
+                  pi["key"] == "end_" + nid and pi["nw"] == 192 and pi["nh"] == 108 and pi["decoding"] == "async" and pi["src"].endswith(f"test_art/end_{kind}.png")
+                  and "结局插图" in pi["alt"] and pi["titleText"] in pi["alt"], str({k_: pi[k_] for k_ in ("key", "nw", "nh", "decoding", "src", "alt")}))
+            check(pre + f"{kind}: picture is 16:9 (±0.5%), pixel-crisp, one image, no placeholder", abs(ratio - 16 / 9) < 16 / 9 * 0.005 and pi["rendering"] in ("pixelated", "crisp-edges") and pi["imgs"] == 1 and pi["ph"] == 0, f"{ratio:.4f} {pi['rendering']} {pi['imgs']} {pi['ph']}")
+            kc = KIND_RGB[kind]
+            bx = pi["box"]
+            px = pixel_at(page, bx["x"] + 1.2, bx["y"] + bx["h"] / 2, dsf)
+            check(pre + f"{kind}: frame is 3px in the kind colour {kc}", pi["border"][0] == "3px" and near(px, kc), f"{pi['border']} px={px}")
+            check(pre + f"{kind}: the dimmed old scene stays as the screen background", pi["bgKey"] == page.evaluate("(a) => WH.factions[a[0]].nodes[a[1]].scene || 'void'", [fid, nid]), str(pi["bgKey"]))
+            if kind == "bad":
+                if not mobile:
+                    check(pre + "landscape: picture left of the head/fate block, inside the panel, top-aligned in the hero", pi["box"]["r"] < pi["title"]["x"] + 2 and pi["box"]["x"] >= pi["panel"]["x"] and pi["box"]["y"] >= pi["panel"]["y"] and pi["box"]["y"] <= pi["hero"]["y"] + 6, f"{pi['box']} {pi['title']}")
+                else:
+                    check(pre + "portrait: picture on top at (almost) full panel width, above the title, no horizontal overflow", pi["box"]["y"] < pi["title"]["y"] and pi["box"]["w"] >= pi["panel"]["w"] - 60 and pi["box"]["r"] <= pi["vw"] and pi["sw"] <= pi["vw"] + 1, f"{pi['box']} {pi['panel']} sw={pi['sw']}")
+                shot(page, ("m90_end_art_bad" if mobile else ("111_end_art_1080" if mode == "desktop1080" else "110_end_art_bad")))
+            if kind == "death" and not mobile:
+                shot(page, "112_end_art_death_1080" if mode == "desktop1080" else "112_end_art_death")
+        # ---- no layout jump: the 16:9 box is reserved before the image decodes ----
+        j = page.evaluate("""(id) => { const g = WH.UI.game; WH.UI.loadRecord(Object.assign(g.toRecord(), {nodeId: id, ended: true}));
+          const q = () => { const b = document.querySelector('#scr-ending .end-pic').getBoundingClientRect(), h = document.querySelector('#scr-ending .ending-hero').getBoundingClientRect(), t = document.querySelector('#scr-ending .ending-title').getBoundingClientRect(); return [b.width, b.height, h.height, t.y]; };
+          return {before: q(), loaded: document.querySelector('#scr-ending .end-pic img').complete}; }""", gid)
+        page.wait_for_timeout(300)
+        after = page.evaluate("""() => { const b = document.querySelector('#scr-ending .end-pic').getBoundingClientRect(), h = document.querySelector('#scr-ending .ending-hero').getBoundingClientRect(), t = document.querySelector('#scr-ending .ending-title').getBoundingClientRect(); return [b.width, b.height, h.height, t.y]; }""")
+        check(pre + "no layout jump: picture box + hero + title position identical before and after the image loads", j["before"][0] > 100 and all(abs(j["before"][i] - after[i]) < 0.6 for i in range(4)), f"{j['before']} → {after}")
+
+        # ---- fallback path: no key → node scene; key but file missing → node scene (never broken icon / slime) ----
+        for label, nid in (("no end_ key", fb_id), ("key registered, PNG missing", mp_id)):
+            show_ending_of(page, nid)
+            page.wait_for_timeout(350)
+            pi = pic_info(page)
+            want = page.evaluate("(a) => WH.factions[a[0]].nodes[a[1]].scene || 'void'", [fid, nid])
+            check(pre + f"fallback ({label}): the node scene is shown in the box, decoded, no placeholder, not marked empty", pi["key"] == want and pi["nw"] == 192 and pi["nh"] == 108 and pi["imgs"] == 1 and pi["ph"] == 0 and not pi["empty"], str({k_: pi[k_] for k_ in ("key", "nw", "nh", "imgs", "ph", "empty")}))
+            check(pre + f"fallback ({label}): box is still 16:9 with the kind frame", abs(pi["img"]["w"] / pi["img"]["h"] - 16 / 9) < 0.02 and pi["border"][0] == "3px", str(pi["img"]))
+        # nothing loadable at all (unknown scene key + missing file) → flat dark box, still reserved, no broken icon / placeholder text
+        page.evaluate("""([fid, id]) => { WH.scenes['end_' + id] = {src: 'tools/dev/test_art/missing_two.png', w: 192, h: 108}; WH.factions[fid].nodes[id].__scene = WH.factions[fid].nodes[id].scene; WH.factions[fid].nodes[id].scene = 'no_such_scene_key'; }""", [fid, mp_id])
+        show_ending_of(page, mp_id); page.wait_for_timeout(300)
+        pi = pic_info(page)
+        check(pre + "nothing loadable: the 16:9 box stays reserved and flat (no <img>, no placeholder, no broken-image icon)", pi["imgs"] == 0 and pi["ph"] == 0 and pi["empty"] and pi["img"] is None and pi["box"]["w"] > 100 and abs(pi["box"]["w"] / pi["box"]["h"] - 16 / 9) < 0.1, str(pi["cls"]))
+        page.evaluate("""([fid, id]) => { const n = WH.factions[fid].nodes[id]; n.scene = n.__scene; delete n.__scene; WH.scenes['end_' + id] = {src: 'tools/dev/test_art/missing_on_purpose.png', w: 192, h: 108}; }""", [fid, mp_id])
+
+        # ---- layout: buttons never covered, panel scrolls ----
+        show_ending_of(page, did)
+        if not mobile:
+            page.locator("#scr-ending .ending-scroll").evaluate("e => e.scrollTop = e.scrollHeight"); page.wait_for_timeout(120)
+            pi = pic_info(page)
+            sc = page.evaluate("() => { const e = document.querySelector('#scr-ending .ending-scroll'); return [e.scrollTop, e.scrollHeight, e.clientHeight]; }")
+            check(pre + "landscape: the ending panel scrolls (content > view is allowed) and the buttons stay below the scroll area, inside the panel and the window",
+                  pi["scroll"]["b"] <= pi["btns"]["y"] + 1 and pi["btns"]["b"] <= pi["panel"]["b"] + 1 and pi["panel"]["b"] <= pi["vh"] and pi["panel"]["y"] >= 0 and pi["btns"]["y"] >= 0 and sc[0] > 0 and sc[1] > sc[2], f"{pi['scroll']} {pi['btns']} {pi['panel']} {sc}")
+            page.locator("#scr-ending .ending-btns .btn.primary").click(trial=True)           # actionable = visible, enabled, not covered
+            check(pre + "landscape: ↻ again / other / home buttons are actionable (not covered) after scrolling", True)
+            page.locator("#scr-ending .ending-scroll").evaluate("e => e.scrollTop = 0")
+        else:
+            page.locator("#scr-ending .ending-btns .btn").first.scroll_into_view_if_needed(); page.wait_for_timeout(150)
+            bb = page.locator("#scr-ending .ending-btns .btn").first.bounding_box()
+            check(pre + "portrait: buttons reachable by scrolling the page, inside the viewport, not covered", bb and bb["y"] >= 0 and bb["y"] + bb["height"] <= 845 and bb["x"] >= 0, str(bb))
+            page.locator("#scr-ending .ending-btns .btn.primary").tap(trial=True)
+            page.evaluate("() => window.scrollTo(0, 0)")
+        # ---- English ----
+        page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(250)
+        pi = pic_info(page)
+        check(pre + "en: alt text = 'Ending illustration: <English title>', picture unchanged", pi["alt"].startswith("Ending illustration: ") and pi["titleText"] in pi["alt"] and pi["key"] == "end_" + did, pi["alt"])
+        if mode != "desktop1080": shot(page, "m91_end_art_en" if mobile else "113_end_art_en")
+        page.evaluate("() => WH.UI.setLang('zh')"); page.wait_for_timeout(150)
+
+        # ---- 往生录 endings grid: thumbnails for unlocked, flat dark for locked ----
+        for nid in (gid, bid, did, fb_id, mp_id): show_ending_of(page, nid)
+        page.wait_for_timeout(300)
+        page.evaluate("() => { WH.UI.show('title'); }"); page.wait_for_timeout(150)
+        page.evaluate("() => WH.UI.openCodex(null, false, 'endings')"); page.wait_for_selector(".modal .end-tile", timeout=3000); page.wait_for_timeout(500)
+        g = page.evaluate("""([ids, fid]) => {
+          const tiles = [...document.querySelectorAll('.modal .end-tile')], unl = tiles.filter(t => !t.classList.contains('locked')), lock = tiles.filter(t => t.classList.contains('locked'));
+          const rect = (e) => { const b = e.getBoundingClientRect(); return {x: b.x, y: b.y, w: b.width, h: b.height, b: b.bottom, r: b.right}; };
+          const info = {};
+          ids.forEach(id => { const w = document.querySelector('.modal .end-pic[data-ending="' + id + '"]'), t = w && w.closest('.end-tile'), im = w && w.querySelector('img');
+            info[id] = w ? {key: im ? im.dataset.key : null, nw: im ? im.naturalWidth : 0, imgs: w.querySelectorAll('img').length, ph: w.querySelectorAll('.ph, .ph-scene, .slime').length, box: rect(im || w),
+              frame: getComputedStyle(w).borderTopColor, aboveTitle: im ? im.getBoundingClientRect().bottom <= t.querySelector('.et').getBoundingClientRect().top + 1 : null, first: t.firstElementChild === w, alt: im ? im.alt : null, kind: [...t.classList].filter(c => ['good', 'bad', 'death'].includes(c))[0]} : null; });
+          const total = Object.keys(WH.factions[fid].nodes).filter(id => WH.factions[fid].nodes[id].ending).length;
+          return {tiles: tiles.length, unl: unl.length, lock: lock.length, info,
+            lockedImgs: lock.reduce((n, t) => n + t.querySelectorAll('img').length, 0), lockedPics: lock.filter(t => t.querySelector('.end-pic.locked')).length,
+            lockedBg: lock.length ? getComputedStyle(lock[0].querySelector('.end-pic')).backgroundImage : '', lockedQ: lock.every(t => t.querySelector('.et').textContent.trim() === '???'),
+            lockedBox: lock.length ? rect(lock[0].querySelector('.end-pic')) : null, lockedBw: lock.length ? parseFloat(getComputedStyle(lock[0].querySelector('.end-pic')).borderTopWidth) : 0, unlBox: rect(unl[0].querySelector('.end-pic')), vw: innerWidth, sw: document.documentElement.scrollWidth,
+            sectionTiles: document.querySelectorAll('.modal .codex-sec').length, total}; }""", [[gid, bid, did, fb_id, mp_id], fid])
+        i0 = g["info"]
+        check(pre + "往生录: unlocked tiles = the 5 reached endings, every other tile is locked", g["unl"] == 5 and g["lock"] == g["tiles"] - 5 and g["lock"] >= 1, f"{g['unl']}/{g['tiles']}")
+        for kind, nid in (("good", gid), ("bad", bid), ("death", did)):
+            x = i0[nid]
+            check(pre + f"往生录: {kind} tile has a 16:9 thumbnail of end_{nid} above the title, first in the tile, in the kind colour",
+                  x and x["key"] == "end_" + nid and x["nw"] == 192 and x["imgs"] == 1 and x["ph"] == 0 and abs(x["box"]["w"] / x["box"]["h"] - 16 / 9) < 0.02 and x["aboveTitle"] and x["first"]
+                  and x["frame"] == "rgb(%d, %d, %d)" % KIND_RGB[kind] and "结局插图" in x["alt"], str(x))
+        for label, nid in (("no key", fb_id), ("PNG missing", mp_id)):
+            x = i0[nid]
+            want = page.evaluate("(a) => WH.factions[a[0]].nodes[a[1]].scene || 'void'", [fid, nid])
+            check(pre + f"往生录: fallback tile ({label}) shows the node scene thumbnail, no placeholder / broken icon", x and x["key"] == want and x["nw"] == 192 and x["imgs"] == 1 and x["ph"] == 0, str(x))
+        check(pre + "往生录: locked tiles show NO <img> (no spoiler), a flat dark 16:9 box (gradient, no url()), '???'", g["lockedImgs"] == 0 and g["lockedPics"] == g["lock"] and "url(" not in g["lockedBg"] and g["lockedQ"]
+              and abs((g["lockedBox"]["w"] - 2 * g["lockedBw"]) / (g["lockedBox"]["h"] - 2 * g["lockedBw"]) - 16 / 9) < 0.02 and abs(g["lockedBox"]["w"] - g["unlBox"]["w"]) < 3, f"{g['lockedBg'][:60]} {g['lockedBox']}")
+        check(pre + "往生录: no horizontal overflow", g["sw"] <= g["vw"] + 1, f"{g['sw']} vs {g['vw']}")
+        shot(page, "m92_endings_grid" if mobile else ("114_endings_grid_1080" if mode == "desktop1080" else "114_endings_grid"))
+        page.evaluate("() => { const m = document.querySelector('.modal-body'); const l = document.querySelector('.end-tile.locked'); if (l && l.scrollIntoView) l.scrollIntoView({block: 'center'}); }"); page.wait_for_timeout(150)
+        shot(page, "m93_endings_grid_locked" if mobile else ("115_endings_grid_locked_1080" if mode == "desktop1080" else "115_endings_grid_locked"))
+        page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(300)
+        check(pre + "往生录 (en): thumbnails keep working after a language switch, alt in English", page.evaluate("document.querySelectorAll('.modal .end-tile:not(.locked) .end-pic img').length") == 5
+              and page.evaluate("[...document.querySelectorAll('.modal .end-tile:not(.locked) .end-pic img')].every(i => i.alt.startsWith('Ending illustration: '))"))
+        page.keyboard.press("Escape"); page.wait_for_timeout(100)
+        page.evaluate("() => WH.UI.setLang('zh')")
+        ctx.close(); b.close()
+
+    # ---- every ending of every loaded route: first view fits, buttons never covered, in zh and en (throw-away profile) ----
+    for mobile in (False, True):
+        b = p.chromium.launch(executable_path=CHROME, headless="--headed" not in ARGS)
+        ctx = b.new_context(viewport={"width": 390, "height": 844} if mobile else {"width": 1280, "height": 720}, device_scale_factor=1, is_mobile=mobile, has_touch=mobile, locale="zh-CN")
+        page = ctx.new_page(); attach_console(page, "end-fit" + ("-m" if mobile else ""))
+        page.goto(BASE + QS + ("&" if QS else "?") + "seed=22"); page.wait_for_selector("#scr-title .title-main")
+        page.evaluate("() => localStorage.clear()"); page.reload(); page.wait_for_selector("#scr-title .title-main")
+        res = page.evaluate("""(mobile) => {
+          const bad = [], seen = [];
+          for (const lang of ['zh', 'en']) {
+            WH.UI.setLang(lang);
+            for (const fid of Object.keys(WH.factions)) {
+              const f = WH.factions[fid], g = new WH.Game(fid, {rng: WH.RNG(5)}); g.start((f.origins && f.origins[0] && f.origins[0].id) || undefined);
+              for (const id of Object.keys(f.nodes).filter(i => f.nodes[i].ending)) {
+                WH.UI.game = g; WH.UI.loadRecord(Object.assign(g.toRecord(), {nodeId: id, ended: true}));
+                const q = (s) => document.querySelector('#scr-ending ' + s).getBoundingClientRect();
+                const p = q('.ending-panel'), bt = q('.ending-btns'), sc = q('.ending-scroll'), hero = q('.ending-hero'), pic = q('.end-pic'), ti = q('.ending-title');
+                const why = [];
+                if (!mobile) {
+                  if (bt.bottom > p.bottom + 1 || sc.bottom > bt.top + 1) why.push('buttons covered');
+                  if (p.bottom > innerHeight || p.top < 0) why.push('panel outside window');
+                  if (hero.height > sc.height + 1) why.push('hero taller than the scroll area ' + Math.round(hero.height) + '>' + Math.round(sc.height));
+                  if (pic.right > ti.left + 2) why.push('picture overlaps the head');
+                } else {
+                  if (pic.right > innerWidth || p.right > innerWidth + 1 || document.documentElement.scrollWidth > innerWidth + 1) why.push('horizontal overflow');
+                  if (pic.top > ti.top) why.push('picture not above the title');
+                }
+                seen.push(id); if (why.length) bad.push(lang + ':' + id + ' ' + why.join('; '));
+              }
+            }
+          }
+          return {n: seen.length, bad}; }""", mobile)
+        check(f"§31 {'portrait' if mobile else 'landscape'}: all {res['n'] // 2} endings × zh/en — " + ("picture above the title, no horizontal overflow" if mobile else "buttons never covered, hero fits the first view, picture beside the head"),
+              res["n"] >= 2 and not res["bad"], "; ".join(res["bad"][:6]))
+        ctx.close(); b.close()
+
+
+def run_v040(p):
+    """SPEC §32 on sample data: node.alt (text replacement + adds, from* conditions, arrival state, reload / rewind), choice.resultAlt, death-node alt,
+    event `where` / `excludeFactions`, save fallback (unknown node id → start of the saved chapter + notice). zh + en, desktop + mobile."""
+    print("\n== v0.4.0 story overhaul engine (SPEC §32, sample) ==")
+    b, ctx, page = new_ctx(p, tag="v040")
+    eng = page.evaluate("""() => {
+      const STEP = () => ({kind:'node', nodeId:null, choiceDeltas:{}, nodeDeltas:{}, deltas:{}, time:null, chapterChanged:false, fromChapter:null, codexNew:[], roll:null, death:null, ending:null, event:null, deathPending:null, rumor:null, rumorCodex:[], grudge:null});
+      const mkG = (extra) => { const g = new WH.Game('sample', Object.assign({rng: WH.RNG(3), rumors: false, echoes: false}, extra || {})); g.start('hive'); return g; };
+      const enter = (node, prev, flags, mut, extra) => { const g = mkG(extra); g.state.flags = Object.assign({}, flags || {}); g.state.nodeId = prev; g.state.history = [prev]; g.state.ended = false;
+        if (mut) mut(g); g._enter(node, STEP()); return g; };
+      const base = WH.factions.sample.nodes.smp_006.text, out = {};
+      const a = enter('smp_006', 'smp_004', {});
+      out.plain = [a.nodeBody().zh === base.zh && a.nodeBody().en === base.en, a.state.altSel, a.altAdds().length];
+      const t = enter('smp_006', 'smp_004', {token: true});
+      out.token = [t.nodeBody().zh.indexOf('袖中的铁片开始发烫') >= 0, t.nodeBody().zh.indexOf('\\n\\n') < 0, t.nodeBody().en.indexOf('token in your sleeve') >= 0, t.state.altSel && t.state.altSel.t];
+      const c = enter('smp_006', 'smp_005', {token: true, origin_scav: true, prayed: true});
+      const cz = c.nodeBody().zh.split('\\n\\n');
+      out.max2 = [cz.length, cz[1], cz[2], c.state.altSel.a, c.nodeBody().zh.indexOf('淤青') < 0];
+      const d = enter('smp_006', 'smp_005', {});
+      out.fromNode = [d.nodeBody().zh === base.zh + '\\n\\n执法者留下的淤青还在疼。', d.nodeBody().en === base.en + '\\n\\nThe bruises the enforcers left still ache.'];
+      const e = enter('smp_006', 'smp_004', {prayed: true});
+      out.nodeText = [e.nodeText().zh === e.nodeBody().zh, e.altText().zh === base.zh, e.altAdds().length];
+      // saved with the selection: a reload (even with different flags in the record) shows the same text; a record without altSel re-resolves
+      const rec = JSON.parse(JSON.stringify(c.toRecord())); rec.flags = {};
+      const r1 = WH.Game.fromRecord(rec, {rumors: false, echoes: false});
+      const rec2 = JSON.parse(JSON.stringify(rec)); delete rec2.altSel; const r2 = WH.Game.fromRecord(rec2, {rumors: false, echoes: false});
+      out.reload = [!!rec.altSel, r1.nodeBody().zh === c.nodeBody().zh, r2.nodeBody().zh === base.zh + '\\n\\n执法者留下的淤青还在疼。', JSON.stringify(r1.toRecord().altSel) === JSON.stringify(c.state.altSel)];
+      // rewind: back to the choice before → the same text again
+      const rw = enter('smp_006', 'smp_005', {origin_scav: true}, null, {rewind: true}); const b0 = rw.nodeBody().zh; rw.choose(0);
+      out.rewind = [rw.state.nodeId !== 'smp_006', rw.rewind(), rw.state.nodeId === 'smp_006' && rw.nodeBody().zh === b0 && b0.indexOf('下巢的老人说过') >= 0];
+      // no RNG draws: the main stream is identical with and without alt data
+      const rngAfter = (stripAlt) => { const g = mkG({rng: WH.RNG(9)}); g.state.nodeId = 'smp_005'; g.state.history = ['smp_005']; const n = WH.factions.sample.nodes.smp_006, hold = n.alt;
+        if (stripAlt) delete n.alt; try { g._enter('smp_006', STEP()); } finally { n.alt = hold; } return g.rng.getState(); };
+      out.noRng = rngAfter(false) === rngAfter(true);
+      // resultAlt (flag prayed) on smp_002's first choice, judged before the choice's effects; zh + en
+      const ra = (flags) => { const g = enter('smp_002', 'smp_001', flags); const st = g.choose(0); return st.consequence.text; };
+      const rp = ra({prayed: true}), rn = ra({});
+      out.resultAlt = [rp.zh.indexOf('默念祷文') >= 0 && rp.en.indexOf('mutter the litany') >= 0, rn.zh.indexOf('你扯回手臂，留下一层皮') >= 0 && rn.zh.indexOf('祷文') < 0];
+      // death / claim nodes get alt too: fromScene / fromChapter of the node the death came from
+      const dt = enter('smp_007', 'smp_006', {}, (g) => { g.state.stats.hp = 5; }); const ddead = dt.state.deathPending; dt.choose(0);
+      const early = enter('smp_002', 'smp_001', {}, (g) => { g.state.stats.hp = 10; }); early.choose(0);
+      out.death = [ddead, dt.state.nodeId, dt.nodeBody().zh.indexOf('你倒在战壕的泥里') === 0, dt.nodeBody().zh.indexOf('还没轮到') < 0, early.state.nodeId, early.nodeBody().zh.indexOf('你的血渗进') === 0 && early.nodeBody().zh.indexOf('还没轮到上战场') > 0];
+      return out; }""")
+    check("§32.2 alt: no condition matches → the base text, no selection stored", eng["plain"][0] and eng["plain"][1] is None and eng["plain"][2] == 0, str(eng["plain"]))
+    check("§32.2 alt: the first matching `text` entry replaces the node text (zh + en)", all(eng["token"][:3]) and eng["token"][3] == 0, str(eng["token"]))
+    check("§32.2 alt: matching `add` entries are separate paragraphs, at most 2 (the third match is dropped)", eng["max2"][0] == 3 and "下巢的老人说过" in eng["max2"][1] and "祷文" in eng["max2"][2] and eng["max2"][3] == [1, 2] and eng["max2"][4], str(eng["max2"]))
+    check("§32.2 alt: fromNode looks at the previously played node (zh + en)", all(eng["fromNode"]), str(eng["fromNode"]))
+    check("§32.2 alt: altText / altAdds / nodeText agree", all(eng["nodeText"][:2]) and eng["nodeText"][2] == 1, str(eng["nodeText"]))
+    check("§32.2 alt: stored in state.altSel → record.altSel; a reload shows the same text, a record without it re-resolves", all(eng["reload"]), str(eng["reload"]))
+    check("§32.2 alt: a rewind (§30) shows the same alt text again", eng["rewind"][0] and eng["rewind"][1] and eng["rewind"][2], str(eng["rewind"]))
+    check("§32.2 alt: resolving alt draws nothing from the RNG", eng["noRng"])
+    check("§32.2 resultAlt: first match replaces choice.result (flag prayed), base result otherwise", all(eng["resultAlt"]), str(eng["resultAlt"]))
+    check("§32.2 alt on death nodes: fromScene replaces the text, fromChapter adds a line, no match → base", eng["death"][0] == "hp" and eng["death"][1] == "smp_death_hp" and eng["death"][2] and eng["death"][3] and eng["death"][4] == "smp_death_hp" and eng["death"][5], str(eng["death"]))
+    # --- event where / excludeFactions ---
+    ev = page.evaluate("""() => {
+      const mk = (flags) => { const g = new WH.Game('sample', {rng: WH.RNG(4), rumors: false, echoes: false}); g.start('hive'); g.state.flags = Object.assign({}, flags || {}); return g; };
+      const ids = (g, ch, n) => g.eligibleEvents(ch, n).map(e => e.id), out = {};
+      const g = mk({peeked: true});
+      out.right = ids(g, 1, 'smp_002').includes('smp_evt_where');
+      out.wrongScene = !ids(g, 1, 'smp_003').includes('smp_evt_where');
+      out.wrongChapter = !ids(g, 2, 'smp_004').includes('smp_evt_where');
+      out.noFlag = !ids(mk({}), 1, 'smp_002').includes('smp_evt_where');
+      out.legacy = ids(mk({}), 1).includes('smp_evt_where');                      // no node given → where is ignored (old callers)
+      out.excluded = ['smp_001', 'smp_002', 'smp_003', 'smp_006'].every(n => !ids(g, 4, n).includes('smp_evt_excl')) && !ids(g, 1).includes('smp_evt_excl');
+      out.generic = ids(g, 1, 'smp_003').includes('smp_evt_khorne');                // events without `where` behave as before
+      // _goTo with an eventRoll of 1: the where-event can fire in the manufactorum, never underhive, over many seeds
+      const F = WH.factions.sample, old = [F.nodes.smp_002.eventRoll, F.nodes.smp_003.eventRoll]; F.nodes.smp_002.eventRoll = 1; F.nodes.smp_003.eventRoll = 1;
+      let hit = 0, wrong = 0, others = 0;
+      for (let seed = 1; seed <= 80; seed++) {
+        const a = new WH.Game('sample', {rng: WH.RNG(seed), rumors: false, echoes: false}); a.start('hive'); a.state.flags.peeked = true;
+        const s1 = a._goTo('smp_002', {kind: 'node', nodeId: null, choiceDeltas: {}, nodeDeltas: {}, deltas: {}, codexNew: [], rumorCodex: []});
+        if (s1.kind === 'event') { if (s1.event.id === 'smp_evt_where') hit++; else others++; }
+        const c = new WH.Game('sample', {rng: WH.RNG(seed), rumors: false, echoes: false}); c.start('hive'); c.state.flags.peeked = true;
+        const s2 = c._goTo('smp_003', {kind: 'node', nodeId: null, choiceDeltas: {}, nodeDeltas: {}, deltas: {}, codexNew: [], rumorCodex: []});
+        if (s2.kind === 'event' && (s2.event.id === 'smp_evt_where' || s2.event.id === 'smp_evt_excl')) wrong++;
+      }
+      F.nodes.smp_002.eventRoll = old[0]; F.nodes.smp_003.eventRoll = old[1]; if (old[0] === undefined) delete F.nodes.smp_002.eventRoll;
+      out.fire = [hit, others, wrong];
+      return out; }""")
+    check("§32.3 where: the event is eligible on the right scene + flag + chapter", ev["right"])
+    check("§32.3 where: blocked on the wrong scene, the wrong chapter and without the flag", ev["wrongScene"] and ev["wrongChapter"] and ev["noFlag"])
+    check("§32.3 where: callers without a node (legacy) ignore `where`; events without `where` are unchanged", ev["legacy"] and ev["generic"])
+    check("§32.3 excludeFactions: an excluded faction never gets the event", ev["excluded"])
+    check("§32.3 where in _goTo: fires in the manufactorum (some seeds), never underhive over 80 seeds", ev["fire"][0] > 0 and ev["fire"][1] > 0 and ev["fire"][2] == 0, str(ev["fire"]))
+    # --- save fallback (engine) ---
+    fb = page.evaluate("""() => {
+      const g = new WH.Game('sample', {rng: WH.RNG(2), rumors: false, echoes: false}); g.start('hive'); g.state.flags = {prayed: true, origin_hive: true}; g.state.stats.hp = 61;
+      const rec = (o) => Object.assign(JSON.parse(JSON.stringify(g.toRecord())), o), load = (o) => WH.Game.fromRecord(rec(o), {rumors: false, echoes: false}), out = {};
+      const a = load({nodeId: 'smp_gone', chapter: 3}), b = load({nodeId: 'smp_gone', chapter: 2}), c = load({nodeId: 'smp_gone', chapter: 1, origin: 'scav'}), d = load({nodeId: 'smp_gone', chapter: 9});
+      out.ch = [a.state.nodeId, b.state.nodeId, c.state.nodeId, d.state.nodeId];
+      out.kept = [a.state.flags.prayed === true, a.state.stats.hp === 61, a.fallbackFrom, a.state.chapter, a.state.ended, a.node().chapter];
+      out.ok = load({}).fallbackFrom === undefined;
+      const e = load({nodeId: 'smp_004', pendingEvent: 'smp_evt_khorne', pendingNext: 'smp_gone2', chapter: 2});
+      out.pending = [e.fallbackFrom, e.state.pendingEvent, e.state.pendingNext, e.state.nodeId];
+      const f = load({nodeId: 'smp_gone', chapter: 4, ended: true, deathPending: 'hp'}); out.deadWood = [f.state.ended, f.state.deathPending, f.state.stats.hp >= 1];
+      const step = a.choose(0); out.plays = !!step && a.state.nodeId !== 'smp_006';
+      out.validate = [WH.Save.validate(rec({nodeId: 'smp_gone'})).ok, WH.Save.validate(rec({faction: 'nope'})).error];
+      out.fallbackNode = WH.Game.fallbackNode(WH.factions.sample, 2, 'hive');
+      return out; }""")
+    check("§32.4 fallback: unknown node → first node of the saved chapter (bridge, entry node, origin start; unknown chapter → nearest earlier)", fb["ch"] == ["smp_006", "smp_004", "smp_o_scav_1", "smp_007"] and fb["fallbackNode"] == "smp_004", str(fb["ch"]))
+    check("§32.4 fallback: stats / flags kept, chapter follows the new node, the notice flag names the missing id", fb["kept"] == [True, True, "smp_gone", 3, False, 3], str(fb["kept"]))
+    check("§32.4 fallback: a record whose node exists is untouched; a vanished pendingNext drops the event; a vanished ending / death is not carried over",
+          fb["ok"] and fb["pending"] == ["smp_gone2", None, None, "smp_004"] and fb["deadWood"] == [False, None, True], str(fb["pending"]) + str(fb["deadWood"]))
+    check("§32.4 fallback: the run continues from the fallback node; Save.validate accepts an unknown node, still rejects an unknown faction", fb["plays"] and fb["validate"][0] is True and fb["validate"][1] == "err_faction", str(fb["validate"]))
+    # --- UI ---
+    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(200)
+    pick_faction(page, "sample", "hive"); wait_idle(page); finish_text(page)
+    goto_node(page, "smp_006", flags={"token": True, "origin_scav": True, "prayed": True}, history=["smp_005"])
+    tx = page.locator("#dlg-text").inner_text()
+    check("§32.2 UI: the dialogue shows the alt-resolved text then the first two add paragraphs", "袖中的铁片开始发烫" in tx and tx.index("下巢的老人说过") > tx.index("袖中的铁片") and tx.index("你的嘴唇仍记得") > tx.index("下巢的老人说过") and "淤青" not in tx and "\n\n" in tx, tx)
+    shot(page, "v040_alt_zh")
+    page.locator("#tools button", has_text="EN").click(); page.wait_for_timeout(200); finish_text(page)
+    tx = page.locator("#dlg-text").inner_text()
+    check("§32.2 UI: English re-renders the same selection", "token in your sleeve" in tx and "old man downhive" in tx and "Your lips still remember" in tx and "bruises" not in tx, tx)
+    page.locator("#tools button", has_text="中").click(); page.wait_for_timeout(200); finish_text(page)
+    rec_ok = page.evaluate("""() => { const r = WH.UI.game.toRecord(); r.flags = {}; WH.UI.loadRecord(r); return !!r.altSel; }""")
+    page.wait_for_timeout(150); finish_text(page)
+    check("§32.2 UI: loading a record restores the stored selection (not re-evaluated from the changed flags)", rec_ok and "袖中的铁片开始发烫" in page.locator("#dlg-text").inner_text())
+    # language switch while the consequence beat is open re-renders the SAME node text (with its alt paragraphs)
+    goto_node(page, "smp_006", flags={"origin_scav": True, "prayed": True}, history=["smp_004"])
+    page.locator("#choices button", has_text="闭眼背诵祷文").click(); page.wait_for_timeout(150)
+    opened = page.locator("#conseq").count() == 1
+    page.locator("#tools button", has_text="EN").click(); page.wait_for_timeout(200); finish_text(page)
+    check("§32.2 UI: language switch during a consequence beat keeps the previous node's alt text", opened and "Your lips still remember" in page.locator("#dlg-text").inner_text(), page.locator("#dlg-text").inner_text())
+    page.locator("#tools button", has_text="中").click(); page.wait_for_timeout(150)
+    pass_conseq(page); wait_idle(page); finish_text(page)
+    # resultAlt in the UI (the consequence panel)
+    goto_node(page, "smp_002", flags={"prayed": True}, history=["smp_001"])
+    page.locator("#choices button", has_text="拼命干活").click(); page.wait_for_timeout(150); finish_text(page)
+    check("§32.2 UI: resultAlt text shows in the consequence panel", "你默念祷文" in page.locator("#conseq .cq-text").inner_text(), page.locator("#conseq .cq-text").inner_text())
+    pass_conseq(page); wait_idle(page); finish_text(page)
+    goto_node(page, "smp_002", flags={}, history=["smp_001"])
+    page.locator("#choices button", has_text="拼命干活").click(); page.wait_for_timeout(150); finish_text(page)
+    check("§32.2 UI: no condition → the base result", "祷文" not in page.locator("#conseq .cq-text").inner_text() and "留下一层皮" in page.locator("#conseq .cq-text").inner_text())
+    pass_conseq(page); wait_idle(page); finish_text(page)
+    # ending screen: alt text of the death node
+    page.evaluate("""() => { const STEP = () => ({kind:'node', nodeId:null, choiceDeltas:{}, nodeDeltas:{}, deltas:{}, time:null, chapterChanged:false, fromChapter:null, codexNew:[], roll:null, death:null, ending:null, event:null, deathPending:null, rumor:null, rumorCodex:[], grudge:null});
+      const g = new WH.Game('sample', {rng: WH.RNG(3), rumors: false, echoes: false}); g.start('hive'); g.state.nodeId = 'smp_007'; g.state.history = ['smp_006']; g.state.ended = false; g.state.stats.hp = 5;
+      g.state.deathPending = 'hp'; g.choose(0); WH.UI.loadRecord(g.toRecord()); }""")
+    page.wait_for_timeout(300)
+    et = page.locator(".ending-text").inner_text()
+    check("§32.2 UI: the ending screen shows the alt-resolved death text", "你倒在战壕的泥里" in et and "你的血渗进" not in et, et)
+    shot(page, "v040_ending_alt")
+    # save fallback notice (zh, then en); the run is playable afterwards
+    page.evaluate("""() => { const g = new WH.Game('sample', {rng: WH.RNG(2), rumors: false, echoes: false}); g.start('hive'); g.state.flags.prayed = true; g.state.stats.hp = 61;
+      WH.UI.show('game'); WH.UI.loadRecord(Object.assign(g.toRecord(), {nodeId: 'smp_gone', chapter: 2})); }""")
+    page.wait_for_timeout(250); finish_text(page)
+    st = state(page)
+    check("§32.4 UI: a vanished node shows the one-line notice (zh) and the start of the saved chapter, stats / flags kept",
+          page.locator(".toast", has_text="剧情已更新，已回到本章开头").count() == 1 and st["nodeId"] == "smp_004" and st["flags"].get("prayed") is True and st["stats"]["hp"] == 61, str(st["nodeId"]))
+    click_choice(page, 0); wait_idle(page)
+    if page.locator("#event-overlay").count(): resolve_event(page)
+    wait_idle(page); finish_text(page)
+    check("§32.4 UI: the run continues after the fallback", state(page)["nodeId"] != "smp_004" and page.locator("#dlg-text").inner_text().strip() != "", f"{state(page)['nodeId']} | {page.locator('#dlg-text').inner_text()[:40]!r} | conseq={page.locator('#conseq').count()} ev={page.locator('#event-overlay').count()}")
+    page.locator("#tools button", has_text="EN").click(); page.wait_for_timeout(200)
+    page.evaluate("""() => { const g = new WH.Game('sample', {rng: WH.RNG(2), rumors: false, echoes: false}); g.start('hive'); WH.UI.loadRecord(Object.assign(g.toRecord(), {nodeId: 'smp_gone', chapter: 3})); }""")
+    page.wait_for_timeout(250)
+    check("§32.4 UI: the notice in English; a bridge node is the chapter start", page.locator(".toast", has_text="Story updated — back to the start of this chapter").count() == 1 and state(page)["nodeId"] == "smp_006")
+    shot(page, "v040_fallback_en")
+    ctx.close(); b.close()
+    # --- mobile ---
+    b, ctx, page = new_ctx(p, mobile=True, tag="v040-m")
+    page.locator("#scr-title .menu .btn.primary").tap(); page.wait_for_timeout(200)
+    pick_faction(page, "sample", "hive", tap=True); wait_idle(page); finish_text(page)
+    goto_node(page, "smp_006", flags={"token": True, "origin_scav": True, "prayed": True}, history=["smp_005"])
+    check("§32.2 mobile: alt paragraphs readable, no horizontal overflow", "你的嘴唇仍记得" in page.locator("#dlg-text").inner_text() and page.evaluate("document.documentElement.scrollWidth") <= 391)
+    page.screenshot(path=os.path.join(OUT, "m80_alt.png"))
+    ctx.close(); b.close()
+
+def run_real_v040(p):
+    """--real: every `alt` node of every route resolves without throwing (no flags / every flag the node tests set), the engine tolerates each
+    route's unknown-node fallback, and no event `where` references a missing scene or node."""
+    print("\n== v0.4.0 story overhaul (real data) ==")
+    b, ctx, page = new_ctx(p, tag="realv040")
+    res = page.evaluate("""() => {
+      const out = {nodes: 0, alt: 0, bad: [], fb: 0, fbBad: [], ev: 0, evBad: []};
+      const flagsOf = (c, s) => { if (!c || typeof c !== 'object') return s; ['flag', 'notFlag'].forEach(k => { if (typeof c[k] === 'string') s.add(c[k]); }); ['flags', 'anyFlag'].forEach(k => [].concat(c[k] || []).forEach(x => s.add(x)));
+        ['any', 'all'].forEach(k => [].concat(c[k] || []).forEach(x => flagsOf(x, s))); if (c.not) flagsOf(c.not, s); return s; };
+      for (const fid of Object.keys(WH.factions)) {
+        const f = WH.factions[fid];
+        for (const id of Object.keys(f.nodes)) {
+          const n = f.nodes[id]; out.nodes++;
+          if (Array.isArray(n.alt) && n.alt.length) {
+            out.alt++;
+            for (const mode of [0, 1]) {
+              try {
+                const g = new WH.Game(fid, {rng: WH.RNG(1), rumors: false, echoes: false}); g.start();
+                const fl = new Set(); n.alt.forEach(a => flagsOf(a.if, fl)); g.state.flags = {}; if (mode) fl.forEach(k => { g.state.flags[k] = true; });
+                g.state.history = [f.startNode]; g.state.nodeId = f.startNode; g._enter(id, {kind: 'node', nodeId: null, choiceDeltas: {}, nodeDeltas: {}, deltas: {}, codexNew: [], rumorCodex: []});
+                const t = g.nodeBody(); if (typeof t.zh !== 'string' || !t.zh.trim() || typeof t.en !== 'string' || !t.en.trim()) out.bad.push(fid + '/' + id + ' empty');
+                const rec = JSON.parse(JSON.stringify(g.toRecord())); const g2 = WH.Game.fromRecord(rec, {rumors: false, echoes: false}); if (g2.nodeBody().zh !== t.zh) out.bad.push(fid + '/' + id + ' reload differs');
+              } catch (e) { out.bad.push(fid + '/' + id + ' ' + e.message); }
+            }
+          }
+        }
+        const chapters = Object.keys(f.chapters || {}).map(Number);
+        for (const ch of chapters) { out.fb++; try { const g = new WH.Game(fid, {rng: WH.RNG(1)}); g.start(); const rec = JSON.parse(JSON.stringify(g.toRecord())); rec.nodeId = '__gone__'; rec.chapter = ch;
+          const g2 = WH.Game.fromRecord(rec, {rumors: false, echoes: false}); if (!f.nodes[g2.state.nodeId] || f.nodes[g2.state.nodeId].ending || g2.fallbackFrom !== '__gone__') out.fbBad.push(fid + ' ch' + ch + ' → ' + g2.state.nodeId); } catch (e) { out.fbBad.push(fid + ' ch' + ch + ' ' + e.message); } }
+      }
+      for (const e of WH.events) { if (!e.where) continue; out.ev++;
+        for (const k of ['scenes', 'notScenes']) [].concat(e.where[k] || []).forEach(sc => { if (!WH.scenes[sc]) out.evBad.push(e.id + ' ' + k + ' ' + sc); }); }
+      return out; }""")
+    print(f"  {res['alt']} alt nodes / {res['nodes']} nodes, {res['fb']} chapter fallbacks, {res['ev']} events with where")
+    check("§32 real: every alt node resolves (no flags / all tested flags), reloads identically and never throws", not res["bad"], "; ".join(res["bad"][:6]))
+    check("§32 real: save fallback lands on a real, non-ending node of every chapter of every route", not res["fbBad"], "; ".join(res["fbBad"][:6]))
+    check("§32 real: event `where` scenes are known", not res["evBad"], "; ".join(res["evBad"][:6]))
+    ctx.close(); b.close()
+
+
+
 with sync_playwright() as p:
     t0 = time.time()
     if "--only-v033" in ARGS:                        # SPEC §29/§30 quick loop (sample data)
         run_rewind(p); run_style(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
+    if "--only-gather" in ARGS:                      # SPEC §20c quick loop (sample: run_gather, --real: run_real_gather)
+        (run_real_gather if REAL else run_gather)(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
+    if "--only-track" in ARGS:                       # SPEC §29b quick loop (sample data, or --real)
+        run_track(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
+    if "--only-v034" in ARGS:                        # SPEC §31 quick loop (sample data, or --real)
+        run_v034(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
+    if "--only-v040" in ARGS:                        # SPEC §32 quick loop (sample: run_v040, --real: run_real_v040)
+        (run_real_v040 if REAL else run_v040)(p)
         fails = [r for r in results if not r[1]]
         print(f"\nconsole/page errors: {len(errors)}")
         for e in errors: print("  " + e)
@@ -1832,14 +2736,20 @@ with sync_playwright() as p:
         run_v03(p)
         run_grudge(p)
         run_rewind(p)
+        run_v040(p)
+        run_gather(p)
     if "--only-v022" not in ARGS: run_five(p)
     run_difficulty(p)
     run_style(p)
+    run_track(p)
+    run_v034(p)
     if REAL:
         run_new_routes(p)
         run_real_v022(p)
         run_real_v03(p)
         run_real_grudge(p)
+        run_real_v040(p)
+        run_real_gather(p)
     fails = [r for r in results if not r[1]]
     print(f"\nconsole/page errors: {len(errors)}")
     for e in errors: print("  " + e)

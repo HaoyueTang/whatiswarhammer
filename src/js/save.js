@@ -94,9 +94,8 @@
     try { rec = migrate(JSON.parse(JSON.stringify(rec))); } catch (e) { return {ok: false, error: "err_schema"}; }
     var f = WH.factions && WH.factions[rec.faction];
     if (!f) return {ok: false, error: "err_faction", arg: rec.faction};
-    var nodeOK = (f.nodes && f.nodes[rec.nodeId]) || rec.nodeId.indexOf("__death_") === 0;
-    if (!nodeOK) return {ok: false, error: "err_node", arg: rec.nodeId};
-    if (rec.pendingNext && !(f.nodes && f.nodes[rec.pendingNext])) return {ok: false, error: "err_node", arg: rec.pendingNext};
+    /* SPEC §32.4: a node id that no longer exists is NOT an error any more — WH.Game.fromRecord moves the run to the start of the saved chapter
+     * (stats / flags kept) and the UI shows a one-line notice. Unknown factions are still rejected. */
     if (!rec.stats || typeof rec.stats !== "object") return {ok: false, error: "err_schema"};
     if (rec.codex && !Array.isArray(rec.codex)) return {ok: false, error: "err_schema"};
     if (rec.seenEvents && !Array.isArray(rec.seenEvents)) return {ok: false, error: "err_schema"};
@@ -144,7 +143,7 @@
     /* settings */
     defaultSettings: function () {
       var nav = (root.navigator && (root.navigator.language || "")) || "";
-      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true, rewind: false, musicStyle: "chip"};
+      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true, rewind: false, musicStyle: "chip", musicTrack: "auto"};
     },
     loadSettings: function () {
       var d = Save.defaultSettings(), s = getJSON("settings") || {};
@@ -154,6 +153,7 @@
       if (s.knownHint !== "silent") s.knownHint = "toast";
       s.rewind = s.rewind === true;                                        // SPEC §30 (default off)
       if (typeof s.musicStyle !== "string" || !/^[a-z0-9_-]{1,24}$/i.test(s.musicStyle)) s.musicStyle = "chip";   // SPEC §29 (audio.js maps unknown ids to chip)
+      if (typeof s.musicTrack !== "string" || !/^[a-z0-9_-]{1,24}$/i.test(s.musicTrack)) s.musicTrack = "auto";   // SPEC §29b ("auto" or a mood id; the UI/audio.js map unknown ids to auto)
       return s;
     },
     saveSettings: function (s) { set("settings", JSON.stringify(s)); },

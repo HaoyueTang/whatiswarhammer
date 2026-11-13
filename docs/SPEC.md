@@ -486,3 +486,4 @@ If a loaded slot/autosave points to a node id that no longer exists, the engine 
 - **Severity.** Default `validate.js` prints the §32.1 story findings as WARN (so a route mid-rewrite keeps the older gates green); `--story-gate` turns the "error" limits into errors (false choice > 10 %, forced chapter step > 0, median run > 80).
 - **Shallow branch (rule 2, lead decision 2026-11-12).** Defined in rule 2 above: re-merge within ≤ 1 step AND no read flag distinguishes the choices; the plain "re-merge within ≤ 1 step" count stays as an INFO figure.
 - **Not implemented:** the §32.3 heuristic "event text contradicts the scene"; only the dead-roll check (an `eventRoll` node where no event can fire) exists.
+(Note: `node tools/dev/playthrough.js <faction> [--seed N] [--origin id|index] [--en] [--stats] [--flags] [--first|--last]` prints one random run as readable text — QA tool.)

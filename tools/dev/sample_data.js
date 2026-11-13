@@ -15,6 +15,14 @@
  * v0.3.2 (SPEC §28 grudges): faction.npcs {vik (sprite guardsman), mira (no sprite)}; smp_006 can wrong Vik (steals his canteen), smp_005 can
  * wrong Mira (plants the token on her); smp_007 carries two Vik grudges (roll p −0.15 + hp, effects only) — Vik is present through his
  * speaker sprite — and a "return the canteen" redemption (forgiven_vik); smp_008 carries a Mira grudge shown through a `grudgeLine`.
+ * v0.3.4 (SPEC §20c gathering places): rumours and echoes are heard ONLY on nodes with `gather: {zh, en}` (label contained in the zh and en
+ * text). Two sample gather nodes: smp_004 (ch2 mess hall — rumour match: cadia scores 2, wall/nowhen score 0) and smp_002 (ch1 break area —
+ * no rumour exists for chapter 1, so it only shows the tag). smp_rum_never now lives in chapters 5–6 (no sample gather node there, so the
+ * validator warns "unreachable" and chr_sample_heresy stays locked). Tests that need a crowd everywhere set `gather` on all nodes in-page.
+ * v0.4.0 (SPEC §32): smp_006 is a `bridge` node with `alt` (a `text` replacement on flag token, `add` paragraphs on origin_scav / prayed / fromNode —
+ * three can match, only the first 2 show); smp_002's "work yourself raw" has a `resultAlt` (flag prayed); smp_007 carries a `jump` mark; the death
+ * node smp_death_hp varies with `fromScene` / `fromChapter`; two events exercise `where` (smp_evt_where: scene manufactorum + flag peeked + chapter 1,
+ * never eligible at an eventRoll node of the normal route) and `excludeFactions` (smp_evt_excl).
  */
 WH.registerCodex({
   smp_commissar:  {cat: "leader", faction: "imperium", race: "imperium", type: "unit", sprite: "commissar",
@@ -78,16 +86,16 @@ WH.registerCodex({
 /* SPEC §20 rumours (normally data/rumors.js) */
 WH.registerRumors([
   {id: "smp_rum_cadia", factions: ["sample"], minChapter: 2,
-   when: {sprites: ["commissar", "guardsman"], keywords: {zh: ["政委", "卡迪亚"], en: ["Commissar", "Cadia"]}},     // smp_004: sprite + keyword = 2
+   when: {sprites: ["commissar", "guardsman"], keywords: {zh: ["政委", "卡迪亚"], en: ["Commissar", "Cadia"]}},     // smp_004 (mess hall): sprite + keyword = 2
    speaker: {zh: "独臂老兵", en: "One-armed veteran"},
    text: {zh: "“卡迪亚没倒，”他把杯子扣在桌上，“是星球先碎的。人还站着。”", en: "\"Cadia didn't fall,\" he says, slamming his cup down. \"The planet broke first. We were still standing.\""},
    codex: ["chr_sample_cadia"]},
   {id: "smp_rum_wall", factions: ["*"], minChapter: 2, maxChapter: 4, speaker: null,
-   when: {scenes: ["trench"], sprites: ["ork", "ork_boss"], keywords: {zh: ["兽人", "绿皮"], en: ["Ork"]}},      // smp_007 (trench + ork)
+   when: {scenes: ["trench"], sprites: ["ork", "ork_boss"], keywords: {zh: ["兽人", "绿皮"], en: ["Ork"]}},      // smp_007 (trench + ork) — a fight, not a crowd: on the real sample gather nodes it scores 0
    text: {zh: "墙上的炭笔字：记住阿玛迦顿。绿皮总会回来。", en: "Charcoal on the wall: REMEMBER ARMAGEDDON. THE GREENSKINS ALWAYS COME BACK."},
    codex: ["chr_sample_armageddon"]},
-  /* matches no sample node (craftworld scene / seer sprite / "灵族") — must never appear; maxChapter 3 tests the window */
-  {id: "smp_rum_never", factions: ["sample"], minChapter: 1, maxChapter: 3, speaker: {zh: "陌生的吟游者", en: "A strange singer"},
+  /* SPEC §20c: lives in chapters 5–6, where the sample has no gather node → unreachable (the validator warns), must never appear */
+  {id: "smp_rum_never", factions: ["sample"], minChapter: 5, maxChapter: 6, speaker: {zh: "陌生的吟游者", en: "A strange singer"},
    when: {scenes: ["craftworld"], sprites: ["aeldari_seer"], keywords: {zh: ["灵族"], en: ["Aeldari"]}},
    text: {zh: "她唱着一个星球如何一夜之间被欲望吞没。", en: "She sings of a world swallowed by desire in a single night."},
    codex: ["chr_sample_heresy"]}
@@ -129,6 +137,20 @@ WH.registerEvents([
    choices: [
      {text: {zh: "低头接受", en: "Bow and accept"}, effects: {sanity: 5, taint: {all: -20}}, result: {zh: "某种很重的东西，从你肩上滑落了。", en: "Something heavy slides off your shoulders."}},
      {text: {zh: "推开他", en: "Push him away"}, effects: {renown: -5}, result: {zh: "他叹了口气，没有再说什么。", en: "He sighs and says nothing more."}}
+   ]},
+  {id: "smp_evt_where", god: "other", factions: ["sample"], minChapter: 1, where: {scenes: ["manufactorum"], flag: "peeked", chapter: {min: 1, max: 1}},
+   scene: "manufactorum", speaker: {sprite: "hive_foreman", name: {zh: "工头格里克", en: "Foreman Grick"}}, foe: null,
+   text: {zh: "工头把一页纸拍在压床上：“这上面的名字，你认识吗？”", en: "The foreman slaps a page on the press: \"Do you know the name on this?\""},
+   choices: [
+     {text: {zh: "摇头", en: "Shake your head"}, effects: {sanity: -3}, result: {zh: "他盯了你很久，把纸收了回去。", en: "He stares at you a long while, then takes the page back."}},
+     {text: {zh: "说不认识，但手在抖", en: "Say no, hands shaking"}, effects: {renown: -3}, result: {zh: "他什么也没说，只是记了下来。", en: "He says nothing. He just writes it down."}}
+   ]},
+  {id: "smp_evt_excl", god: "other", factions: ["*"], excludeFactions: ["sample"], where: {notScenes: ["warp"]},
+   scene: "cathedral", speaker: null, foe: null,
+   text: {zh: "钟声停了。这个事件从不会在测试阵营里出现。", en: "The bell falls silent. This event never fires in the sample faction."},
+   choices: [
+     {text: {zh: "继续", en: "Go on"}, result: {zh: "什么也没有发生。", en: "Nothing happens."}},
+     {text: {zh: "再等等", en: "Wait a little"}, result: {zh: "什么也没有发生。", en: "Nothing happens."}}
    ]},
   {id: "smp_claim_khorne", god: "khorne", trigger: "claim", factions: ["*"],
    scene: "daemon_world", speaker: {sprite: "daemon_khorne", name: {zh: "铜王座的回声", en: "Echo of the Brass Throne"}}, foe: null,
@@ -212,11 +234,12 @@ WH.registerFaction({
       text: {zh: "第二天，你被调去工厂顶班。没人解释为什么。", en: "Next day you are sent to cover a factory shift. No one explains why."},
       choices: [{text: {zh: "去工厂", en: "Go to the factory"}, next: "smp_002"}]},
     smp_002: {chapter: 1, scene: "manufactorum", speaker: {sprite: "hive_foreman", name: {zh: "工头格里克", en: "Foreman Grick"}},
-      time: {h: 6},
-      text: {zh: "“配额又涨了。完不成的人，名字会进什一税名单。”", en: "\"Quota's up again. Miss it, and your name goes on the tithe list.\""},
+      time: {h: 6}, gather: {zh: "工间休息处", en: "Break area"},
+      text: {zh: "休息铃响了，工人们挤在工间休息处。工头格里克说：“配额又涨了。完不成的人，名字会进什一税名单。”", en: "The break bell rings and the workers crowd the break area. Foreman Grick: \"Quota's up again. Miss it, and your name goes on the tithe list.\""},
       choices: [
         {text: {zh: "拼命干活", en: "Work yourself raw"}, next: "smp_004", effects: {hp: -15},
-         result: {zh: "压床咬住了你的袖口。你扯回手臂，留下一层皮。", en: "The press catches your sleeve. You tear your arm free and leave skin behind."}},
+         result: {zh: "压床咬住了你的袖口。你扯回手臂，留下一层皮。", en: "The press catches your sleeve. You tear your arm free and leave skin behind."},
+         resultAlt: [{if: {flag: "prayed"}, text: {zh: "压床咬住了你的袖口。你默念祷文，扯回手臂，只留下一层皮。", en: "The press catches your sleeve. You mutter the litany and tear your arm free, leaving only skin."}}]},
         {text: {zh: "偷工减料", en: "Cut corners"}, roll: {p: 0.5, stat: "sanity", success: "smp_004", fail: "smp_005"},
          rollResult: {success: {zh: "检查员只看了一眼计数板，就走开了。", en: "The inspector glances at the tally board and walks on."},
                       fail: {zh: "检查员停在你的工位前，慢慢掏出记事板。", en: "The inspector stops at your station and slowly takes out a slate."}}},
@@ -234,8 +257,8 @@ WH.registerFaction({
         {text: {zh: "[未祈祷] 跟他走", en: "[Never prayed] Follow him"}, next: "smp_end_bad_cult", require: {notFlag: "prayed"}, hideIfLocked: true}
       ]},
     smp_004: {chapter: 2, scene: "barracks", speaker: {sprite: "commissar", name: {zh: "卡斯政委", en: "Commissar Kast"}},
-      time: {d: 9},
-      text: {zh: "你的名字还是上了名单。卡斯政委看着新兵：“恐惧是允许的。逃跑不是。”", en: "Your name made the list anyway. Commissar Kast eyes the recruits: \"Fear is permitted. Running is not.\""},
+      time: {d: 9}, gather: {zh: "食堂", en: "Mess hall"},
+      text: {zh: "食堂里，你的名字还是上了名单。卡斯政委看着新兵：“恐惧是允许的。逃跑不是。”", en: "In the mess hall, your name made the list anyway. Commissar Kast eyes the recruits: \"Fear is permitted. Running is not.\""},
       codex: ["smp_commissar"],
       choices: [
         {text: {zh: "立正", en: "Stand to attention"}, next: "smp_006", effects: {renown: 5}},
@@ -255,8 +278,14 @@ WH.registerFaction({
          result: {zh: "执法者在米拉的铺位下搜出了铁片。她回头看你，一个字也没说。", en: "The enforcers find the token under Mira's bunk. She looks back at you and says nothing."}}
       ]},
     smp_006: {chapter: 3, scene: "ship_interior", speaker: {sprite: "psyker", name: {zh: "被缚的灵能者", en: "Bound Psyker"}},
-      time: {d: 30, warp: true}, eventRoll: 0.4,
+      time: {d: 30, warp: true}, eventRoll: 0.4, bridge: true,
       text: {zh: "运兵舰潜入亚空间。舷窗外的颜色没有名字。灵能者在笑。", en: "The troopship drops into the warp. The colours outside have no names. The psyker is laughing."},
+      alt: [
+        {if: {flag: "token"}, text: {zh: "运兵舰潜入亚空间。袖中的铁片开始发烫，舷窗外的颜色没有名字。灵能者在笑。", en: "The troopship drops into the warp. The token in your sleeve turns hot; the colours outside have no names. The psyker is laughing."}},
+        {if: {flag: "origin_scav"}, add: {zh: "下巢的老人说过，墙里有歌。这里的歌更响。", en: "The old man downhive said the walls sing. Here, the song is louder."}},
+        {if: {flag: "prayed"}, add: {zh: "你的嘴唇仍记得那句祷文。", en: "Your lips still remember the litany."}},
+        {if: {fromNode: ["smp_005"]}, add: {zh: "执法者留下的淤青还在疼。", en: "The bruises the enforcers left still ache."}}
+      ],
       effects: {sanity: -15}, codex: ["smp_warp", "smp_place_warp"],
       choices: [
         {text: {zh: "盯着舷窗", en: "Stare out the viewport"}, next: "smp_007", effects: {sanity: -30, corruption: 10},
@@ -267,7 +296,7 @@ WH.registerFaction({
          result: {zh: "维克睡着了。你把他最后半壶水倒进了自己的水壶。", en: "Vik is asleep. You pour the last of his water into your own canteen."}}
       ]},
     smp_007: {chapter: 4, scene: "trench", speaker: {sprite: "guardsman", name: {zh: "老兵维克", en: "Veteran Vik"}}, foe: "ork",
-      time: {y: 2},
+      time: {y: 2}, jump: {zh: "两年的军旅一笔带过", en: "two years of service, skipped"},
       text: {zh: "两年。你学会了在泥里睡觉。今夜，绿皮冲锋了。", en: "Two years. You learned to sleep in mud. Tonight, the greenskins charge."},
       effects: {hp: -35}, codex: ["smp_ork"],
       choices: [
@@ -315,6 +344,10 @@ WH.registerFaction({
       ending: {kind: "bad", title: {zh: "颅骨献给王座", en: "Skulls for the Throne"}, cause: {zh: "被恐虐认领", en: "Claimed by Khorne"}}},
     smp_death_hp: {scene: "ruins", speaker: null,
       text: {zh: "你的血渗进了这个星球的土里。这里的土早已喝饱了血。", en: "Your blood soaks into this world's soil. It has drunk its fill before."},
+      alt: [
+        {if: {fromScene: ["trench"]}, text: {zh: "你倒在战壕的泥里。这里的泥早已喝饱了血。", en: "You fall in the trench mud. It has drunk its fill before."}},
+        {if: {fromChapter: {min: 1, max: 2}}, add: {zh: "还没轮到上战场，你就倒下了。", en: "You fall before ever reaching a battlefield."}}
+      ],
       ending: {kind: "death", title: {zh: "无名之死", en: "A Nameless Death"}}},
     smp_death_sanity: {scene: "warp", speaker: null,
       text: {zh: "你听懂了低语。然后你开始和它们一起低语。", en: "You understand the whispers. Then you begin to whisper with them."},

@@ -30,6 +30,13 @@
 </div>
 <div class="grid" id="previews"></div>
 
+<h2>Track (SPEC §29b)</h2>
+<div class="row">
+  <label>track <select id="track"></select></label>
+  <button id="trackprev" style="min-width:0">▶ preview selected mood (~8 s)</button>
+  <span id="trackdesc" style="color:#a99c83"></span>
+</div>
+
 <h2>Music moods</h2>
 <div class="grid" id="moods"></div>
 <div class="row">
@@ -63,7 +70,8 @@
   function status() {
     var c = A._ctx();
     $("status").textContent = "context: " + (c ? c.state + "  t=" + c.currentTime.toFixed(1) + "s" : "not created (click to unlock)") +
-      "\nstyle: " + A.getStyle() + (A.isPreviewing() ? "   (previewing)" : "") +
+      "\nstyle: " + A.getStyle() + (A.isPreviewing() ? "   (previewing)" : "") + "   track: " + A.getTrack() +
+      "   playing: " + A.getPlayingMood() +
       "\ncurrent mood: " + A.current() + "   wanted: " + A.wanted() + "   muted: " + A.isMuted() +
       "\nmusic " + A.getMusicVolume().toFixed(2) + "   sfx " + A.getSfxVolume().toFixed(2);
     [].forEach.call(moodBox.children, function (b) { b.classList.toggle("on", b.dataset.mood === A.current()); });
@@ -88,6 +96,13 @@
     $("previews").appendChild(b);
   });
   function styleDesc() { var st = A.getStyles().filter(function (x) { return x.id === A.getStyle(); })[0]; $("styledesc").textContent = st ? st.desc.zh + " | " + st.desc.en : ""; }
+  A.getMoods().forEach(function (m) { buildTrackOption(m); });
+  function buildTrackOption(m) {
+    if (!$("track").children.length) { var a = document.createElement("option"); a.value = "auto"; a.textContent = "auto — 自动（随剧情） / follows the story"; $("track").appendChild(a); }
+    var o = document.createElement("option"); o.value = m.id; o.textContent = m.group + " · " + m.id + " — " + m.zh + " / " + m.en; $("track").appendChild(o);
+  }
+  $("track").onchange = function () { A.unlock(); var r = A.setTrack(this.value); $("trackdesc").textContent = "track = " + r; status(); };
+  $("trackprev").onclick = function () { A.unlock(); var v = $("track").value; $("trackdesc").textContent = v === "auto" ? "pick a mood first" : "previewMood(" + v + ") = " + A.previewMood(v); status(); };
   $("style").onchange = function () { A.unlock(); A.setStyle(this.value); buildMoods(); styleDesc(); status(); };
   buildMoods(); styleDesc();
   A.sfxNames.forEach(function (s) {

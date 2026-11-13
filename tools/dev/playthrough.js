@@ -32,7 +32,7 @@ for (let n = 0; n < MAX; n++) {
     console.log(`\n[EVENT ${ev.id}] ${L(ev.text)}`);
     const ch = g.eventChoices(); ch.forEach((c, i) => console.log(`   - [${i}] ${L((c.choice || c).text)}`));
     const k = Math.floor(rnd() * ch.length); console.log("   → pick", k);
-    const r = g.eventChoose(k); if (r && r.consequence && r.consequence.result) console.log("   ⤷", L(r.consequence.result));
+    const r = g.eventChoose(k); if (r && r.consequence && (r.consequence.text||r.consequence.result)) console.log("   ⤷", L(r.consequence.text||r.consequence.result));
     step = g.eventContinue(); continue;
   }
   const id = g.state.nodeId, node = g.node(id) || {};
@@ -49,6 +49,6 @@ for (let n = 0; n < MAX; n++) {
   const pick = opt("first", false) ? pool[0].i : opt("last", false) ? pool[pool.length - 1].i : pool[Math.floor(rnd() * pool.length)].i;
   console.log("   → pick", pick);
   step = g.choose(pick);
-  if (step.consequence && step.consequence.result) console.log("   ⤷", L(step.consequence.result).slice(0, 400));
+  { const cq = step.consequence || {}, rt = cq.text || cq.result; if (rt) console.log("   ⤷", L(rt).slice(0, 400)); }
   if (step.roll) console.log("   🎲", JSON.stringify(step.roll).slice(0, 120));
 }

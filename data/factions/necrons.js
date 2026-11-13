@@ -385,7 +385,7 @@
       {if: {flag: "handshake"}, add: L("技师的探针碰了碰你耳后：“已登记者。”", "The cryptek's probe touches behind your ear. “Registered.”")},
       {if: {flag: "sliver"}, add: L("技师从你口袋里取走那片金属，放回了墙上。", "The cryptek takes the metal sliver from your pocket and puts it back in the wall.")},
       {if: {flag: "savedOriel"}, add: L("奥里尔医师站在你身后，按着伤口。", "Medicae Oriel stands behind you, holding his wound.")},
-      {if: {fromNode: ["nec_206"]}, add: L("技师先测了你肩上的伤。", "The cryptek measures the wound on your shoulder first.")}
+      {if: {fromNode: ["nec_206"]}, add: L("技师先量了量你扣过扳机的那根手指。", "The cryptek first measures the finger that pulled the trigger.")}
     ],
     codex: ["nec_crypteks"],
     choices: [
@@ -420,10 +420,10 @@
         "The overlord waves a hand. “With your kind. Go and see.”"))
     ]};
 
-  N.nec_209a = {chapter: 2, scene: "tomb_exterior", speaker: null, time: {h: 6},
+  N.nec_209a = {chapter: 2, scene: "tomb_exterior", speaker: null, time: {h: 12},
     gather: L("幸存者围栏", "Survivors' pen"),
-    text: L("金字塔脚下的幸存者围栏里，三十几个人挤着取暖。技师在栏外来回走，听你们说话，学你们的词。\n卡尔中士被单独带走了。远处，最后一架穿梭机的尾焰划过夜空。",
-            "In the survivors' pen at the pyramid's foot, thirty-odd people huddle for warmth. Crypteks pace outside, listening, learning your words.\nSergeant Kaal was taken away alone. Far off, the last shuttle's trail scores the night."),
+    text: L("金字塔脚下的幸存者围栏里，三十几个人挤着取暖。技师在栏外来回走，听你们说话，学你们的词。\n卡尔中士被单独带走了。天黑了，天上一架穿梭机也没有。",
+            "In the survivors' pen at the pyramid's foot, thirty-odd people huddle for warmth. Crypteks pace outside, listening, learning your words.\nSergeant Kaal was taken away alone. Night falls; there isn't a single shuttle in the sky."),
     alt: [
       {if: {flag: "askedCompanions"}, add: L("“和你的同类在一起”——原来就是这里。", "“With your kind”: so this is what he meant.")},
       {if: {flag: "hollisFriend"}, add: L("霍利斯给你挪出个位置：“我说过吧，它们一直醒着。”", "Hollis makes room for you. “Told you. Always awake.”")},
@@ -434,7 +434,7 @@
     choices: [
       C("记下每个人的名字", "Write down everyone's name", "nec_301", X({sanity: 5, set: {listedNames: true}},
         "三十四个名字。你写在手背上，怕明天就少了。",
-        "Thirty-four names. You write them on your arm, afraid there'll be fewer tomorrow.")),
+        "Thirty-four names. You write them on the back of your hand, afraid there'll be fewer tomorrow.")),
       C("贴着栏杆，学技师的词", "Sit by the bars and learn their words", "nec_301", X({renown: 3, sanity: -3, set: {learnedWords: true}},
         "技师在学你，你也在学技师。天亮前，你记住了“害虫”“留着”和“礼数”。",
         "They learn you; you learn them. By dawn you know “vermin,” “keep,” and “etiquette.”"))
@@ -444,7 +444,7 @@
     text: L("带记号的人被送进矿坑，替金字塔挖掉身上的沙。\n没有鞭子，没有监工，只有一只甲虫，每小时绕你脚边转一圈，测你还剩多少力气。\n第三天，它多停了一会儿。",
             "The marked are sent to the pits to dig sand off the pyramid.\nNo whips, no overseers. Just a scarab that circles your feet every hour, measuring how much strength you have left.\nOn the third day it lingers."),
     alt: [
-      {if: {flag: "quota"}, add: L("监工画过勾的那种手法，甲虫好像也认得。", "The scarab seems to recognise the overseer's sort of tick mark.")}
+      {if: {flag: "quota"}, add: L("甲虫每转一圈，就在沙上划一道勾，跟监工的手法一模一样。", "Each circuit, the scarab scratches a tick in the sand, just like the overseer used to.")}
     ],
     effects: {hp: -10},
     choices: [
@@ -468,7 +468,7 @@
         "From the pit edge, the cable-cloaked lord has you carried into his throne hall. “I am Sekhrat, Overlord of Akhemet.”\nHe asks you the date. You tell him. He is silent a long time.\n“Sixty million years,” he says at last. “We overslept.”")},
       {if: {flag: "askedNap"}, add: L("你昨天问他睡了多久。这就是答案。", "Yesterday you asked how long he slept. This is the answer.")},
       {if: {flag: "learnedWords"}, add: L("你用围栏里学来的词报日期。他的眼光亮了一度。", "You give the date in the words you learned in the pen. His eyes brighten a shade.")},
-      {if: {flag: "listedNames"}, add: L("手背上的三十四个名字，你一直攥着拳头藏着。", "You keep your fist closed over the thirty-four names on your arm.")}
+      {if: {flag: "listedNames"}, add: L("手背上的三十四个名字，你一直攥着拳头藏着。", "You keep your fist closed over the thirty-four names on the back of your hand.")}
     ],
     codex: ["nec_great_sleep", "place_court_hall", "nec_dynasties"],
     choices: [
@@ -615,8 +615,8 @@
   /* ============ Chapter 4 · The Specimen ============ */
   N.nec_313 = {chapter: 4, scene: "barracks", speaker: null, time: {d: 40}, bridge: true,
     gather: L("俘虏厅", "Captives' hall"),
-    text: L("四十天里，霸主把“留着有用”的人类关进一间旧仆役厅，就是俘虏厅。大家互相教礼数：鞠躬的角度，不能先开口。\n这天夜里，技师来通知：“明天有贵客。客人喜欢人类。”",
-            "For forty days the overlord keeps his “useful” humans in an old servants' hall, now the captives' hall. You teach each other etiquette: the angle of a bow, never speak first.\nTonight a cryptek announces: “A guest comes tomorrow. The guest is fond of humans.”"),
+    text: L("四十天里，霸主把三十来个“留着有用”的人类关进一间旧仆役厅，就是俘虏厅。大家互相教礼数：鞠躬的角度，不能先开口。\n这天夜里，技师来通知：“明天有贵客。客人喜欢人类。”",
+            "For forty days the overlord keeps some thirty “useful” humans in an old servants' hall, now the captives' hall. You teach each other etiquette: the angle of a bow, never speak first.\nTonight a cryptek announces: “A guest comes tomorrow. The guest is fond of humans.”"),
     alt: [
       {if: {flag: "advisedDelay"}, add: L("两封四十页的问候信送出去了，两边都还没回。", "Both forty-page greetings went out. Neither side has answered yet.")},
       {if: {flag: "ahmetSubmit"}, add: L("厅外挂起了萨特克王朝的绿色雷纹旗。", "Outside the hall now hangs the Sautekh's green lightning banner.")},
@@ -828,8 +828,8 @@
     ]};
 
   N.nec_504 = {chapter: 5, scene: "stasis_gallery", speaker: IMHET, foe: "aeldari_seer", time: {h: 1}, eventRoll: 0.35,
-    text: L("第一位访客是一位远道而来的死灵贵族。伊姆赫特把你推到先知的展位前：“讲。”\n贵族的目光像一盏冷灯。\n你清了清嗓子。你已经三百八十年没说过话了。",
-            "The first visitor is a necron noble from afar. Imhet pushes you before the seer's display. “Speak.”\nThe noble's gaze is a cold lamp.\nYou clear your throat. You haven't spoken in three hundred and eighty years."),
+    text: L("第一位访客是一位远道而来的死灵贵族。伊姆赫特把你推到先知的展位前：“讲。”\n贵族的目光像一盏冷灯。\n你清了清嗓子。上一次有人认真听你说话，是三百八十年前。",
+            "The first visitor is a necron noble from afar. Imhet pushes you before the seer's display. “Speak.”\nThe noble's gaze is a cold lamp.\nYou clear your throat. The last time anyone really listened to you was three hundred and eighty years ago."),
     choices: [
       C("讲天堂之战：灵族与死灵的旧仇", "Tell of the War in Heaven, the old feud", "nec_505", O(Q({flag: "heardWar"}), X({renown: 10, set: {tipCoin: true}},
         "贵族听得一动不动。讲完后，他把一枚古钱币放进你手里，当作小费。",
@@ -1057,8 +1057,9 @@
     text: L("出发前，收藏家向你描述他的新展位：一片星神碎片，冻在饥饿的那一刻。\n“铭牌我都想好了：死亡，进食中。”\n他的声音快乐得像个孩子。",
             "Before departure, the Collector describes his new display: a star-god shard, frozen mid-hunger.\n“I've already written the plaque: Death, Feeding.”\nHe sounds as happy as a child."),
     alt: [
+      {if: {flag: "aeldariFriend"}, add: L("伊姆赫特在先知空了的展位前站了很久，一句也没问你。", "Imhet stood a long time before the seer's empty display. He asked you nothing.")},
       {if: {flag: "sawShard"}, add: L("你想起那个声音在你骨头里说话的感觉。", "You remember that voice speaking inside your bones.")},
-      {if: {flag: "askedShard"}, add: L("“你想看它很久了，”他说，“涅弗记过一笔。”", "“You've wanted to see it a long time,” he says. “Nefer made a note.”")}
+      {if: {flag: "askedShard"}, add: L("“你想看它很久了，”收藏家说，“涅弗记过一笔。”", "“You've wanted to see it a long time,” says the Collector. “Nefer made a note.”")}
     ],
     codex: ["nec_ctan"],
     choices: [
@@ -1110,9 +1111,9 @@
     ],
     choices: [
       C("排队应征挖掘劳工", "Queue up as a dig labourer", "nec_701"),
-      C("趁夜从甲虫隧道回墓里", "Take the scarab tunnels back into the tomb", "nec_702", X({sanity: -3},
-        "隧道还认得你的脚步。你走得越深，帐篷城的歌声越远。",
-        "The tunnels still know your footsteps. The deeper you go, the fainter the camp's hymns."))
+      C("从甲虫隧道溜回墓里", "Slip back into the tomb by the scarab tunnels", "nec_702", X({sanity: -3},
+        "隧道里的甲虫给你让路，像还认得你。你走得越深，帐篷城的歌声越远。",
+        "The scarabs in the tunnels make way, as if they still know you. The deeper you go, the fainter the camp's hymns."))
     ]};
 
   /* ============ Chapter 7 · Return to the Tomb ============ */
@@ -1125,7 +1126,7 @@
       {if: {flag: "doubter"}, add: L("“我的旧档案页脚有一行“存疑”，”他说，“现在我知道是谁写的了。”", "“My old file has “unverified” in its margin,” he says. “Now I know who wrote it.”")},
       {if: {flag: "loyalScribe"}, add: L("“忠诚的书记。”他的镜头柔和了一度。", "“The loyal scribe.” His lenses soften a shade.")},
       {if: {flag: "sawCog"}, add: L("他袍子上烙着那枚齿轮印——当年出钱的锻造世界。", "His robe bears that cog-brand: the forge world that paid for the dig.")},
-      {if: {flag: "drillHand"}, add: L("“你替我校准过第一枚钻头，”他说，“它钻了一百年。”", "“You calibrated my first bit,” he says. “It drilled a hundred years.”")}
+      {if: {flag: "drillHand"}, add: L("“你替我校准过第一枚钻头，”他说，“甲虫吃了它。我又钻了一百年。”", "“You calibrated my first bit,” he says. “The scarabs ate it. I have drilled for a century since.”")}
     ],
     codex: ["imp_mechanicus"],
     choices: [
@@ -1220,8 +1221,8 @@
 
   N.nec_707 = {chapter: 7, scene: "dig_site", speaker: MORDANE, time: {h: 8},
     gather: L("撤离集合点", "Evacuation muster"),
-    text: L("卫兵把你押到营地的撤离集合点。劳工们挤在一起，吵着走不走。\n一个穿深色长外套的女人听完霸主的期限，笑了：“一个金属贵族，给我们一天时间？”\n莫丹审判官转向贤者：“那就今天开门。”",
-            "Guards march you to the camp's evacuation muster. Labourers crowd together, arguing whether to leave.\nA woman in a long dark coat hears the overlord's deadline and laughs. “A metal aristocrat giving us a day?”\nInquisitor Mordane turns to the magos. “Then we open the door today.”"),
+    text: L("卫兵把你押到营地的撤离集合点。劳工们挤在一起，吵着走不走。\n穿深色长外套的莫丹审判官听完霸主的期限，笑了：“一个金属贵族，给我们一天时间？”\n她转向贤者：“那就今天开门。”",
+            "Guards march you to the camp's evacuation muster. Labourers crowd together, arguing whether to leave.\nInquisitor Mordane, in a long dark coat, hears the overlord's deadline and laughs. “A metal aristocrat giving us a day?”\nShe turns to the magos. “Then we open the door today.”"),
     effects: {set: {inqKnows: true}},
     codex: ["imp_inquisition"],
     choices: [
@@ -1367,8 +1368,8 @@
         "你争来的那一小时，此刻全都用上了。光网一层层收紧。",
         "The hour you stole is spent all at once. The net tightens, layer by layer."))),
       C("用停滞钥匙冻住它一秒", "Freeze it for a second with the stasis key", "nec_806", O(Q({flag: "stasisKey"}, true), X({renown: 5, taint: {all: -10}},
-        "钥匙在你手里化成一团冷光。碎片停了一秒，一秒就够了。",
-        "The key melts into cold light in your hand. The shard stops for one second. One second is enough."))),
+        "钥匙在你手里亮成一团冷光。碎片停了一秒，一秒就够了。",
+        "The key blazes into cold light in your hand. The shard stops for one second. One second is enough."))),
       C("硬着头皮念", "Stumble through it anyway", null, R(0.45, "sanity", "nec_806", "nec_807",
         RR("你念错了两个音，但星神没听出来。", "You fluff two sounds, but the star god doesn't notice.",
            "你念到一半，舌头冻住了。", "Halfway through, your tongue freezes.")))
@@ -1411,7 +1412,7 @@
     text: L("最后一个音节落下，光网收紧。碎片尖叫着缩回笼子，像一滴墨缩回墨水瓶。\n墓穴安静了。塞赫拉特走到你面前，第一次弯下了腰。\n“发音，”他说，“几乎完美。”",
             "The last syllable falls and the net tightens. The shard shrieks back into its cage like ink into the bottle.\nThe tomb goes silent. Sekhrat comes before you and, for the first time, bows.\n“Pronunciation,” he says. “Nearly flawless.”"),
     alt: [
-      {if: {flag: "stasisKey"}, add: L("他看了看你手里那团冷光：“收藏家的东西。我就不问了。”", "He eyes the cold light in your hand. “The Collector's property. I won't ask.”")},
+      {if: {flag: "stasisKey"}, add: L("他瞥了一眼你缝着钥匙的外套夹层：“收藏家的东西。我就不问了。”", "He glances at the coat lining where the key is sewn. “The Collector's property. I won't ask.”")},
       {if: {flag: "drillStalled"}, add: L("“你争来的那一小时，”他说，“用得很好。”", "“The hour you won,” he says, “was well spent.”")}
     ],
     effects: {renown: 5, sanity: 5, set: {sealed: true}},
@@ -1501,7 +1502,7 @@
            "莫丹摇头：“你站错了地方。”枪声响起时，墓门替你开了一条缝。", "Mordane shakes her head. “Wrong place to stand.” As the shots ring out, the tomb door opens a crack for you.")),
         G("mordane", "她不会和出卖过她哨位的人谈条件。", "She won't bargain with someone who sold out her posts.", -0.2))),
       C("退回墓穴深处", "Retreat into the tomb", "nec_809", G("mordane", "她早叫人瞄着墓道口，专等背对枪口的人。",
-        "Her riflemen already cover the tunnel mouth, waiting for anyone who turns his back.", null, {hp: -8})),
+        "Her riflemen already cover the tunnel mouth, waiting for anyone who turns their back.", null, {hp: -8})),
       C("放下一切，投降", "Drop everything and surrender", "nec_end_inquisition", X({sanity: 5},
         "你把笔记放在沙地上。莫丹弯腰捡起来，翻了一页，叹了口气。",
         "You lay your notes on the sand. Mordane picks them up, turns one page, and sighs."))
@@ -1538,7 +1539,7 @@
     text: L("穿梭机冲出大气层时，下面的沙漠亮起了净化之火。轨道上，一艘自由贸易商的船收了你。\n你抱着那份报告，一页没少。帝国不会出版它，审判庭会追捕它。\n但真相现在有了一个活着的抄本：你。",
             "As the shuttle breaks atmosphere, purging fire blooms over the desert below. In orbit a Free Trader takes you aboard.\nYou clutch the report, not one page lost. The Imperium will never publish it; the Inquisition will hunt it.\nBut the truth now has a living copy: you."),
     alt: [
-      {if: {flag: "freedColleagues"}, add: L("奥里尔的证词，你也带上了。", "You took Oriel's testimony too.")},
+      {if: {flag: "freedColleagues"}, add: L("档案库里奥里尔医师那份封存的证词，你也一并带走了。", "Medicae Oriel's sealed testimony from the archive came with you too.")},
       {if: {flag: "listedNames"}, add: L("报告最后一页，是围栏里那三十四个名字。", "The last page of the report: the thirty-four names from the pen.")},
       {if: {flag: "nameFixed"}, add: L("这一次，你的名字拼对了。", "This time, your name is spelled right.")}
     ],
@@ -1563,7 +1564,8 @@
             "The purging fire takes the cathedral and the camp; the pyramid has long since sunk beneath the sand.\nFar below, a human sits in a cold hall writing a history by green light, for whoever wakes in sixty million years.\nThe overlord drops by now and then to check the pronunciation."),
     alt: [
       {if: {all: [{flag: "salt"}, {notFlag: "neferDead"}]}, add: L("涅弗每年给你一粒盐，要你描述得详细点。", "Every year Nefer gives you a grain of salt, and asks for details.")},
-      {if: {flag: "neferDead"}, add: L("第一章，你写的是一个替你挡下死亡的技师。", "Your first chapter is about a cryptek who took your death for you.")}
+      {if: {all: [{flag: "neferDead"}, {notFlag: "shardHalf"}]}, add: L("第一章，你写的是一个替你挡下死亡的技师。", "Your first chapter is about a cryptek who took your death for you.")},
+      {if: {flags: ["neferDead", "shardHalf"]}, add: L("第一章写的是涅弗：他用身体堵住裂口时，你在往外跑。", "Your first chapter is about Nefer, who plugged the breach with his body while you ran.")}
     ],
     ending: {kind: "good", title: L("墓中史官", "Chronicler of the Tomb"), cause: L("留作墓穴的史官", "Stayed as the tomb's chronicler")}};
 
@@ -1660,7 +1662,9 @@
             "You fall. A few metal scarabs arrive from nowhere, circle you once, and decide you're no longer useful.\nThey collect your lamp and your pen and stack them neatly.\nYou become one more tidy dune."),
     alt: [
       {if: {fromScene: ["stasis_gallery"]}, text: L("你倒下了。一只清洁构造体赶来，绕你转了一圈，判定你已经没有用了。\n它把你的笔、你的鞋码得整整齐齐，放进一个没有铭牌的展位。\n你成了又一件整齐的藏品。",
-        "You fall. A cleaning construct arrives, circles you once, and decides you're no longer useful.\nIt stacks your pen and shoes neatly in a display with no plaque.\nYou become one more tidy exhibit.")}
+        "You fall. A cleaning construct arrives, circles you once, and decides you're no longer useful.\nIt stacks your pen and shoes neatly in a display with no plaque.\nYou become one more tidy exhibit.")},
+      {if: {fromScene: ["tomb_interior"]}, text: L("你倒下了。几只金属甲虫不知从哪儿赶来，绕你转了一圈，判定你已经没有用了。\n它们收走你的灯、你的笔，码得整整齐齐。\n你成了墓里又一件整齐的陈设。",
+        "You fall. A few metal scarabs arrive from nowhere, circle you once, and decide you're no longer useful.\nThey collect your lamp and your pen and stack them neatly.\nYou become one more tidy fixture of the tomb.")}
     ],
     ending: {kind: "death", title: L("整齐的沙丘", "A Tidy Dune"), cause: L("倒下，无人收殓", "Fell, unburied")}};
 

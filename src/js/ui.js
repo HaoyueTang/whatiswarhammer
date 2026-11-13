@@ -22,6 +22,7 @@
     au("setSfxVolume", (s.sfxVol === undefined ? 80 : s.sfxVol) / 100);
     au("mute", !!s.muted);
     au("setStyle", currentStyle());                                      // SPEC §29 (no-op until audio.js has styles)
+    au("setTrack", currentTrack());                                      // SPEC §29b ("auto" or a fixed mood)
   }
   /* ---------- music styles (SPEC §29): WH.Audio.getStyles()/setStyle()/previewStyle() are optional ---------- */
   var FALLBACK_STYLES = [{id: "chip", name: {zh: "8位芯片", en: "8-bit chiptune"},
@@ -60,8 +61,163 @@
     WH.Save.saveSettings(UI.settings);
     au("mute", UI.settings.muted);
     Array.prototype.forEach.call(document.querySelectorAll(".sound-btn"), function (b) { b.parentNode.replaceChild(soundButton(), b); });
+    syncAudioUI();
     var top = UI.modals[UI.modals.length - 1];
     if (top && top.reopen) top.reopen();
+  }
+
+  /* ---------- track selection (SPEC §29b): settings.musicTrack = "auto" | a mood id; WH.Audio.getMoods()/setTrack()/previewMood() are optional ---------- */
+  var TRACK_GROUPS = ["calm", "tense", "fight", "end", "faction"];
+  function moodList() {
+    var A = WH.Audio, list = null;
+    try { list = A && typeof A.getMoods === "function" ? A.getMoods() : null; } catch (e) { list = null; }
+    return Array.isArray(list) ? list.filter(function (x) { return x && typeof x.id === "string" && x.id; }) : [];
+  }
+  function moodName(m) { return (WH.lang === "en" ? (m.en || m.zh) : (m.zh || m.en)) || m.id; }
+  function validTrack(id) { return id === "auto" || moodList().some(function (x) { return x.id === id; }) ? id : "auto"; }
+  function currentTrack() { return validTrack(UI.settings && UI.settings.musicTrack); }
+  function canPreviewMood() { return !!(WH.Audio && typeof WH.Audio.previewMood === "function"); }
+  /* "现在播放：平静" — what is sounding now (the previewed mood while a preview runs); before the first click: what will sound */
+  function nowPlaying() {
+    var list = moodList(), id = au("getPlayingMood");
+    if (!id) id = currentTrack() !== "auto" ? currentTrack() : screenMood();
+    var m = list.filter(function (x) { return x.id === id; })[0];
+    if (!m) return t("track_now", {x: t("track_none")});
+    return t(au("isPreviewing") ? "track_preview_now" : "track_now", {x: moodName(m)}) + (UI.settings.muted ? t("track_muted") : "");
+  }
+  function chooseTrack(id) {
+    id = validTrack(id);
+    UI.settings.musicTrack = id;
+    WH.Save.saveSettings(UI.settings);
+    au("setTrack", id);
+    syncAudioUI();
+  }
+  function chooseStyle(id) {
+    UI.settings.musicStyle = id;
+    WH.Save.saveSettings(UI.settings);
+    au("setStyle", id);
+    syncAudioUI();
+  }
+  /* ▶ preview (style §29 or track §29b): ~8 s, the audio module stops it by itself; muted → nothing plays, say so */
+  function startPreview(kind, id) {
+    if (!au(kind === "track" ? "previewMood" : "previewStyle", id)) { if (UI.settings.muted) toast(t("preview_muted")); return; }
+    markPreview(kind, id);
+  }
+  function markPreview(kind, id) {
+    clearTimeout(UI.pvTimer);
+    UI.pv = {kind: kind, id: id};
+    UI.pvTimer = setTimeout(function () { UI.pv = null; syncAudioUI(); }, 9500);       // safety net: the preview ends after ~8.7 s
+    syncAudioUI();
+  }
+  /* keeps every visible audio control (settings list + ♪ quick panel) and every "now playing" line in step with settings + audio state */
+  function syncAudioUI() {
+    var track = currentTrack(), style = currentStyle(), pv = UI.pv, muted = !!UI.settings.muted;
+    var each = function (sel, fn) { Array.prototype.forEach.call(document.querySelectorAll(sel), fn); };
+    each(".track-pick", function (b) { var on = b.getAttribute("data-track") === track; b.setAttribute("aria-checked", String(on)); b.tabIndex = on ? 0 : -1; b.parentNode.classList.toggle("on", on); });
+    each(".style-pick", function (b) { var on = b.getAttribute("data-style") === style; b.setAttribute("aria-checked", String(on)); b.tabIndex = on ? 0 : -1; b.parentNode.classList.toggle("on", on); });
+    each("select.track-select", function (e) { if (e.value !== track) e.value = track; });
+    each("select.style-select", function (e) { if (e.value !== style) e.value = style; });
+    each(".track-prev", function (b) { var on = !!pv && pv.kind === "track" && pv.id === b.getAttribute("data-track"); b.classList.toggle("playing", on); b.setAttribute("aria-pressed", String(on)); });
+    each(".style-prev", function (b) { var on = !!pv && pv.kind === "style" && pv.id === b.getAttribute("data-style"); b.classList.toggle("playing", on); b.setAttribute("aria-pressed", String(on)); });
+    each(".pop-prev", function (b) {
+      var k = b.getAttribute("data-kind"), sel = b.parentNode.querySelector("select"), id = sel ? sel.value : "";
+      var on = !!pv && pv.kind === k && pv.id === id;
+      b.classList.toggle("playing", on); b.setAttribute("aria-pressed", String(on)); b.disabled = k === "track" && id === "auto";
+    });
+    each(".pop-mute [data-mute]", function (b) { b.setAttribute("aria-pressed", String((b.getAttribute("data-mute") === "1") === muted)); });
+    each(".track-now", function (e) { e.textContent = nowPlaying(); });
+  }
+  function onAudioChange() {                                  // WH.Audio.onChange: what is playing changed (story mood, track, preview start/end)
+    if (UI.pv && !au("isPreviewing")) { clearTimeout(UI.pvTimer); UI.pv = null; }
+    syncAudioUI();
+  }
+  function groupMoods(list) {
+    var by = {}, order = [];
+    list.forEach(function (m) { var g = m.group || "other"; if (!by[g]) { by[g] = []; order.push(g); } by[g].push(m); });
+    var known = TRACK_GROUPS.filter(function (g) { return by[g]; }), rest = order.filter(function (g) { return TRACK_GROUPS.indexOf(g) < 0; });
+    return known.concat(rest).map(function (g) { return {id: g, items: by[g]}; });
+  }
+
+  /* ---------- ♪ quick panel next to the sound button: track + style + mute (SPEC §29b). Closes on outside press / Esc; in sync with Settings. ---------- */
+  function musicButton() {
+    if (!WH.Audio) return null;
+    return h("button", {class: "btn small px music-btn", type: "button", "aria-haspopup": "dialog", "aria-expanded": String(!!UI.pop),
+      "aria-label": t("music_quick_aria"), title: t("music_quick"), onclick: function (e) { toggleMusicPop(e.currentTarget); }}, "\u266A");
+  }
+  function toggleMusicPop(btn) {
+    if (UI.pop) { var same = UI.pop.btn === btn; closeMusicPop(); if (same) return; }
+    openMusicPop(btn);
+  }
+  function openMusicPop(btn) {
+    closeMusicPop(true);
+    var list = moodList(), styles = styleList(), rows = [];
+    var prevBtn = function (kind) {
+      return canPreviewMood() ? h("button", {class: "btn small px pop-prev", type: "button", "data-kind": kind, "aria-pressed": "false",
+        "aria-label": t("style_preview") + ": " + t(kind === "track" ? "music_track" : "music_style"), title: t("style_preview"),
+        onclick: function () { var sel = this.parentNode.querySelector("select"); if (sel && sel.value !== "auto") startPreview(kind, sel.value); }}, "\u25B6") : null;
+    };
+    if (list.length) {
+      var tsel = h("select", {class: "track-select", id: "pop-track"});
+      tsel.appendChild(h("option", {value: "auto"}, t("track_auto")));
+      groupMoods(list).forEach(function (g) {
+        var og = h("optgroup", {label: t("track_g_" + g.id)});
+        g.items.forEach(function (m) { og.appendChild(h("option", {value: m.id}, moodName(m))); });
+        tsel.appendChild(og);
+      });
+      tsel.value = currentTrack();
+      tsel.addEventListener("change", function () { chooseTrack(tsel.value); });
+      rows.push(h("div", {class: "pop-row"}, h("label", {class: "k", for: "pop-track"}, t("music_track")), tsel, canPreviewMood() ? prevBtn("track") : null));
+    }
+    var ssel = h("select", {class: "style-select", id: "pop-style"});
+    styles.forEach(function (x) { ssel.appendChild(h("option", {value: x.id}, L(x.name))); });
+    ssel.value = currentStyle();
+    ssel.addEventListener("change", function () { chooseStyle(ssel.value); });
+    rows.push(h("div", {class: "pop-row"}, h("label", {class: "k", for: "pop-style"}, t("music_style")), ssel, canPreviewStyle() ? prevBtn("style") : null));
+    var mb = function (m, label) {
+      return h("button", {class: "btn small px", type: "button", "data-mute": m ? "1" : "0", "aria-pressed": String(!!UI.settings.muted === m),
+        onclick: function () { if (!!UI.settings.muted !== m) toggleMute(); }}, label);
+    };
+    rows.push(h("div", {class: "pop-row pop-mute"}, h("span", {class: "k"}, t("sound")), h("div", {class: "seg"}, mb(false, "\uD83D\uDD0A " + t("on")), mb(true, "\uD83D\uDD07 " + t("mute")))));
+    var pop = h("div", {class: "music-pop px", role: "dialog", "aria-label": t("music_quick"), tabindex: "-1"},
+      h("div", {class: "pop-head"}, h("span", {class: "pop-title"}, "\u266A " + t("music_quick")),
+        h("button", {class: "btn small px pop-x", type: "button", "aria-label": t("pop_close_aria"), onclick: function () { closeMusicPop(); }}, "\u2715")),
+      list.length ? h("p", {class: "track-now", "aria-live": "polite"}, nowPlaying()) : null, rows);
+    $("overlay-root").appendChild(pop);
+    UI.pop = {el: pop, btn: btn};
+    btn.setAttribute("aria-expanded", "true");
+    placeMusicPop();
+    document.addEventListener("pointerdown", musicPopOutside, true);
+    window.addEventListener("resize", placeMusicPop);
+    syncAudioUI();
+    var f = pop.querySelector("select, button:not(:disabled)");
+    if (f) f.focus({preventScroll: true});
+  }
+  /* stage coordinates (the landscape stage is a scaled 960x540 box; in portrait the stage is the flowing page, scale 1) */
+  function placeMusicPop() {
+    var P = UI.pop;
+    if (!P) return;
+    if (!document.contains(P.btn)) { closeMusicPop(true); return; }
+    var st = $("stage").getBoundingClientRect(), r = P.btn.getBoundingClientRect(), sc = UI.scale || 1;
+    var top = Math.round((r.bottom - st.top) / sc + 6), el = P.el;
+    el.style.top = top + "px";
+    if (document.body.classList.contains("portrait")) { el.style.left = "8px"; el.style.right = "8px"; el.style.maxHeight = ""; }
+    else { el.style.left = ""; el.style.right = Math.max(6, Math.round(960 - (r.right - st.left) / sc)) + "px"; el.style.maxHeight = Math.max(140, 540 - top - 10) + "px"; }
+  }
+  function musicPopOutside(e) {
+    var P = UI.pop;
+    if (!P || P.el.contains(e.target) || (e.target.closest && e.target.closest(".music-btn"))) return;
+    closeMusicPop(true);
+  }
+  function closeMusicPop(silent) {
+    var P = UI.pop;
+    if (!P) return;
+    UI.pop = null;
+    var inside = P.el.contains(document.activeElement);
+    P.el.remove();
+    document.removeEventListener("pointerdown", musicPopOutside, true);
+    window.removeEventListener("resize", placeMusicPop);
+    Array.prototype.forEach.call(document.querySelectorAll(".music-btn"), function (b) { b.setAttribute("aria-expanded", "false"); });
+    if (!silent && inside && P.btn && document.contains(P.btn)) P.btn.focus({preventScroll: true});
   }
 
   /* ---------- tiny DOM helper ---------- */
@@ -374,6 +530,7 @@
     UI.lastTick = performance.now();
     setInterval(tickPlay, 1000);
     applyAudioSettings();
+    au("onChange", onAudioChange);                              // SPEC §29b: "now playing" lines follow the story mood / track / preview
     var unlock = function () {
       document.removeEventListener("pointerdown", unlock, true);
       document.removeEventListener("keydown", unlock, true);
@@ -431,9 +588,10 @@
   }
 
   function show(name) {
+    closeMusicPop(true);
     ["title", "select", "game", "ending"].forEach(function (s) { $("scr-" + s).hidden = s !== name; });
     UI.screen = name;
-    if (name !== "game") stopWhispers();
+    if (name !== "game") { stopWhispers(); UI.gather = null; drawGatherTag(); }
     if (name === "title") renderTitle();
     if (name === "select") { if (!UI.keepSel) UI.sel.faction = null; UI.keepSel = false; renderSelect(); }
     if (name === "title" || name === "select") mood("title");
@@ -461,7 +619,7 @@
     var errs = (window.WH_LOAD_ERRORS || []);
     var newBtn = h("button", {class: "btn primary px", type: "button", "data-sfx": "start", onclick: function () { show("select"); }}, t("new_game"));
     s.appendChild(h("div", {class: "bg"}, art("scene", "title")));
-    s.appendChild(h("div", {class: "corner"}, soundButton(), langButton()));
+    s.appendChild(h("div", {class: "corner"}, soundButton(), musicButton(), langButton()));
     s.appendChild(h("div", {class: "title-wrap"},
       h("div", {class: "title-kicker"}, WH.lang === "zh" ? "战锤40K 同人文字冒险" : "A Warhammer 40,000 fan text adventure"),
       h("h1", {class: "title-main", id: "t-main"}, t("title_main")),
@@ -790,6 +948,8 @@
     tools.appendChild(b(null, t("load"), function () { openSaves("load"); }));
     tools.appendChild(b(null, t("settings"), openSettings));
     tools.appendChild(soundButton());
+    var mbtn = musicButton();
+    if (mbtn) tools.appendChild(mbtn);
     tools.appendChild(b("icon_lang", t("lang_toggle"), toggleLang, t("language") + ": " + t("lang_toggle")));
     if (UI.settings.rewind === true) {                                   // SPEC §30: only while the switch is on
       var rw = b(null, "\u21B6 " + t("rewind_btn"), function () { rewindStep(); }, t("rewind_aria"));
@@ -910,6 +1070,23 @@
     var plate = clear($("chapter-plate"));
     plate.appendChild(document.createTextNode(t("chapter_n", {n: WH.chapterNum(ch)})));
     if (ct) plate.appendChild(h("b", null, L(ct)));
+    drawGatherTag();
+  }
+
+  /* SPEC §20c: a gathering-place node (node.gather = {zh, en}) shows "聚集区 · 食堂" / "Crowd · Mess hall" next to the chapter plate — the
+   * only places where rumours / echoes can be heard. UI.gather = the label of the node on screen (null elsewhere); redrawn on language change. */
+  function renderGatherTag(node) {
+    UI.gather = node && WH.Rules && WH.Rules.isGather && WH.Rules.isGather(node) ? node.gather : null;
+    drawGatherTag();
+  }
+  function drawGatherTag() {
+    var el = $("gather-tag");
+    if (!el) return;
+    clear(el);
+    if (!UI.gather) { el.hidden = true; el.removeAttribute("data-label"); return; }
+    el.textContent = t("gather_tag", {x: L(UI.gather)});
+    el.setAttribute("data-label", UI.gather.en || "");
+    el.hidden = false;
   }
 
   function tickPlay() {
@@ -959,18 +1136,19 @@
     var g = UI.game, node;
     try { node = opts.nodeId ? g.node(opts.nodeId) : g.node(); } catch (e) { toast(t("missing_node", {x: e.message})); return; }
     setScene(node.scene);
+    renderGatherTag(node);
     setActor("left", node.speaker ? node.speaker.sprite : g.playerSprite(), !node.speaker);
     setActor("right", node.foe || null);
     var np = $("nameplate"), name = nodeSpeakerName(node);
     np.textContent = name;
     np.className = "nameplate" + (name ? "" : " narration");
     $("dlg-text").classList.toggle("narr", !node.speaker);
-    if (opts.nodeId) { UI.typer.run(L(node.text), "instant"); renderRumor(null); renderGrudgeLine(null); return; }
+    if (opts.nodeId) { UI.typer.run(L(opts.body || node.text), "instant"); renderRumor(null); renderGrudgeLine(null); return; }
     renderRumor(g.currentRumor ? g.currentRumor() : null, opts.instant);
     renderGrudgeLine(g.grudgeLine ? g.grudgeLine() : null, opts.instant);
     renderChoices(true);
     if (!UI.eventOpen) mood(au("moodFor", node, g.state, g.faction));
-    var text = L(node.text);
+    var text = L(g.nodeBody ? g.nodeBody() : node.text);        // SPEC §32.2: alt-resolved text + alt paragraphs
     if (node.ending) {
       var gm = godsMet();
       if (gm.length) text += "\n\n" + t("gods_watched", {x: gm.map(godName).join(WH.lang === "zh" ? "、" : ", ")});
@@ -1129,11 +1307,11 @@
     var v = g.choices()[i];
     if (!v || v.locked) return;
     Array.prototype.forEach.call($("choices").children, function (b) { b.disabled = true; });
-    var prevId = g.state.nodeId, step;
+    var prevId = g.state.nodeId, prevBody = g.nodeBody ? g.nodeBody() : null, step;    // prevBody: SPEC §32.2 text of this node (language switch during the beat)
     try { step = g.choose(i); } catch (e) { toast(t("missing_node", {x: e.message})); console.error(e); renderChoices(); return; }
     if (!step) { renderChoices(); return; }
     if (!v.forced && UI.settings.consequences !== false && step.consequence && step.consequence.show) {
-      showConsequence(step, v.choice, prevId);
+      showConsequence(step, v.choice, prevId, prevBody);
       return;
     }
     if (step.roll) toast(t("risky") + " " + Math.round(step.roll.pEff * 100) + "% → " + (step.roll.success ? t("roll_ok") : t("roll_fail")));
@@ -1219,11 +1397,11 @@
       }};
   }
 
-  function showConsequence(step, choice, prevId) {
+  function showConsequence(step, choice, prevId, prevBody) {
     var g = UI.game, view = {stats: {}, chapter: g.state.chapter};
     WH.Rules.STATS.forEach(function (k) { view.stats[k] = g.state.stats[k] - ((step.nodeDeltas && step.nodeDeltas[k]) || 0); });
     if (step.chapterChanged && step.fromChapter) view.chapter = step.fromChapter;
-    UI.conseq = {step: step, choice: choice, prevId: prevId, view: view};
+    UI.conseq = {step: step, choice: choice, prevId: prevId, prevBody: prevBody || null, view: view};
     sfx("consequence");
     renderConseq(false);
     renderHud(!!step.time);
@@ -1457,13 +1635,13 @@
   }
 
   /* ---------- toasts ---------- */
-  function toast(msg) {
+  function toast(msg, ms) {
     var root = $("overlay-root"), box = root.querySelector(".toasts");
     if (!box) { box = h("div", {class: "toasts", role: "status", "aria-live": "polite"}); root.appendChild(box); }
     var el = h("div", {class: "toast px"}, msg);
     while (box.children.length >= 3) box.removeChild(box.firstChild);
     box.appendChild(el);
-    setTimeout(function () { el.remove(); }, 2700);
+    setTimeout(function () { el.remove(); }, ms || 2700);
   }
   UI.toast = toast;
   /* ids newly unlocked in this run. Settings (all persisted):
@@ -1932,31 +2110,30 @@
     var s = clear($("scr-ending"));
     s.style.setProperty("--accent", fcolor(f));
     s.appendChild(h("div", {class: "bg"}, art("scene", node.scene || "void")));
-    s.appendChild(h("div", {class: "corner"}, soundButton(), langButton()));
+    s.appendChild(h("div", {class: "corner"}, soundButton(), musicButton(), langButton()));
     var again = h("button", {class: "btn primary px", type: "button", onclick: function () { startGame(f.id, g.state.origin); }}, "↻ " + t("again"));
     var back = UI.settings.rewind === true && g.canRewind() ?              // SPEC §30
       h("button", {class: "btn px rewind-end", type: "button", id: "rewind-end", "aria-keyshortcuts": "Z", title: t("rewind_end") + " (Z)", onclick: function () { rewindStep(); }}, "\u21B6 " + t("rewind_end")) : null;
     s.appendChild(h("div", {class: "ending-wrap"},
       h("div", {class: "ending-panel px", role: "region", "aria-label": L(end.title)},
-        h("div", {class: "ending-hero"},                                    // SPEC §31: picture (left in landscape, on top in portrait) + head / text / fate
-          endingPic(f.id, g.state.nodeId, end.kind, L(end.title)),
-          h("div", {class: "ending-info"},
+        h("div", {class: "ending-scroll"},                                     // everything except the buttons scrolls (SPEC §31: picture + facts stay readable at any size)
+          h("div", {class: "ending-hero"},                                    // SPEC §31 picture · head · text · fate · stats (a grid; landscape: picture left, portrait: on top)
+            endingPic(f.id, g.state.nodeId, end.kind, L(end.title)),
             h("div", {class: "ending-head"},
               h("span", {class: "kind " + end.kind}, t("ending_" + end.kind)),
               h("h2", {class: "ending-title"}, L(end.title)),
               h("span", {class: "ending-fac"}, L(f.name) + " · " + originLabel(f, g.state.origin))),
-            h("p", {class: "ending-text"}, L(node.text)),
+            h("p", {class: "ending-text"}, L(g.nodeBody ? g.nodeBody() : node.text)),
             h("div", {class: "ending-fate " + end.kind},
               end.kind !== "good" ? h("div", {class: "fate"}, h("span", {class: "k"}, t("cause")), h("span", {class: "v cause"}, L(causeOf(f, g.state.nodeId, node)))) : null,
               h("div", {class: "fate"}, h("span", {class: "k"}, t("survived")), h("span", {class: "v"}, WH.fmtDur(surv))),
               rr && rr.newRecord ? h("span", {class: "new-record"}, "★ " + t("new_record")) : null,
-              g.rewindCount > 0 ? h("span", {class: "run-rw", title: t("rewinds_title", {n: g.rewindCount})}, "\u21B6" + g.rewindCount) : null))),
-        h("div", {class: "ending-stats"},
-          h("div", null, h("div", {class: "k"}, t("final_date")), h("div", {class: "v"}, WH.fmtDate(g.date()))),
-          h("div", null, h("div", {class: "k"}, t("play_time")), h("div", {class: "v"}, WH.fmtPlay(g.state.playMs))),
-          h("div", null, h("div", {class: "k"}, t("nodes_visited")), h("div", {class: "v"}, String(g.state.visits))),
-          h("div", null, h("div", {class: "k"}, t("codex_completion")), h("div", {class: "v"}, cs.pct + "%  (" + cs.n + "/" + cs.t + ")"))),
-        h("div", {class: "ending-scroll"},
+              g.rewindCount > 0 ? h("span", {class: "run-rw", title: t("rewinds_title", {n: g.rewindCount})}, "\u21B6" + g.rewindCount) : null),
+            h("div", {class: "ending-stats"},
+              h("div", null, h("div", {class: "k"}, t("final_date")), h("div", {class: "v"}, WH.fmtDate(g.date()))),
+              h("div", null, h("div", {class: "k"}, t("play_time")), h("div", {class: "v"}, WH.fmtPlay(g.state.playMs))),
+              h("div", null, h("div", {class: "k"}, t("nodes_visited")), h("div", {class: "v"}, String(g.state.visits))),
+              h("div", null, h("div", {class: "k"}, t("codex_completion")), h("div", {class: "v"}, cs.pct + "%  (" + cs.n + "/" + cs.t + ")")))),
           cgod ? claimBanner(cgod, Math.round((g.state.taint && g.state.taint[cgod]) || 0)) : null,
           tipCard(f, end, g),
           h("h3", {class: "met-title"}, t("you_met")),
@@ -1992,6 +2169,7 @@
 
   /* ======================= MODALS ======================= */
   function openModal(o) {
+    closeMusicPop(true);
     var prev = document.activeElement;
     var closeBtn = h("button", {class: "btn small px", type: "button", "aria-label": t("close"), onclick: function () { closeTop(); }}, "✕");
     var modal = h("div", {class: "modal px" + (o.narrow ? " narrow" : ""), role: "dialog", "aria-modal": "true", "aria-label": o.title},
@@ -2022,7 +2200,7 @@
   function trapFocus(e, box) {
     var top = box ? {el: box} : UI.modals[UI.modals.length - 1];
     if (!top) return;
-    var f = top.el.querySelectorAll("button:not(:disabled), input, [tabindex='0']");
+    var f = top.el.querySelectorAll("button:not(:disabled), input, select:not(:disabled), [tabindex='0']");
     if (!f.length) return;
     var first = f[0], last = f[f.length - 1];
     if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
@@ -2410,6 +2588,7 @@
     catch (e) { toast(t("import_bad", {x: e.message})); return false; }
     UI.game = g;
     enterGameScreen();
+    if (g.fallbackFrom) toast("⟲ " + t("story_updated"), 5200);             // SPEC §32.4: the saved node vanished in a story update
     if (g.state.ended) { showEnding(); return true; }
     renderNode({instant: true});
     renderHud();
@@ -2438,7 +2617,7 @@
   }
   /* SPEC §29: "配乐风格" selector — radio cards with a ▶ preview each; applies immediately, kept in settings.musicStyle */
   function styleRow() {
-    var st = UI.settings, list = styleList(), cur = currentStyle(), prev = canPreviewStyle(), playing = null, timer = null;
+    var list = styleList(), cur = currentStyle(), prev = canPreviewStyle();
     var cards = list.map(function (sty) {
       var pick = h("button", {class: "style-pick", type: "button", role: "radio", "aria-checked": String(sty.id === cur), "data-style": sty.id,
         tabindex: sty.id === cur ? 0 : -1},
@@ -2448,38 +2627,56 @@
       var card = h("div", {class: "style-card" + (sty.id === cur ? " on" : ""), "data-style": sty.id}, pick, pv);
       return {card: card, pick: pick, pv: pv, id: sty.id};
     });
-    var choose = function (id, focus) {
-      st.musicStyle = id; WH.Save.saveSettings(st);
-      au("setStyle", id);
-      cards.forEach(function (c) {
-        var on = c.id === id;
-        c.card.classList.toggle("on", on); c.pick.setAttribute("aria-checked", String(on)); c.pick.tabIndex = on ? 0 : -1;
-        if (on && focus) c.pick.focus();
-      });
-    };
-    var stopMark = function () {
-      if (timer) { clearTimeout(timer); timer = null; }
-      cards.forEach(function (c) { if (c.pv) { c.pv.setAttribute("aria-pressed", "false"); c.pv.classList.remove("playing"); } });
-      playing = null;
-    };
     cards.forEach(function (c, i) {
-      c.pick.addEventListener("click", function () { choose(c.id, false); });
+      c.pick.addEventListener("click", function () { chooseStyle(c.id); });
       c.pick.addEventListener("keydown", function (e) {
         var d = (e.key === "ArrowDown" || e.key === "ArrowRight") ? 1 : (e.key === "ArrowUp" || e.key === "ArrowLeft") ? -1 : 0;
         if (!d) return;
         e.preventDefault(); e.stopPropagation();
-        choose(cards[(i + d + cards.length) % cards.length].id, true);
+        var n = cards[(i + d + cards.length) % cards.length];
+        chooseStyle(n.id); n.pick.focus();
       });
-      if (c.pv) c.pv.addEventListener("click", function () {
-        stopMark();
-        au("previewStyle", c.id);
-        playing = c.id; c.pv.setAttribute("aria-pressed", "true"); c.pv.classList.add("playing");
-        timer = setTimeout(stopMark, 8500);                           // the preview stops itself after ~8 s
-      });
+      if (c.pv) c.pv.addEventListener("click", function () { startPreview("style", c.id); });      // the preview stops itself after ~8 s
     });
     return h("div", {class: "setrow style-row"},
       h("span", {class: "k", id: "style-label"}, t("music_style")),
       h("div", {class: "style-list", role: "radiogroup", "aria-labelledby": "style-label"}, cards.map(function (c) { return c.card; })));
+  }
+  /* SPEC §29b: "曲目" — auto (follows the story) or one fixed track, grouped list with a ▶ preview each + a "now playing" line */
+  function trackRow() {
+    var list = moodList();
+    if (!list.length) return null;
+    var cur = currentTrack(), prev = canPreviewMood(), picks = [];
+    var item = function (id, name, desc, cls) {
+      var pick = h("button", {class: "track-pick", type: "button", role: "radio", "aria-checked": String(id === cur), "data-track": id, tabindex: id === cur ? 0 : -1},
+        h("span", {class: "sn"}, name), desc ? h("span", {class: "sd"}, desc) : null);
+      var pv = prev && id !== "auto" ? h("button", {class: "track-prev", type: "button", "data-track": id, "aria-pressed": "false",
+        "aria-label": t("track_preview_aria", {x: name}), title: t("track_preview_aria", {x: name})}, "\u25B6") : null;
+      pick.addEventListener("click", function () { chooseTrack(id); });
+      if (pv) pv.addEventListener("click", function () { startPreview("track", id); });
+      picks.push({id: id, pick: pick});
+      return h("div", {class: "track-item" + (cls ? " " + cls : "") + (id === cur ? " on" : ""), "data-track": id}, pick, pv);
+    };
+    var body = [item("auto", t("track_auto"), t("track_auto_desc"), "track-auto")];
+    groupMoods(list).forEach(function (g) {
+      body.push(h("div", {class: "track-group", role: "presentation"},
+        h("span", {class: "track-gh", "aria-hidden": "true"}, t("track_g_" + g.id)),
+        h("div", {class: "track-grid", role: "presentation"}, g.items.map(function (m) { return item(m.id, moodName(m)); }))));
+    });
+    picks.forEach(function (c, i) {
+      c.pick.addEventListener("keydown", function (e) {
+        var d = (e.key === "ArrowDown" || e.key === "ArrowRight") ? 1 : (e.key === "ArrowUp" || e.key === "ArrowLeft") ? -1 : 0;
+        if (!d) return;
+        e.preventDefault(); e.stopPropagation();
+        var n = picks[(i + d + picks.length) % picks.length];
+        chooseTrack(n.id); n.pick.focus();
+      });
+    });
+    return h("div", {class: "setrow track-row"},
+      h("span", {class: "k", id: "track-label"}, t("music_track")),
+      h("div", {class: "track-box"},
+        h("p", {class: "track-now", "aria-live": "off"}, nowPlaying()),
+        h("div", {class: "track-list", role: "radiogroup", "aria-labelledby": "track-label"}, body)));
   }
   function openSettings(replace) {
     var st = UI.settings;
@@ -2504,12 +2701,12 @@
           if (UI.game) { UI.game.echoes = v; if (UI.screen === "game" && !UI.conseq) renderRumor(UI.game.currentRumor(), !UI.typer.active); }
           openSettings(true);
         })),
-      h("div", {class: "setrow"}, h("span", {class: "k"}, t("rumors")),
+      h("div", {class: "setrow hint-row"}, h("span", {class: "k"}, t("rumors")),
         seg([[true, t("on")], [false, t("off")]], st.rumors !== false, function (v) {
           st.rumors = v; save();
           if (UI.game) { UI.game.rumors = v; if (UI.screen === "game" && !UI.conseq) renderRumor(v ? UI.game.currentRumor() : null, !UI.typer.active); }
           openSettings(true);
-        })),
+        }), h("p", {class: "set-hint", id: "rumor-hint"}, t("rumor_hint"))),
       h("div", {class: "setrow rewind-row"}, h("span", {class: "k"}, t("rewind_set")),
         seg([[true, t("on")], [false, t("off")]], st.rewind === true, function (v) {
           st.rewind = v; save();
@@ -2518,6 +2715,7 @@
           openSettings(true);
         }), h("p", {class: "set-hint"}, t("rewind_hint"))),
       styleRow(),
+      trackRow(),
       eggDone("planned") ? h("div", {class: "setrow tz-row"}, h("span", {class: "k"}, t("tz_joke")),
         seg([[true, t("on")], [false, t("off")]], st.tzeentchJoke !== false, function (v) { st.tzeentchJoke = v; save(); openSettings(true); })) : null,
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("lore_cards")),
@@ -2599,6 +2797,7 @@
   /* ---------- language ---------- */
   function setLang(l) {
     if (l !== "zh" && l !== "en") return;
+    closeMusicPop(true);
     WH.lang = l;
     UI.settings.lang = l;
     WH.Save.saveSettings(UI.settings);
@@ -2611,7 +2810,7 @@
     else if (UI.screen === "game" && UI.game) {
       buildStats();
       renderHud();
-      if (UI.conseq) { renderNode({instant: true, nodeId: UI.conseq.prevId}); renderConseq(true); }
+      if (UI.conseq) { renderNode({instant: true, nodeId: UI.conseq.prevId, body: UI.conseq.prevBody}); renderConseq(true); }
       else if (!UI.busy) renderNode({instant: true});
       if (UI.event) {
         var ev = UI.event.e, g = UI.game;
@@ -2630,6 +2829,11 @@
   function onKey(e) {
     var k = e.key, tag = (e.target && e.target.tagName) || "";
     var onButton = tag === "BUTTON" || tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA";
+    if (UI.pop) {                                          // ♪ quick panel: Esc closes, Tab stays inside, other keys act on its controls
+      if (k === "Escape") { e.preventDefault(); closeMusicPop(); }
+      else if (k === "Tab") trapFocus(e, UI.pop.el);
+      return;
+    }
     if (k === "Tab" && UI.modals.length) { trapFocus(e); return; }
     if (UI.cardDone) {
       if (k === " " || k === "Enter" || k === "Escape") { e.preventDefault(); UI.cardDone(); }

@@ -131,7 +131,7 @@
         "Teo waits for you to speak. You left him in the rockfall, and now you won't give him a word. You don't sleep; your ears are full of falling stone."))
     ]};
 
-  N.gsc_104b = {chapter: 1, scene: "mine_shaft", speaker: JORY, time: {d: 1},
+  N.gsc_104b = {chapter: 1, scene: "mine_shaft", speaker: JORY, time: {d: 7},
     text: L("整整一个星期，提奥的班组没人跟你说话。下井没人帮你推矿车，收工没人等你。\n只有一个戴兜帽的表兄，有一天在升降口塞给你一壶水。\n“我叫乔里，”他说，“提奥会想通的。家里人都会。”",
             "For a whole week no one on Teo's crew speaks to you. Nobody helps with your cart; nobody waits at shift's end.\nOnly one hooded cousin, one day at the lift-head, pushes a water flask into your hands.\n“I'm Jory,” he says. “Teo will come round. Family always does.”"),
     effects: {hp: -5},
@@ -148,22 +148,28 @@
       C("一拳砸烂告示板", "Smash the notice board", "gsc_105a", X({hp: -8, renown: 5, set: {protested: true, smashedBoard: true}, taint: {khorne: 45}},
         "木板碎了，你的指节也破了。执法官把你按在地上。人群里，几个戴兜帽的人记住了你的脸。",
         "The board splinters, and so do your knuckles. Enforcers pin you down. In the crowd, a few hooded faces remember yours.")),
-      C("替咳嗽的老工友说句话", "Speak up for the coughing old miner", "gsc_106", X({renown: 4, sanity: -3, set: {protested: true, ganttMarked: true}},
+      C("替咳嗽的老工友说句话", "Speak up for the coughing old miner", "gsc_106", O(X({renown: 4, sanity: -3, set: {protested: true, ganttMarked: true}},
         "甘特把你的名字写进本子里。散工后，提奥拍了拍你的背：“你是个好人。家里人会喜欢你。”",
-        "Gant writes your name in his book. After shift Teo claps your back. “You're a good one. The family will like you.”")),
+        "Gant writes your name in his book. After shift Teo claps your back. “You're a good one. The family will like you.”"),
+        {resultAlt: [RA(F("wronged_teo"), "甘特把你的名字写进本子里。散工后，提奥远远看了你一眼，没过来，也没走开。",
+                       "Gant writes your name in his book. After shift Teo looks at you from a distance. He doesn't come over, and he doesn't leave.")]})),
       C("低头，什么也不说", "Keep your head down", "gsc_106", X({sanity: -5, set: {headDown: true}},
         "你低着头回到铺位。那一晚的口粮，只有半块。",
         "You go back to your bunk with your head down. Supper is half a bar."))
     ]};
 
   N.gsc_105a = {chapter: 1, scene: "underhive", speaker: VASK, time: {h: 3},
+    alt: [ALT(F("wronged_teo"), "执法分局的禁闭室。瓦斯克执法官隔着铁栏看你，像在记一张脸。\n“砸告示板，罚十天工分，”他说，“下回砸的就是你的手。”\n天亮放你出来。门口站着提奥，脸还是冷的，手里却拿着一块热面包。",
+            "A cell in the enforcer precinct. Enforcer-Captain Vask studies you through the bars, as if filing a face.\n“Smashing notices. Ten days' tally,” he says. “Next time it's your hands.”\nAt dawn they let you out. Teo is at the door, face still cold, a warm roll in his hand all the same.")],
     text: L("执法分局的禁闭室。瓦斯克执法官隔着铁栏看你，像在记一张脸。\n“砸告示板，罚十天工分，”他说，“下回砸的就是你的手。”\n天亮放你出来。门口站着提奥，手里拿着一块热面包。",
             "A cell in the enforcer precinct. Enforcer-Captain Vask studies you through the bars, as if filing a face.\n“Smashing notices. Ten days' tally,” he says. “Next time it's your hands.”\nAt dawn they let you out. Teo is waiting at the door with a warm roll."),
     effects: {set: {vaskKnows: true}},
     choices: [
-      C("跟着提奥走", "Walk off with Teo", "gsc_106", X({renown: 3},
+      C("跟着提奥走", "Walk off with Teo", "gsc_106", O(X({renown: 3},
         "提奥什么也没问，只把面包掰了一半给你。“霍林家的人在分局有朋友，”他说，“不然你得关三天。”",
-        "Teo asks nothing, only breaks the roll in half for you. “The Hollins have friends at the precinct,” he says. “Else it'd be three days.”"))
+        "Teo asks nothing, only breaks the roll in half for you. “The Hollins have friends at the precinct,” he says. “Else it'd be three days.”"),
+        {resultAlt: [RA(F("wronged_teo"), "提奥把面包掰了一半塞给你，转身走在前面。“霍林家在分局有朋友，”他头也不回，“不然你得关三天。”",
+                       "Teo shoves half the roll at you and walks on ahead. “The Hollins have friends at the precinct,” he says without turning. “Else it'd be three days.”")]}))
     ]};
 
   N.gsc_106 = {chapter: 1, scene: "hive_hab", speaker: TEO, time: {d: 2},
@@ -415,7 +421,7 @@
 
   N.gsc_204 = {chapter: 2, scene: "mine_shaft", speaker: null, time: {d: 2},
     alt: [ADD(F("heardGant"), "你想起厨房里婶子们的话：会有人管的。", "You remember the aunts in the kitchen: someone will see to him."),
-          ADD(F("ganttMarked"), "他的本子摊在桌上，翻开的那页写着你的名字。", "His book lies open on the desk, at the page with your name.")],
+          ADD(F("ganttMarked"), "账本底下压着他记名字的小本子，有一页写着你。", "Under the ledger lies his little book of names. One page is yours.")],
     text: L("两天后，甘特工头没来上班。\n他的办公室收拾得整整齐齐，账本合着，椅子推进桌下，像他只是出去喝口水。\n新来的工头姓霍林。工分，涨回来了。",
             "Two days later, Foreman Gant doesn't come to work.\nHis office is tidy: ledger closed, chair pushed in, as if he'd just stepped out for water.\nThe new foreman's name is Hollin. The tallies go back up."),
     choices: [
@@ -516,7 +522,9 @@
     ]};
 
   N.gsc_209 = {chapter: 2, scene: "cathedral", speaker: LUSK, time: {d: 5}, jump: L("又一个星期天，你去了小教堂", "Another Sunday; you go to the chapel"), gather: L("小教堂", "Mining chapel"),
-    alt: [ADD(F("prayedFirst"), "“听说你在那家饭前也祷告，”他说，“他们念的是谁？”", "“I hear you say grace in that house,” he says. “Whose name do they say?”"),
+    alt: [ALT(F("origin_kin"), "星期天你没去礼拜堂，去了矿区小教堂。卢斯克神父对着半空的长椅布道，几个老矿工和寡妇在打盹。\n散场后他拦住你：“孩子，有人在拜假帝皇。四只手的那种。”\n“你要是知道什么，帝皇听得见。”",
+            "On Sunday you skip the family chapel and go to the mining chapel. Father Lusk preaches to half-empty pews; a few old miners and widows doze.\nAfterward he stops you. “Child, someone is worshipping a false Emperor. The four-armed kind.”\n“If you know anything, the Emperor is listening.”"),
+          ADD(F("prayedFirst"), "“听说你在那家饭前也祷告，”他说，“他们念的是谁？”", "“I hear you say grace in that house,” he says. “Whose name do they say?”"),
           ADD(F("lookedAway"), "“甘特的事，你也不问？”他看着你。", "“And Gant? You don't ask either?” He watches you."),
           ADD(F("suspicious"), "他压低声音：“我往星区写了一封信，已经寄出去了。”", "He lowers his voice. “I've written to the sector. The letter's already gone.”")],
     text: L("星期天你没去霍林家，去了矿区小教堂。卢斯克神父对着半空的长椅布道，几个老矿工和寡妇在打盹。\n散场后他拦住你：“孩子，有人在拜假帝皇。四只手的那种。”\n“你要是知道什么，帝皇听得见。”",
@@ -565,7 +573,7 @@
     ]};
 
   N.gsc_212 = {chapter: 2, scene: "underhive", speaker: VASK, time: {h: 2},
-    alt: [ADD(F("vaskAgent"), "“你终于肯来了，”他说，“我等你的报告等了一个月。”", "“Finally,” he says. “I've waited a month for your report.”"),
+    alt: [ADD({all: [F("vaskAgent"), NF("reported")]}, "“你终于肯来了，”他说，“我等你的报告等了一个月。”", "“Finally,” he says. “I've waited a month for your report.”"),
           ADD(F("reported"), "他翻开本子，指着那两道线：“星期天。你说对了。”", "He opens his book to the double-underlined word. “Sunday. You were right.”")],
     text: L("瓦斯克没让你说完。“我知道。神父，工头，三十一个矿工。”\n他把一颗通讯珠放在桌上。“我手下至少有四个执法官，星期天去霍林家吃饭。”\n“我谁也信不过。除了你。”",
             "Vask doesn't let you finish. “I know. The priest, the foreman, thirty-one miners.”\nHe sets a vox-bead on the desk. “At least four of my own enforcers eat at the Hollins' on Sundays.”\n“I can't trust anyone. Except you.”"),
@@ -583,7 +591,7 @@
   N.gsc_300 = {chapter: 3, scene: "hive_hab", speaker: TEO, time: {d: 2}, bridge: true,
     alt: [ALT(F("origin_kin"), "休息日清早，提奥来家里接你。路过矿区小教堂，门上贴着“神父外出”。卢斯克好几天没露面了，谁也不提。\n听说他走前，往星区寄出过一封信。\n提奥把矿灯递给你：“走吧，老祖宗在等。”",
             "Early on rest-day Teo comes to the house for you. On the mining chapel door hangs a notice: FATHER AWAY. Lusk hasn't been seen for days, and nobody mentions it.\nThey say he posted a letter off-world before he went.\nTeo hands you a lamp. “Come on. The Grandsire's waiting.”"),
-          ADD(F("confessedLusk"), "你知道是谁说出去的。台阶上那个兜帽小孩，冲你挥了挥手。", "You know who told. The hooded child on the steps waves at you."),
+          ADD(F("confessedLusk"), "教堂台阶上，一个戴兜帽的小孩冲你挥挥手。你忏悔那天，他也坐在这里。", "On the chapel steps a hooded child waves at you. The day you confessed, he was sitting right there."),
           ADD(F("defendedHollins"), "你替霍林家说过好话。神父还是走了。", "You spoke up for the Hollins. The priest is gone all the same."),
           ADD(F("hesitated"), "“你让家人等了一回，”提奥说，“没关系，家人会等。”", "“You kept the family waiting,” Teo says. “It's all right. Family waits.”"),
           ADD(F("wire"), "通讯珠藏在你领口里，凉凉的。", "The vox-bead lies cold inside your collar."),
@@ -738,9 +746,10 @@
     ]};
 
   N.gsc_310 = {chapter: 3, scene: "hive_hab", speaker: TEO, time: {d: 20}, jump: L("二十天后，井口食堂", "Twenty days later, the pithead canteen"),
-    alt: [ALT({all: [NF("linked"), NF("origin_kin")]}, "二十天后，井口食堂。长桌，口粮，提奥坐在你对面，周围几十个人吃饭的节奏一模一样。\n你脑子里没有嗡鸣，只有他们一起唱歌时，胸口会轻轻一震。\n提奥说：“家里人有耐心。老祖宗会再等你一回。”",
-            "Twenty days later, the pithead canteen. Long tables, rations, Teo across from you; dozens around you eat in exactly the same rhythm.\nThere is no hum in your head. Only when they sing together does your chest give a faint shiver.\nTeo says: “Family is patient. The Grandsire will wait for you again.”"),
-          ADD(F("origin_kin"), "你从小就有嗡鸣。可从那天起，它离你近得像贴着耳朵。", "You have had the hum since birth. Since that day it sits right against your ear."),
+    alt: [ALT({all: [NF("linked"), NF("origin_kin")]}, "二十天后，井口食堂。长桌，口粮，提奥坐在你对面，周围几十个人吃饭的节奏一模一样。\n你脑子里没有嗡鸣，只有他们一起唱歌时，胸口会轻轻一震。\n提奥说：“不急。家里人有的是耐心。”",
+            "Twenty days later, the pithead canteen. Long tables, rations, Teo across from you; dozens around you eat in exactly the same rhythm.\nThere is no hum in your head. Only when they sing together does your chest give a faint shiver.\nTeo says: “No hurry. Family has all the patience in the world.”"),
+          ALT(F("origin_kin"), "二十天后，井口食堂。长桌，口粮，提奥坐在你对面，周围几十个人吃饭的节奏一模一样。\n你生来就有的嗡鸣，从洞窟那天起近得像贴着耳朵，醒着睡着都在。\n提奥说：“这就是家。所有人都在你心里。”",
+            "Twenty days later, the pithead canteen. Long tables, rations, Teo across from you; dozens around you eat in exactly the same rhythm.\nThe hum you were born with has sat right against your ear since the cavern, waking or sleeping.\nTeo says: “That's family. Everyone in your heart.”"),
           ADD(F("shutTeo"), "他是自己端着碗坐过来的。你关门那天的事，他一个字没提。", "He brought his bowl over himself. He says not a word about the shut door.")],
     text: L("二十天后，井口食堂。长桌，口粮，提奥坐在你对面，周围几十个人吃饭的节奏一模一样。\n那之后，你脑子里多了一阵很轻的嗡鸣。醒来时它在，下井时它在。\n提奥说：“这就是家。所有人都在你心里。”",
             "Twenty days later, the pithead canteen. Long tables, rations, Teo across from you; dozens around you eat in exactly the same rhythm.\nSince that night a soft hum lives in your head. There when you wake, there when you go down the shaft.\nTeo says: “That's family. Everyone in your heart.”"),
@@ -757,7 +766,8 @@
     ]};
 
   N.gsc_311 = {chapter: 3, scene: "underhive", speaker: VASK, foe: "enforcer", time: {d: 9}, jump: L("第九天，矿口出事", "The ninth day, trouble at the pithead"),
-    alt: [ADD(F("wire"), "瓦斯克手里拿着一卷录音：通讯珠被捏碎前的最后几秒。", "Vask holds a recording: the bead's last seconds before it was crushed."),
+    alt: [ADD({flags: ["wire", "forgiven"]}, "瓦斯克手里拿着一卷录音：通讯珠被捏碎前的最后几秒。", "Vask holds a recording: the bead's last seconds before it was crushed."),
+          ADD({all: [F("wire"), NF("forgiven")]}, "瓦斯克手里拿着一卷录音，是你领口那颗通讯珠录下的。", "Vask holds a recording, made by the bead in your collar."),
           ADD(F("toldVask"), "瓦斯克的口袋里，还揣着你说的那四道划痕。", "In Vask's pocket is still the page with your four scratches."),
           ADD(F("refusedVask"), "“你不肯帮我，”瓦斯克说，“我只好自己查。”", "“You wouldn't help,” Vask says. “So I looked for myself.”"),
           ADD(F("flinched"), "乔里隔着人群看了你一眼，没指望你。", "Across the crowd Jory glances at you, expecting nothing."),
@@ -806,8 +816,8 @@
           ADD(F("yearsReport"), "这些年你每月给瓦斯克写一份报告，越写越短。", "All these years you wrote Vask a report each month, shorter every time."),
           ADD(F("joryMaimed"), "乔里少了一只手，还是天天来看你。", "Jory, one arm short, still drops by every day."),
           ADD(F("cameBack"), "自从接过提奥那碗汤，你每个星期天都回家吃饭。", "Since you took Teo's soup that morning, you've never missed a Sunday supper.")],
-    text: L("十二年过去了，你两鬓有了白发。霍林家又多了两百口人；不姓霍林、却星期天来吃饭的“兄弟”，有好几千。\n内尔十二岁，在街上跳绳，只是眼睛在灯下发紫。\n奥莎大娘快不行了。",
-            "Twelve years pass and your temples go grey. The Hollins have two hundred more mouths; the “brothers” who aren't Hollins but come to Sunday supper number in the thousands.\nNell is twelve, skipping rope in the street, only her eyes turn violet under lamps.\nMa Ossa is dying."),
+    text: L("十二年过去了，你眼角也有了细纹。霍林家又多了两百口人；不姓霍林、却星期天来吃饭的“兄弟”，有好几千。\n内尔十二岁，在街上跳绳，只是眼睛在灯下发紫。\n奥莎大娘快不行了。",
+            "Twelve years pass; lines gather at the corners of your eyes. The Hollins have two hundred more mouths; the “brothers” who aren't Hollins but come to Sunday supper number in the thousands.\nNell is twelve, skipping rope in the street, only her eyes turn violet under lamps.\nMa Ossa is dying."),
     choices: [
       C("去陪大娘", "Go sit with Ma", "gsc_402", X({sanity: 2},
         "你推开她的房门。屋里很暗，很暖，一屋子人都给你让了座。",
@@ -833,8 +843,8 @@
     ]};
 
   N.gsc_403 = {chapter: 4, scene: "hive_hab", speaker: NELL, time: {h: 2}, eventRoll: 0.35,
-    text: L("集市上，国教的游行队伍走过，举着双头鹰旗。内尔躲到你身后。\n一个小孩冲着雷恩光秃秃的头皮喊：“变种！”\n雷恩只是把头巾拉紧。内尔攥着你的袖子：“他们为什么讨厌我们？”",
-            "In the market an Ecclesiarchy procession passes under eagle banners. Nell hides behind you.\nA boy yells at Wren's bare scalp: “Mutie!”\nWren only pulls her scarf tighter. Nell clutches your sleeve. “Why do they hate us?”"),
+    text: L("集市上，国教的游行队伍走过，举着双头鹰旗。内尔躲到你身后。\n一个小孩冲着同来的雷恩光秃秃的头皮喊：“变种！”\n雷恩只是把头巾拉紧。内尔攥着你的袖子：“他们为什么讨厌我们？”",
+            "In the market an Ecclesiarchy procession passes under eagle banners. Nell hides behind you.\nA boy yells at the bare scalp of Wren, who came along: “Mutie!”\nWren only pulls her scarf tighter. Nell clutches your sleeve. “Why do they hate us?”"),
     choices: [
       C("揪住那个孩子的领子", "Grab the boy by the collar", "gsc_404", X({hp: -5, renown: 6, set: {brawl: true}, taint: {khorne: 45}},
         "那孩子吓哭了。他父亲冲过来，你们打成一团，直到执法官吹哨。内尔看你的眼神，亮得像看英雄。",
@@ -1000,10 +1010,10 @@
         "Useless. The song doesn't come through the ears. But that little wax makes you feel you're still guarding one door."))
     ]};
 
-  N.gsc_502 = {chapter: 5, scene: "hive_spire", speaker: ASTRO, foe: null, time: {d: 20}, jump: L("第二十天，雷耶斯来矿上要人", "The twentieth day; Reyes comes for hands"),
+  N.gsc_502 = {chapter: 5, scene: "hive_spire", speaker: ASTRO, foe: null, time: {d: 20}, jump: L("二十天后，雷耶斯来矿上要人", "Twenty days on, Reyes comes for hands"),
     alt: [ADD(F("origin_warden"), "执法局把你借调了过去：是你母亲点的名。", "The precinct lent you out for it. Your mother put your name down.")],
-    text: L("第二十天，雷耶斯中尉来矿上要人：星语塔的伺服梯坏了，得找几个有力气的抬人。\n塔顶，老星语者瞎眼流着血：“有影子……泰拉听不见了。”\n“它在吃光，”他说，“它在吃所有的声音。”",
-            "On the twentieth day Lieutenant Reyes comes to the mine for hands: the astropathic tower's servo-lift is broken and they need strong backs to carry someone.\nAt the top the old astropath's blind eyes bleed. “A shadow... Terra can't hear.”\n“It's eating the light,” he says. “Eating every voice.”"),
+    text: L("二十天后，雷耶斯中尉来矿上要人：星语塔的伺服梯坏了，得找几个有力气的抬人。\n塔顶，老星语者瞎眼流着血：“有影子……泰拉听不见了。”\n“它在吃光，”他说，“它在吃所有的声音。”",
+            "Twenty days later Lieutenant Reyes comes to the mine for hands: the astropathic tower's servo-lift is broken and they need strong backs to carry someone.\nAt the top the old astropath's blind eyes bleed. “A shadow... Terra can't hear.”\n“It's eating the light,” he says. “Eating every voice.”"),
     codex: ["xenos_shadow_in_warp"],
     choices: [
       C("握住他的手，听他说完", "Hold his hand and hear him out", "gsc_503", X({sanity: -6, set: {astropath: true}, taint: {tzeentch: 50}},
@@ -1054,7 +1064,7 @@
   N.gsc_505 = {chapter: 5, scene: "underhive", speaker: null, time: {d: 2},
     alt: [ADD(F("nellDream"), "内尔说的那些嘴、那些牙，你一闭眼就看见。", "Nell's mouths and teeth are there the moment you close your eyes."),
           ADD(F("content"), "嗡鸣轻轻地提醒你：你说过，你从来没这么好过。", "The hum gently reminds you: you said you'd never been better."),
-          ADD(F("doubt"), "你想起那一夜在角落里摆清楚的甲壳和手。", "You think of that night in the corner, the chitin and hands laid out clear."),
+          ADD(F("doubt"), "你想起那一夜，在角落里把甲壳和手一样样想清楚。", "You think of that night in the corner, thinking the chitin and the hands through one by one."),
           ADD(F("soldBrann"), "布兰回来以后，再也没提过赫斯珀。是你让他闭的嘴。", "Since Brann came back he's never mentioned Hesper. You shut him up.")],
     text: L("你睡不着。布兰的话、星语者的话、内尔的梦，在你脑子里绕成一团。\n嗡鸣轻轻地劝你：别想了，回家吧。\n可你想知道，星之子到底是什么。",
             "You can't sleep. Brann's words, the astropath's, Nell's dream, all tangle in your head.\nThe hum gently coaxes: stop thinking. Come home.\nBut you want to know what the Star Children really are."),
@@ -1238,10 +1248,10 @@
     ]};
 
   N.gsc_603b = {chapter: 6, scene: "underhive", speaker: JORY, time: {h: 8},
-    alt: [ALT(F("joryMaimed"), "审判官的人去了十三号矿井。家人趁机炸开了分局的牢房。\n烟里，乔里用仅剩的两只手把你拖了出去。他没提那只手的事。\n“首领说，等不了了。”",
-            "The Inquisitor's men have gone to Shaft Thirteen. The family seizes the moment and blows open the precinct cells.\nThrough the smoke Jory drags you out with his two remaining arms. He says nothing about the third.\n“The Primus says we can't wait.”")],
-    text: L("审判官的人去了十三号矿井。家人趁机炸开了分局的牢房。\n烟里，一只三只手的人把你从废墟里拖了出去。是乔里。\n“首领说，等不了了。”",
-            "The Inquisitor's men have gone to Shaft Thirteen. The family seizes the moment and blows open the precinct cells.\nThrough the smoke a three-armed figure drags you out of the rubble. Jory.\n“The Primus says we can't wait.”"),
+    alt: [ALT(F("joryMaimed"), "审判官带人下矿井搜去了。家人趁机炸开了分局的牢房。\n烟里，乔里用仅剩的两只手把你拖了出去。他没提那只手的事。\n“首领说，等不了了。”",
+            "The Inquisitor has taken his men down the shafts to search. The family seizes the moment and blows open the precinct cells.\nThrough the smoke Jory drags you out with his two remaining arms. He says nothing about the third.\n“The Primus says we can't wait.”")],
+    text: L("审判官带人下矿井搜去了。家人趁机炸开了分局的牢房。\n烟里，一只三只手的人把你从废墟里拖了出去。是乔里。\n“首领说，等不了了。”",
+            "The Inquisitor has taken his men down the shafts to search. The family seizes the moment and blows open the precinct cells.\nThrough the smoke a three-armed figure drags you out of the rubble. Jory.\n“The Primus says we can't wait.”"),
     effects: {hp: -8},
     choices: [
       C("跟着他钻进巷道", "Follow him into the galleries", "gsc_606", X({renown: 4},
@@ -1363,7 +1373,7 @@
   N.gsc_701 = {chapter: 7, scene: "burning_city", speaker: PRIMUS, foe: "gsc_neophyte", time: {h: 10}, bridge: true,
     alt: [ADD(F("thornePlan"), "索恩给的那把小手枪，揣在你怀里。他的人在等你的信号。", "Thorne's little pistol sits inside your coat. His men wait on your signal."),
           ADD(F("arkPlan"), "雷恩昨夜说：船，等孩子们。", "Last night Wren said: the ship will wait for the children."),
-          ADD(F("smuggler"), "调转的炮口里，有你当年运进去的炮弹。", "Some of the shells in those turned guns are ones you smuggled in."),
+          ADD({any: [F("kinLedger"), {all: [F("smuggler"), NF("heldOut"), NF("traitor")]}]}, "炸开那些大门的，有你当年经手的那批炸药。", "Some of the charges blowing those gates passed through your hands, years ago."),
           ADD(FN("gsc_610"), "主祭的指印还留在你太阳穴上。", "The Magus's fingerprints still ache at your temples."),
           ADD(F("backedDown"), "你在洞窟里低过头。今天，家人从你身边跑过，没人看你。", "You bowed your head in the cavern. Today the kin run past you and nobody looks.")],
     text: L("黎明。整座矿城同时爆炸。\n防卫军的炮口调转了方向，执法局的大门从里面打开，矿井里涌出几千个家人和兄弟。\n几十年的耐心，在一个早上全部用完。",
@@ -1459,7 +1469,9 @@
                        "You remember Brann: don't look up. Head down, you burrow against the crowd.")]})),
       C("去找内尔", "Go find Nell", "gsc_706", O(Q({notFlag: "withNell"}, true), X({hp: -5, set: {withNell: true}},
         "你在人群里找到了她。她正抬头看着天，你一把抓住她的手：“别看。跟我走。”",
-        "You find her in the crowd, staring up. You seize her hand. “Don't look. Come with me.”")))
+        "You find her in the crowd, staring up. You seize her hand. “Don't look. Come with me.”"),
+        {resultAlt: [RA(FN("gsc_704"), "她一直在你身边，正抬头看着天。你把她的头按低：“别看。跟我走。”",
+                       "She's been beside you all along, staring up. You push her head down. “Don't look. Come with me.”")]}))
     ]};
 
   N.gsc_706 = {chapter: 7, scene: "spore_sky", speaker: null, foe: "gaunt", time: {h: 2},
@@ -1483,7 +1495,9 @@
     ]};
 
   N.gsc_707 = {chapter: 7, scene: "ruins", speaker: MAGUS, time: {h: 3},
-    alt: [ADD(FN("gsc_708"), "你身后，提奥的歌声停了。", "Behind you, Teo's singing has stopped.")],
+    alt: [ALT({all: [NF("linked"), NF("origin_kin")]}, "废墟里，你撞见了主祭。袍子破了，眼里的紫光一闪一闪地熄灭。\n“他们为什么不认识我们？”他问，“我们唱了那么多年……”\n满城的歌，一个声音也不剩了。取代它的，是无边无际的、饥饿的寂静。",
+            "In the ruins you run into the Magus. His robes are torn; the violet light in his eyes gutters.\n“Why don't they know us?” he asks you. “We sang for so many years...”\nNot one voice of the city's song is left. In its place is a hungry silence without end."),
+          ADD(FN("gsc_708"), "你身后，提奥的歌声停了。", "Behind you, Teo's singing has stopped.")],
     text: L("废墟里，你撞见了主祭。袍子破了，眼里的紫光一闪一闪地熄灭。\n“他们为什么不认识我们？”他问，“我们唱了那么多年……”\n你脑子里的嗡鸣不见了。取代它的，是无边无际的、饥饿的寂静。",
             "In the ruins you run into the Magus. His robes are torn; the violet light in his eyes gutters.\n“Why don't they know us?” he asks you. “We sang for so many years...”\nThe hum in your head is gone. In its place is a hungry silence without end."),
     codex: ["xenos_hive_mind"],
@@ -1491,7 +1505,7 @@
       C("“他们从来就不认识我们。”", "“They never knew us.”", "gsc_801", X({sanity: 5, renown: -3},
         "主祭像个孩子一样坐倒在地上。你走的时候，他还坐在那里，抬头看着天。",
         "The Magus sits down like a child. When you leave, he's still sitting there, looking up.")),
-      C("再打一拳，再一拳", "Hit him again. And again", "gsc_801", O(Q({taint: "khorne", min: 30}, true), X({hp: -5, renown: -5, taint: {khorne: 65}},
+      C("一拳接一拳地打他", "Hit him, again and again", "gsc_801", O(Q({taint: "khorne", min: 30}, true), X({hp: -5, renown: -5, taint: {khorne: 65}},
         "你停不下来，也不想停。天上那么多东西你打不着，眼前这一个，你打得着。",
         "You can't stop and don't want to. You can't hit all those things in the sky. This one, you can."))),
       C("拉他一起走", "Pull him along with you", "gsc_707b", X({hp: -5, renown: 4},
@@ -1566,8 +1580,8 @@
 
   N.gsc_803 = {chapter: 8, scene: "cult_shrine", speaker: THORNE, time: {h: 1},
     alt: [ADD(F("astroCalm"), "“是那个打过镇静剂的老人，”审判官说，“他在喊你的名字。”", "“The old man you sedated,” says the Inquisitor. “He's calling your name.”")],
-    text: L("老祖宗死了。整座城里，剩下的家人在同一刻踉跄了一下。\n你脑子里第一次真正安静了。十五年来第一次，只有你自己。\n审判官的通讯器响了：“星语塔……歌停了！星语者在喊，用他自己的命在喊！”",
-            "The Grandsire is dead. Across the city every remaining kin stumbles at the same instant.\nFor the first time your head is truly quiet. For the first time in fifteen years, it's only you.\nThe Inquisitor's vox crackles. “Astropathic tower... the song's stopped! He's screaming, screaming with his life!”"),
+    text: L("老祖宗死了。整座城里，剩下的家人在同一刻踉跄了一下。\n你脑子里第一次真正安静了。只剩下你自己。\n审判官的通讯器响了：“星语塔……歌停了！星语者在喊，用他自己的命在喊！”",
+            "The Grandsire is dead. Across the city every remaining kin stumbles at the same instant.\nFor the first time your head is truly quiet. Only you are left in it.\nThe Inquisitor's vox crackles. “Astropathic tower... the song's stopped! He's screaming, screaming with his life!”"),
     effects: {sanity: 10, set: {grandsireDead: true}},
     choices: [
       C("去星语塔，帮他把警告发完", "Go to the tower and help finish the warning", "gsc_end_shadow", X({hp: -10, renown: 5},
@@ -1630,7 +1644,7 @@
     alt: [ALT(NF("withKids"), "你挤进了矿船。舱里坐满了别人带来的孩子，还剩最后一个座位。\n内尔站在舷梯口，没有进来：“我听得见它们。我走到哪儿，它们就会跟到哪儿。”\n舷梯下，还有一个孩子在哭。",
             "You squeeze into the hauler. The hold is full of children others brought; one seat is left.\nNell stands at the ramp and doesn't come in. “I can hear them. Wherever I go, they'll follow.”\nAt the foot of the ramp, one more child is crying."),
           ADD(F("withNell"), "一路上她都攥着你的手。现在，她松开了。", "She held your hand the whole way. Now she lets go."),
-          ADD(F("promisedNell"), "“你答应过拉着我的手跑，”她说，“你做到了。”", "“You promised to hold my hand and run,” she says. “You did.”"),
+          ADD({flags: ["promisedNell", "withNell"]}, "“你答应过拉着我的手跑，”她说，“你做到了。”", "“You promised to hold my hand and run,” she says. “You did.”"),
           ADD(F("heldNell"), "“你是第一个抱我的人，”她说。", "“You were the first one ever to hold me,” she says."),
           ADD(F("huggedNell"), "她身上还有矿灰和肥皂的味道。", "She still smells of ore dust and soap."),
           ADD(F("savedMarr"), "你母亲坐在舱尾，替孩子们系安全带。", "Your mother sits at the back of the hold, buckling children in.")],
@@ -1713,8 +1727,8 @@
 
   N.gsc_end_shadow = {chapter: 8, scene: "hive_spire", speaker: ASTRO, time: {d: 9},
     alt: [ADD(F("astroCalm"), "老星语者临死前握着你的手，叫对了你的名字。", "Before he died the old astropath held your hand and said your name right.")],
-    text: L("影子还在，可歌停了，影子上开了一道缝，正好够一句话。九天后，帝国海军的炮火照亮了紫天。\n凯辛三号没保住，可整个阿尔科萨星区都听见了它的名字。\n你坐在塔的废墟上，和你记得的每一张脸。",
-            "The Shadow remains, but the song stopped, and a crack opened just wide enough for one sentence. Nine days later Imperial Navy guns light the violet sky.\nKessin Tertius could not be saved, but the whole Arcosa Sector heard its name.\nYou sit in the tower's ruins, your mind quiet. Only you, and every face you remember."),
+    text: L("影子还在，可歌停了，影子掀开了一道缝，正好够一句话。九天后，帝国海军的炮火照亮了紫天。\n凯辛三号没保住，可整个阿尔科萨星区都听见了它的名字。\n你坐在塔的废墟上，和你记得的每一张脸。",
+            "The Shadow remains, but the song stopped, and for the space of one sentence it lifted. Nine days later Imperial Navy guns light the violet sky.\nKessin Tertius could not be saved, but the whole Arcosa Sector heard its name.\nYou sit in the tower's ruins with every face you remember."),
     codex: ["place_arcosa"],
     ending: {kind: "good", title: L("阴影散去", "The Shadow Lifts"), cause: L("杀死族长，喊出警告", "Killed the Patriarch, sent the warning")}};
 
@@ -1810,10 +1824,11 @@
     ending: {kind: "death", title: L("抬走", "Carried Home"), cause: L("伤重而死", "Died of wounds")}};
 
   N.gsc_death_sanity = {scene: "gsc_chapel", speaker: null,
-    alt: [ALT({fromChapter: {max: 1}}, "你再也分不清哪个声音是自己的了。\n隔壁传来霍林家的歌，你跟着那个调子走了出去，再也没回来。\n第二天，霍林家多了一个总在微笑的人。没人记得他原来叫什么。",
+    alt: [ALT({fromChapter: {max: 1}}, "你再也分不清哪个声音是自己的了。\n隔壁传来霍林家的歌，你跟着那个调子走了出去，再也没回来。\n第二天，霍林家多了一个总在微笑的人。没人记得这人原来叫什么。",
             "You can no longer tell which voice is yours.\nThrough the wall comes a Hollin song; you follow the tune out the door and never come back.\nNext day the Hollins have one more person who always smiles. Nobody remembers their old name."),
-          ADD({fromChapter: {min: 7}}, "城里已经没有人在唱了。可你脑子里，那首歌还在。", "No one in the city is singing anymore. But in your head the song goes on.")],
-    text: L("你再也分不清哪个声音是自己的了。\n嗡鸣里有几百个声音，你挑了一个最温柔的，跟着它走，再也没回来。\n家里多了一个总在微笑的人。没人记得他原来叫什么。",
+          ALT({fromChapter: {min: 7}}, "你再也分不清哪个声音是自己的了。\n城里已经没有人在唱了。可你脑子里那首歌还在，越来越响，你跟着它走进了紫色的雾里。\n再也没有人记得你原来叫什么。",
+            "You can no longer tell which voice is yours.\nNo one in the city sings anymore. But the song in your head goes on, louder and louder, and you follow it into the violet haze.\nNo one is left who remembers your old name.")],
+    text: L("你再也分不清哪个声音是自己的了。\n嗡鸣里有几百个声音，你挑了一个最温柔的，跟着它走，再也没回来。\n家里多了一个总在微笑的人。没人记得这人原来叫什么。",
             "You can no longer tell which voice is yours.\nThe hum holds hundreds. You pick the gentlest, follow it, and never come back.\nThe family gains one more person who always smiles. Nobody remembers their old name."),
     ending: {kind: "death", title: L("几百个声音之一", "One of Hundreds"), cause: L("自我溶进了族群意识", "Self dissolved into the Broodmind")}};
 

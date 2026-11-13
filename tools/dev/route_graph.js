@@ -10,9 +10,12 @@
  * stated in the text of a node that is only reachable through it, or gated with a `require`.
  * Automatic findings: dead gates (require flag that can never be true here / notFlag that is always false), flags read but
  * never set, flags set but never read, unreachable nodes, dead ends, rolls without both targets, choices that can never be offered.
+ * SPEC §32.2: `alt` / `resultAlt` conditions count as reads; each alt entry is checked against the data-flow (flag MUST on arrival → decorative,
+ * flag not MAY → can never match) and printed in the digest with the MUST / MAY status of its flags.
  * Random events (eventRoll → data/events*.js) may also set flags; they are not part of the graph (noted in the output). */
 "use strict";
 const fs = require("fs"), path = require("path"), vm = require("vm");
+const SL = require("./story_lib.js");     // SPEC §32.2: alt / resultAlt conditions count as flag reads
 const ROOT = path.resolve(__dirname, "..", "..");
 const argv = process.argv.slice(2);
 const arg = (n, d) => { const i = argv.indexOf(n); return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : d; };
@@ -115,16 +118,19 @@ const reached = (id) => mustF[id] !== null;
 /* ---- automatic findings ---- */
 const findings = [];
 const add = (sev, id, msg) => findings.push({sev, id, msg});
-const readFlags = {}, setFlags = {};
+const readFlags = {}, setFlags = {}, eventFlags = new Set();
+(ctx.WH.events || []).forEach((ev) => { if (SL.appliesTo(ev, FID)) (ev.choices || []).forEach((c) => setOf(c.effects).on.forEach((k) => { eventFlags.add(k); (setFlags[k] = setFlags[k] || []).push("event " + ev.id); })); });
 ids.forEach((id) => {
   const n = N[id];
   setOf(n.effects).on.forEach((k) => (setFlags[k] = setFlags[k] || []).push(id));
+  (n.alt || []).forEach((a) => SL.condFlags(a && a["if"]).forEach((k) => (readFlags[k] = readFlags[k] || []).push(id)));
   (n.choices || []).forEach((c) => {
     setOf(c.effects).on.forEach((k) => (setFlags[k] = setFlags[k] || []).push(id));
-    const rq = c.require || {};
-    [rq.flag, rq.notFlag].filter(Boolean).forEach((k) => (readFlags[k] = readFlags[k] || []).push(id));
+    SL.requireFlags(c.require).forEach((k) => (readFlags[k] = readFlags[k] || []).push(id));
+    (c.resultAlt || []).forEach((a) => SL.condFlags(a && a["if"]).forEach((k) => (readFlags[k] = readFlags[k] || []).push(id)));
   });
 });
+(ctx.WH.events || []).forEach((ev) => { if (SL.appliesTo(ev, FID)) SL.whereFlags(ev.where).forEach((k) => (readFlags[k] = readFlags[k] || []).push("event " + ev.id)); });
 starts.forEach((s) => s.flags.forEach((k) => (setFlags[k] = setFlags[k] || []).push("origin")));
 Object.keys(readFlags).forEach((k) => { if (!setFlags[k]) add("ERROR", readFlags[k][0], "flag '" + k + "' is required/tested but never set anywhere (read at " + [...new Set(readFlags[k])].join(", ") + ")"); });
 Object.keys(setFlags).forEach((k) => {
@@ -140,12 +146,30 @@ ids.forEach((id) => {
     const lab = "choice " + (ci + 1) + " \"" + ((c.text && c.text.zh) || "") + "\"";
     if (c.roll && !(c.roll.success && c.roll.fail)) add("ERROR", id, lab + ": roll needs both success and fail targets");
     [c.next, c.roll && c.roll.success, c.roll && c.roll.fail].filter(Boolean).forEach((t) => { if (!N[t]) add("ERROR", id, lab + " → missing node " + t); });
-    const rq = c.require || {};
-    if (rq.flag && !mayF[id].has(rq.flag) && !mayF[id].has(rq.flag)) add("WARN", id, lab + " requires flag '" + rq.flag + "' which no path to this node can have set → never offered");
+    const rq = Array.isArray(c.require) ? (c.require[0] || {}) : (c.require || {});
+    if (rq.flag && !mayF[id].has(rq.flag) && !eventFlags.has(rq.flag)) add("WARN", id, lab + " requires flag '" + rq.flag + "' which no path to this node can have set → never offered");
     if (rq.notFlag && mustF[id] && mustF[id].has(rq.notFlag)) add("WARN", id, lab + " needs flag '" + rq.notFlag + "' to be unset but every path sets it → never offered");
     if (rq.flag && mustF[id] && mustF[id].has(rq.flag)) add("INFO", id, lab + " requires flag '" + rq.flag + "' which every path already has → gate is decorative");
     if (!c.result && !(c.rollResult) && !c.roll && (c.effects && Object.keys(c.effects).some((k) => k !== "set"))) add("INFO", id, lab + " has stat effects but no result text (player sees numbers only)");
   });
+});
+/* SPEC §32.2 alt / resultAlt entries vs the data-flow: a top-level flag condition that is MUST on arrival is decorative, one that is not MAY can never match */
+const flagState = (k, id) => (mustF[id] && mustF[id].has(k)) ? "MUST" : (mayF[id].has(k) || eventFlags.has(k)) ? "MAY" : "never";
+function altChecks(id, list, label, extraMay) {
+  (list || []).forEach((a, i) => {
+    const q = (a && a["if"]) || {}, pos = [].concat(q.flag || [], q.flags || []);
+    const st = (k) => (extraMay && extraMay.has(k)) && flagState(k, id) === "never" ? "MAY" : flagState(k, id);
+    pos.forEach((k) => { if (st(k) === "never") add("WARN", id, label + "[" + i + "] needs flag '" + k + "' which no path to this node sets → can never match"); });
+    if (pos.length && pos.every((k) => st(k) === "MUST") && !q.notFlag && !q.not && !q.any && !q.anyFlag && !q.all) add("INFO", id, label + "[" + i + "] needs " + pos.map((k) => "'" + k + "'").join(", ") + " which every path already has → always applies (make it the base text)");
+    if (q.notFlag && mustF[id] && mustF[id].has(q.notFlag)) add("WARN", id, label + "[" + i + "] needs flag '" + q.notFlag + "' unset but every path sets it → can never match");
+  });
+}
+ids.forEach((id) => {
+  if (!reached(id)) return;
+  const n = N[id];
+  altChecks(id, n.alt, "alt");
+  const nodeSet = new Set(setOf(n.effects).on);
+  (n.choices || []).forEach((c, ci) => altChecks(id, c.resultAlt, "choice " + (ci + 1) + " resultAlt", nodeSet));
 });
 /* a node reached by only one incoming edge whose parent's text/choice is the only context: fine; nodes with ≥3 distinct parents are 'joins' — list them for continuity review */
 const joins = ids.filter((id) => reached(id) && new Set(inn[id].map((e) => e.from)).size >= 3 && !N[id].ending);
@@ -181,6 +205,11 @@ if (!CHECKS) {
     L.push(n.text.zh.replace(/\n/g, " / "));
     if (EN) L.push("_" + n.text.en.replace(/\n/g, " / ") + "_");
     if (n.grudgeLine) L.push("(grudgeLine " + n.grudgeLine.npc + ": " + n.grudgeLine.text.zh + ")");
+    const cstr = (q) => JSON.stringify(q, (k, v) => v).replace(/"/g, "");
+    const flagNote = (q) => { const fl = [...SL.condFlags(q)]; return fl.length && reached(id) ? " [" + fl.map((k) => k + ":" + flagState(k, id)).join(" ") + "]" : ""; };
+    (n.alt || []).forEach((a, i) => L.push("  alt[" + i + "] if " + cstr(a["if"]) + flagNote(a["if"]) + (a.text ? " → TEXT: " + a.text.zh.replace(/\n/g, " / ") : " → ADD: " + ((a.add && a.add.zh) || "").replace(/\n/g, " / "))));
+    if (n.bridge) L.push("(bridge node)");
+    if (n.jump) L.push("(jump: " + n.jump.zh + ")");
     if (n.ending) L.push("ending: 「" + n.ending.title.zh + "」 cause: " + ((n.ending.cause && n.ending.cause.zh) || "—"));
     if (n.effects || (n.codex && n.codex.length)) L.push("on enter: " + estr(n.effects) + (n.codex && n.codex.length ? "  codex:" + n.codex.join(",") : ""));
     const pr = inn[id].map((e) => e.from + (e.kind !== "next" ? "(" + e.kind + ")" : "") + " ⟵ “" + ((e.c.text && e.c.text.zh) || "") + "”");
@@ -198,6 +227,7 @@ if (!CHECKS) {
       const gr = c.grudge ? " grudge(" + c.grudge.npc + ")" : "";
       let res = "";
       if (c.result) res = " ⇒ " + c.result.zh.replace(/\n/g, " / ");
+      (c.resultAlt || []).forEach((a, i) => { res += " ⇒alt[" + i + "] if " + cstr(a["if"]) + flagNote(a["if"]) + ": " + ((a.text && a.text.zh) || "").replace(/\n/g, " / "); });
       if (c.rollResult) res += " ⇒✓ " + ((c.rollResult.success && c.rollResult.success.zh) || "") + " ⇒✗ " + ((c.rollResult.fail && c.rollResult.fail.zh) || "");
       L.push("  " + (ci + 1) + ". “" + ((c.text && c.text.zh) || "") + "” " + tgt + rq + eff + gr + res);
     });

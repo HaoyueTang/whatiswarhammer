@@ -23,6 +23,7 @@
   WH.registerEvents([
     /* ================= Imperium ================= */
     {id: "evt_t_imp_tzeentch", god: "tzeentch", factions: ["imperium"], minChapter: 2,
+     where: {nodes: ["imp_208", "imp_400", "imp_501", "imp_611"]},   // SPEC §32.3: aboard ship, in or around a warp jump
      scene: "ship_interior", speaker: S("guardsman", "输光的老兵", "A Veteran Down on His Luck"), foe: null,
      text: L("运兵舰在亚空间里颠簸。一个老兵输光了口粮，把一副帝皇塔罗牌塞进你手里：“拿走。它们老是说对，我受不了了。”\n你翻开第一张。牌面上画的，是你明天才会见到的人。",
              "The troopship shudders through the warp. A veteran who has gambled away his rations presses an Emperor's Tarot deck into your hands. “Take it. They keep being right. I can't stand it.”\nYou turn the first card. It shows someone you won't meet until tomorrow."),
@@ -40,6 +41,7 @@
      ]},
 
     {id: "evt_t_imp_khorne", god: "khorne", factions: ["imperium"], minChapter: 3,
+     where: {nodes: ["imp_306"]},   // Dustfall, after the first ork wave falls back
      scene: "trench", speaker: S("sigil_khorne", "远处的鼓", "A Distant Drum"), foe: null,
      text: L("兽人的冲锋退了一阵。你低头数刺刀上的缺口：十一个。可你只记得砍过三次。\n远处有面鼓在敲，和你的心跳一个节拍。中士在喊你回掩体。",
              "The ork charge falls back for a moment. You count the nicks on your bayonet: eleven. You only remember striking three times.\nSomewhere a drum is beating in time with your heart. The sergeant is shouting for you to get back in cover."),
@@ -54,6 +56,7 @@
      ]},
 
     {id: "evt_t_imp_cleanse", god: "other", cleanse: true, factions: ["imperium"], minChapter: 3,
+     where: {nodes: ["imp_306", "imp_400", "imp_402", "imp_403", "imp_707"]},   // a lull with a priest at hand, never in the warp
      scene: "barracks", speaker: S("preacher", "随军牧师", "Regimental Priest"), foe: null,
      text: L("随军牧师在弹药箱上点了一支蜡烛，听人忏悔。队伍排得很长。\n轮到你时，他没有抬头：“说吧，孩子。帝皇都听得见，我只是替他记着。”",
              "The regimental priest has lit a candle on an ammo crate and is hearing confessions. The queue is long.\nWhen your turn comes he doesn't look up. “Speak, child. The Emperor hears it all. I only keep the ledger for Him.”"),
@@ -71,6 +74,7 @@
      ]},
 
     {id: "evt_t_imp_nurgle", god: "nurgle", factions: ["imperium"], minChapter: 4,
+     where: {nodes: ["imp_402", "imp_403"]},   // rain-city Vessel
      scene: "ruins", speaker: S("guardsman", "笑眯眯的伤员", "A Cheerful Patient"), foe: null,
      text: L("雨下了九天。野战医院的药早就用完了，只有角落那张床上的伤员一天比一天精神，脸色红润，身上有股烂苹果的甜味。\n他朝你招手：“兄弟，你的伤口该换药了。我这儿有。”",
              "It has rained for nine days. The field hospital ran out of medicine long ago, yet the patient in the corner bed grows rosier every day, smelling sweetly of rotten apples.\nHe waves you over. “Brother, that wound needs a fresh dressing. I've got some.”"),
@@ -85,9 +89,10 @@
      ]},
 
     {id: "evt_t_imp_slaanesh", god: "slaanesh", factions: ["imperium"], minChapter: 6,
+     where: {nodes: ["imp_611"]},   // aboard ship before the jump home
      scene: "ship_interior", speaker: S("guard_sergeant", "军需官", "The Quartermaster"), foe: null,
-     text: L("远征舰队要选一名新兵在授旗仪式上举旗。你被选中了。\n军需官递给你一面小镜子和一盒香膏：“要完美。全舰队都在看。”\n镜子里的你，比记忆中好看。",
-             "The crusade fleet needs a recruit to bear the standard at the colours ceremony. You've been chosen.\nThe quartermaster hands you a small mirror and a tin of scented balm. “Perfect, mind. The whole fleet is watching.”\nIn the mirror you look better than you remember."),
+     text: L("舰队要选一名新兵在授旗仪式上举旗。你被选中了。\n军需官递给你一面小镜子和一盒香膏：“要完美。全舰队都在看。”\n镜子里的你，比记忆中好看。",
+             "The fleet needs a recruit to bear the standard at the colours ceremony. You've been chosen.\nThe quartermaster hands you a small mirror and a tin of scented balm. “Perfect, mind. The whole fleet is watching.”\nIn the mirror you look better than you remember."),
      codex: ["imp_indomitus"],
      choices: [
        O("对着镜子练一整夜", "Practise before the mirror all night", {renown: 8, sanity: 3, taint: {slaanesh: 30}},
@@ -100,6 +105,7 @@
 
     /* ================= Chaos ================= */
     {id: "evt_t_cha_cleanse", god: "other", cleanse: true, factions: ["chaos"], minChapter: 2,
+     where: {nodes: ["cha_205", "cha_406"]},   // SPEC §32.3: Sump / chapel life, ch2 initiation month or the hideout before the purge
      scene: "underhive", speaker: S("cultist", "缺牙的老太太", "A Gap-Toothed Old Woman"), foe: null,
      text: L("漏雨的棚子底下，一个缺牙的老太太在分一罐糊糊。你不认识她，可她盛给你的那一勺最满。\n“我听见你说梦话，”她说，“声音不像你。吃吧，吃饱了就像了。”",
              "Under the leaking lean-to, a gap-toothed old woman is sharing out a tin of mash. You don't know her, but the spoonful she gives you is the fullest.\n“I heard you talking in your sleep,” she says. “Didn't sound like you. Eat. Full belly, you'll sound like you again.”"),
@@ -108,15 +114,16 @@
        O("坐下来跟她一起吃", "Sit down and eat with her", {hp: 5, sanity: 6, taint: {all: -15}},
          "糊糊没什么味道，但热乎乎的。她讲起年轻时的污池，你们笑了好几回。那一夜，你睡得像个普通人。",
          "The mash tastes of nothing, but it's hot. She talks about the Sump when she was young, and you both laugh more than once. That night you sleep like an ordinary person."),
-       O("把你那份也让给他", "Give him your share too", {hp: -3, sanity: 5, taint: {all: -12}},
+       O("把你那份也让给她", "Give her your share too", {hp: -3, sanity: 5, taint: {all: -12}},
          "她不肯要，两人推来推去，最后一人一半。那些总在你耳边说话的声音，今晚都没来。",
          "She won't take it. You push it back and forth and end up splitting it. The voices that keep talking in your ear don't come tonight.")
      ]},
 
     {id: "evt_t_cha_khorne", god: "khorne", factions: ["chaos"], minChapter: 3,
+     where: {nodes: ["cha_310"]},   // the days between the rising and the Space Marines' landing
      scene: "burning_city", speaker: S("cultist", "黄铜项圈的信徒", "Brass-Collared Zealot"), foe: null,
-     text: L("起义第二夜。一个陌生的信徒塞给你一把黄铜柄的斧子，柄上缠的布已经发硬。\n“它记得每一只握过它的手，”他说，“它会教你。”\n斧子比看上去轻，轻得像在催你。",
-             "The second night of the uprising. A zealot you don't know thrusts a brass-hafted axe at you, its grip-wrap stiff with age.\n“It remembers every hand that's held it,” he says. “It will teach you.”\nThe axe is lighter than it looks. Light enough to feel impatient."),
+     text: L("起义后的那几夜里，一个陌生的信徒塞给你一把黄铜柄的斧子，柄上缠的布已经发硬。\n“它记得每一只握过它的手，”他说，“它会教你。”\n斧子比看上去轻，轻得像在催你。",
+             "In the nights after the rising, a zealot you don't know thrusts a brass-hafted axe at you, its grip-wrap stiff with age.\n“It remembers every hand that's held it,” he says. “It will teach you.”\nThe axe is lighter than it looks. Light enough to feel impatient."),
      codex: ["god_khorne"],
      choices: [
        O("握紧斧子，冲在最前面", "Grip the axe and charge at the front", {renown: 8, hp: -6, taint: {khorne: 30}},
@@ -127,7 +134,8 @@
          "Long after you've walked away you can hear it humming in the wall, like someone tapping out your name.")
      ]},
 
-    {id: "evt_t_cha_tzeentch", god: "tzeentch", factions: ["chaos"], minChapter: 4,
+    {id: "evt_t_cha_tzeentch", god: "tzeentch", factions: ["chaos"], minChapter: 2,
+     where: {nodes: ["cha_205"]},   // the Choir's chapel during the initiation month
      scene: "cult_shrine", speaker: S("sigil_tzeentch", "没有书名的书", "The Untitled Book"), foe: null,
      text: L("教团藏书室里有本没写书名的书。你翻开，第一页写着你今天早上做过的事，一字不差。\n最后一页还空着。墨迹正一点一点渗出来。",
              "In the cult's book-room sits a volume with no title. You open it. The first page describes what you did this morning, word for word.\nThe last page is still blank. Ink is seeping into it, little by little."),
@@ -145,6 +153,7 @@
      ]},
 
     {id: "evt_t_cha_slaanesh", god: "slaanesh", factions: ["chaos"], minChapter: 5,
+     where: {nodes: ["cha_506"]},   // the black warship's lower hold, as the jump begins
      scene: "ship_interior", speaker: S("cultist", "底舱的歌者", "The Singer Below Decks"), foe: null,
      text: L("黑色战舰的底舱里，有人在唱诗班的老调子，唱得比诗班里任何人都好一万倍。\n你跟着哼了一句。那人停下来看你：“你也能唱成这样。只要你一直练，不吃，不睡。”",
              "Below decks on the black warship, someone is singing an old Choir hymn, ten thousand times better than anyone in the Choir ever did.\nYou hum along. The singer stops and looks at you. “You could sing like this too. Just keep practising. Don't eat. Don't sleep.”"),
@@ -159,6 +168,7 @@
      ]},
 
     {id: "evt_t_cha_nurgle", god: "nurgle", factions: ["chaos"], minChapter: 6,
+     where: {nodes: ["cha_601"]},   // the daemon world around the trial grounds
      scene: "daemon_world", speaker: S("daemon_nurgle", "种瓜的老人", "The Melon Grower"), foe: null,
      text: L("恶魔世界上有一片瓜田，瓜藤爬满了生锈的铠甲。种瓜的胖老人递给你一块瓜，瓤是灰绿色的。\n“你太累了，”他说，“在这儿歇歇吧。没人会催你。永远没有。”",
              "On the daemon world there is a melon patch, its vines climbing over rusted armour. The fat old grower hands you a slice. The flesh is grey-green.\n“You're so tired,” he says. “Rest here a while. No one will hurry you. Not ever.”"),
@@ -174,6 +184,7 @@
 
     /* ================= T'au ================= */
     {id: "evt_t_tau_tzeentch", god: "tzeentch", factions: ["tau"], minChapter: 2,
+     where: {nodes: ["tau_202", "tau_300", "tau_312", "tau_501", "tau_601"]},   // SPEC §32.3: quiet days in camp or city, never in battle or the warp
      scene: "tau_city", speaker: S("sigil_tzeentch", "挪动的字", "Shifting Letters"), foe: null,
      text: L("水族使节发给你一本人类语版的《大义》入门手册。\n读到第三页，字开始挪动位置，拼成一句新话：“改变，才是唯一的大义。”\n再看时，又变回去了。",
              "A water caste envoy gives you a Greater Good primer, printed in human script.\nOn page three the letters start to shift, spelling a new sentence: “Change is the only Greater Good.”\nYou look again. It has changed back."),
@@ -187,10 +198,11 @@
          "The envoy is surprised and delighted. “You want it explained?” He talks for two hours. Not one letter moves again.")
      ]},
 
-    {id: "evt_t_tau_khorne", god: "khorne", factions: ["tau"], minChapter: 3,
+    {id: "evt_t_tau_khorne", god: "khorne", factions: ["tau"], minChapter: 4,
+     where: {nodes: ["tau_312", "tau_501"]},   // after the ork war (ch3), in a lull
      scene: "jungle", speaker: S("kroot", "克鲁特鼓手", "Kroot Drummer"), foe: null,
-     text: L("打退兽人之后，克鲁特们围着篝火敲战鼓。领头的鼓手把一根骨头鼓槌递给你：“人类，你打得像克鲁特。来，敲。”\n鼓声一起，你的手就停不下来了。",
-             "After the orks are driven off, the kroot gather round the fire to beat their war drums. The lead drummer hands you a bone drumstick. “Human. You fight like kroot. Come. Beat.”\nOnce the drumming starts, your hands won't stop."),
+     text: L("上回打退兽人以后，克鲁特们每月都围着篝火敲战鼓。领头的鼓手把一根骨头鼓槌递给你：“人类，你打得像克鲁特。来，敲。”\n鼓声一起，你的手就停不下来了。",
+             "Ever since the orks were driven off, the kroot gather each month round the fire to beat their war drums. The lead drummer hands you a bone drumstick. “Human. You fight like kroot. Come. Beat.”\nOnce the drumming starts, your hands won't stop."),
      codex: ["tau_kroot"],
      choices: [
        O("敲到天亮", "Drum until dawn", {renown: 5, hp: 8, taint: {khorne: 30}},
@@ -202,12 +214,13 @@
      ]},
 
     {id: "evt_t_tau_cleanse", god: "other", cleanse: true, factions: ["tau"], minChapter: 4,
+     where: {nodes: ["tau_312", "tau_501", "tau_601"]},   // while Orin's Ethereals still live and the city is quiet
      scene: "tau_outpost", speaker: S("tau_ethereal", "以太族长者", "An Ethereal Elder"), foe: null,
      text: L("一位以太族长者在晨光里静坐，身边的火族战士一动不动。\n他示意你坐下：“你的呼吸太乱了，像是有别人在替你喘气。跟着我。为了大义，一呼，一吸。”",
              "An Ethereal elder sits still in the dawn light, his fire warriors motionless around him.\nHe motions you to sit. “Your breathing is ragged, as if someone else breathes for you. Follow me. For the Greater Good: in, and out.”"),
      codex: ["tau_ethereal"],
      choices: [
-       O("跟着他一起冥想", "Meditate with him", {sanity: 8, renown: 3, taint: {all: -20}},
+       O("跟着他一起冥想", "Meditate with him", {sanity: 8, renown: 3, taint: {all: -15}},
          "不知过了多久，你只听得见自己的心跳。一下，又一下，全都是你自己的。",
          "After a time you can't measure, you hear only your own heartbeat. One beat, then another, all of them yours."),
        O("坐一会儿就走", "Sit a moment, then leave", {sanity: 3, taint: {all: -5}},
@@ -216,6 +229,7 @@
      ]},
 
     {id: "evt_t_tau_slaanesh", god: "slaanesh", factions: ["tau"], minChapter: 5,
+     where: {nodes: ["tau_501", "tau_601"]},   // garrison life with an earth-caste simulator at hand
      scene: "tau_outpost", speaker: S("tau_drone", "计分屏", "Score Display"), foe: null,
      text: L("土族的射击模拟舱给每一枪打分。你拿了九十九分，全营最高。\n深夜你又溜进去，想打一次满分。舱里的灯是淡紫色的，以前不是。\n屏幕上写着：“再来一次。你差一点就完美了。”",
              "The earth caste's firing simulator scores every shot. You scored ninety-nine, best in the cadre.\nLate at night you sneak back in for a perfect hundred. The cabin lights are pale violet. They never used to be.\nThe screen reads: “Again. You were so nearly perfect.”"),
@@ -230,6 +244,7 @@
      ]},
 
     {id: "evt_t_tau_nurgle", god: "nurgle", factions: ["tau"], minChapter: 6,
+     where: {nodes: ["tau_601"]},   // the human quarter in the month before the swarm
      scene: "hive_hab", speaker: S("gue_vesa", "汤铺老板娘", "The Soup-Shop Keeper"), foe: null,
      text: L("人类街区闹起了咳嗽病，医疗无人机封了三条巷子。\n只有巷尾的汤铺照常开着。喝过汤的人都不咳了，只是脸红得发亮，总在笑。\n老板娘给你舀了一碗：“趁热。”",
              "A coughing sickness spreads through the human quarter; medical drones seal off three alleys.\nOnly the soup shop at the end of the lane stays open. Those who drink there stop coughing. They just glow pink, and smile all the time.\nThe keeper ladles you a bowl. “While it's hot.”"),
@@ -244,7 +259,8 @@
      ]},
 
     /* ================= Aeldari ================= */
-    {id: "evt_t_eld_tzeentch", god: "tzeentch", factions: ["aeldari"], minChapter: 2,
+    {id: "evt_t_eld_tzeentch", god: "tzeentch", factions: ["aeldari"], minChapter: 3,
+     where: {scenes: ["webway"], chapter: {min: 3, max: 3}},   // SPEC §32.3: only while the Farseer leads you through the webway
      scene: "webway", speaker: S("sigil_tzeentch", "掉落的符文石", "A Dropped Rune"), foe: null,
      text: L("穿过网道时，你捡到一块掉在地上的符文石。它在手心发热，表面浮出一条条细线，是你的命运线，比灵族说的还多几条。\n石头低语：“先知只给你看一条。我给你看全部。”",
              "Crossing the webway, you pick up a fallen rune-stone. It warms in your palm and fine threads surface on it: your fate-lines, more than the Aeldari ever told you.\nThe stone whispers: “The seers show you one. I'll show you them all.”"),
@@ -258,7 +274,8 @@
          "The farseer studies it a long while, then drops it into a crack in the webway. “That is not one of ours.”")
      ]},
 
-    {id: "evt_t_eld_slaanesh", god: "slaanesh", factions: ["aeldari"], minChapter: 3,
+    {id: "evt_t_eld_slaanesh", god: "slaanesh", factions: ["aeldari"], minChapter: 4,
+     where: {scenes: ["craftworld"], chapter: {min: 4, max: 7}},
      scene: "craftworld", speaker: S("sigil_slaanesh", "穹顶下的声音", "A Voice Beneath the Dome"), foe: null,
      text: L("灵族乐师在穹顶下排练。旋律美得让你忘了呼吸，也忘了家人是怎么死的。\n有个声音在你耳边说：“他们有道途约束，不敢一直听下去。你们猿人没有。你敢。”",
              "Aeldari musicians rehearse beneath the dome. The melody is so beautiful you forget to breathe, forget how your family died.\nA voice at your ear: “They have their Paths to hold them back. They dare not keep listening. You mon-keigh have none. You dare.”"),
@@ -273,12 +290,13 @@
      ]},
 
     {id: "evt_t_eld_cleanse", god: "other", cleanse: true, factions: ["aeldari"], minChapter: 4,
-     scene: "craftworld", speaker: S("aeldari_bonesinger", "灵骨歌者", "Bonesinger"), foe: null,
+     where: {scenes: ["craftworld"], chapter: {min: 4, max: 7}},
+     scene: "craftworld", speaker: S("aeldari_bonesinger", "一位年轻的灵骨歌者", "A young Bonesinger"), foe: null,
      text: L("灵骨歌者低声唱着，把一块小小的灵魂石放进你掌心。它是凉的，像井水。\n“她在找我们所有人，”她说，“你们猿人的灵魂太亮了，像黑夜里的灯笼。这个能替你遮一遮。”",
              "The bonesinger sings softly and sets a small spirit stone in your palm. It is cool, like well water.\n“She hunts for all of us,” she says. “Your mon-keigh souls burn so bright, lanterns in the dark. This will shade you a little.”"),
      codex: ["eld_spirit_stone"],
      choices: [
-       O("把灵魂石贴身戴好", "Wear the stone against your skin", {sanity: 6, taint: {all: -15, slaanesh: -10}},
+       O("把灵魂石贴身戴好", "Wear the stone against your skin", {sanity: 6, set: {wardStone: true}, taint: {all: -15, slaanesh: -10}},
          "那一夜，你第一次没有梦见黑暗里那双找你的眼睛。灵魂石微微发烫，像在替你挡着什么。",
          "That night, for the first time, you don't dream of the eyes searching for you in the dark. The stone grows warm, as if holding something off."),
        O("道谢，但不收", "Thank her, but decline", {sanity: -2, renown: 2},
@@ -286,7 +304,8 @@
          "She doesn't insist. She only says, “Then don't sing at night.”")
      ]},
 
-    {id: "evt_t_eld_khorne", god: "khorne", factions: ["aeldari"], minChapter: 5,
+    {id: "evt_t_eld_khorne", god: "khorne", factions: ["aeldari"], minChapter: 4,
+     where: {nodes: ["eld_407"]},   // the Aspect Shrine
      scene: "craftworld", speaker: S("sigil_khorne", "空着的面具", "The Empty Mask"), foe: null,
      text: L("相位神殿里，灵族战士戴上面具，就变成了另一个人。\n墙上挂着一副空面具，没有主人。你碰了它一下，耳朵里就灌满铁与火的轰鸣，有人在低吼：“戴上。杀戮不需要道途。”",
              "In the aspect shrine, Aeldari warriors don their masks and become someone else.\nAn empty mask hangs on the wall, ownerless. You touch it, and your ears fill with the roar of iron and fire. Something growls: “Put it on. Slaughter needs no Path.”"),
@@ -301,6 +320,7 @@
      ]},
 
     {id: "evt_t_eld_nurgle", god: "nurgle", factions: ["aeldari"], minChapter: 6,
+     where: {scenes: ["maiden_world"], chapter: {min: 6, max: 6}},
      scene: "maiden_world", speaker: S("sigil_nurgle", "井底的哭声", "Weeping in the Well"), foe: null,
      text: L("处女世界的果园里有一口老井。井底有个女人在哭，哭声温柔得让人心碎。\n她说她的眼泪能治好一切伤痛，只要你带走一捧。井沿上爬满了肥厚的、开着花的藤。",
              "In an orchard on the maiden world there is an old well. A woman weeps at its bottom, so gently it breaks your heart.\nHer tears can heal any hurt, she says, if you will carry some away. Fat, flowering vines smother the well's rim."),
@@ -309,13 +329,14 @@
        O("接一捧她的眼泪", "Catch a handful of her tears", {hp: 15, taint: {nurgle: 30}},
          "眼泪治好了你所有的旧伤。井沿的藤顺着你的手腕绕了一圈，留下一道暖暖的绿痕。",
          "The tears heal every old wound you have. A vine curls once around your wrist, leaving a warm green mark."),
-       O("去找游侠", "Go and find a ranger", {sanity: -3, renown: 3},
-         "游侠的脸色很难看。她用石头封了井口：“那是被囚禁的女神。看守她的，是个园丁。”",
-         "The ranger's face darkens. She seals the well with stones. “That is a captive goddess. Her keeper is a gardener.”")
+       O("去找流亡者长老", "Go and find the Exodite elder", {sanity: -3, renown: 3},
+         "长老的脸色很难看。她用石头封了井口：“那是被囚禁的女神。看守她的，是个园丁。”",
+         "The elder's face darkens. She seals the well with stones. “That is a captive goddess. Her keeper is a gardener.”")
      ]},
 
     /* ================= Necrons ================= */
     {id: "evt_t_nec_tzeentch", god: "tzeentch", factions: ["necrons"], minChapter: 2,
+     where: {scenes: ["tomb_interior"], chapter: {min: 3, max: 4}},   // SPEC §32.3: days spent inside the tomb (ch3 guest, ch4 captives' hall)
      scene: "tomb_interior", speaker: S("sigil_tzeentch", "多出来的一行", "The Extra Line"), foe: null,
      text: L("墓墙上的象形文字你已经抄了好几天。今天你发现有一行看得懂了，是用你的母语写的：\n“往下走。答案就在下面一层。”\n昨天，这一行还不存在。",
              "You've spent days copying the glyphs on the tomb wall. Today one line is readable. It's written in your own language:\n“Go down. The answer is one level below.”\nYesterday, that line didn't exist."),
@@ -330,9 +351,10 @@
      ]},
 
     {id: "evt_t_nec_nurgle", god: "nurgle", factions: ["necrons"], minChapter: 3,
+     where: {nodes: ["nec_401"]},   // SPEC §32.3: after forty days in the captives' hall (nec_313)
      scene: "tomb_interior", speaker: S("sigil_nurgle", "快活的厨子", "The Jolly Cook"), foe: null,
-     text: L("和你关在一起的挖掘队员一个接一个发了烧。\n只有老厨子越来越胖，越来越快活。他用捡来的金属罐煮着什么，冒着甜丝丝的热气：“来一碗吧，学者。喝了就不怕冷了。”",
-             "One by one, the diggers held captive with you fall to fever.\nOnly the old cook grows fatter and jollier. Something simmers in a scavenged metal can, sending up sweet steam. “Have a bowl, scholar. You'll never feel the cold again.”"),
+     text: L("俘虏厅里的挖掘队员一个接一个发了烧。\n只有老厨子越来越胖，越来越快活。他用捡来的金属罐煮着什么，冒着甜丝丝的热气：“来一碗吧，小家伙。喝了就不怕冷了。”",
+             "One by one, the diggers in the captives' hall fall to fever.\nOnly the old cook grows fatter and jollier. Something simmers in a scavenged metal can, sending up sweet steam. “Have a bowl, little one. You'll never feel the cold again.”"),
      codex: ["god_nurgle"],
      choices: [
        O("喝一碗", "Have a bowl", {hp: 12, sanity: 5, taint: {nurgle: 30}},
@@ -344,6 +366,7 @@
      ]},
 
     {id: "evt_t_nec_cleanse", god: "other", cleanse: true, factions: ["necrons"], minChapter: 3,
+     where: {scenes: ["tomb_interior"], chapter: {min: 3, max: 8}},   // SPEC §32.3: a pylon deep in the tomb
      scene: "tomb_interior", speaker: S("canoptek_scarab", "黑色石柱", "The Black Pylon"), foe: null,
      text: L("墓穴深处立着一根黑色石柱。一靠近它，脑子里所有的声音都停了：低语、敲门声、梦里那些说个不停的东西。\n只剩一种冰冷的、绝对的安静。像死，又像被谁擦干净了。",
              "Deep in the tomb stands a black pylon. Near it, every voice in your head falls silent: the whispers, the knocking, the things that chatter in your dreams.\nOnly a cold, absolute quiet remains. Like death. Or like being wiped clean."),
@@ -358,6 +381,7 @@
      ]},
 
     {id: "evt_t_nec_khorne", god: "khorne", factions: ["necrons"], minChapter: 4,
+     where: {nodes: ["nec_810"]},   // SPEC §32.3: the surface after the shard fight, dead guards on the sand
      scene: "tomb_exterior", speaker: S("sigil_khorne", "还在转的链锯剑", "A Chainsword Still Running"), foe: null,
      text: L("墓穴外的沙地上躺着一队帝国卫兵，死灵战士刚从这里走过。你从沙里捡起一把链锯剑。\n它还在转，自己在转。握柄烫手，里面有个声音在低吼：“这些铁壳子没有灵魂，不值得杀。去找值得的。”",
              "A squad of Imperial guards lies on the sand outside the tomb; necron warriors have just passed this way. You pull a chainsword from the sand.\nIt's still running, on its own. The grip is hot, and something inside growls: “Those tin husks have no souls. Not worth killing. Go find some that are.”"),
@@ -372,6 +396,7 @@
      ]},
 
     {id: "evt_t_nec_slaanesh", god: "slaanesh", factions: ["necrons"], minChapter: 5,
+     where: {scenes: ["stasis_gallery"]},   // SPEC §32.3: only in the Collector's gallery
      scene: "stasis_gallery", speaker: S("sigil_slaanesh", "空着的展台", "The Empty Plinth"), foe: null,
      text: L("收藏馆里，每个静滞力场都封着一个完美的瞬间：一场胜利，一次拥抱，一朵永不凋谢的花。\n有个展台空着，铭牌上已经刻好了你的名字。你忽然很想知道，自己一生中最好看的那一刻是什么样子。",
              "In the gallery, each stasis field holds a perfect moment: a victory, an embrace, a flower that will never wilt.\nOne plinth is empty. Your name is already engraved on it. Suddenly you long to see the finest moment of your life."),
@@ -387,6 +412,7 @@
 
     /* ================= Shared taint events ================= */
     {id: "evt_t_any_dice", god: "undivided", factions: ["*"], minChapter: 2,
+     where: {notScenes: ["stasis_gallery"], notNodes: ["imp_306", "imp_714", "cha_701", "nec_504", "nec_810"]},   // a dream: never mid-battle or in stasis (shared-events pass)
      scene: "warp", speaker: S("sigil_undivided", "梦里的小贩", "The Dream Peddler"), foe: null,
      text: L("你梦见一个没有脸的小贩，摊上只卖一样东西：一颗四面的骰子，每一面颜色都不同。\n“不要钱，”他说，“掷一次就好。哪一面朝上，就送你哪一样。”",
              "You dream of a faceless peddler whose stall sells one thing only: a four-sided die, each face a different colour.\n“No charge,” he says. “Just roll it once. Whichever face lands up, that's your gift.”"),
@@ -404,6 +430,7 @@
      ]},
 
     {id: "evt_t_any_feast", god: "undivided", factions: ["*"], minChapter: 4,
+     where: {notScenes: ["stasis_gallery"], notNodes: ["imp_306", "imp_714", "cha_701", "nec_504", "nec_810"]},
      scene: "daemon_world", speaker: S("sigil_undivided", "两张空椅子", "Two Empty Chairs"), foe: null,
      text: L("你梦见一场宴会，长桌边有两张空椅子在等你。\n一张在最热闹的那头，人人光彩照人，笑声不断。一张在最安静的角落，一位胖胖的老人正给大家分热汤。\n两边都在朝你招手。",
              "You dream of a banquet. Two empty chairs wait for you at the long table.\nOne at the lively end, where everyone glitters and the laughter never stops. One in the quiet corner, where a stout old man ladles out hot soup.\nBoth ends beckon."),
@@ -421,6 +448,7 @@
      ]},
 
     {id: "evt_t_any_note", god: "other", cleanse: true, factions: ["*"], minChapter: 3,
+     where: {notScenes: ["stasis_gallery"]},
      scene: "void", speaker: S(null, "一张旧字条", "An Old Note"), foe: null,
      text: L("你在衣服内衬里摸到一张折得很小的纸。是很久以前家里人偷偷塞进去的，你一直没发现。\n字歪歪扭扭：“记得吃饭。记得你是谁。”",
              "Sewn into the lining of your clothes you find a tightly folded scrap of paper. Someone at home slipped it in long ago; you never noticed.\nThe handwriting is clumsy: “Remember to eat. Remember who you are.”"),

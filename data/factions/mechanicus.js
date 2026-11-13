@@ -127,8 +127,8 @@
     alt: [ADD(F("doubleShift"), "二十个小时挣来的黄，四个小时的停线就抹掉了。", "Twenty hours of yellow, wiped out by four hours of stoppage."),
           ADD(F("griesGrace"), "“宽限到期，”格里斯说，“利息就是你的编号。”", "“Grace expired,” says Gries. “The interest is your number.”"),
           ADD(F("wronged_gries"), "他擦得很慢，另一只手一直摸着空了的腰带。", "He wipes slowly, his other hand on the empty loop of his belt.")],
-    text: L("第三次红。冲压机停的那四个小时，格里斯全记在你名下，然后亲手把你的数字从板上擦掉，像擦掉一点油污。\n两个护教军走过来，一左一右，步伐整齐得像同一个人。",
-            "Third red. Gries logs the press's four-hour stoppage against your name, then wipes your number off the board himself, like a smear of grease.\nTwo Skitarii approach, one on each side, moving in step like a single person."),
+    text: L("第三次红。冲压机停的那四个小时，监工格里斯全记在你名下，然后亲手把你的数字从板上擦掉，像擦掉一点油污。\n两个护教军走过来，一左一右，步伐整齐得像同一个人。",
+            "Third red. Overseer Gries logs the press's four-hour stoppage against your name, then wipes your number off the board himself, like a smear of grease.\nTwo Skitarii approach, one on each side, moving in step like a single person."),
     effects: {sanity: -5},
     choices: [
       C("跟他们走", "Go with them", "mech_107", X(null,
@@ -145,8 +145,8 @@
           ADD(F("wronged_tobin"), "他是托宾。他认出了你，什么也没说。", "It's Tobin. He recognises you and says nothing."),
           ADD(F("origin_savant"), "你数过了：从配额板到这里，一百一十七步。", "You counted: from the quota board to here, one hundred and seventeen steps."),
           ADD(F("origin_conscript"), "后颈的插槽空了，恐惧在里面来回撞。", "The socket at your neck is empty; fear rattles around inside it.")],
-    text: L("转化线前的候审队列很长。几十个人低声交换消息：谁的编号昨天被擦掉，谁的手被评估为“可用”。\n排在你前面的杂役回头冲你笑了笑，哼起一首只有四个音的歌。\n轮到他了。然后，轮到你。",
-            "The holding queue for the conversion line is long. Dozens trade whispers: whose number was wiped yesterday, whose hands were rated ‘usable’.\nThe menial ahead of you turns, smiles, and hums a song of four notes.\nHis turn comes. Then yours."),
+    text: L("转化线前的候审队列很长。几十个人低声交换消息：谁的编号昨天被擦掉，谁的手被评估为“可用”。\n排在你前面的杂役回头冲你笑了笑，哼起一首只有四个音的歌。\n就要轮到他了，然后是你。",
+            "The holding queue for the conversion line is long. Dozens trade whispers: whose number was wiped yesterday, whose hands were rated ‘usable’.\nThe menial ahead of you turns, smiles, and hums a song of four notes.\nHis turn is next. Then yours."),
     codex: ["imp_servitor"],
     choices: [
       C("报出档案里的备注编号", "Quote the note number in your file", "mech_108", O(Q({flag: "noticed"}), X({renown: 5},
@@ -338,7 +338,7 @@
   N.mech_200 = {chapter: 2, scene: "tech_vault", speaker: OSSIA, time: {h: 10}, bridge: true,
     alt: [ADD(F("askedTobin"), "你问起隔壁台上的那个人。“问题已记录，”她说，“答案你不会喜欢。”", "You ask about the man on the next table. “Query logged,” she says. “You won't like the answer.”"),
           ADD(F("pulledTobin"), "手腕上还有护教军的指印。你拽过的那只袖子，后来空了。", "Skitarius fingermarks still ring your wrist. The sleeve you pulled is empty now."),
-          ADD(F("wronged_tobin"), "你多出的那十分钟，现在是一张折叠铺。你睡不着。", "The ten minutes you bought are a folding cot now. You can't sleep."),
+          ADD(F("wronged_tobin"), "托宾的事，你不愿去想。折叠铺很硬，你睡不着。", "You'd rather not think about Tobin. The cot is hard; you can't sleep."),
           ADD(F("origin_savant"), "铺位上已经放好一块空白数据板。“我说过会再借你。”", "A blank data-slate waits on the cot. “I said I'd borrow you again.”"),
           ADD(F("origin_conscript"), "后颈的空插槽一碰枕头就疼。恐惧还在，只是累了。", "The empty socket aches against the pillow. The fear is still there, only tired.")],
     text: L("进圣库的第一夜。你睡在两排书架之间的折叠铺上，熔炉的轰鸣隔着墙传过来。\n奥西娅在书架后面还没睡，笔尖一直在响。\n“明天开始学二进制，”她说，“熄灯。”",
@@ -364,7 +364,7 @@
 
   N.mech_202 = {chapter: 2, scene: "forge_floor", speaker: TOBIN, time: {h: 4},
     grudgeLine: {npc: "gries", text: L("这是格里斯监工管的炉子。他叉着手站在炉口，目光钉在你身上。", "This is Overseer Gries's furnace. He stands arms folded at the furnace mouth, eyes fixed on you.")},
-    alt: [ADD({all: [F("tobinFriend"), NF("learnedSong")]}, "你认得这张脸。几天前，他还告诉过你他的名字。", "You know this face. Days ago he told you his name."),
+    alt: [ADD({all: [F("tobinFriend"), NF("learnedSong")]}, "你认得这张脸。他叫托宾。", "You know this face. His name was Tobin."),
           ADD(F("askedServitor"), "“去问问它们，”奥西娅说过。你走近了一步。", "“Go and ask them,” Ossia said. You step closer."),
           ADD(F("learnedSong"), "那四个音你早就会了——配给队列里他教过你。", "You've known those four notes since the ration queue. He taught you."),
           ADD(F("sawServitors"), "它的步伐是护教军操典里的步伐，凯什指给你看过。", "Its gait is straight from the Skitarii drill-book. Kesh once pointed it out to you.")],
@@ -679,7 +679,7 @@
   N.mech_309 = {chapter: 3, scene: "tech_vault", speaker: VALLEN, time: {d: 2},
     alt: [ADD(F("askedNew"), "“问题太多的人，”他补了一句，“放远一点比较安全。”", "“Those with too many questions,” he adds, “are safer at a distance.”"),
           ADD(F("doubter"), "他看着你，像听见了你誓词后面那半句。", "He looks at you as if he heard the half-line behind your vow.")],
-    text: L("探索舰队路过，缺书记神甫，瓦伦填上了你的名字。“我们出钱考察过忒萨零号，维克崔斯-9没回来。这次去G-7卫星。”\n他顺手划掉异端通缉名单的第一行：塞瑞丁。“旧案，三十年前判的。”",
+    text: L("探索舰队路过，缺书记神甫，瓦伦填上了你的名字。“我们出钱考察过忒萨零号，维克崔斯-9贤者没回来。这次去G-7卫星。”\n他顺手划掉异端通缉名单的第一行：塞瑞丁。“旧案，三十年前判的。”",
             "An explorator fleet is passing, short of lexmechanics; Vallen enters your name. “Gravex paid for the Thessa Null dig. Magos Vektrix-9 has not returned. This time, Moonlet G-7.”\nIn passing he strikes the first line from a heretek wanted-list: Syrredin. “An old case. Judged thirty years ago.”"),
     codex: ["mech_explorators", "place_thessa_null"],
     choices: [
@@ -708,7 +708,7 @@
     jump: L("亚空间航行三十天", "Thirty days through the warp"),
     alt: [ADD(F("origin_conscript"), "邻桌的护教军认出了你后颈的疤，给你挪了个位子。", "The Skitarii at the next table spot the scar on your neck and make room for you.")],
     text: L("航行第三十天，舰员食堂里挤满护教军和船员。你第一次睡满了八小时。\n长桌那头，探索贤者卡兰提斯有四条腿、两个大脑，一个专门用来好奇。\n“G-7的墓穴比人类还老。我想知道它知道什么。”",
-            "Day thirty of the voyage, in the crew mess. Skitarii, crew and servitors crowd the long tables; for once you slept eight hours.\nAt the far end sits Explorator Calantis: four legs, two brains, one reserved for curiosity.\n“The tomb on G-7 may be older than humanity. I want to know what it knows.”"),
+            "Day thirty of the voyage, in the crew mess. Skitarii and crew crowd the long tables; for once you slept eight hours.\nAt the far end sits Explorator Calantis: four legs, two brains, one reserved for curiosity.\n“The tomb on G-7 may be older than humanity. I want to know what it knows.”"),
     effects: {hp: 15},
     choices: [
       C("“它会愿意被知道吗？”", "“Will it want to be known?”", "mech_402", X({sanity: -3, set: {askedWill: true}},
@@ -795,7 +795,7 @@
   N.mech_405 = {chapter: 4, scene: "tomb_exterior", speaker: CALANTIS, time: {h: 1},
     alt: [ADD(F("sleepCode"), "休眠码还在你舌头上发冷。墓道深处安静了一点。", "The sleep-code is still cold on your tongue. The tunnels have gone a little quieter."),
           ADD(F("askedPriority"), "你想起瓦伦预留的那个档案位。", "You remember the file slot Vallen reserved."),
-          ADD(F("perimeter"), "卡兰提斯是最后一个跑出来的。", "Calantis is the last one out.")],
+          ADD(F("perimeter"), "她是最后一个跑出墓道的，也是第一个走回去的。", "She was the last one out of the tunnels, and the first to go back.")],
     text: L("运输艇的舱门正在关闭。卡兰提斯站在墓道口，没有上船。\n“还有一个墓室，”她说，“只看一眼。”\n她走回了黑暗里。舱门合上了。",
             "The lander's hatch is closing. Calantis stands at the tunnel mouth and doesn't board.\n“One more chamber,” she says. “Just one look.”\nShe walks back into the dark. The hatch seals."),
     choices: [
@@ -825,7 +825,7 @@
     alt: [ADD(F("tookMetal"), "你亲手拆下来的那块，纹路长得最快。", "The piece you dismantled yourself grows its patterns fastest."),
           ADD(F("savedServitors"), "你救上船的机仆守在货舱门口，一动不动。", "The servitors you got aboard stand motionless at the hold door.")],
     text: L("回程的货舱里，带回来的死灵金属在自我修复，长出了细小的纹路。舰船的机魂不安地闪着灯。\n凯什拿枪对着它。“它在学习我们的船。”\n“扔出去，”她说，“或者你负责。”",
-            "In the hold on the voyage home, the necron metal you brought back is repairing itself, growing fine new patterns. The ship's spirit flickers uneasily.\nKesh aims at it. “It's learning our ship.”\n“Jettison it,” she says. “Or it's your responsibility.”"),
+            "In the hold on the voyage home, the necron metal brought aboard is repairing itself, growing fine new patterns. The ship's spirit flickers uneasily.\nKesh aims at it. “It's learning our ship.”\n“Jettison it,” she says. “Or it's your responsibility.”"),
     choices: [
       C("扔进虚空", "Jettison it", "mech_409", X({renown: -3, sanity: 5, set: {voidedMetal: true}},
         "金属在舱外翻滚。最后一刻，它朝舰船伸出了一根细丝。",
@@ -864,7 +864,7 @@
     ]};
 
   N.mech_502 = {chapter: 5, scene: "ruins", speaker: KESH, foe: "ork_nob", time: {h: 1},
-    alt: [ADD(F("keshTrust"), "“你的报表从没错过，”凯什说，“这次也别错。”", "“Your reports have never been wrong,” Kesh says. “Don't start now.”")],
+    alt: [ADD({all: [F("keshTrust"), NF("kastelanMisfire")]}, "“你的报表从没错过，”凯什说，“这次也别错。”", "“Your reports have never been wrong,” Kesh says. “Don't start now.”")],
     text: L("凯什的分队守在第三熔炉前。对面冲来一个兽人头目，比卡斯特兰矮不了多少，挥着链锯斧。\n“书记神甫，”凯什说，“我需要火力校准，或者需要一个人。”\n她等你选。",
             "Kesh's maniple holds before the Third Furnace. An ork boss charges, not much shorter than a Kastelan, swinging a chain-axe.\n“Lexmechanic,” says Kesh, “I need fire calibration. Or I need a body.”\nShe waits for your choice."),
     choices: [
@@ -907,8 +907,8 @@
         RR("大炮第一发就炸了膛。你趁乱挣开锁链，一头钻进废铁场深处。", "The cannon bursts on its first shot. In the chaos you slip your chains and dive deeper into the scrapyard.",
            "机械佬发现了你的小动作，反而大笑：“聪明小东西！留着！”", "The Mek spots your trick and roars with laughter. “Clever little fing! Keepin' you!”"))),
       C("等护教军来救", "Wait for the Skitarii", "mech_504", X({hp: -10, sanity: -5},
-        "两天后护教军炸开了废铁场。你趁乱从铁链里挣出来，正撞上废铁场中央的东西。",
-        "Two days later the Skitarii blast the scrapyard open. You wriggle free in the chaos and run straight into what stands at its centre.")),
+        "天亮前护教军炸开了废铁场。你趁乱从铁链里挣出来，正撞上废铁场中央的东西。",
+        "Before dawn the Skitarii blast the scrapyard open. You wriggle free in the chaos and run straight into what stands at its centre.")),
       C("给他好好修", "Fix it properly for him", "mech_end_looted", X({sanity: -5},
         "你修得一丝不苟。大炮第一发就打穿了三堵墙。机械佬抱住你：“好小东西！”",
         "You fix it meticulously. Its first shot punches through three walls. The Mek hugs you. “Good little fing!”"))
@@ -937,8 +937,9 @@
     ]};
 
   N.mech_507 = {chapter: 5, scene: "ork_scrapyard", speaker: null, foe: "kastelan_robot", time: {h: 1},
-    text: L("你躺在废铁堆里，肋骨断了几根。红色的机器人朝你走来，每一步都踩碎一块金属。\n它胸口的灯在闪。\n闪了两下，和试炮那天一样。",
-            "You lie in the scrap with several ribs broken. The red robot walks toward you, each step crushing metal.\nIts chest light is blinking.\nTwice, just like the day of the gunnery trial."),
+    alt: [ADD(F("prayedKastelan"), "试炮那天你对它念祷文时，它也是这样闪的。", "It blinked just like this the day you prayed to it at the trial.")],
+    text: L("你躺在废铁堆里，肋骨断了几根。红色的机器人朝你走来，每一步都踩碎一块金属。\n它胸口的灯在闪。\n闪两下，停一停，又闪两下。",
+            "You lie in the scrap with several ribs broken. The red robot walks toward you, each step crushing metal.\nIts chest light is blinking.\nTwice. A pause. Twice again."),
     effects: {hp: -15},
     choices: [
       C("念试炮那天念过的祷文", "Recite the prayer from the trial", "mech_506", O(Q({flag: "prayedKastelan"}, true), X({sanity: 5, renown: 5, set: {kastelanWoke: true}},
@@ -973,8 +974,8 @@
     ]};
 
   N.mech_508 = {chapter: 5, scene: "manufactorum", speaker: null, time: {d: 2}, gather: L("杂役食堂", "Menial refectory"),
-    text: L("兽人退后第三天，杂役食堂里挤满了人，大家捧着糊糊议论冷却管道里一夜长出的蘑菇，红的绿的。\n“兽人的孢子，烧不干净，明年还会长出小绿皮。”\n管道里的蘑菇微微发热，摸上去像一只温顺的动物。",
-            "Three days after the orks left, the menial refectory is packed. Over bowls of gruel everyone talks about the fungus that sprouted overnight in the coolant pipes, red and green.\n“Ork spores. Can't burn 'em all. Next year, little greenskins.”\nThe fungus is faintly warm, like a docile animal."),
+    text: L("兽人退后第四天，杂役食堂里挤满了人，大家捧着糊糊议论冷却管道里一夜长出的蘑菇，红的绿的。\n“兽人的孢子，烧不干净，明年还会长出小绿皮。”\n管道里的蘑菇微微发热，摸上去像一只温顺的动物。",
+            "Four days after the orks left, the menial refectory is packed. Over bowls of gruel everyone talks about the fungus that sprouted overnight in the coolant pipes, red and green.\n“Ork spores. Can't burn 'em all. Next year, little greenskins.”\nThe fungus is faintly warm, like a docile animal."),
     choices: [
       C("全部烧掉", "Burn it all", "mech_509", X({hp: -5, renown: 3, set: {burnedSpores: true}},
         "火焰喷射器烧了一整天。烟是甜的，你咳了一整夜。",
@@ -1051,8 +1052,8 @@
         "奥西娅看着它熔化，没阻止。“它会再长出来的，”她说，“知识都这样。”",
         "Ossia watches it melt and doesn't stop you. “It'll grow back,” she says. “Knowledge always does.”")),
       C("问她：他从哪里进来？", "Ask her: where will he come in?", "mech_604", O(Q({flag: "ossiaOwes"}, true), X({sanity: -3, set: {knowLanding: true}},
-        "她犹豫了很久。“冷却管道。反应堆的冷却管道。”说完她就走了，钥匙留在桌上。",
-        "She hesitates a long time. “The coolant ducts. The reactor's coolant ducts.” Then she leaves, the key on the desk."))),
+        "她犹豫了很久。“冷却管道。反应堆的冷却管道。”说完她就走了。你把钥匙放回桌上。",
+        "She hesitates a long time. “The coolant ducts. The reactor's coolant ducts.” Then she leaves. You set the key down on the desk."))),
       C("用卡兰提斯的遗言换一句实话", "Trade Calantis's last words for the truth", "mech_604", O(Q({flag: "calantisFile"}, true), X({sanity: -5, set: {knowLanding: true}, taint: {tzeentch: 10}},
         "她读完那串零，眼睛亮得吓人。“冷却管道，”她说，“他从反应堆的冷却管道进来。”",
         "She reads the string of zeros, eyes frighteningly bright. “The coolant ducts,” she says. “He comes in through the reactor's coolant ducts.”")))
@@ -1111,8 +1112,8 @@
     alt: [ADD(F("augHalf"), "胸腔里的泵稳稳地跳，比队里每个人的心跳都稳。", "The pump in your chest beats steadily, steadier than any heart in the line."),
           ADD(F("fleshKept"), "你的手还是你的手，端着口粮碗，有点抖。", "Your hands are still yours, holding the ration bowl, a little unsteady."),
           ADD(F("burnedSpores"), "有个杂役小声说：“烧蘑菇的那个。”", "A menial whispers: “That's the one who burned the fungus.”")],
-    text: L("三天后，你去熔炉配给站领口粮。护教军向你点头，杂役给你让路，就像当年你给神甫让路。\n排队的人在议论轨道上的异象。灯一闪一闪，像在用二进制说话。\n你听懂了。它在说：害怕。",
-            "Three days later you collect rations at the forge commissary. Skitarii nod to you; menials step aside, as you once did for priests.\nThe queue murmurs about lights seen in orbit. The lamps flicker as if speaking binary.\nYou understand. They're saying: afraid."),
+    text: L("两天后，你去熔炉配给站领口粮。护教军向你点头，杂役给你让路，就像当年你给神甫让路。\n排队的人在议论轨道上的异象。灯一闪一闪，像在用二进制说话。\n你听懂了。它在说：害怕。",
+            "Two days later you collect rations at the forge commissary. Skitarii nod to you; menials step aside, as you once did for priests.\nThe queue murmurs about lights seen in orbit. The lamps flicker as if speaking binary.\nYou understand. They're saying: afraid."),
     choices: [
       C("去冥想室为熔炉祈祷", "Go to the meditation cell to pray for the forge", "mech_607", X(null,
         "你把没吃完的口粮塞给身后的杂役，走进冥想室。",
@@ -1138,8 +1139,8 @@
     ]};
 
   N.mech_608 = {chapter: 6, scene: "forge_floor", speaker: RUMM, time: {h: 4},
-    text: L("废码在熔炉间蔓延。传送带倒着转，机仆停下来对着墙发呆。\n鲁姆抱着反应堆的控制台哭：“它害怕！它说它听见了别的声音！”\n格拉维克斯的心脏，一座等离子反应堆，在颤抖。",
-            "Scrapcode spreads among the furnaces. Conveyors run backward; servitors stop and stare at walls.\nRumm clings to the reactor console, weeping. “It's afraid! It says it hears other voices!”\nGravex's heart, a plasma reactor, is trembling."),
+    text: L("废码在熔炉间蔓延。传送带倒着转，机仆停下来对着墙发呆。\n铸工神甫鲁姆抱着反应堆的控制台哭：“它害怕！它说它听见了别的声音！”\n格拉维克斯的心脏，一座等离子反应堆，在颤抖。",
+            "Scrapcode spreads among the furnaces. Conveyors run backward; servitors stop and stare at walls.\nEnginseer Rumm clings to the reactor console, weeping. “It's afraid! It says it hears other voices!”\nGravex's heart, a plasma reactor, is trembling."),
     choices: [
       C("对反应堆唱祷文", "Sing a litany to the reactor", "mech_609", O(X({sanity: -5, taint: {all: -10}, set: {calmedReactor: true, keeper: true}},
         "你唱到嗓子出血。反应堆的颤抖慢慢平了，像一只被抚摸的巨兽。",
@@ -1169,8 +1170,8 @@
     alt: [ADD(F("motiveLater"), "一位电祭司朝你抬了抬手：“下次”到了。", "An electro-priest raises a hand to you: ‘next time’ has come."),
           ADD(F("knowLanding"), "你报上了冷却管道，凯什在图上多画了一个红圈。", "You report the coolant ducts; Kesh adds a red circle to the map."),
           ADD(F("heardVoice"), "塞瑞丁的声音还在你植入体里嗡嗡响。", "Syrredin's voice still hums in your implants.")],
-    text: L("离登陆还有六小时，护教军集结点。凯什单腿撑着桌沿，在全息图上点了三处：防线、冷却隧道、圣库。\n电祭司们在角落里互相通电，像在热身。\n“三个口子，”凯什说，“书记神甫，你守一个。”",
-            "Six hours to landfall, at the Skitarii muster. Braced one-legged on the table edge, Kesh marks three points on the hololith: the line, the coolant tunnels, the Vault.\nIn a corner the electro-priests shock one another, warming up.\n“Three gaps,” says Kesh. “Lexmechanic, you hold one.”"),
+    text: L("离登陆还有六小时，护教军集结点。凯什撑着桌沿，在全息图上点了三处：防线、冷却隧道、圣库。\n电祭司们在角落里互相通电，像在热身。\n“三个口子，”凯什说，“书记神甫，你守一个。”",
+            "Six hours to landfall, at the Skitarii muster. Braced on the table edge, Kesh marks three points on the hololith: the line, the coolant tunnels, the Vault.\nIn a corner the electro-priests shock one another, warming up.\n“Three gaps,” says Kesh. “Lexmechanic, you hold one.”"),
     choices: [
       C("检查武器，等", "Check your gear, and wait", "mech_701", X(null,
         "六个小时像六分钟。轨道上的黄铜舰船开始往下投东西。",
@@ -1322,8 +1323,8 @@
         "他伸出一只手，关节多一个，和奥西娅的一样。你握住了它。",
         "He offers a hand with one joint too many, like Ossia's. You take it."))),
       C("把铅箱交给他", "Hand him the lead box", "mech_end_heretek", O(Q({flag: "crystal"}, true), X({corruption: 15, taint: {tzeentch: 10}},
-        "他撕开七道封条，金属在他掌心认主般地缠上来。“你看，”他说，“你一直在替我收集。”",
-        "He tears the seven seals; the metal coils into his palm as if it knew him. “You see,” he says, “you've been collecting for me all along.”")))
+        "他撕开剩下的六道封条，金属在他掌心认主般地缠上来。“你看，”他说，“你一直在替我收集。”",
+        "He tears off the six remaining seals; the metal coils into his palm as if it knew him. “You see,” he says, “you've been collecting for me all along.”")))
     ]};
 
   /* ============ Chapter 8 · The Omnissiah ============ */
@@ -1444,8 +1445,8 @@
     alt: [ADD(F("keeper"), "反应堆认出了你的脚步，墙上的灯亮了一下。", "The reactor knows your footsteps; a light on the wall blinks once."),
           ADD({anyFlag: ["tobinOff", "tobinGave"]}, "T-0B1N站过的地方空着。你停下来，哼了四个音。", "The place where T-0B1N stood is empty. You stop and hum four notes."),
           ADD(F("menialSong"), "隧道里学会那首歌的杂役，都回到了这里。", "The menials who learned the song in the tunnels have all come back here.")],
-    text: L("三天后，你回到第七熔炉。配额板烧掉了一半，剩下那半上，你的旧编号还在，是绿的。\n反应堆在墙后低低地响。\n有人递给你一把扳手。",
-            "Three days later you are back at the Seventh Furnace. Half the quota board has burned; on what's left, your old number is still there, and green.\nThe reactor murmurs behind the wall.\nSomeone hands you a spanner."),
+    text: L("三天后，你回到第七熔炉。配额板烧掉了一半，剩下那半上，有人把你的旧编号重新写了上去，是绿的。\n反应堆在墙后低低地响。\n有人递给你一把扳手。",
+            "Three days later you are back at the Seventh Furnace. Half the quota board has burned; on what's left, someone has chalked your old number back up, in green.\nThe reactor murmurs behind the wall.\nSomeone hands you a spanner."),
     choices: [
       C("留下来，当它的看守神甫", "Stay, as its keeper", "mech_end_keeper", O(Q({flag: "keeper"}), X({sanity: 10},
         "你接过扳手，拧紧了第一颗螺栓。反应堆的灯又亮了一下。",
@@ -1457,11 +1458,11 @@
 
   /* ============ Endings ============ */
   N.mech_end_magos = {chapter: 8, scene: "manufactorum", speaker: null, time: {y: 30},
-    alt: [ADD(F("fleshFirst"), "袍子下没有黄铜。神甫们至今叫你“原装的贤者”。", "There's no brass beneath the robe. The priests still call you ‘the original Magos’."),
+    alt: [ADD(F("fleshFirst"), "当年你连第一次改造都没要。神甫们至今叫你“原装的贤者”。", "You refused even your first augmentation. The priests still call you ‘the original Magos’."),
           ADD(F("handLost"), "你用一只黄铜手签下了第一道命令。另一只，还是肉的。", "You sign your first order with a brass hand. The other is still flesh."),
           ADD(F("draggedVallen"), "瓦伦的推荐信，挂在你办公室的墙上。", "Vallen's letter of recommendation hangs on your office wall.")],
-    text: L("三十年后，你成了格拉维克斯的贤者。袍子下有黄铜，胸口里仍是一颗会疼的心。\n你改了转化线的规矩：会数数的、会唱歌的，先送来见你。\n你的档案里，名字一栏终于填上了。",
-            "Thirty years later you are a Magos of Gravex. Brass beneath the robe; in your chest, a heart that still aches.\nYou change the rules of the conversion line: anyone who can count, or sing, is sent to you first.\nIn your file, the name field is finally filled in."),
+    text: L("三十年后，你成了格拉维克斯的贤者。袍子下的黄铜比同僚少得多，胸口里仍是一颗会疼的心。\n你改了转化线的规矩：会数数的、会唱歌的，先送来见你。\n你的档案里，名字一栏终于填上了。",
+            "Thirty years later you are a Magos of Gravex. Far less brass beneath the robe than your peers; in your chest, a heart that still aches.\nYou change the rules of the conversion line: anyone who can count, or sing, is sent to you first.\nIn your file, the name field is finally filled in."),
     ending: {kind: "good", title: L("有心的贤者", "The Magos With a Heart"), cause: L("成为保留人心的贤者", "Became a Magos who kept a heart")}};
 
   N.mech_end_explorator = {chapter: 8, scene: "void", speaker: null, time: {y: 1, warp: true},
@@ -1474,7 +1475,7 @@
   N.mech_end_keeper = {chapter: 8, scene: "forge_floor", speaker: null, time: {y: 2},
     alt: [ADD({anyFlag: ["tobinOff", "tobinGave"]}, "你每天在T-0B1N站过的地方停一下，哼四个音。", "Every day you pause where T-0B1N stood and hum four notes."),
           ADD(F("tobinRust"), "T-0B1N还在，锈花开满全身，哼歌哼得很慢。", "T-0B1N is still here, covered in rust-flowers, humming slowly."),
-          ADD(F("tobinSaved"), "然后给T-0B1N擦脸。它还在哼歌，还是跑调。", "Then you wipe T-0B1N's face. It still hums, still off-key."),
+          ADD({all: [F("tobinSaved"), NF("tobinGave")]}, "然后给T-0B1N擦脸。它还在哼歌，还是跑调。", "Then you wipe T-0B1N's face. It still hums, still off-key."),
           ADD(F("menialSong"), "第七熔炉的杂役上工时，都哼着那四个音。", "The Seventh Furnace's menials hum those four notes as they work.")],
     text: L("你没有升职，留在第七熔炉当它的看守神甫。\n每天早上，你给反应堆念祷文，给传送带上油。\n杂役们说，第七熔炉的机魂是全星球脾气最好的。",
             "You decline promotion and stay on as keeper of the Seventh Furnace.\nEach morning you pray to the reactor and oil the conveyors.\nThe menials say the Seventh Furnace has the kindest machine spirit on the planet."),

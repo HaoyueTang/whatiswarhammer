@@ -6,8 +6,15 @@
  *   options: --runs N (default 3000)  --seed S (default 1)  --faction id  --quiet (errors/warnings summary only)
  *   node tools/dev/validate.js --write-difficulty   also writes data/difficulty.js (SPEC §24): fixed seeds 1/5/9 × --runs per
  *     faction (origins alternate), level 1/2/3 by random-play death rate <24 / 24–29 / ≥29 %, per faction and per "faction/origin".
+ *   SPEC §31 (v0.3.4): every ending node needs an illustration — a manifest scene `end_<id>` whose PNG exists (error; warning if it
+ *   is not 192×108), plus tools/dev/dump_endings.js --check (tools/art/endings_brief.json stale → warning, or error if the ending
+ *   count differs). --allow-missing-ending-art downgrades the "no scene / no PNG" errors to ONE summary warning (development only,
+ *   while the art role is still producing). Not checked with --sample.
  *   SPEC §20: also checks data/chronicle.js (timeline codex entries), data/rumors.js and data/events_lore.js, and
  *   reports rumours per route, chronicle entries per millennium and avg rumours overheard per simulated run.
+ *   SPEC §20c (v0.3.4): rumours / echoes are heard only on gather nodes (node.gather = {zh, en}); checks the shape, label-in-text coherence,
+ *   forbidden places, per route count / chapters / per-origin passes / rumours per run / echo share; routes with NO gather node get one
+ *   "no gather nodes yet" warning instead. `node tools/dev/validate.js --gather-report [--faction f] [--runs N]` prints the static table.
  *
  * Loads registry + manifest + data + the REAL engine (src/js/engine.js) into a vm context, so simulated runs
  * use exactly the game rules (effects, clamps, death checks, roll formula, warp time, events).
@@ -17,6 +24,7 @@
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
+const SL = require("./story_lib.js");         // SPEC §32 story analysis (shared with route_converge.js / route_graph.js)
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const argv = process.argv.slice(2);
@@ -27,6 +35,10 @@ const RUNS = parseInt(arg("--runs", "3000"), 10);
 const SEED = parseInt(arg("--seed", "1"), 10);
 const ONLY = arg("--faction", null);
 const WRITE_DIFF = argv.includes("--write-difficulty");
+const STORY_GATE = argv.includes("--story-gate");       // SPEC §32: story-quality limits (false choices, forced chapter steps, run length …) fail the run
+const GATHER_REPORT = argv.includes("--gather-report"); // SPEC §20c: print the per-route gather-node table and exit
+const STORY_REPORT = argv.includes("--story-report");   // SPEC §32: print the per-route story table and exit
+const ALLOW_MISSING_END_ART = argv.includes("--allow-missing-ending-art");   // SPEC §31: dev only — the default (no flag) is the real gate
 const DIFF_SEEDS = [1, 5, 9];
 const diffLevel = (deathPct) => deathPct < 24 ? 1 : deathPct < 29 ? 2 : 3;   // SPEC §24
 const STEP_LIMIT = 1500;
@@ -218,6 +230,121 @@ function checkRequire(r, where, flagsSet) {
   }
 }
 
+/* ---------- SPEC §32.2 conditions: node.alt / choice.resultAlt ---------- */
+const ALT_TEXT_ZH = 90, ALT_TEXT_EN = 65, ALT_ADD_ZH = 45, ALT_ADD_EN = 33, ALT_MAX = 8, RESULT_ALT_MAX = 4, JUMP_ZH = 40, JUMP_EN = 25;
+const sceneKnown = (k) => sceneKeys.has(k) || SPEC2_SCENES.includes(k);
+const arrOf = (x) => (x === undefined || x === null ? [] : Array.isArray(x) ? x : [x]);
+const rangeOk = (r) => typeof r === "number" || (r && typeof r === "object" && !Array.isArray(r) && Object.keys(r).every((k) => ["min", "max"].includes(k) && typeof r[k] === "number") && Object.keys(r).length > 0);
+/* env: {flagsSet:Set (every flag set anywhere that can reach this route), nodes:{id→node}} */
+function checkCond(c, w, env) {
+  if (c === undefined || c === null || typeof c !== "object" || Array.isArray(c)) { err(`${w}: condition must be an object (flag / notFlag / flags / anyFlag / stat / fromChapter / fromScene / fromNode / any / all / not)`); return; }
+  const keys = Object.keys(c);
+  if (!keys.length) { err(`${w}: empty condition`); return; }
+  for (const k of keys) if (!SL.COND_KEYS.includes(k)) err(`${w}: unknown condition key "${k}"`);
+  const needSet = (f) => { if (!env.flagsSet.has(f)) err(`${w}: flag "${f}" is never set anywhere (SPEC §32.2)`); };
+  for (const k of ["flag", "notFlag"]) if (c[k] !== undefined) { if (typeof c[k] !== "string" || !c[k]) err(`${w}.${k}: must be a flag name`); else needSet(c[k]); }
+  for (const k of ["flags", "anyFlag"]) if (c[k] !== undefined) {
+    if (!Array.isArray(c[k]) || !c[k].length || c[k].some((x) => typeof x !== "string" || !x)) err(`${w}.${k}: must be a non-empty array of flag names`);
+    else c[k].forEach(needSet);
+  }
+  if (c.stat !== undefined && !STATS.includes(c.stat)) err(`${w}.stat: "${c.stat}" invalid`);
+  if (c.taint !== undefined && !TAINT_GODS.includes(c.taint)) err(`${w}.taint: "${c.taint}" invalid`);
+  if (c.stat !== undefined && c.taint !== undefined) err(`${w}: both stat and taint (split into two conditions)`);
+  if ((c.stat !== undefined || c.taint !== undefined) && c.min === undefined && c.max === undefined) err(`${w}: stat/taint condition without min/max`);
+  if ((c.min !== undefined || c.max !== undefined) && c.stat === undefined && c.taint === undefined) err(`${w}: min/max without stat or taint`);
+  for (const k of ["min", "max"]) if (c[k] !== undefined && typeof c[k] !== "number") err(`${w}.${k}: not a number`);
+  if (c.fromChapter !== undefined && !rangeOk(c.fromChapter)) err(`${w}.fromChapter: needs a number or {min,max}`);
+  if (c.fromScene !== undefined) { const l = arrOf(c.fromScene); if (!l.length || l.some((x) => typeof x !== "string")) err(`${w}.fromScene: needs scene keys`); else l.forEach((x) => { if (!sceneKnown(x)) err(`${w}.fromScene: unknown scene "${x}"`); }); }
+  if (c.fromNode !== undefined) { const l = arrOf(c.fromNode); if (!l.length || l.some((x) => typeof x !== "string")) err(`${w}.fromNode: needs node ids`); else l.forEach((x) => { if (!env.nodes[x]) err(`${w}.fromNode: node "${x}" does not exist`); }); }
+  for (const k of ["any", "all"]) if (c[k] !== undefined) {
+    if (!Array.isArray(c[k]) || !c[k].length) err(`${w}.${k}: needs a non-empty array of conditions`);
+    else c[k].forEach((x, i) => checkCond(x, `${w}.${k}[${i}]`, env));
+  }
+  if (c.not !== undefined) checkCond(c.not, w + ".not", env);
+}
+/* can the condition ever hold at a node? env.may = flags that may be set there, env.preds = ids of the nodes that lead here (null = entered from anywhere) */
+function condPossible(c, env) {
+  if (!c || typeof c !== "object" || Array.isArray(c)) return true;
+  if (typeof c.flag === "string" && !env.may.has(c.flag)) return false;
+  if (Array.isArray(c.flags) && c.flags.some((f) => !env.may.has(f))) return false;
+  if (Array.isArray(c.anyFlag) && c.anyFlag.length && !c.anyFlag.some((f) => env.may.has(f))) return false;
+  if (Array.isArray(c.any) && c.any.length && !c.any.some((x) => condPossible(x, env))) return false;
+  if (Array.isArray(c.all) && c.all.some((x) => !condPossible(x, env))) return false;
+  if (env.preds) {
+    const P = [...env.preds].map((id) => env.nodes[id]).filter(Boolean), ids = [...env.preds];
+    if (c.fromNode !== undefined && !arrOf(c.fromNode).some((x) => ids.includes(x))) return false;
+    if (c.fromScene !== undefined && !P.some((n) => arrOf(c.fromScene).includes(n.scene))) return false;
+    if (c.fromChapter !== undefined && rangeOk(c.fromChapter) && !P.some((n) => typeof n.chapter === "number" && (typeof c.fromChapter === "number" ? n.chapter === c.fromChapter
+        : (c.fromChapter.min === undefined || n.chapter >= c.fromChapter.min) && (c.fromChapter.max === undefined || n.chapter <= c.fromChapter.max)))) return false;
+  }
+  return true;
+}
+/* node.alt: [{if, text:{zh,en}} | {if, add:{zh,en}}] ≤ 8 */
+function checkAlt(n, nw, env) {
+  if (n.alt === undefined) return;
+  if (!Array.isArray(n.alt) || !n.alt.length) { err(`${nw}.alt: must be a non-empty array`); return; }
+  if (n.alt.length > ALT_MAX) err(`${nw}.alt: ${n.alt.length} entries (max ${ALT_MAX})`);
+  let adds = 0;
+  n.alt.forEach((a, i) => {
+    const aw = `${nw}.alt[${i}]`;
+    if (!a || typeof a !== "object" || Array.isArray(a)) { err(`${aw}: must be {if, text|add}`); return; }
+    for (const k of Object.keys(a)) if (!["if", "text", "add"].includes(k)) err(`${aw}: unknown key "${k}"`);
+    if ((a.text === undefined) === (a.add === undefined)) err(`${aw}: needs exactly one of text / add`);
+    checkCond(a["if"], aw + ".if", env);
+    if (a.text !== undefined) checkL(a.text, aw + ".text", ALT_TEXT_ZH, ALT_TEXT_EN);
+    if (a.add !== undefined) { checkL(a.add, aw + ".add", ALT_ADD_ZH, ALT_ADD_EN); adds++; }
+    if (a["if"] && typeof a["if"] === "object" && !condPossible(a["if"], env)) warn(`${aw}: condition can never match here (no path to this node sets the flag / comes from that node, scene or chapter)`);
+  });
+  if (adds > 8) warn(`${nw}.alt: ${adds} add entries — the engine shows at most 2 matching ones, keep the conditions mutually exclusive`);
+  else if (adds > 2) note(`${nw}.alt: ${adds} add entries — fine if their conditions are mutually exclusive (the engine shows at most 2 matching ones)`);
+}
+/* choice.resultAlt: [{if, text:{zh,en}}] ≤ 4, first match replaces choice.result */
+function checkResultAlt(c, cw, env) {
+  if (c.resultAlt === undefined) return;
+  if (!Array.isArray(c.resultAlt) || !c.resultAlt.length) { err(`${cw}.resultAlt: must be a non-empty array`); return; }
+  if (c.resultAlt.length > RESULT_ALT_MAX) err(`${cw}.resultAlt: ${c.resultAlt.length} entries (max ${RESULT_ALT_MAX})`);
+  c.resultAlt.forEach((a, i) => {
+    const aw = `${cw}.resultAlt[${i}]`;
+    if (!a || typeof a !== "object" || Array.isArray(a)) { err(`${aw}: must be {if, text}`); return; }
+    for (const k of Object.keys(a)) if (!["if", "text"].includes(k)) err(`${aw}: unknown key "${k}"`);
+    checkCond(a["if"], aw + ".if", env);
+    checkL(a.text, aw + ".text", ALT_TEXT_ZH, ALT_TEXT_EN);
+    if (a["if"] && typeof a["if"] === "object" && !condPossible(a["if"], env)) warn(`${aw}: condition can never match here`);
+  });
+  if (c.result === undefined && c.rollResult === undefined) warn(`${cw}: resultAlt without a base result (shown only when a condition matches)`);
+}
+/* SPEC §32.3 event.where / excludeFactions */
+function checkWhere(e, w, applies) {
+  if (e.excludeFactions !== undefined) {
+    if (!Array.isArray(e.excludeFactions) || !e.excludeFactions.length || e.excludeFactions.some((x) => typeof x !== "string")) err(`${w}.excludeFactions: must be a non-empty array of faction ids`);
+    else for (const x of e.excludeFactions) {
+      if (!FACTION_FILES.includes(x) && !WH.factions[x]) err(`${w}.excludeFactions: unknown faction "${x}"`);
+      if ((e.factions || []).includes(x)) warn(`${w}: faction "${x}" is both in factions and excludeFactions`);
+    }
+  }
+  if (e.where === undefined) return;
+  const q = e.where;
+  if (!q || typeof q !== "object" || Array.isArray(q) || !Object.keys(q).length) { err(`${w}.where: must be a non-empty object`); return; }
+  for (const k of Object.keys(q)) if (!SL.WHERE_KEYS.includes(k)) err(`${w}.where: unknown key "${k}"`);
+  for (const k of ["scenes", "notScenes"]) if (q[k] !== undefined) {
+    const l = arrOf(q[k]); if (!l.length || l.some((x) => typeof x !== "string")) err(`${w}.where.${k}: needs scene keys`);
+    else l.forEach((x) => { if (!sceneKnown(x)) err(`${w}.where.${k}: unknown scene "${x}"`); });
+  }
+  for (const k of ["nodes", "notNodes"]) if (q[k] !== undefined) {
+    const l = arrOf(q[k]); if (!l.length || l.some((x) => typeof x !== "string")) err(`${w}.where.${k}: needs node ids`);
+    else l.forEach((x) => { if (applies.length && !applies.some((fid) => WH.factions[fid] && WH.factions[fid].nodes && WH.factions[fid].nodes[x])) err(`${w}.where.${k}: node "${x}" does not exist in ${applies.join("/") || "any faction"}`); });
+  }
+  if (q.chapter !== undefined && !rangeOk(q.chapter)) err(`${w}.where.chapter: needs a number or {min,max}`);
+  for (const k of ["flag", "notFlag"]) if (q[k] !== undefined) { if (typeof q[k] !== "string" || !q[k]) err(`${w}.where.${k}: must be a flag name`); else if (!ALL_FLAGS.has(q[k])) err(`${w}.where.${k}: flag "${q[k]}" is never set anywhere`); }
+  for (const k of ["flags", "anyFlag"]) if (q[k] !== undefined) {
+    if (!Array.isArray(q[k]) || !q[k].length || q[k].some((x) => typeof x !== "string")) err(`${w}.where.${k}: must be a non-empty array of flag names`);
+    else q[k].forEach((x) => { if (!ALL_FLAGS.has(x)) err(`${w}.where.${k}: flag "${x}" is never set anywhere`); });
+  }
+  if (q.stat !== undefined && !STATS.includes(q.stat)) err(`${w}.where.stat: "${q.stat}" invalid`);
+  if (q.taint !== undefined && !TAINT_GODS.includes(q.taint)) err(`${w}.where.taint: "${q.taint}" invalid`);
+  if ((q.stat !== undefined || q.taint !== undefined) && q.min === undefined && q.max === undefined) err(`${w}.where: stat/taint without min/max`);
+}
+
 /* every flag set anywhere (factions, origins, events) — for require checks on event choices */
 const ALL_FLAGS = new Set();
 {
@@ -272,10 +399,70 @@ function checkManifest() {
     for (const k of Object.keys(reg)) {
       const a = reg[k];
       if (!a || !a.src) { err(`manifest ${g}.${k}: missing src`); continue; }
-      if (!fs.existsSync(path.join(ROOT, a.src))) warn(`manifest ${g}.${k}: file not found ${a.src}`);
+      if (g === "scenes" && /^end_/.test(k) && !SAMPLE) { /* SPEC §31 ending art: file presence is checked by checkEndingArt() */ }
+      else if (!fs.existsSync(path.join(ROOT, a.src))) warn(`manifest ${g}.${k}: file not found ${a.src}`);
       if (!a.w || !a.h) warn(`manifest ${g}.${k}: missing w/h`);
     }
   }
+}
+
+/* ---------- ending illustrations (SPEC §31) ---------- */
+const END_ART_W = 192, END_ART_H = 108;
+function pngSize(file) {      // IHDR of a PNG, no dependencies → {w,h} or null if it is not a PNG
+  let fd;
+  try {
+    fd = fs.openSync(file, "r");
+    const b = Buffer.alloc(24);
+    if (fs.readSync(fd, b, 0, 24, 0) < 24) return null;
+    if (b.readUInt32BE(0) !== 0x89504e47 || b.readUInt32BE(4) !== 0x0d0a1a0a || b.toString("ascii", 12, 16) !== "IHDR") return null;
+    return {w: b.readUInt32BE(16), h: b.readUInt32BE(20)};
+  } catch (e) { return null; }
+  finally { if (fd !== undefined) fs.closeSync(fd); }
+}
+function checkEndingArt() {
+  if (SAMPLE) return;
+  const ids = [];                                                  // [faction, id] for every ending node of every loaded route
+  for (const fid of Object.keys(WH.factions)) {
+    const nodes = WH.factions[fid].nodes || {};
+    for (const id of Object.keys(nodes)) if (nodes[id].ending) ids.push([fid, id]);
+  }
+  const known = new Set(ids.map((x) => x[1]));
+  const missing = [];                                              // [faction, id, reason]
+  for (const [fid, id] of ids) {
+    const key = "end_" + id, a = WH.scenes[key], w = `ending art ${fid}/${id}`;
+    if (!a || !a.src) { missing.push([fid, id, `no manifest scene "${key}"`]); continue; }
+    const want = `assets/endings/${id}.png`;
+    if (a.src !== want) warn(`${w}: manifest src "${a.src}" (expected ${want}, SPEC §31)`);
+    const file = path.join(ROOT, a.src);
+    if (!fs.existsSync(file)) { missing.push([fid, id, `PNG missing: ${a.src}`]); continue; }
+    const sz = pngSize(file);
+    if (!sz) { err(`${w}: ${a.src} is not a readable PNG`); continue; }
+    if (sz.w !== END_ART_W || sz.h !== END_ART_H) warn(`${w}: ${a.src} is ${sz.w}×${sz.h}, expected ${END_ART_W}×${END_ART_H} (SPEC §31)`);
+    if (a.w !== END_ART_W || a.h !== END_ART_H) warn(`${w}: manifest w/h is ${a.w}×${a.h}, expected ${END_ART_W}×${END_ART_H}`);
+    if (!a.name || !a.name.zh || !a.name.en) warn(`${w}: manifest scene "${key}" has no name {zh,en} (SPEC §31: the ending title)`);
+  }
+  if (ALLOW_MISSING_END_ART) {
+    if (missing.length) warn(`ending art (SPEC §31): ${missing.length} of ${ids.length} ending(s) have no illustration yet (no manifest scene "end_<id>" or no PNG) — allowed by --allow-missing-ending-art; the real gate is the run without that flag`);
+  } else for (const [fid, id, why] of missing) err(`ending art ${fid}/${id}: ${why} (SPEC §31; --allow-missing-ending-art while the art is in progress)`);
+  // manifest scenes / PNG files for endings that do not exist (renamed or removed ending)
+  const orphans = Object.keys(WH.scenes).filter((k) => /^end_/.test(k) && !known.has(k.slice(4)));
+  if (orphans.length) warn(`ending art: ${orphans.length} manifest scene(s) end_* without an ending node: ${orphans.slice(0, 6).join(", ")}${orphans.length > 6 ? ", …" : ""}`);
+  const dir = path.join(ROOT, "assets", "endings");
+  if (fs.existsSync(dir)) {
+    const extra = fs.readdirSync(dir).filter((f) => /\.png$/i.test(f) && !known.has(f.replace(/\.png$/i, "")));
+    if (extra.length) warn(`ending art: ${extra.length} PNG(s) in assets/endings/ without an ending node: ${extra.slice(0, 6).join(", ")}${extra.length > 6 ? ", …" : ""}`);
+  }
+  // the brief the art role works from must match the data (tools/dev/dump_endings.js --check)
+  const brief = path.join(ROOT, "tools", "art", "endings_brief.json");
+  const r = require("child_process").spawnSync(process.execPath, [path.join(ROOT, "tools", "dev", "dump_endings.js"), "--check"], {encoding: "utf8"});
+  if (r.error) warn(`ending brief: could not run tools/dev/dump_endings.js --check (${r.error.message})`);
+  else if (r.status !== 0) {
+    let n = null;
+    try { n = JSON.parse(fs.readFileSync(brief, "utf8")).count; } catch (e) { /* missing or unreadable → count unknown */ }
+    const msg = `tools/art/endings_brief.json is stale (${n === null ? "missing/unreadable" : n + " in the brief"} vs ${ids.length} ending nodes) — run: node tools/dev/dump_endings.js`;
+    if (n !== ids.length) err(`ending brief: ${msg}; the ending count differs (SPEC §31)`); else warn(`ending brief: ${msg}`);
+  } else note(`ending brief: ${(r.stdout || "").trim()}`);
+  if (!QUIET) console.log(`ending art (SPEC §31): ${ids.length - missing.length}/${ids.length} illustrated${ALLOW_MISSING_END_ART ? " (missing allowed)" : ""}`);
 }
 
 /* ---------- codex + events ---------- */
@@ -509,6 +696,65 @@ function chronicleReport() {
 }
 
 /* ---------- SPEC §20 rumours ---------- */
+/* ---------- SPEC §20c gathering places (聚集区) ---------- */
+const GATHER_ZH = 8, GATHER_EN = 4;                                  // label limits
+const GATHER_MIN_NODES = 8, GATHER_MIN_CHAPTERS = 6;                  // per route
+const GATHER_ERR_PASSES = 5, GATHER_WARN_PASSES = 6;                  // per origin, average gather nodes passed per finished random run
+const GATHER_RUMOR_LO = 3, GATHER_RUMOR_HI = 6;                       // rumours heard per run (warn outside)
+const GATHER_BAD_SCENES = ["warp", "void", "webway", "daemon_world", "tomb_interior", "stasis_gallery"];   // storm / solitude / tomb scenes contradict a crowd (warn)
+/* pure: what is wrong with node.gather → {errs[], warns[]} (used by the validator and by --gather-report) */
+function gatherProblems(n) {
+  const E = [], W = [], g = n && n.gather;
+  if (g === undefined) return {errs: E, warns: W};
+  if (!g || typeof g !== "object" || Array.isArray(g)) { E.push("gather must be {zh, en}"); return {errs: E, warns: W}; }
+  for (const k of Object.keys(g)) if (k !== "zh" && k !== "en") E.push(`gather: unknown key "${k}"`);
+  let shape = true;
+  for (const l of ["zh", "en"]) if (typeof g[l] !== "string" || !g[l].trim()) { E.push(`gather.${l} missing`); shape = false; }
+  if (!shape) return {errs: E, warns: W};
+  if (zhLen(g.zh) > GATHER_ZH) E.push(`gather.zh "${g.zh}" is ${zhLen(g.zh)} chars (max ${GATHER_ZH})`);
+  if (enWords(g.en) > GATHER_EN) E.push(`gather.en "${g.en}" is ${enWords(g.en)} words (max ${GATHER_EN})`);
+  if (n.ending) E.push("gather on an ending / death node (SPEC §20c: never)");
+  if (n.eventRoll !== undefined) E.push("gather on a node with eventRoll (SPEC §20c: a crowd scene and a random event do not mix)");
+  const t = n.text || {};
+  if (typeof t.zh === "string" && !t.zh.includes(g.zh)) E.push(`text.zh does not contain the label "${g.zh}" (SPEC §20c coherence: the text must show the place)`);
+  if (typeof t.en === "string" && !t.en.toLowerCase().includes(g.en.toLowerCase())) E.push(`text.en does not contain the label "${g.en}" (SPEC §20c coherence: the text must show the place)`);
+  (Array.isArray(n.alt) ? n.alt : []).forEach((a, i) => {
+    if (!a || !a.text || typeof a.text !== "object") return;
+    if (typeof a.text.zh === "string" && !a.text.zh.includes(g.zh)) W.push(`alt[${i}].text.zh replaces the node text without the label "${g.zh}"`);
+    if (typeof a.text.en === "string" && !a.text.en.toLowerCase().includes(g.en.toLowerCase())) W.push(`alt[${i}].text.en replaces the node text without the label "${g.en}"`);
+  });
+  if (n.foe) W.push(`gather on a foe node (${n.foe}) — a crowd and a fight rarely mix`);
+  if (GATHER_BAD_SCENES.includes(n.scene)) W.push(`gather in scene "${n.scene}" (storm / solitude / tomb scenes contradict a crowd)`);
+  if (n.time && n.time.warp) W.push("gather on a warp-time node");
+  return {errs: E, warns: W};
+}
+/* static per-route facts: gather node ids (valid shape, not endings), chapters, gather→gather hops, gather nodes each origin can reach */
+function gatherStatic(f) {
+  const nodes = f.nodes || {}, ids = Object.keys(nodes).filter((id) => WH.Rules.isGather(nodes[id]) && !nodes[id].ending), set = new Set(ids);
+  const chapters = [...new Set(ids.map((id) => nodes[id].chapter).filter((c) => typeof c === "number"))].sort((a, b) => a - b);
+  const adjacent = [];
+  ids.forEach((id) => (nodes[id].choices || []).forEach((c) => targetsOf(c).forEach((t) => { if (t && t !== id && set.has(t)) adjacent.push(`${id}→${t}`); })));
+  const reach = {};
+  WH.Game.origins(f).forEach((o) => { const r = originReach(f, o); reach[o.id] = ids.filter((id) => r.has(id)); });
+  return {ids, chapters, adjacent: [...new Set(adjacent)], reach};
+}
+/* route-level verdict (after the simulation so a short route does not skip the Monte-Carlo): `s` = simulate() result or null */
+function gatherVerdict(f, gi, s) {
+  if (!gi.ids.length) { warn(`${f.id}: no gather nodes yet — rumours cannot fire (SPEC §20c)`); return; }
+  if (!SAMPLE) {
+    if (gi.ids.length < GATHER_MIN_NODES) err(`${f.id}: ${gi.ids.length} gather node(s) (SPEC §20c: ≥ ${GATHER_MIN_NODES})`);
+    if (gi.chapters.length < GATHER_MIN_CHAPTERS) err(`${f.id}: gather nodes in ${gi.chapters.length} chapter(s) [${gi.chapters.join(",")}] (SPEC §20c: ≥ ${GATHER_MIN_CHAPTERS} different chapters)`);
+    for (const [oid, list] of Object.entries(gi.reach)) if (list.length < GATHER_ERR_PASSES) err(`${f.id}.origin.${oid}: only ${list.length} gather node(s) reachable (SPEC §20c: every origin passes ≥ ${GATHER_ERR_PASSES})`);
+  }
+  if (gi.adjacent.length) warn(`${f.id}: ${gi.adjacent.length} gather node(s) lead straight to another gather node (SPEC §20c: at most 1 per 2 consecutive spine nodes): ${gi.adjacent.slice(0, 8).join(", ")}${gi.adjacent.length > 8 ? ", …" : ""}`);
+  if (s && !SAMPLE) for (const [oid, o] of Object.entries(s.perOrigin)) {
+    if (!o.gather.length) continue;
+    const a = avg(o.gather);
+    if (a < GATHER_ERR_PASSES) err(`${f.id}.origin.${oid}: passes ${a.toFixed(2)} gather nodes per finished run on average (SPEC §20c: every origin ≥ ${GATHER_ERR_PASSES})`);
+    else if (a < GATHER_WARN_PASSES) warn(`${f.id}.origin.${oid}: passes ${a.toFixed(2)} gather nodes per finished run on average (SPEC §20c: aim for ≥ ${GATHER_WARN_PASSES})`);
+  }
+}
+
 function checkRumors() {
   const list = WH.rumors || [], seen = new Set();
   const known = new Set(Object.keys(WH.factions).concat(FACTION_FILES));
@@ -535,10 +781,10 @@ function checkRumors() {
     checkWhen(r, w);
   });
 }
-/* SPEC §20b: when = any of {scenes, sprites, codex, flags, keywords:{zh,en}}; required (rumours without it never fire) */
+/* SPEC §20b: when = any of {scenes, sprites, codex, flags, keywords:{zh,en}}; SPEC §20c: only a preference now (a rumour without it is idle crowd chatter, score 0) */
 function checkWhen(r, w) {
   const wh = r.when;
-  if (wh === undefined) { err(`${w}: no "when" — SPEC §20b rumours without when never fire`); return; }
+  if (wh === undefined) { warn(`${w}: no "when" — heard only as score-0 crowd chatter at gather nodes (SPEC §20c; add a "when" to make it relevant)`); return; }
   if (!wh || typeof wh !== "object" || Array.isArray(wh)) { err(`${w}.when: must be an object`); return; }
   const keys = Object.keys(wh);
   if (!keys.length) err(`${w}.when: empty (never matches)`);
@@ -558,37 +804,34 @@ function checkWhen(r, w) {
     }
   }
 }
-/* SPEC §20b static coverage: nodes of a route where a rumour could fire (eligible chapter, no eventRoll, not an ending)
- * and whose context matches on scene / sprite / codex / keyword. Flags are run state: reported separately. */
+/* SPEC §20c static coverage: a rumour can only be heard on a gather node (no ending, no eventRoll) whose chapter lies inside its window.
+ * Routes without any gather node yet are skipped here (they get their own "no gather nodes yet" warning). */
 function rumorNodes(f) {
-  return Object.keys(f.nodes || {}).filter((id) => { const n = f.nodes[id]; return !n.ending && !n.eventRoll; });
+  return Object.keys(f.nodes || {}).filter((id) => { const n = f.nodes[id]; return !n.ending && !n.eventRoll && WH.Rules.isGather(n); });
 }
 function rumorCoverage() {
-  const list = (WH.rumors || []).filter((r) => r && r.when);
+  const list = (WH.rumors || []).filter((r) => r && r.id);
   if (!list.length) return;
-  const rows = [], zero = [], generic = [];
+  const withGather = Object.keys(WH.factions).filter((fid) => rumorNodes(WH.factions[fid]).length);
+  if (!withGather.length) { note(`rumours (SPEC §20c): no route has gather nodes yet — none of the ${list.length} rumours can be heard`); return; }
+  const rows = [], zero = [];
   for (const r of list) {
-    const routes = Object.keys(WH.factions).filter((fid) => (r.factions || []).some((x) => x === "*" || x === fid));
+    const routes = withGather.filter((fid) => (r.factions || []).some((x) => x === "*" || x === fid));
+    if (!routes.length) continue;                       // all of its routes are still without gather nodes
     const parts = [];
     let total = 0;
     for (const fid of routes) {
       const f = WH.factions[fid], ids = rumorNodes(f);
-      const ok = ids.filter((id) => {
-        const n = f.nodes[id], ch = typeof n.chapter === "number" ? n.chapter : null;
-        if (ch !== null && !WH.Rules.rumorEligible(r, fid, ch)) return false;
-        return WH.Rules.rumorScore(r, WH.Rules.nodeContext(n, {})) > 0;
-      });
+      const ok = ids.filter((id) => { const ch = f.nodes[id].chapter; return typeof ch !== "number" || WH.Rules.rumorEligible(r, fid, ch); });
+      const hit = ok.filter((id) => WH.Rules.rumorScore(r, WH.Rules.nodeContext(f.nodes[id], {})) > 0);
       total += ok.length;
-      parts.push(`${fid} ${ok.length}/${ids.length}`);
-      if (ids.length && ok.length / ids.length > 0.4) generic.push(`${r.id}@${fid} ${(100 * ok.length / ids.length).toFixed(0)}%`);
+      parts.push(`${fid} ${ok.length}/${ids.length}${hit.length ? ` (${hit.length} match)` : ""}`);
     }
-    const flagsOnly = !total && Array.isArray(r.when.flags) && r.when.flags.length;
-    if (!total && !flagsOnly) zero.push(r.id);
-    rows.push(`  ${r.id.padEnd(30)} ${parts.join(" · ")}${flagsOnly ? "  (flags only)" : ""}`);
+    if (!total) zero.push(r.id);
+    rows.push(`  ${r.id.padEnd(30)} ${parts.join(" · ")}`);
   }
-  if (zero.length) warn(`rumours (SPEC §20b): ${zero.length} can never match any node in their routes/chapters (unreachable): ${zero.slice(0, 10).join(", ")}${zero.length > 10 ? ", …" : ""}`);
-  if (generic.length) warn(`rumours (SPEC §20b): ${generic.length} match > 40% of a route's nodes (too generic): ${generic.slice(0, 10).join(", ")}${generic.length > 10 ? ", …" : ""}`);
-  if (!QUIET) { console.log("rumour coverage (SPEC §20b: matchable nodes / rumour-capable nodes per route):"); rows.forEach((x) => console.log(x)); }
+  if (zero.length) warn(`rumours (SPEC §20c): ${zero.length} have no gather node in their chapter range on any route that has gather nodes (unreachable): ${zero.slice(0, 10).join(", ")}${zero.length > 10 ? ", …" : ""}`);
+  if (!QUIET) { console.log("rumour coverage (SPEC §20c: gather nodes in the rumour's chapter window / gather nodes of the route; match = `when` scores > 0):"); rows.forEach((x) => console.log(x)); }
 }
 function rumorReport() {
   const list = WH.rumors || [];
@@ -649,7 +892,8 @@ function checkEvents() {
     checkL(e.text, w + ".text", 90, 65);
     codexRef(e.codex, w);
     if (!e.choices || e.choices.length < 2 || e.choices.length > 3) err(`${w}: needs 2–3 choices (has ${(e.choices || []).length})`);
-    const applies = Object.keys(WH.factions).filter((fid) => (e.factions || ["*"]).some((x) => x === "*" || x === fid));
+    const applies = Object.keys(WH.factions).filter((fid) => (e.factions || ["*"]).some((x) => x === "*" || x === fid) && !(e.excludeFactions || []).includes(fid));
+    checkWhere(e, w, applies);                          // SPEC §32.3 where / excludeFactions
     (e.choices || []).forEach((c, i) => {
       const cw = `${w}.choice${i + 1}`;
       checkL(c.text, `${cw}.text`, 24, 14);
@@ -788,8 +1032,7 @@ function checkFaction(f) {
   if (!SAMPLE && (chapterIds.length < 6 || chapterIds.length > 8)) warn(`${w}: ${chapterIds.length} chapters (spec 6–8)`);
   for (const c of chapterIds) checkL(f.chapters[c], `${w}.chapters.${c}`);
   const pro = PREFIX[f.id] ? ids.filter((id) => id.startsWith(PREFIX[f.id] + "o_")).length : 0;   // SPEC §16 prologue nodes
-  const lo = NEW_ROUTES.includes(f.id) ? 75 : 70, hi = NEW_ROUTES.includes(f.id) ? 90 : 95;
-  if (!SAMPLE && (ids.length - pro < lo || ids.length - pro > hi)) warn(`${w}: ${ids.length - pro} spine nodes + ${pro} prologue (spec ${lo}–${hi} + prologues)`);
+  void pro;                                // SPEC §32.1 rule 14 (80–145 nodes per route, median run 45–70) is checked by storyGate() below
   if (PREFIX[f.id]) for (const id of ids) if (!id.startsWith(PREFIX[f.id])) warn(`${w}: node id "${id}" lacks prefix ${PREFIX[f.id]}`);
 
   // death nodes
@@ -806,6 +1049,7 @@ function checkFaction(f) {
     else codexRef(l, `${w}.learn.${g}`);
   }
   // nodes
+  const flowInfo = SL.mayFlags(f, WH), storyEnv = {flagsSet, nodes, may: new Set(), preds: null};   // SPEC §32.2 data-flow for "can never match" warnings
   const endings = {good: [], bad: [], death: []};
   const cons = {choices: 0, withResult: 0, eff: 0, effWithResult: 0, rolls: 0, rollsWithResult: 0, missing: []};
   const codexUnlockable = new Set();
@@ -818,6 +1062,10 @@ function checkFaction(f) {
     if (n.speaker) { sprite(n.speaker.sprite, nw + ".speaker"); checkL(n.speaker.name, nw + ".speaker.name"); }
     sprite(n.foe, nw + ".foe");
     checkL(n.text, nw + ".text", 90, 65);
+    storyEnv.may = flowInfo.may[id]; storyEnv.preds = flowInfo.roots.has(id) ? null : flowInfo.preds[id];
+    checkAlt(n, nw, storyEnv);                            // SPEC §32.2
+    if (n.bridge !== undefined && n.bridge !== true) err(`${nw}.bridge: must be true`);
+    if (n.jump !== undefined) checkL(n.jump, nw + ".jump", JUMP_ZH, JUMP_EN);
     checkEffects(n.effects, nw);
     codexRef(n.codex, nw);
     [].concat(n.codex || []).forEach((c) => codexUnlockable.add(c));
@@ -827,6 +1075,7 @@ function checkFaction(f) {
       for (const k of Object.keys(n.time)) if (!["h", "d", "w", "y", "warp"].includes(k)) warn(`${nw}: unknown time key "${k}"`);
     }
     if (n.eventRoll !== undefined && !(n.eventRoll > 0 && n.eventRoll <= 1)) err(`${nw}: eventRoll ${n.eventRoll} not in (0,1]`);
+    if (n.gather !== undefined) { const gp = gatherProblems(n); gp.errs.forEach((m) => err(`${nw}: ${m}`)); gp.warns.forEach((m) => warn(`${nw}: ${m}`)); }   // SPEC §20c
     if (n.ending) {
       if (!["good", "bad", "death"].includes(n.ending.kind)) err(`${nw}: ending.kind "${n.ending.kind}" invalid`);
       else endings[n.ending.kind].push(id);
@@ -864,6 +1113,10 @@ function checkFaction(f) {
       checkEffects(c.effects, cw);
       codexRef(c.codex, cw);
       checkRequire(c.require, cw, flagsSet);
+      if (c.resultAlt !== undefined) {                    // SPEC §32.2: judged before the choice's effects, flags = arrival + this node's own effects
+        const mayR = new Set(storyEnv.may); Object.keys((n.effects && n.effects.set) || {}).forEach((k) => n.effects.set[k] && mayR.add(k));
+        checkResultAlt(c, cw, Object.assign({}, storyEnv, {may: mayR}));
+      }
       if (c.goto !== undefined) warn(`${cw}: goto is only used on event choices (use next)`);
       if (c.roll) {
         if (c.next) warn(`${cw}: has both roll and next (next ignored)`);
@@ -923,7 +1176,7 @@ function checkFaction(f) {
   if (!SAMPLE && cons.eff && cons.effWithResult < cons.eff && NEW_ROUTES.includes(f.id))
     warn(`${w}: ${cons.eff - cons.effWithResult} effect/set choice(s) without result (SPEC §11): ${cons.missing.slice(0, 8).join(", ")}${cons.missing.length > 8 ? ", …" : ""}`);
   const grudge = checkGrudges(f);                      // SPEC §28
-  return {endings, nodeCount: ids.length, chapters: chapterIds.length, cons, grudge};
+  return {endings, nodeCount: ids.length, chapters: chapterIds.length, cons, grudge, gather: gatherStatic(f)};
 }
 
 /* ---------- SPEC §28 grudges (人际后果) ----------
@@ -1156,28 +1409,33 @@ function stripGrudges(f) {
   }
   return Object.assign({}, f, {nodes});
 }
+let SIM_RUNS = null;                       // --story-report: fewer runs
+/* SPEC §20c: one synthetic past-life echo (dated before any route's start) so the simulation can measure the echo share */
+const SIM_ECHO_POOL = [{runId: "sim_echo", endingId: null, echo: {faction: "__sim__", role: {zh: "工人", en: "worker"}, world: {zh: "某个世界", en: "some world"},
+  cause: {zh: "战死", en: "died in battle"}, kind: "death", dateKey: 0, claimedBy: null}}];
 function simulate(f, seed, data) {
   if (seed === undefined) seed = SEED;
   if (!data) data = WH;
   const origins = WH.Game.origins(f);
-  const res = {runs: RUNS, visits: [], endings: {}, kinds: {good: 0, bad: 0, death: 0}, deathCause: {}, loops: 0, crashes: 0,
+  const res = {runs: SIM_RUNS || RUNS, visits: [], endings: {}, kinds: {good: 0, bad: 0, death: 0}, deathCause: {}, loops: 0, crashes: 0,
                softlocks: new Map(), events: {}, eventsPerRun: [], years: [], visited: new Set(), firstCrash: null, maxRevisit: 0, maxRevisitNode: null,
                perOrigin: {}};
-  origins.forEach((o) => { res.perOrigin[o.id] = {runs: 0, visits: [], kinds: {good: 0, bad: 0, death: 0}, endings: new Set()}; });
+  origins.forEach((o) => { res.perOrigin[o.id] = {runs: 0, visits: [], kinds: {good: 0, bad: 0, death: 0}, endings: new Set(), gather: []}; });
+  res.gatherPasses = []; res.echoRuns = 0; res.echoSim = !!(data.echoTemplates && data.echoTemplates.length);   // SPEC §20c: gather nodes passed per finished run; echo share with a synthetic pool
   res.taint = {khorne: [], nurgle: [], tzeentch: [], slaanesh: []}; res.claims = {}; res.cleanses = 0;
   res.rumors = []; res.rumorIds = {}; res.chrUnlocked = []; res.rumorScores = [];      // SPEC §20 / §20b
   res.grudge = {shown: [], taken: [], wronged: 0, active: 0, npcRuns: {}, npcTaken: {}, finished: 0};                // SPEC §28
   // SPEC §19 per-god run counts: claim fired ≥1 / fired twice / ended in that god's claim ending / resisted (flag) and not claimed
   res.claimRuns = {}, res.claimTwice = {}, res.claimEnd = {}, res.resisted = {}; res.anyClaimEnd = 0; res.anyClaimFired = 0;
   TAINT_GODS.forEach((gd) => { res.claimRuns[gd] = 0; res.claimTwice[gd] = 0; res.claimEnd[gd] = 0; res.resisted[gd] = 0; });
-  for (let r = 0; r < RUNS; r++) {
+  for (let r = 0; r < (SIM_RUNS || RUNS); r++) {
     const rng = WH.RNG(seed * 100003 + r);
     const origin = origins[r % origins.length], po = res.perOrigin[origin.id];
     po.runs++;
-    let g, steps = 0, evCount = 0, gShown = 0, gTaken = 0;
+    let g, steps = 0, evCount = 0, gShown = 0, gTaken = 0, gHere = 0;
     const fired = {};
     try {
-      g = new WH.Game(f.id, {rng, data});
+      g = new WH.Game(f.id, {rng, data, echoPool: res.echoSim ? SIM_ECHO_POOL : []});
       let step = g.start(origin.id);
       const counts = {};
       while (!g.state.ended && steps < STEP_LIMIT) {
@@ -1194,6 +1452,7 @@ function simulate(f, seed, data) {
           continue;
         }
         counts[g.state.nodeId] = (counts[g.state.nodeId] || 0) + 1;
+        if (WH.Rules.isGather(g.node())) gHere++;
         if (counts[g.state.nodeId] > res.maxRevisit) { res.maxRevisit = counts[g.state.nodeId]; res.maxRevisitNode = g.state.nodeId; }
         const cs = g.choices();
         const open = cs.map((c, i) => [c, i]).filter(([c]) => !c.locked);
@@ -1229,6 +1488,8 @@ function simulate(f, seed, data) {
         wn.forEach((k) => { gr.npcRuns[k] = (gr.npcRuns[k] || 0) + 1; });
       }
       const sr = g.state.seenRumors || [];
+      res.gatherPasses.push(gHere); po.gather.push(gHere);
+      if (g.state.echoRun) res.echoRuns++;
       res.rumors.push(sr.length);
       sr.forEach((id) => { res.rumorIds[id] = (res.rumorIds[id] || 0) + 1; });
       (g.state.rumorLog || []).forEach((x) => res.rumorScores.push(x.score || 0));
@@ -1245,6 +1506,88 @@ function simulate(f, seed, data) {
 const pct = (a, b) => (b ? (100 * a / b).toFixed(1) : "0.0") + "%";
 const avg = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
 
+/* ---------- SPEC §32.1 story-quality gates ----------
+ * rules 1–4 + 14 per route: false choices, shallow branches, forced chapter steps, unjustified hard jumps, flags set and never read,
+ * node count, median run length. Without --story-gate everything is a WARN (so a route mid-rewrite keeps the older gates green); with it the
+ * spec's "error" limits (false choices > 10 %, forced chapter steps > 0, median run > 80) become errors. */
+function storyLine(m, med) {
+  return `story (§32): nodes ${m.nodes} · multi-choice ${m.multi} · false-choice ${m.falseChoice.length} (${m.falsePct.toFixed(0)}%) · shallow ${m.shallow.length}/${m.branching} (${m.shallowPct.toFixed(0)}%; INFO re-merge after ≤1 own node ${m.rejoin1.length}/${m.branching}, flag-echoed ${m.rejoin1Echoed.length}) · ` +
+    `forced chapter steps ${m.forced.length} · hard jumps ${m.hard.length} (unjustified ${m.hardUnjustified.length}) · bridges ${m.bridges.length} · never-read flags ${m.neverRead.length} · ` +
+    `alt ${m.altNodes} nodes/${m.altEntries} entries · resultAlt ${m.resultAlt} · gather ${m.gather.length}` + (med !== null && med !== undefined ? ` · median run ${med} nodes` : "");
+}
+function storyGate(rep) {
+  const m = rep.story, id = rep.id;
+  if (!m) return;
+  const med = rep.sim && rep.sim.visits.length ? SL.median(rep.sim.visits) : null;
+  rep.median = med;
+  const emit = (asError, msg) => (STORY_GATE && asError ? err : warn)(`story ${id}: ${msg}`);
+  const list = (a) => a.slice(0, 5).join(", ") + (a.length > 5 ? ", …" : "");
+  if (m.falsePct > 10) emit(true, `${m.falseChoice.length}/${m.multi} multi-choice nodes (${m.falsePct.toFixed(0)}%) are false choices — all choices lead to the same node and set no distinct read flag (rule 1: error > 10 %): ${list(m.falseChoice)}`);
+  else if (m.falsePct > 5) emit(false, `${m.falseChoice.length}/${m.multi} multi-choice nodes (${m.falsePct.toFixed(0)}%) are false choices (rule 1: warn > 5 %): ${list(m.falseChoice)}`);
+  if (m.shallowPct > 20) emit(false, `${m.shallow.length}/${m.branching} branching nodes (${m.shallowPct.toFixed(0)}%) are shallow — siblings re-merge within ≤1 step AND no read flag tells the choices apart (rule 2: ≤ 20 %; INFO: ${m.rejoin1.length}/${m.branching} re-merge within ≤1 step, ${m.rejoin1Echoed.length} of them flag-echoed): ${list(m.shallow)}`);
+  if (m.forced.length) emit(true, `${m.forced.length} forced chapter step(s) — one node, no real choice, jumps into a later chapter without a bridge (rule 3: 0): ${list(m.forced)}`);
+  if (m.hardUnjustified.length > 3) emit(false, `${m.hardUnjustified.length} unjustified hard jumps (scene + big time / chapter change, no bridge or jump mark; rule 3: ≤ 3): ${list(m.hardUnjustified)}`);
+  if (m.neverRead.length > 3) emit(false, `${m.neverRead.length} flags set and never read (rule 4: ≤ 3): ${list(m.neverRead)}`);
+  if (m.nodes < 80 || m.nodes > 145) emit(false, `${m.nodes} nodes (rule 14: 80–145)`);
+  if (med !== null) {
+    if (med > 80) emit(true, `median run ${med} nodes (rule 14: error > 80)`);
+    else if (med > 70 || med < 45) emit(false, `median run ${med} nodes (rule 14: 52–68 typical, warn > 70 or < 45)`);
+  }
+  if (m.eventRoll.dead.length) emit(false, `${m.eventRoll.dead.length} node(s) have eventRoll but no event can fire there (dead roll; rule 11): ${list(m.eventRoll.dead)}`);
+}
+
+/* node --gather-report [--faction f] [--runs N]: the per-route gather-node table (SPEC §20c), no other checks.
+ * Columns: node id, chapter, scene, label, origins that can reach it (static); --runs N adds the random-play passes per origin. */
+if (GATHER_REPORT) {
+  const ids = Object.keys(WH.factions).filter((id) => !ONLY || id === ONLY);
+  for (const fid of ids) {
+    const f = WH.factions[fid], nodes = f.nodes || {}, gi = gatherStatic(f), origins = WH.Game.origins(f).map((o) => o.id);
+    console.log(`\n== ${fid}: ${gi.ids.length} gather node(s) · chapters [${gi.chapters.join(",")}] · limits: ≥${GATHER_MIN_NODES} nodes, ≥${GATHER_MIN_CHAPTERS} chapters, every origin ≥${GATHER_ERR_PASSES} ==`);
+    if (!gi.ids.length) { console.log("  no gather nodes yet — rumours cannot fire"); continue; }
+    const rows = gi.ids.slice().sort((a, b) => (nodes[a].chapter || 0) - (nodes[b].chapter || 0) || a.localeCompare(b)).map((id) => {
+      const n = nodes[id], pr = gatherProblems(n), reach = origins.filter((o) => gi.reach[o].includes(id));
+      return [id, n.chapter === undefined ? "-" : n.chapter, n.scene || "-", `${n.gather.zh} / ${n.gather.en}`, reach.length === origins.length ? "all" : reach.join(","),
+              pr.errs.length || pr.warns.length ? [...pr.errs.map((m) => "ERR " + m), ...pr.warns.map((m) => "warn " + m)].join("; ") : "ok"];
+    });
+    const head = ["node", "ch", "scene", "label", "reachable by", "check"], w = head.map((h, i) => Math.max(h.length, ...rows.map((r) => String(r[i]).length)));
+    const fmt = (r) => r.map((c, i) => String(c)[i === 0 || i >= 2 ? "padEnd" : "padStart"](w[i])).join("  ");
+    console.log(fmt(head)); console.log(w.map((x) => "-".repeat(x)).join("  "));
+    rows.forEach((r) => console.log(fmt(r)));
+    console.log(`reachable per origin: ${origins.map((o) => `${o} ${gi.reach[o].length}`).join(" · ")}` + (gi.adjacent.length ? ` · gather→gather hops: ${gi.adjacent.join(", ")}` : ""));
+    if (argv.includes("--runs")) {
+      const sm = simulate(f), po = Object.entries(sm.perOrigin);
+      console.log(`random play (${RUNS} runs): passes/run avg ${avg(sm.gatherPasses).toFixed(2)} · ${po.map(([oid, o]) => `${oid} ${avg(o.gather).toFixed(2)}`).join(" · ")} · rumours heard/run ${avg(sm.rumors).toFixed(2)}`);
+    }
+  }
+  process.exit(0);
+}
+
+/* node --story-report [--faction f] [--runs N]: the per-route table (SPEC §32.5), no other checks */
+if (STORY_REPORT) {
+  SIM_RUNS = argv.includes("--runs") ? RUNS : 400;
+  const ids = Object.keys(WH.factions).filter((id) => !ONLY || id === ONLY), rows = [];
+  const head = ["route", "nodes", "multi", "false%", "shallow%", "forced", "hard(unj)", "bridges", "neverRead", "alt", "resAlt", "gather", "median", "evDead"];
+  for (const id of ids) {
+    const m = SL.storyMetrics(WH, id);
+    let med = "-";
+    try { const s = simulate(WH.factions[id]); if (s.visits.length) med = String(SL.median(s.visits)); } catch (e) { med = "err"; }
+    rows.push([id, m.nodes, m.multi, m.falsePct.toFixed(0) + "%", m.shallowPct.toFixed(0) + "%", m.forced.length, `${m.hard.length}(${m.hardUnjustified.length})`, m.bridges.length, m.neverRead.length,
+      `${m.altNodes}/${m.altEntries}`, m.resultAlt, m.gather.length, med, m.eventRoll.dead.length]);
+  }
+  const w = head.map((h, i) => Math.max(h.length, ...rows.map((r) => String(r[i]).length)));
+  const fmt = (r) => r.map((c, i) => String(c)[i === 0 ? "padEnd" : "padStart"](w[i])).join("  ");
+  console.log(`story report (SPEC §32.1) — ${SIM_RUNS} random runs per route for the median; limits: false% warn>5 err>10 · shallow% (re-merge ≤1 step and no read flag distinguishes the choices) ≤20 · forced 0 · hard unjustified ≤3 · neverRead ≤3 · nodes 80–145 · median 45–70 (err>80)`);
+  console.log(fmt(head)); console.log(w.map((x) => "-".repeat(x)).join("  "));
+  rows.forEach((r) => console.log(fmt(r)));
+  if (ONLY) {
+    const m = SL.storyMetrics(WH, ONLY);
+    const show = (t, a) => console.log(`${t} (${a.length}): ${a.slice(0, 40).join(", ")}${a.length > 40 ? ", …" : ""}`);
+    show("false-choice nodes", m.falseChoice); show("shallow branches", m.shallow); show("INFO re-merge within ≤1 step but flag-echoed (not shallow)", m.rejoin1Echoed); show("forced chapter steps", m.forced); show("unjustified hard jumps", m.hardUnjustified);
+    show("flags set and never read", m.neverRead); show("flags read only by achievements/rumours", m.readByOtherOnly); show("dead eventRoll nodes", m.eventRoll.dead);
+  }
+  process.exit(0);
+}
+
 /* ---------- run ---------- */
 const factionIds = Object.keys(WH.factions).filter((id) => !ONLY || id === ONLY);
 console.log(`\n== 什么是战锤 / What is Warhammer? — validator (${SAMPLE ? "SAMPLE data" : "real data"}) ==`);
@@ -1253,6 +1596,7 @@ console.log(`registry: ${factionIds.length} faction(s), ${Object.keys(WH.codex).
   `${Object.keys(WH.sprites).length} sprites, ${Object.keys(WH.scenes).length} scenes, ${Object.keys(WH.ui).length} ui icons`);
 if (!factionIds.length) err("no factions registered");
 checkManifest();
+checkEndingArt();
 checkCodex();
 const perGod = checkEvents();
 checkRumors();
@@ -1291,6 +1635,7 @@ for (const id of factionIds) {
   const st = checkFaction(f);
   flushUnknownCodex();
   const rep = {id, st, sim: null};
+  if (!SAMPLE) { try { rep.story = SL.storyMetrics(WH, id); } catch (e) { warn(`story ${id}: metrics failed — ${e.message}`); } }
   if (errors.length === before || argv.includes("--force-sim")) {
     rep.sim = simulate(f);
     const s = rep.sim;
@@ -1300,9 +1645,11 @@ for (const id of factionIds) {
     const never = Object.keys(f.nodes).filter((n) => !s.visited.has(n));
     if (never.length) warn(`${id}: ${never.length} node(s) never visited in ${RUNS} random runs: ${never.join(", ")}`);
     const a = avg(s.visits);
-    if (!SAMPLE && s.visits.length && (a < 45 || a > 60)) warn(`${id}: avg nodes visited ${a.toFixed(1)} (target 45–60)`);
+    void a;                                // the run-length target (SPEC §32.1 rule 14: median 45–70) is checked by storyGate()
     for (const k of ["good", "bad"]) if (s.visits.length && !s.kinds[k]) warn(`${id}: no "${k}" ending reached in ${RUNS} runs`);
   } else note(`${id}: Monte-Carlo skipped because of static errors (use --force-sim to run anyway)`);
+  gatherVerdict(f, st.gather, rep.sim);                // SPEC §20c
+  if (!SAMPLE) storyGate(rep);
   reports.push(rep);
 }
 
@@ -1315,6 +1662,7 @@ for (const r of reports) {
   const cn = r.st.cons;
   console.log(`consequences (SPEC §11): effect/set choices with result ${cn.effWithResult}/${cn.eff} (${pct(cn.effWithResult, cn.eff)}) · ` +
     `all choices ${cn.withResult}/${cn.choices} (${pct(cn.withResult, cn.choices)}) · rolls with rollResult ${cn.rollsWithResult}/${cn.rolls}`);
+  if (r.story) console.log(storyLine(r.story, r.median));
   const s = r.sim;
   if (!s) { console.log("simulation: skipped"); continue; }
   const v = s.visits;
@@ -1349,30 +1697,40 @@ for (const r of reports) {
     }
     const evs = Object.entries(s.events);
     if (evs.length) console.log(`events fired: ${evs.map(([k, c]) => `${k}×${c}`).join(", ")}`);
-    if ((WH.rumors || []).length) {
+    // SPEC §20c gathering places: passes per origin, rumours / echoes heard
+    const gi = r.st.gather, hasGather = !!(gi && gi.ids.length);
+    if (!hasGather) console.log("gather (SPEC §20c): no gather nodes yet — rumours and echoes cannot fire");
+    else {
+      const gp = s.gatherPasses, fin2 = gp.length || 1;
+      console.log(`gather (SPEC §20c): ${gi.ids.length} nodes in chapters [${gi.chapters.join(",")}] · passes/run avg ${avg(gp).toFixed(2)} (min ${Math.min(...gp)} · max ${Math.max(...gp)}) · per origin ` +
+        Object.entries(s.perOrigin).map(([oid, o]) => `${oid} ${avg(o.gather).toFixed(2)}`).join(" · ") + (gi.adjacent.length ? ` · gather→gather ${gi.adjacent.length}` : "") +
+        (s.echoSim ? ` · echo heard in ${pct(s.echoRuns, fin2)} of runs (1 synthetic past life)` : " · echo share: no WH.echoTemplates loaded"));
+      r.gatherAvg = avg(gp);
+    }
+    if ((WH.rumors || []).length && hasGather) {
       const elig = WH.rumors.filter((x) => (x.factions || []).some((y) => y === "*" || y === r.id));
       const never = elig.filter((x) => !s.rumorIds[x.id]).map((x) => x.id);
       const lore = (ctx.__loreEvents || []).filter((id) => s.events[id]);
       const strong = s.rumorScores.filter((x) => x >= 2).length, ra = avg(s.rumors);
-      console.log(`rumours (SPEC §20b): avg ${ra.toFixed(2)} overheard/run (target 4–8; max ${Math.max(...s.rumors)}) · score ≥2 ${pct(strong, s.rumorScores.length)} · ${elig.length - never.length}/${elig.length} ever heard · ` +
+      console.log(`rumours (SPEC §20c): avg ${ra.toFixed(2)} overheard/run (target ${GATHER_RUMOR_LO}–${GATHER_RUMOR_HI}; max ${Math.max(...s.rumors)}) · score ≥2 ${pct(strong, s.rumorScores.length)} · ${elig.length - never.length}/${elig.length} ever heard · ` +
         `chronicle entries unlocked/run avg ${avg(s.chrUnlocked).toFixed(2)}${(ctx.__loreEvents || []).length ? ` · lore events fired: ${lore.length}/${ctx.__loreEvents.length} ids` : ""}`);
-      // §20b: a shared ("*") rumour that never fits this route is expected (relevance); only route-specific ones warn
+      // a shared ("*") rumour that never fits this route is expected (relevance); only route-specific ones warn
       const byId = Object.fromEntries(WH.rumors.map((x) => [x.id, x]));
       const own = never.filter((id) => { const fs = byId[id].factions || []; return !fs.includes("*") && fs.length === 1; });
       const shared = never.filter((id) => !own.includes(id));
       if (own.length) warn(`${r.id}: ${own.length} route rumour(s) never heard in ${RUNS} runs: ${own.slice(0, 8).join(", ")}${own.length > 8 ? ", …" : ""}`);
       if (shared.length) note(`${r.id}: ${shared.length} shared rumour(s) never fit this route in ${RUNS} runs: ${shared.slice(0, 8).join(", ")}${shared.length > 8 ? ", …" : ""}`);
       r.rumorAvg = ra; r.rumorStrong = s.rumorScores.length ? 100 * strong / s.rumorScores.length : 0;
-      if (!SAMPLE && (ra < 4 || ra > 8)) warn(`${r.id}: ${ra.toFixed(2)} rumours overheard per run (SPEC §20b target 4–8)`);
+      if (!SAMPLE && (ra < GATHER_RUMOR_LO || ra > GATHER_RUMOR_HI)) warn(`${r.id}: ${ra.toFixed(2)} rumours overheard per run (SPEC §20c target ${GATHER_RUMOR_LO}–${GATHER_RUMOR_HI})`);
     }
     // SPEC §28 grudges: wronged npcs, grudge choices, activations per run, death / claim rate with vs without
-    const gi = r.st.grudge;
-    if (gi && gi.any) {
-      const names = Object.keys(gi.perNpc), gr = s.grudge, nf = gr.finished || 1;
-      const base = gi.grudgeChoices || gi.grudgeLines ? simulate(f, SEED, Object.assign({}, WH, {factions: Object.assign({}, WH.factions, {[f.id]: stripGrudges(f)})})) : null;
+    const gri = r.st.grudge;
+    if (gri && gri.any) {
+      const names = Object.keys(gri.perNpc), gr = s.grudge, nf = gr.finished || 1;
+      const base = gri.grudgeChoices || gri.grudgeLines ? simulate(f, SEED, Object.assign({}, WH, {factions: Object.assign({}, WH.factions, {[f.id]: stripGrudges(f)})})) : null;
       const dWith = 100 * s.kinds.death / (v.length || 1), cWith = 100 * s.anyClaimEnd / (v.length || 1);
-      console.log(`grudges (SPEC §28): npcs ${names.length ? names.map((n) => `${n} (wronged by ${gi.perNpc[n].wrong}, grudge choices ${gi.perNpc[n].grudge}${gi.perNpc[n].line ? ", lines " + gi.perNpc[n].line : ""})`).join(" · ") : "none"} · ` +
-        `grudge choices ${gi.grudgeChoices}, presence lines ${gi.grudgeLines}`);
+      console.log(`grudges (SPEC §28): npcs ${names.length ? names.map((n) => `${n} (wronged by ${gri.perNpc[n].wrong}, grudge choices ${gri.perNpc[n].grudge}${gri.perNpc[n].line ? ", lines " + gri.perNpc[n].line : ""})`).join(" · ") : "none"} · ` +
+        `grudge choices ${gri.grudgeChoices}, presence lines ${gri.grudgeLines}`);
       console.log(`  per run: wronged someone ${pct(gr.wronged, nf)} · a grudge choice shown ${pct(gr.active, nf)} · shown/run ${avg(gr.shown).toFixed(2)} · taken/run ${avg(gr.taken).toFixed(2)}` +
         (Object.keys(gr.npcRuns).length ? ` · wronged: ${Object.entries(gr.npcRuns).map(([k, c]) => `${k} ${pct(c, nf)}`).join(" ")}` : ""));
       if (base && base.visits.length) {
@@ -1382,8 +1740,8 @@ for (const r of reports) {
         if (Math.abs(cWith - cBase) > 1.5) warn(`${r.id}: grudges move the claim-ending rate ${cBase.toFixed(1)}% → ${cWith.toFixed(1)}% (SPEC §28: claim bands unchanged)`);
         r.grudgeDeath = {with: dWith, without: dBase};
       }
-      if (gi.grudgeChoices && !gr.active) warn(`${r.id}: grudge choices exist but none was ever shown in ${RUNS} random runs`);
-      else if (gi.grudgeChoices && gr.wronged && gr.taken.reduce((a, b) => a + b, 0) === 0) warn(`${r.id}: a grudge was shown but never chosen in ${RUNS} random runs`);
+      if (gri.grudgeChoices && !gr.active) warn(`${r.id}: grudge choices exist but none was ever shown in ${RUNS} random runs`);
+      else if (gri.grudgeChoices && gr.wronged && gr.taken.reduce((a, b) => a + b, 0) === 0) warn(`${r.id}: a grudge was shown but never chosen in ${RUNS} random runs`);
     }
     console.log(`max visits of one node in a run: ${s.maxRevisit} (${s.maxRevisitNode})`);
     const po = Object.entries(s.perOrigin);
@@ -1410,7 +1768,7 @@ for (const r of reports) {
   const gr = reports.filter((r) => r.st && r.st.grudge && (r.st.grudge.grudgeChoices || r.st.grudge.grudgeLines));
   console.log(`\n§28 grudges: ${gr.length ? gr.map((r) => `${r.id} ${r.st.grudge.grudgeChoices} choice(s)/${r.st.grudge.grudgeLines} line(s)${r.grudgeDeath ? ` death ${r.grudgeDeath.with.toFixed(1)}% (was ${r.grudgeDeath.without.toFixed(1)}%)` : ""}`).join(" · ") : "no route has grudges yet"}`);
 }
-if (reports.some((r) => r.rumorAvg !== undefined)) console.log(`\n§20b rumours overheard per run (target 4–8) · share with score ≥2: ${reports.filter((r) => r.rumorAvg !== undefined).map((r) => `${r.id} ${r.rumorAvg.toFixed(2)} (${r.rumorStrong.toFixed(0)}%)`).join(" · ")}`);
+if (reports.some((r) => r.rumorAvg !== undefined)) console.log(`\n§20c rumours overheard per run (target ${GATHER_RUMOR_LO}–${GATHER_RUMOR_HI}) · share with score ≥2: ${reports.filter((r) => r.rumorAvg !== undefined).map((r) => `${r.id} ${r.rumorAvg.toFixed(2)} (${r.rumorStrong.toFixed(0)}%)`).join(" · ")}`);
 /* ---------- SPEC §30 rewind determinism self-test (engine only; the simulation above never enables rewind) ---------- */
 function rewindSelfTest(f, seed, nRuns) {
   const out = {runs: 0, rewinds: 0, replays: 0, mismatches: [], eventsSeen: 0, rolls: 0};
@@ -1469,7 +1827,10 @@ function rewindSelfTest(f, seed, nRuns) {
 {
   const rows = [];
   for (const fid of factionIds) {
-    const res = rewindSelfTest(WH.factions[fid], SEED, SAMPLE ? 40 : 60);
+    const rp = reports.find((r) => r.id === fid);
+    if (rp && !rp.sim && !argv.includes("--force-sim")) { rows.push(`${fid} skipped (static errors)`); continue; }   // a route mid-rewrite must not crash the run
+    let res;
+    try { res = rewindSelfTest(WH.factions[fid], SEED, SAMPLE ? 40 : 60); } catch (e) { err(`rewind (SPEC §30) ${fid}: self-test threw — ${e.message}`); rows.push(`${fid} threw`); continue; }
     rows.push(`${fid} ${res.rewinds} rewinds / ${res.replays} replays (${res.rolls} rolls)`);
     res.mismatches.forEach((m) => err(`rewind (SPEC §30) ${fid}: ${m}`));
   }
