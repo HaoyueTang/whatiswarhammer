@@ -2,7 +2,7 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
-## [0.4.0] - 2026-11-13 (preview: 47 of 131 ending pictures; the rest fall back to the node scene)
+## [0.4.0] - 2026-11-13
 ### Changed — Story overhaul of all 8 routes (SPEC §32)
 - Every route rewritten by an Opus author and then read through by a QA reader (≈ 280 continuity fixes): no cosmetic choices (false choices 43–69 % → 0 %), no forced chapter steps (6–10 per route → 0), every chapter step goes through a bridge node (where / when / who is present), every flag that is set is read later (21–49 never-read flags per route → 0), hard jumps explained or removed (18–48 → 0 unexplained).
 - Nodes per route 89–111 → 103–140; typical run 52–62 nodes; random-play death rates stay within ±3 pts of v0.3.3 (aeldari −2 to −3); good-ending share in random play falls to 22–29 % because choices now have consequences.
@@ -15,6 +15,7 @@ Format follows Keep a Changelog; versions follow SemVer.
 ### Added — Dev tools
 - `tools/dev/playthrough.js` (one seeded random run as readable text), `route_graph.js`, `route_converge.js`, `story_lib.js`, `event_matrix.js`, `validate.js --story-report / --story-gate / --gather-report`.
 ### Added — Ending illustrations (SPEC §31)
+- All 131 endings have their own 192×108 pixel picture (≤ 32 colours, Bayer-dithered, original archetypes, no text or marks): 8 routes drawn by art agents with a shared kit (`tools/art/endkit.py`), strict gate `build_all.py --check-endings` (size, colours, near-empty, near-duplicate, luminance bands good > bad > death per route), deterministic re-render (byte-identical).
 - UI (web): every ending screen shows its own picture. A fixed 16:9 box (pixel-crisp, 3 px frame in the ending's kind colour: gold good / grey bad / red death, `alt` = "结局插图：<title>" / "Ending illustration: <title>", async decoding, the space is reserved so nothing jumps while it loads) is the top of the ending panel: left of the title / cause / facts on landscape, full width above them on portrait. The dimmed old scene stays as the screen background. The panel now scrolls as a whole (picture, facts, "你认识了" recap) with the buttons pinned below it, so they are never covered at 1280×720, 1920×1080 or 390×844.
 - 往生录 → 结局: unlocked tiles get a 16:9 thumbnail above the title; locked tiles show a flat dark box (no image, nothing spoiled) and "???" as before.
 - `UI.endingArt(factionId, nodeId)` returns `end_<id>` when the manifest registers it, else the node's own scene. If the image is unregistered or fails to load, the node scene is shown instead (never a broken-image icon or the slime placeholder; if even that fails the box stays flat dark). No new setting.

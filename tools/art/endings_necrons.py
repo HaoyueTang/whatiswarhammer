@@ -232,6 +232,41 @@ def _trooper(c, x, y, h, col="#1c2824", eye="#7aff9a", rim=None, facing=1):
 
 
 
+def _lr_shade(img, dark, light, gamma=1.0, rev=False):
+    """re-colour an opaque silhouette with a left-to-right gradient (dark -> light; rev: light on the left): volume
+    without outlines, so a dark body keeps its shape against a dark background."""
+    out = img.copy()
+    px = out.load()
+    w = max(1, img.width - 1)
+    for y in range(img.height):
+        for x in range(img.width):
+            if px[x, y][3] >= 128:
+                px[x, y] = mix(C(dark), C(light), ((1.0 - x / float(w)) if rev else (x / float(w))) ** gamma) + (255,)
+    return out
+
+
+def _skull(c, hx, hy, facing=1, eye="#7aff9a", lit="#e0f0e8", mid="#a0b4aa", dark="#5a7068", s=1.0):
+    """a small metal skull head centred at (hx, hy): banded oval, jaw bar, two green eye pixels on the facing side."""
+    d = 1 if facing > 0 else -1
+    rx, ry = int(round(3 * s)), int(round(4 * s))
+    for yy in range(-ry, ry + 1):
+        for xx in range(-rx, rx + 1):
+            if (xx / (rx + 0.4)) ** 2 + (yy / (ry + 0.4)) ** 2 <= 1.0:
+                t = 0.5 + 0.5 * (xx * d) / float(rx) - 0.2 * yy / float(ry)
+                c.set(hx + xx, hy + yy, lit if t > 0.78 else (mid if t > 0.35 else dark))
+    c.rect(hx - rx + 1, hy + ry - 1, hx + rx - 1, hy + ry - 1, dark)
+    c.set(hx + d * 1, hy - 1, eye)
+    c.set(hx + d * 3 if rx >= 3 else hx + d * 2, hy - 1, eye)
+
+
+def _dim(c, col, amount):
+    """pull the whole canvas toward `col` by `amount` with a plain per-pixel mix (no dither mesh; palette size unchanged)."""
+    col = C(col)
+    for y in range(c.h):
+        for x in range(c.w):
+            c.set(x, y, mix(c.get(x, y), col, amount))
+
+
 def _stars_band(c, seed, n, y0, y1, cols=("#6a7aa8", "#c8d8f0", "#ffffff")):
     stars(c, seed, n, y0, y1, cols=cols)
 
@@ -321,6 +356,7 @@ def nec_end_ceasefire(e):
     put_figure(c, me, 97, 99, rim_col="#fff0c8", toward=(-1, -1),
                shadow=dict(toward_light=(-1, 0.1), length=1.3, squash=0.2, col="#5a3418", t=0.6))
     particles(c, "mote", 22, (0, 10, 190, 70), seed=e.seed_for("mote"), cols=("#ffe8b8", "#ffd090"))
+    _dim(c, "#2a1608", 0.30)                                             # a late, low light: pull the whole picture down a step
     vignette_kind(c, "good", strength=0.5, inner=0.55)
 
 
@@ -337,16 +373,18 @@ def nec_end_webway(e):
     glow(c, FX, FY - 4, 60, ["#a8381e", "#e0642a", "#ff9c4c", "#ffd890"], power=1.5, strength=1.0, ry=34)
     # the purge fire plume: a pillar of smoke lit from below
     pn = e.noise("plume")
-    for y in range(7, FY):
+    for y in range(4, FY):
         k = (FY - y) / float(FY)                                       # 0 at the ground, 1 at the top
-        wid = (6 + 26 * (k ** 1.2)) * (1.0 if k < 0.72 else clamp((1.0 - k) / 0.28) ** 0.5)
-        for x in range(int(FX - wid - 8), int(FX + wid + 9)):
+        cx_ = FX + 26 * k ** 1.8                                       # the column leans away on the wind and thins out
+        wid = 6 + 14 * k
+        for x in range(int(cx_ - wid - 8), int(cx_ + wid + 9)):
             if not (0 <= x < 192):
                 continue
-            d = abs(x - FX) / max(1.0, wid)
+            d = abs(x - cx_) / max(1.0, wid)
             v = pn.fbm(x * 0.07, y * 0.1, 4)
-            if d + (v - 0.5) * 0.9 < 0.85:
-                lit = clamp(1.05 - k * 1.05 - d * 0.35 + (v - 0.5) * 0.4)
+            dens = (1.0 - d) * (1.0 - 0.8 * k ** 1.5) + (v - 0.5) * 0.9
+            if dens > 0.22:
+                lit = clamp(1.0 - k * 1.0 - d * 0.35 + (v - 0.5) * 0.4)
                 c.set(x, y, ramp_pick(["#2a1438", "#5a2448", "#a0383a", "#ec6a2a", "#ffb050", "#ffe49a"], lit, x, y))
     glow(c, FX, FY - 2, 22, ["#e0642a", "#ffb050", "#ffe49a", "#ffffff"], power=1.3, strength=1.0, ry=9)
     # far dunes silhouetted, the pyramid a tiny black triangle against the fire
@@ -759,6 +797,7 @@ def nec_end_claim_nurgle(e):
     for k in range(18):
         c.set(fr.randint(40, 150), fr.randint(18, 70), "#10160a")
     particles(c, "spore", 26, (40, 16, 150, 84), seed=e.seed_for("sp"), cols=("#e8ff9a", "#c8d850", "#a8b84a"))
+    _dim(c, "#0a1004", 0.26)                                             # a sick, heavy light: pull the whole picture down a step
     vignette_kind(c, "bad", col="#0a1004", strength=0.7, inner=0.5)
 
 
@@ -977,17 +1016,16 @@ def nec_end_devoured(e):
     chest = (hxp + 2, hyp + 7)
     _thread(c, (CX - 12, CY + 8), chest, "#fff0b0", t=0.9, sag=-4, levels=4)
     # the cryptek, small, at the left, with a halo ring
-    ck = fig(34, "stand", "#0a1412", facing=1, thick=1.0, robe=0.0)
-    cx_, cy_ = put_figure(c, ck, 36, 96, rim_col="#9affb0", toward=(1, -0.3),
-                          shadow=dict(toward_light=(1, 0.15), length=1.6, squash=0.2, col="#02060a", t=0.7))
+    cx_, cy_, ck = _courtier(c, 36, 96, 36, facing=1, col="#2a4c42", eye="#7aff9a", gold="#c8a028", rim_col="#9affb0",
+                             toward=(1, 0), crest=False,
+                             shadow=dict(toward_light=(1, 0.15), length=1.6, squash=0.2, col="#02060a", t=0.7))
     hx_, hy_ = ck["head"]
     hxp, hyp = cx_ + int(hx_), cy_ + int(hy_)
-    c.set(hxp - 1, hyp, "#7aff9a"); c.set(hxp + 1, hyp, "#7aff9a")
-    for k in range(14):
-        a = k / 14.0 * 6.283
-        c.set(hxp + math.cos(a) * 6, hyp - 3 + math.sin(a) * 2.2, "#e8b830")
-    c.line([(hxp + 7, hyp + 4), (hxp + 7, hyp + 26)], "#1a3a30")
-    c.set(hxp + 7, hyp + 3, "#7aff9a")
+    for k in range(18):                                                                 # the halo ring behind the head
+        a = k / 18.0 * 6.283
+        c.set(hxp + math.cos(a) * 7, hyp - 1 + math.sin(a) * 7.5, "#e8b830")
+    c.line([(hxp + 9, hyp + 4), (hxp + 9, hyp + 28)], "#2a5a48")
+    c.rect(hxp + 8, hyp + 2, hxp + 10, hyp + 3, "#7aff9a")
     particles(c, "mote", 22, (100, 10, 190, 96), seed=e.seed_for("mote"), cols=("#fff0b0", "#9affd8", "#ffffff"))
     e.protect += ["#fff0b0", "#9affb0"]
     vignette_kind(c, "bad", col="#02060a", strength=0.7)
@@ -1063,10 +1101,622 @@ def nec_end_exhibit(e):
     c.rect(x0 + 10, CB + 3, x1 - 10, CB + 3, "#ffffff")
     for k, ln in enumerate([30, 24, 14]):
         c.rect(x0 + 13, CB + 4 + k * 2, x0 + 13 + ln - 1, CB + 4 + k * 2, "#5a6a62")
-    # the visitors, backs to us, green eyes turned left toward the case
-    for (vx, vy, vh, vc) in [(138, 100, 52, "#07141a"), (182, 118, 82, "#04090c")]:
-        _necron(c, vx, vy, vh, facing=-1, col=vc, eye="#7affd8", rim_col="#7affd8", toward=(-1, -0.3), thick=0.9,
-                shadow=dict(toward_light=(-1, 0.1), length=1.2, squash=0.2, col="#02060a", t=0.6))
+    # the visitors: solid steel-teal bodies (lit from the case, on the left), green eyes turned toward it
+    for (vx, vy, vh, cr) in [(138, 100, 52, True), (182, 118, 82, False)]:
+        _courtier(c, vx, vy, vh, facing=-1, col="#2c4e5a", eye="#7affd8", gold="#a88a28", rim_col="#bfffff", toward=(-1, 0),
+                  crest=cr, rev=True, shadow=dict(toward_light=(-1, 0.1), length=1.2, squash=0.2, col="#02060a", t=0.6))
     particles(c, "mote", 22, (6, 6, 150, 100), seed=e.seed_for("mote"), cols=("#bfffff", "#8ae0e8", "#ffffff"))
     e.protect += ["#ffffff"]
     vignette_kind(c, "bad", col="#02060a", strength=0.62)
+
+
+# ==== WAVE 2 (new endings) ====
+
+
+def _boot(c, x, y, h, col, hi, rim, sole="#07050a", flip=False):
+    """one boot in side view, toe to the right (flip: left).  (x, y) = heel-ground point of the shaft's centre,
+    h = total height.  Shaft + foot + a heel block + a darker sole, a lit cuff and toe cap."""
+    s = -1 if flip else 1
+    sw = max(2, int(h * 0.34))                         # shaft width
+    fh = max(2, int(h * 0.34))                         # foot height
+    fl = max(4, int(h * 0.80))                         # foot length (heel to toe)
+
+    def R(x0, y0, x1, y1, col_):
+        a, b = sorted((x + s * x0, x + s * x1))
+        c.rect(a, y + y0, b, y + y1, col_)
+    R(-sw // 2, -h + 1, sw // 2, -fh, col)                                  # shaft
+    R(-sw // 2 - 1, -fh + 1, fl - sw // 2 - 2, -1, col)                     # foot
+    R(fl - sw // 2 - 1, -fh + 3 if fh > 3 else -fh + 1, fl - sw // 2, -1, col)   # toe taper
+    R(-sw // 2 - 1, -1, fl - sw // 2, 0, sole)                              # sole
+    if h >= 14:
+        R(-sw // 2, -fh // 2, fl - sw // 2 - 2, -fh // 2, mix(C(col), C(hi), 0.35))        # welt line
+    R(-sw // 2 - 1, -3, -sw // 2 + 1, 0, sole)                              # heel block
+    R(-sw // 2, -h + 1, sw // 2, -h + 1, rim)                               # lit cuff
+    if h >= 8:
+        R(-sw // 2, -h + 2, -sw // 2, -fh - 1, mix(C(col), C(rim), 0.45))   # light edge on the shaft (light side)
+        R(fl // 2, -fh + 1, fl - sw // 2 - 1, -fh + 1, hi)                  # top of the vamp
+        R(fl - sw // 2 - 1, -fh + 3 if fh > 3 else -fh + 1, fl - sw // 2 - 1, -2, hi)   # toe cap
+    if h >= 14:
+        R(fl // 2 - 1, -fh + 2, fl - sw // 2 - 2, -fh + 2, mix(C(hi), C(col), 0.4))                 # a second sheen row on the vamp
+        R(-sw // 2 + 1, -h + 4, sw // 2 - 1, -h + 4, mix(C(col), C(rim), 0.35))        # a buckle strap
+        R(-sw // 2 + 1, -h + 8, sw // 2 - 1, -h + 8, mix(C(col), C(rim), 0.35))
+
+
+@ending("nec_end_inquisition")
+def nec_end_inquisition(e):
+    """BAD.  Knew Too Much: a grey dust-plain at dusk under a heavy sky with one dull slit of light on the right
+    horizon.  A row of boots stands in the sand, toes pointing out toward the slit, receding from the lower left
+    toward a little black knot of camp and one figure in a wide hat; the old pairs are grey with dust, the nearest
+    pair is new and black -- the row has grown by one.  Beside it a folder lies on the sand with a red stamp-bar.
+    Cold light from the right, long shadows falling toward the lower left."""
+    c = e.c
+    HZ = 52
+    sky(c, ["#0e0d18", "#1c1828", "#322a3c", "#5a4650", "#9a6a56", "#d08e60"], 0, HZ)
+    sn = e.noise("deck")                                         # heavy cloud deck, darkest on top
+    for y in range(0, HZ):
+        for x in range(192):
+            v = sn.fbm(x * 0.025, y * 0.11, 4)
+            k = y / float(HZ)
+            if v > 0.42 - 0.18 * k:
+                blend(c, x, y, "#100e18", clamp((v - 0.35) * 2.2) * (0.85 - 0.45 * k), 3)
+    for x in range(96, 192):                                     # the slit: a thin hot band just over the horizon
+        u = 1.0 - abs(x - 158) / 62.0
+        if u > 0:
+            for k, col in enumerate(["#e0a064", "#f2c07a", "#ffe0a0"]):
+                if u > 0.25 + 0.3 * k:
+                    c.set(x, HZ - 3 - k, col)
+    glow(c, 158, HZ - 2, 56, ["#4a3238", "#7a4c44", "#b87c54", "#e8b078"], power=1.7, strength=0.75, ry=14)
+    c.ellipse(160, HZ - 1, 6, 2, "#ffe0a0")
+    stars(c, e.seed_for("st"), 24, 0, 18, cols=("#6a6280", "#a8a0c0"))
+    # the plain: mauve-grey sand, lit from the slit, colder toward the foreground
+    n2 = e.noise("sand")
+    for y in range(HZ, 108):
+        k = (y - HZ) / float(107 - HZ)
+        for x in range(192):
+            lit = clamp(1.0 - abs(x - 160) / 150.0) * (1.0 - k) ** 0.6
+            v = n2.fbm(x * 0.05 + y * 0.01, y * 0.18, 3)
+            t = clamp(0.30 + 0.5 * lit + (v - 0.5) * 0.35 - 0.20 * k)
+            c.set(x, y, ramp_pick(["#1e1824", "#342a34", "#5a4a52", "#8a6e68", "#c09478"], t, x, y))
+    wr = e.rng("ripples")                                        # wind ripples
+    for _ in range(46):
+        yy = wr.randint(HZ + 3, 106)
+        xx = wr.randint(0, 186)
+        ln = wr.randint(3, 8 + (yy - HZ) // 5)
+        for i in range(ln):
+            blend(c, xx + i, yy, "#b89a86", 0.40 * (1 - (yy - HZ) / 70.0) + 0.08, 3)
+    # far camp, black tents with a few lamps
+    for (tx, tw, th) in [(100, 7, 4), (109, 5, 3), (120, 9, 5), (128, 6, 3)]:
+        c.poly([(tx - tw // 2, HZ + 1), (tx, HZ + 1 - th), (tx + tw // 2, HZ + 1)], "#1a141a")
+    for (lx, ly) in [(102, HZ), (121, HZ - 1), (127, HZ)]:
+        c.set(lx, ly, "#ffc870")
+    # Mordane: a small wide-hat silhouette at the far end of the row, against the slit
+    mord = fig(12, "stand", "#120e14", robe=0.6, facing=-1)
+    mx, my = put_figure(c, mord, 150, HZ + 2, rim_col="#e0a064", toward=(1, -0.2))
+    hxm, hym = mord["head"]
+    c.rect(mx + int(hxm) - 3, my + int(hym) - 1, mx + int(hxm) + 3, my + int(hym) - 1, "#120e14")
+    c.rect(mx + int(hxm) - 1, my + int(hym) - 2, mx + int(hxm) + 1, my + int(hym) - 2, "#120e14")
+    # the row: pairs of side-view boots, toes toward the slit, perspective from lower left to the far end
+    light_pool(c, 34, 97, 46, 13, "#b89484", t=0.42, power=0.9)
+    pairs = [(18, 98, 27), (66, 87, 18), (96, 80, 13), (116, 75, 10), (129, 71, 8), (139, 68, 6), (147, 66, 5), (153, 64, 4)]
+    for i, (bx, by, bh) in enumerate(pairs):
+        k = i / float(len(pairs) - 1)
+        col = mix(C("#0e0a10"), C("#8a7a70"), 0.0 if i == 0 else 0.15 + 0.55 * k)
+        hi = mix(C("#6a5448"), C("#c0a890"), 0.0 if i == 0 else 0.5 * k)
+        rim_ = "#e0a064" if i else "#f0b070"
+        # shadow first: long, falling to the lower left (light is on the right)
+        sl = int(bh * 1.4) + 3
+        for j in range(sl):
+            for dy in (0, 1, 2) if bh > 12 else (0, 1):
+                blend(c, bx - j + 2, by + 1 + dy + j // 7, "#0c0812", 0.42 * (1 - j / float(sl)), 3)
+        _boot(c, bx + int(bh * 0.40), by - max(1, int(bh * 0.08)), bh, mix(col, C("#8a7a70"), 0.12), hi, rim_)   # the far boot of the pair
+        _boot(c, bx, by, bh, col, hi, rim_)
+        if i == 0:                                                # a skin of dust already on the new pair
+            for dx in range(-3, 18):
+                if (dx * 5 + 2) % 4 < 2:
+                    c.set(bx + dx, by - 9 - (dx % 3), "#5a4a52")
+    # the file on the sand: a folder with a red stamp bar (no lettering)
+    FX, FY = 112, 99
+    c.poly([(FX - 11, FY), (FX + 11, FY), (FX + 9, FY - 10), (FX - 9, FY - 10)], "#c9b486")
+    c.poly([(FX - 11, FY), (FX - 9, FY - 10), (FX - 9, FY - 8), (FX - 10, FY)], "#8a7650")
+    c.rect(FX - 9, FY - 10, FX + 9, FY - 10, "#efe2b8")
+    c.rect(FX - 5, FY - 8, FX + 5, FY - 4, "#b8231a")
+    c.rect(FX - 5, FY - 8, FX + 5, FY - 8, "#e6483a")
+    c.rect(FX - 3, FY - 6, FX + 3, FY - 6, "#7a1410")
+    c.rect(FX - 7, FY - 2, FX + 6, FY - 2, "#9a8660")
+    for x in range(FX - 14, FX + 12):
+        blend(c, x - 3, FY + 1, "#0a0810", 0.62, 3)
+        blend(c, x - 6, FY + 2, "#0a0810", 0.40, 3)
+    e.protect += ["#b8231a", "#e6483a"]
+    particles(c, "ash", 20, (0, 44, 190, 104), seed=e.seed_for("dust"), cols=("#8a7a78", "#a89888"), wind=(2, 0))
+    vignette_kind(c, "bad", col="#0a0812", strength=0.5, inner=0.66)
+
+
+def _flayer(c, x, y, h, facing=1, col="#05080e", eye="#7aff9a", strips="#a8705e", rim_col=None, toward=(-1, -1),
+            pose="hunch", n_strips=5, seed=1, robe=0.0, hood=True):
+    """a Flayed One: a hunched hooded silhouette with two green eyes and ragged strips of hide (warm, wrong) hanging
+    from the shoulders / hands.  Feet at (x, y).  Returns (left, top) of the figure image and the figure dict."""
+    f = fig(h, pose, col, facing=facing, hood=hood, robe=robe, thick=1.05)
+    ox, oy = put_figure(c, f, x, y, rim_col=rim_col, toward=toward)
+    hx_, hy_ = f["head"]
+    hxp, hyp = ox + int(round(hx_)), oy + int(round(hy_))
+    d = 1 if facing > 0 else -1
+    if h >= 12:
+        c.set(hxp + d, hyp, eye)
+        if h >= 20:
+            c.set(hxp + d + (2 * d if h >= 30 else d), hyp, eye)
+    else:
+        c.set(hxp + d, hyp, eye)
+    rr = random.Random(seed)
+    if h >= 14 and n_strips:
+        sx0 = hxp - d * max(2, h // 9)
+        for i in range(n_strips):                                   # hide strips: short ragged vertical lines
+            px_ = sx0 + (i - n_strips // 2) * max(1, h // 14) + rr.randint(-1, 1)
+            py_ = hyp + max(3, h // 8) + rr.randint(0, max(1, h // 8))
+            ln = rr.randint(max(2, h // 10), max(3, h // 4))
+            c.rect(px_, py_, px_, py_ + ln, strips)
+            if ln > 3 and rr.random() < 0.5:
+                c.set(px_ + 1, py_ + ln - 1, strips)
+    return ox, oy, f
+
+
+@ending("nec_end_flayer")
+def nec_end_flayer(e):
+    """BAD.  Cold: a vault without light.  A pale cold shaft from a breach in the upper left falls on frosted stone;
+    in it two figures walk away to the left hand in hand -- Lord Meruk, tall and hooded, and the human behind him
+    in the old coat.  Around them, in three depths, the Flayed Ones crowd the dark, green-eyed, with strips of
+    warm-coloured hide hanging from them -- the only warm colour in the picture.  Two huge dark ones frame the edges."""
+    c = e.c
+    HZ = 66
+    # cold hall: dark blue stone, a pale mist band to silhouette the crowd against
+    for y in range(108):
+        for x in range(192):
+            k = y / 108.0
+            m = 1.0 - abs(y - 56) / 44.0                               # mist peaks mid-height
+            t = 0.30 + 0.62 * clamp(m) ** 1.1 + (0.04 if (x // 18) % 2 else 0)
+            c.set(x, y, ramp_pick(["#04060c", "#0a1018", "#142030", "#243a50", "#3e5c76", "#6a8aa4"], t, x, y))
+    # pillars and arches fading into the mist
+    for px_ in (14, 46, 92, 140, 176):
+        c.rect(px_, 0, px_ + 4, HZ, "#070b12")
+        c.rect(px_ + 4, 0, px_ + 4, HZ, "#16222e")
+    for y in range(0, 26):                                            # ceiling falls away: dark vault
+        for x in range(192):
+            blend(c, x, y, "#03050a", 0.5 * (1 - y / 26.0), 3)
+    # the breach: a ragged hole in the ceiling top-left, pale light
+    bx, by = 52, 0
+    for yy in range(0, 12):
+        for xx in range(bx - 14 + yy // 3, bx + 14 - yy // 2):
+            c.set(xx, yy, ramp_pick(["#8ab0c8", "#c8e4f0", "#f0fbff"], 0.5 + 0.5 * (1 - yy / 12.0), xx, yy))
+    glow(c, bx, 4, 22, ["#243a50", "#5a84a0", "#a8d0e0"], power=1.4, strength=0.9, ry=14)
+    shafts(c, (bx, 4), 62, 34, 6, 120, "#d8f0ff", t=0.30, seed=e.seed_for("sh"), w0=4, w1=20, power=0.5, floor=100)
+    # floor: frost-dark stone, lit under the shaft
+    hband(c, HZ, 107, ["#3a566c", "#22384c", "#14222f", "#0a121a"], seed=e.seed_for("fl"), rough=0.08)
+    c.rect(0, HZ, 191, HZ, "#4a6a84")
+    for x in range(-60, 260, 26):
+        c.line([(96 + (x - 96) * 0.4, HZ + 1), (96 + (x - 96) * 1.9, 107)], "#0a121c")
+    light_pool(c, 92, 94, 70, 16, "#bfe4f4", t=0.62, power=0.9, levels=4)
+    light_pool(c, 92, 94, 34, 9, "#e8f8ff", t=0.45, power=1.0, levels=4)
+    fr = e.rng("frost")                                                # frost sparkle on the floor
+    for _ in range(60):
+        c.set(fr.randint(30, 160), fr.randint(HZ + 3, 104), "#cfe8f4" if fr.random() < 0.5 else "#8ab0c8")
+    # the crowd: far row (small, against the mist), mid row, with strips of warm hide
+    far = [(8, 22), (22, 18), (40, 21), (60, 17), (76, 20), (104, 18), (120, 22), (136, 17), (152, 21), (168, 18), (184, 22)]
+    for i, (fx_, fh) in enumerate(far):
+        _flayer(c, fx_, HZ + 2 + (i % 3), fh, facing=1 if i % 2 else -1, col="#0a121c", strips="#8a5a4c", n_strips=3,
+                seed=e.seed_for("f%d" % i), pose="hunch")
+    mid = [(10, 33), (30, 36), (70, 31), (126, 34), (150, 38), (176, 33)]
+    for i, (fx_, fh) in enumerate(mid):
+        _flayer(c, fx_, HZ + 12 + (i % 2) * 3, fh, facing=1 if i % 2 else -1, col="#060b12", strips="#a8705e", n_strips=5,
+                seed=e.seed_for("m%d" % i), pose="hunch", rim_col="#4a6a84", toward=(-1, -1))
+    haze(c, HZ - 6, HZ + 10, "#3e5c76", t=0.35, seed=e.seed_for("hz"), profile="mid")
+    # Lord Meruk: tall, hooded, in a long ragged cloak, leading by the hand to the left
+    mer_f = fig(66, "walk", "#04070c", facing=-1, hood=True, robe=0.85, thick=1.1)
+    mox, moy = put_figure(c, mer_f, 82, 101, rim_col="#9ac4dc", toward=(-1, -1),
+                          shadow=dict(toward_light=(-1, 0.1), length=1.1, squash=0.22, col="#03050a", t=0.6))
+    hx_, hy_ = mer_f["head"]
+    hxm, hym = mox + int(hx_), moy + int(hy_)
+    c.set(hxm - 1, hym, "#7aff9a"); c.set(hxm - 3, hym, "#7aff9a")
+    rr = e.rng("meruk")
+    for i in range(9):                                                 # hide strips hanging from his shoulders and cloak
+        sx_ = hxm + 2 + i * 2 - 6
+        sy_ = hym + 8 + rr.randint(0, 5)
+        ln = rr.randint(5, 12)
+        c.rect(sx_, sy_, sx_, sy_ + ln, "#b8806c" if i % 3 else "#8a5a4c")
+    # his reaching hand and the human's hand joined behind him
+    me = player_fig("necrons", 46, "walk", facing=-1, thick=1.1)
+    me = dict(me, img=tint(me["img"], "#16283a", 0.42))
+    me_ox, me_oy = put_figure(c, me, 113, 101, rim_col="#cfe8f4", toward=(-1, -1),
+                              shadow=dict(toward_light=(-1, 0.1), length=1.1, squash=0.22, col="#03050a", t=0.6))
+    mh = me["hands"][0]
+    meh = (me_ox + int(mh[0]), me_oy + int(mh[1]))
+    mh2 = mer_f["hands"][1]
+    mrh = (mox + int(mh2[0]), moy + int(mh2[1]))
+    c.line([mrh, (meh[0], meh[1])], "#04070c", 2)
+    c.rect(meh[0] - 2, meh[1] - 1, meh[0] + 1, meh[1] + 1, "#8ab0c8")           # the joined hands, pale and cold
+    c.set(meh[0] - 3, meh[1] - 1, "#cfe8f4"); c.set(meh[0] - 3, meh[1] + 1, "#cfe8f4"); c.set(meh[0] - 2, meh[1] + 2, "#cfe8f4")
+    c.set(meh[0] - 1, meh[1], "#e8f8ff")
+    hx_, hy_ = me["head"]
+    c.set(me_ox + int(hx_) - 2, me_oy + int(hy_), "#cfe8f4")           # the human's eye: pale, looking at the hide
+    # two huge dark ones frame the edges and lean in
+    _flayer(c, 6, 118, 96, facing=1, col="#050a12", strips="#7a4a3c", n_strips=7, seed=e.seed_for("L"), pose="hunch",
+            rim_col="#2a4258", toward=(1, -1))
+    _flayer(c, 190, 120, 104, facing=-1, col="#050a12", strips="#7a4a3c", n_strips=7, seed=e.seed_for("R"), pose="hunch",
+            rim_col="#2a4258", toward=(-1, -1))
+    particles(c, "snow", 28, (0, 8, 190, 100), seed=e.seed_for("snow"), cols=("#cfe8f4", "#8ab0c8"))
+    e.protect += ["#7aff9a", "#cfe8f4"]
+    vignette_kind(c, "bad", col="#02040a", strength=0.5, inner=0.66)
+
+
+def _courtier(c, x, y, h, facing=1, col="#46645a", eye="#7aff9a", gold="#d8a828", rim_col=None, toward=(1, 0),
+              shadow=None, crest=True, rev=False):
+    """a necron courtier at attention: thin dark body, a gold collar and a tall gold crest, two green eyes."""
+    f = fig(h, "stand", col, facing=facing, thick=0.66)
+    f = dict(f, img=_lr_shade(f["img"], mix(C(col), C("#000000"), 0.55), mix(C(col), C("#ffffff"), 0.18), rev=rev))
+    ox, oy = put_figure(c, f, x, y, rim_col=rim_col, toward=toward, shadow=shadow)
+    hx_, hy_ = f["head"]
+    hxp, hyp = ox + int(round(hx_)), oy + int(round(hy_))
+    d = 1 if facing > 0 else -1
+    _skull(c, hxp, hyp, facing, eye=eye, s=1.0 if h >= 40 else 0.8,
+           lit="#e0f0e8" if h >= 40 else "#a0b4aa", mid="#a0b4aa" if h >= 40 else "#70867c", dark="#5a7068" if h >= 40 else "#3c5048")
+    sh = max(2, int(h * 0.075))
+    c.rect(hxp - 3, hyp + sh + 1, hxp + 3, hyp + sh + 2, gold)            # collar
+    if crest:
+        top = hyp - max(4, int(h * 0.10))
+        c.poly([(hxp - 2, hyp - 3), (hxp + 2, hyp - 3), (hxp + 1, top), (hxp - 1, top)], gold)
+    return ox, oy, f
+
+
+@ending("nec_end_metal")
+def nec_end_metal(e):
+    """BAD.  The Undying Courtier: the throne hall.  At the far right the overlord sits on a gold dais under a huge
+    green gem; the court stands in two ranks facing him -- thin dark bodies, gold collars and crests, green eyes.
+    In the front rank, third from the left, one of them wears a human's coat: the body is still in the old
+    clothes, the head a silver skull with two green eyes.  Green-gold light from the right, long shadows to the left."""
+    c = e.c
+    HZ = 82
+    # hall: dark teal plates; tall pillars with gold bands; glyph panels between them
+    for y in range(108):
+        for x in range(192):
+            t = 0.08 + 0.26 * clamp(1.0 - abs(y - 50) / 60.0) + 0.16 * clamp(1.0 - abs(x - 172) / 120.0) \
+                + (0.04 if (x // 20 + y // 14) % 2 else 0.0)
+            c.set(x, y, ramp_pick(["#040a0a", "#0a1a18", "#12302a", "#1c4a3e", "#2e6a58"], t, x, y))
+    for px_ in (8, 56, 104, 140):
+        c.rect(px_, 0, px_ + 9, HZ, "#06100e")
+        c.rect(px_ + 9, 0, px_ + 9, HZ, "#2a6a52")
+        c.rect(px_, 0, px_, HZ, "#0e2a22")
+        for yy in (14, 36, 58):
+            c.rect(px_, yy, px_ + 9, yy + 2, "#8a6a1c")
+            c.rect(px_, yy, px_ + 9, yy, "#d8a828")
+    _glyph_wall(c, 20, 10, 52, 70, ["#1e5a44", "#2e7a5c"], e.seed_for("gw"), cw=4, rh=9, p=0.5)
+    _glyph_wall(c, 68, 10, 100, 70, ["#1e5a44", "#2e7a5c"], e.seed_for("gw2"), cw=4, rh=9, p=0.5)
+    for y in range(108):                                                  # keep the left of the hall low-lit
+        for x in range(0, 150):
+            blend(c, x, y, "#02080a", 0.32 * clamp(1.0 - (x - 100) / 60.0) if x > 100 else 0.32, 3)
+    # the dais: gold steps at the right, the overlord seated high, the gem behind him
+    GX, GY = 168, 36
+    glow(c, GX, GY, 54, ["#12302a", "#2e7a5c", "#7affb0", "#d8ffd8"], power=1.3, strength=1.0, ry=46)
+    c.ellipse(GX, GY, 15, 15, "#12302a")
+    c.ellipse(GX, GY, 12, 12, "#3ad86a")
+    c.ellipse(GX - 2, GY - 2, 8, 8, "#9affb0")
+    c.ellipse(GX - 3, GY - 3, 4, 4, "#e8ffe8")
+    for k in range(5):                                                     # rays from the gem down onto the court
+        a = math.radians(125 + k * 14)
+        for r in range(18, 70):
+            blend(c, int(GX + math.cos(a) * r), int(GY + math.sin(a) * r), "#9affb0", 0.25 * (1 - r / 70.0), 3)
+    lord = spr("necron_lord", 1, mirror=True, tint_to="#06140c", tint_t=0.35, crop=(0, 0, 64, 52), bottom_fade=8)
+    lord = rim(lord, "#d8ffb0", (-1, -1), min_run=4)
+    place(c, lord, GX - 3, 68, anchor="bm")
+    for k in range(5):                                                     # steps
+        y0 = 66 + k * 4
+        c.rect(GX - 36 + k * 5, y0, 191, y0 + 3, "#6a4e14" if k % 2 else "#8a6a1c")
+        c.rect(GX - 36 + k * 5, y0, 191, y0, "#f0c038")
+    # floor: polished teal, a spill of green-gold light running left from the dais
+    hband(c, HZ, 107, ["#1c4a3e", "#12302a", "#0a1a18", "#040a0a"], seed=e.seed_for("fl"), rough=0.06)
+    c.rect(0, HZ, 191, HZ, "#2e7a5c")
+    for x in range(-60, 260, 26):
+        c.line([(96 + (x - 96) * 0.4, HZ + 1), (96 + (x - 96) * 1.9, 107)], "#08140f")
+    light_pool(c, 130, 96, 80, 12, "#9affb0", t=0.55, power=0.9, levels=4)
+    light_pool(c, 150, 92, 40, 8, "#f0e090", t=0.4, power=1.0)
+    # back rank, smaller, in the mist
+    haze(c, 40, HZ, "#2e6a58", t=0.25, seed=e.seed_for("hz"), profile="bottom")
+    for (bx, bh) in [(34, 36), (64, 37), (97, 36), (128, 38)]:
+        _courtier(c, bx, HZ - 1, bh, facing=1, col="#2a463e", eye="#5aca7a", gold="#9a7a22", rim_col="#4aa86a",
+                  shadow=dict(toward_light=(1, 0.1), length=0.9, squash=0.2, col="#02060a", t=0.5))
+    # front rank, large: three courtiers and the one in the coat (third)
+    SH = dict(toward_light=(1, 0.1), length=1.1, squash=0.2, col="#02060a", t=0.6)
+    for (bx, bh) in [(20, 60), (58, 61)]:
+        _courtier(c, bx, 101, bh, facing=1, rim_col="#9affb0", shadow=SH)
+    me = player_fig("necrons", 58, "stand", facing=1, thick=0.78)
+    me = dict(me, img=tint(me["img"], "#0a1816", 0.5))
+    _im = me["img"]                                                        # take the human head off: a skull goes there
+    _px = _im.load()
+    _hx, _hy = me["head"]
+    for _y in range(_im.height):
+        for _x in range(_im.width):
+            if math.hypot(_x - _hx, _y - _hy) <= 0.088 * 58 * 1.15 and _y <= _hy + 1:
+                _px[_x, _y] = (0, 0, 0, 0)
+    mx, my = put_figure(c, me, 96, 101, rim_col="#e8f8c0", toward=(1, 0), shadow=SH)
+    hx_, hy_ = me["head"]
+    hxp, hyp = mx + int(round(hx_)), my + int(round(hy_))
+    _skull(c, hxp, hyp, 1, s=1.0)
+    c.rect(hxp - 3, hyp + 7, hxp + 3, hyp + 8, "#d8a828")                  # a courtier's collar over the coat
+    for (bx, bh) in [(134, 60)]:
+        _courtier(c, bx, 101, bh, facing=1, rim_col="#9affb0", shadow=SH)
+    particles(c, "mote", 22, (6, 10, 186, 98), seed=e.seed_for("mote"), cols=("#9affb0", "#f0e090", "#e8ffe8"))
+    e.protect += ["#7aff9a", "#e8f8c0"]
+    vignette_kind(c, "bad", col="#02080a", strength=0.62, inner=0.6)
+
+
+@ending("nec_death_hp")
+def nec_death_hp(e):
+    """DEATH.  A Tidy Dune: night outside the tomb.  The fallen human has become a long smooth mound of sand in the
+    foreground, person-shaped, its ridge lit by a cold moon at the upper right; beside it the lamp, pen and notebook
+    are stacked square and the lamp still burns, a tiny warm point.  Four metal scarabs stand in an even row beside
+    the stack; behind, evenly spaced, the earlier mounds lead off toward the black pyramid with its green point."""
+    c = e.c
+    HZ = 60
+    sky(c, ["#03040a", "#060a16", "#0a1426", "#14263c", "#27425a", "#4a6a7c"], 0, HZ)
+    stars(c, e.seed_for("st"), 70, 0, 44, cols=("#5a6a90", "#a8b8d8", "#ffffff"))
+    MX, MY = 162, 20
+    glow(c, MX, MY, 18, ["#0a1426", "#1e3652", "#5a7a94", "#c8dae6"], power=1.8, strength=0.9, ry=16)
+    c.ellipse(MX, MY, 3, 3, "#dfe9ee")
+    c.ellipse(MX - 1, MY - 1, 2, 2, "#ffffff")
+    # far dunes and the black pyramid with its green point
+    ridge(c, HZ + 3, 2, 8, "#0c1626", seed=e.seed_for("r0"), lite="#3a5a74", scale=0.025)
+    PX, PB, PH, PW = 38, HZ + 3, 30, 30
+    c.poly([(PX - PW, PB), (PX, PB - PH), (PX, PB)], "#14202c")
+    c.poly([(PX, PB), (PX, PB - PH), (PX + PW, PB)], "#050810")
+    c.line([(PX - PW, PB), (PX, PB - PH)], "#2c9a58")
+    c.line([(PX, PB - PH), (PX + PW, PB)], "#0e3a24")
+    glow(c, PX, PB - PH - 1, 8, ["#0e3a24", "#3ad86a", "#c8ffd8"], power=1.2, strength=0.9)
+    haze(c, HZ - 6, HZ + 8, "#2e4a62", t=0.35, seed=e.seed_for("hz"), profile="mid")
+    # sand: cold blue-grey, lit from the right
+    sn = e.noise("sand")
+    for y in range(HZ + 3, 108):
+        k = (y - HZ) / 48.0
+        for x in range(192):
+            v = sn.fbm(x * 0.04, y * 0.16, 3)
+            lit = clamp(1.0 - abs(x - 150) / 170.0)
+            t = clamp(0.28 + 0.34 * lit * (1.0 - k * 0.6) + (v - 0.5) * 0.3 - 0.18 * k)
+            c.set(x, y, ramp_pick(["#07080f", "#10121e", "#1c2234", "#2c364c", "#445670"], t, x, y))
+    # the earlier mounds: evenly spaced, each with a tiny square stack beside it, receding toward the pyramid
+    def mound(cx, base, w, h, col_hi="#7a9ab0", col_mid="#2c3a52", col_lo="#10121e", steps=1):
+        for x in range(int(cx - w), int(cx + w) + 1):
+            u = (x - cx) / float(w)
+            if abs(u) > 1:
+                continue
+            top = int(base - h * (1 - u * u) ** 0.9)
+            for y in range(top, int(base) + 1):
+                tt = 0.5 + 0.55 * u + 0.35 * (y - top) / max(1, base - top) * -1
+                col = col_hi if (y == top and u > -0.2) else (col_mid if tt > 0.3 else col_lo)
+                c.set(x, y, col)
+    for i, (mx_, mb, mw, mh) in enumerate([(104, HZ + 8, 9, 4), (126, HZ + 12, 12, 5), (152, HZ + 17, 15, 7), (184, HZ + 24, 19, 9)]):
+        mound(mx_, mb, mw, mh)
+        c.rect(mx_ + mw + 3, mb - 2, mx_ + mw + 4, mb, "#3a4a60")                # a tiny neat stack
+        c.set(mx_ + mw + 3, mb - 3, "#d8b068") if i % 2 == 0 else None
+    # the main mound: a long person-shaped heap (head left, feet right), cold moon along its ridge
+    BX0, BX1, BASE = 18, 132, 99
+    def prof(x):
+        g = lambda m, s, a: a * math.exp(-((x - m) / s) ** 2)
+        return 2 + g(32, 11, 9) + g(66, 16, 9) + g(100, 10, 5.5) + g(122, 7, 3)
+    tops = {}
+    for x in range(BX0, BX1 + 1):
+        edge = clamp(min(x - BX0, BX1 - x) / 9.0) ** 0.6
+        tops[x] = int(BASE - prof(x) * edge * 1.15)
+    sm = dict(tops)
+    for x in range(BX0 + 2, BX1 - 1):                                      # smooth the ridge: a heap, not a rock
+        sm[x] = int(round(sum(tops[x + k] for k in (-2, -1, 0, 1, 2)) / 5.0))
+    tops = sm
+    for x in range(BX0, BX1 + 1):
+        top = tops[x]
+        slope = (tops[min(BX1, x + 2)] - tops[max(BX0, x - 2)]) / 4.0                  # + = descending to the right
+        for y in range(top, BASE + 5):
+            d = (y - top) / max(1.0, float(BASE + 5 - top))
+            lit = clamp(0.92 - slope * 0.55 - d * 0.62 + (0.12 if y == top else 0))
+            c.set(x, y, ramp_pick(["#0a0b14", "#161a2a", "#28324a", "#44566e", "#7a9ab0"], lit, x, y))
+        c.set(x, top, "#a8c0d0" if slope < 0.4 else "#44566e")
+    for k in range(7):                                                     # sand ripples along the mound
+        yy = BASE - 3 - k
+        for x in range(BX0 + 8 + k, BX1 - 8 - k, 5):
+            if tops.get(x, 999) < yy - 1 and (x + k) % 2 == 0:
+                blend(c, x, yy, "#8aa8bc", 0.45, 3)
+    c.rect(BX0 + 24, tops[BX0 + 24] + 2, BX0 + 27, tops[BX0 + 24] + 3, "#6a5c44")      # the coat collar showing at the shoulder
+    c.rect(BX0 + 24, tops[BX0 + 24] + 2, BX0 + 27, tops[BX0 + 24] + 2, "#a89870")
+    # shadow of the mound on the sand, falling away from the moon (to the left)
+    for x in range(BX0 - 14, BX1):
+        blend(c, x, BASE + 5, "#05060c", 0.6, 3)
+        blend(c, x - 2, BASE + 6, "#05060c", 0.45, 3)
+    # the stack: notebook, pen, lamp -- aligned, square; the lamp still lit
+    SX, SY = 172, 102
+    glow(c, SX, SY - 8, 20, ["#2a2218", "#6a4a28", "#d89a40", "#ffe0a0"], power=1.8, strength=0.8, ry=15)
+    c.rect(SX - 8, SY - 3, SX + 8, SY, "#4a3c2a")
+    c.rect(SX - 8, SY - 3, SX + 8, SY - 3, "#8a7450")
+    c.rect(SX - 8, SY - 2, SX - 8, SY, "#2a2216")
+    c.rect(SX - 7, SY - 5, SX + 7, SY - 4, "#d8c890")
+    c.rect(SX - 7, SY - 5, SX + 7, SY - 5, "#efe2b8")
+    c.rect(SX - 6, SY - 6, SX + 5, SY - 6, "#1a1a20")                        # the pen, laid square across the notebook
+    c.rect(SX + 5, SY - 6, SX + 6, SY - 6, "#c8a028")
+    c.rect(SX - 3, SY - 13, SX + 2, SY - 7, "#2a3a44")                       # the lamp: glass, flame, base
+    c.rect(SX - 2, SY - 12, SX + 1, SY - 8, "#ffc860")
+    c.rect(SX - 1, SY - 11, SX, SY - 9, "#fff0b0")
+    c.rect(SX - 3, SY - 14, SX + 2, SY - 14, "#4a5a66")
+    c.rect(SX - 3, SY - 7, SX + 2, SY - 7, "#4a5a66")
+    for x in range(SX - 16, SX + 8):                                         # its small square shadow
+        blend(c, x - 6, SY + 1, "#05060c", 0.5, 3)
+    # four scarabs in an even row on the sand, half size, all facing the mound (left)
+    for k in range(4):
+        sx_ = 96 + k * 16
+        im = spr("canoptek_scarab", 1, mirror=False, tint_to="#06080e", tint_t=0.5)
+        im = im.resize((im.width // 2, im.height // 2), Image.BOX)
+        pxs = im.load()
+        for yy in range(im.height):
+            for xx in range(im.width):
+                if pxs[xx, yy][3] < 140:
+                    pxs[xx, yy] = (0, 0, 0, 0)
+        place(c, rim(im, "#9ab8c8", (1, -1), min_run=2), sx_, 105, anchor="bm")
+        c.set(sx_ - 4, 99, "#7aff9a")
+    particles(c, "mote", 14, (0, 62, 190, 104), seed=e.seed_for("mote"), cols=("#8aa8bc", "#5a7288"))
+    e.protect += ["#ffc860", "#fff0b0", "#7aff9a"]
+    vignette_kind(c, "death", col="#020306", strength=0.8, inner=0.45)
+
+
+@ending("nec_death_corruption")
+def nec_death_corruption(e):
+    """DEATH.  Bottom of the Cup: a round stone basin sunk in the floor of a black vault, seen from slightly above,
+    its inner wall banded with dry tide-rings that step down to a bare, drained floor.  A narrow cold column of light
+    falls from an oculus with one hard white star in it, and in the column, backlit, the husk walks on -- the old
+    coat, pale star-coloured eyes, a faint smile -- while the last motes rise from it toward the star."""
+    c = e.c
+    CX, CY = 98, 90
+    # vault: near black, a dim wall of niches at the horizon band, nothing else
+    for y in range(108):
+        for x in range(192):
+            t = 0.10 + 0.18 * clamp(1.0 - abs(y - 52) / 40.0) + (0.03 if (x // 16) % 2 else 0)
+            c.set(x, y, ramp_pick(["#020406", "#06101a", "#0c1e2a", "#16323e"], t, x, y))
+    rr = e.rng("niches")
+    for nx in range(14):
+        x0 = 4 + nx * 14 + rr.randint(-1, 1)
+        c.rect(x0, 36, x0 + 6, 64, "#03070c")
+        c.rect(x0, 36, x0 + 6, 36, "#1c3e4a")
+        if rr.random() < 0.6:
+            c.set(x0 + 2, 44, "#1e6a46"); c.set(x0 + 4, 44, "#1e6a46")
+    # the oculus: a round hole at the top, one hard star in it
+    OX, OY = 96, 5
+    c.ellipse(OX, OY, 16, 8, "#03060c")
+    c.ellipse(OX, OY, 13, 6, "#0a1830")
+    stars(c, e.seed_for("st"), 22, 0, 10, cols=("#6a8ab0", "#a8c8e8"), mask=lambda x, y: ((x - OX) / 13.0) ** 2 + ((y - OY) / 6.0) ** 2 < 1.0)
+    glow(c, OX + 2, OY, 13, ["#14243c", "#4a7a9c", "#c8ecff", "#ffffff"], power=1.6, strength=1.0, ry=8)
+    c.rect(OX + 1, OY - 1, OX + 3, OY + 1, "#ffffff")
+    for k in range(2, 9):
+        c.set(OX + 2 + k, OY, "#e8ffff" if k < 5 else "#8ac0d0"); c.set(OX + 2 - k, OY, "#e8ffff" if k < 5 else "#8ac0d0")
+        if k < 6:
+            c.set(OX + 2, OY + k, "#e8ffff" if k < 4 else "#8ac0d0"); c.set(OX + 2, OY - k, "#e8ffff" if k < 4 else "#8ac0d0")
+    # the column of light: backlights the husk; wide and pale near the floor
+    for y in range(9, CY + 2):
+        k = (y - 9) / float(CY - 9)
+        hw = 5 + 17 * k
+        for x in range(int(OX - hw), int(OX + hw) + 1):
+            edge = 1.0 - abs(x - OX) / hw
+            blend(c, x, y, "#bfe4f4", 0.10 + 0.55 * k * (0.35 + 0.65 * edge), 4)
+    # the basin: floor ellipse, far rim lit, inner wall banded with dry rings stepping down to the bare bottom
+    def ring_pts(rx, ry, cy):
+        return [(CX + rx * math.cos(a), cy + ry * math.sin(a)) for a in [i * math.pi / 90.0 for i in range(0, 181)]]
+    for y in range(CY - 20, 108):
+        for x in range(0, 192):
+            d = ((x - CX) / 82.0) ** 2 + ((y - CY - 2) / 17.0) ** 2
+            if d <= 1.0:
+                # inside the basin: rings stepping down
+                lev = d ** 0.5
+                band = int(lev * 6)
+                base_cols = ["#2e5058", "#244650", "#1c3a44", "#142c36", "#0e222c", "#091820"]
+                col = base_cols[min(5, 5 - band if False else band)]
+                c.set(x, y, col)
+            elif d <= 1.18:
+                c.set(x, y, "#3a6672" if y < CY + 2 else "#16303a")                       # the stone lip
+            else:
+                if y > CY - 6:
+                    c.set(x, y, ramp_pick(["#0a161e", "#060e14", "#03070c"], (y - CY) / 30.0, x, y))
+    # the dry tide-rings: pale thin lines on the wall, wavering
+    for i, f in enumerate([0.92, 0.78, 0.64, 0.50, 0.37, 0.25]):
+        for (px_, py_) in ring_pts(82 * f, 17 * f, CY + 2):
+            if int(px_ * 1.0 + py_) % 6:
+                c.set(px_, py_, "#7aa4ac" if i % 2 == 0 else "#5a8690")
+    light_pool(c, CX, CY, 24, 8, "#e8ffff", t=0.6, power=1.0, levels=4)            # the bare bottom, lit by the column
+    light_pool(c, CX, CY - 1, 12, 4, "#ffffff", t=0.5, power=1.0, levels=4)
+    # the husk: a dark body in the old coat, backlit, walking on
+    me = player_fig("necrons", 50, "walk", facing=1, thick=1.0)
+    me = dict(me, img=tint(me["img"], "#0a1218", 0.74))
+    mx, my = put_figure(c, me, CX - 2, CY, rim_col="#cfeef8", toward=(-1, -1),
+                        shadow=dict(toward_light=(0.05, 0.9), length=0.1, squash=0.35, col="#02060a", t=0.8))
+    hx_, hy_ = me["head"]
+    hxp, hyp = mx + int(round(hx_)), my + int(round(hy_))
+    c.set(hxp + 1, hyp - 1, "#ffffff"); c.set(hxp + 3, hyp - 1, "#ffffff")        # star-coloured eyes, open
+    c.set(hxp + 1, hyp - 2, "#8ac0d0"); c.set(hxp + 3, hyp - 2, "#8ac0d0")
+    c.set(hxp, hyp + 1, "#cfeef8"); c.set(hxp + 1, hyp + 2, "#cfeef8"); c.set(hxp + 2, hyp + 2, "#cfeef8")   # the smile
+    c.set(hxp + 3, hyp + 1, "#cfeef8")
+    # the last motes of the person rising to the star
+    mr = e.rng("motes")
+    for k in range(44):
+        yy = mr.randint(12, hyp - 4)
+        spread = 2 + (yy / float(hyp)) * 9
+        xx = hxp + 1 + mr.randint(-int(spread), int(spread)) * (0.4 + yy / float(hyp))
+        c.set(xx, yy, "#ffffff" if mr.random() < 0.3 else "#a8d4e4")
+    e.protect += ["#ffffff", "#cfeef8"]
+    vignette_kind(c, "death", col="#010204", strength=0.9, inner=0.4)
+
+
+@ending("nec_death_sanity")
+def nec_death_sanity(e):
+    """DEATH.  Standing Still: a flat wall of tomb niches, two rows of six, each holding a dormant necron standing at
+    attention, eyes dark.  In the lower row, third from the left, stands the human in the old coat, as rigid as the
+    rest, eyes open and pale, dust settled on the head and shoulders.
+    Only that niche is lit; the rest of the wall is almost black green."""
+    c = e.c
+    # wall: black-green plates
+    for y in range(108):
+        for x in range(192):
+            t = 0.30 + 0.18 * clamp(1.0 - abs(x - 80) / 110.0) + (0.05 if (x // 12 + y // 9) % 2 else 0.0)
+            c.set(x, y, ramp_pick(["#020504", "#08140f", "#10241d", "#1c382e"], t, x, y))
+    NW, NH, GAP, MX0 = 26, 46, 6, 3
+    rows = [4, 56]
+    niches = []
+    for r, y0 in enumerate(rows):
+        for ci in range(6):
+            niches.append((r, ci, MX0 + ci * (NW + GAP), y0))
+    pr = e.rng("niche")
+    for (r, ci, x0, y0) in niches:
+        you = (r == 1 and ci == 2)
+        x1, y1 = x0 + NW - 1, y0 + NH - 1
+        back = "#2a5446" if you else "#07140f"
+        c.rect(x0, y0, x1, y1, back)
+        if you:
+            for y in range(y0, y1 + 1):
+                for x in range(x0, x1 + 1):
+                    blend(c, x, y, "#9ad8c0", 0.34 * (1.0 - (y - y0) / float(NH)) ** 0.8 + 0.1, 3)
+        c.rect(x0 - 1, y0 - 1, x1 + 1, y0 - 1, "#2e6a54" if you else "#184034")             # lip
+        c.rect(x0 - 1, y0, x0 - 1, y1, "#1c4a3c" if you else "#0c2a22")
+        c.rect(x1 + 1, y0, x1 + 1, y1, "#04100c")
+        c.rect(x0, y1 - 1, x1, y1, "#0e2a22" if not you else "#3a7a64")                      # the niche floor
+        if you:
+            continue
+        # a dormant necron standing at attention, one or two empty niches
+        if (r, ci) in ((0, 4), (1, 5)) and pr.random() < 2:
+            continue
+        f = fig(36, "stand", "#1e302a", facing=1, thick=0.62)
+        f = dict(f, img=_lr_shade(f["img"], "#122822", "#3e6458"))
+        ox, oy = put_figure(c, f, x0 + NW // 2 - 1, y1 - 2)
+        hx_, hy_ = f["head"]
+        hxp, hyp = ox + int(round(hx_)), oy + int(round(hy_))
+        c.rect(hxp - 2, hyp - 3, hxp + 2, hyp + 3, "#4a6c60")                                  # a skull-plate, dull
+        c.rect(hxp - 2, hyp - 3, hxp - 2, hyp + 3, "#2e4a40")
+        c.set(hxp - 1, hyp - 1, "#0a1612"); c.set(hxp + 1, hyp - 1, "#0a1612")
+        if pr.random() < 0.18:
+            c.set(hxp - 1, hyp - 1, "#1e5a38"); c.set(hxp + 1, hyp - 1, "#1e5a38")            # a stray spark in a sleeper
+        c.rect(hxp - 2, hyp + 4, hxp + 2, hyp + 4, "#3a3418")
+    # the human's niche
+    YX0 = MX0 + 2 * (NW + GAP)
+    YY1 = rows[1] + NH - 1
+    me = player_fig("necrons", 38, "stand", facing=1, thick=0.9)
+    me = dict(me, img=tint(me["img"], "#4a5a54", 0.5))
+    mx, my = put_figure(c, me, YX0 + NW // 2, YY1 - 2, rim_col="#d8fff0", toward=(0, -1))
+    hx_, hy_ = me["head"]
+    hxp, hyp = mx + int(round(hx_)), my + int(round(hy_))
+    c.rect(hxp - 1, hyp - 1, hxp, hyp, "#f4ffff"); c.rect(hxp + 2, hyp - 1, hxp + 3, hyp, "#f4ffff")   # eyes open, pale, fixed
+    c.set(hxp - 1, hyp - 2, "#1a2a24"); c.set(hxp, hyp - 2, "#1a2a24"); c.set(hxp + 2, hyp - 2, "#1a2a24"); c.set(hxp + 3, hyp - 2, "#1a2a24")
+    for dx in range(-4, 5):                                                                     # dust on the head and shoulders
+        if dx % 2 == 0:
+            c.set(hxp + dx, hyp - 5 + abs(dx) // 3, "#a8bcb4")
+    sh_y = hyp + 8
+    for dx in range(-7, 8):
+        if (dx % 3) != 1:
+            c.set(hxp + dx + 1, sh_y, "#8aa098")
+    dn = e.rng("dust")                                                                          # motes hanging in the shaft, perfectly still
+    for _ in range(16):
+        c.set(dn.randint(YX0 + 3, YX0 + NW - 4), dn.randint(rows[1] + 2, YY1 - 14), "#cfe8e0")
+    # the floor ledge and a thin green line of light along it
+    c.rect(0, 103, 191, 107, "#06100e")
+    c.rect(0, 102, 191, 102, "#1c4a3c")
+    for x in range(0, 192, 2):
+        c.set(x, 104, "#1e6a46" if (x // 8) % 3 else "#0c2a1c")
+    light_pool(c, YX0 + NW // 2, 104, 26, 4, "#8ae0c0", t=0.45, power=1.0)
+    e.protect += ["#f4ffff"]
+    vignette_kind(c, "death", col="#010302", strength=0.8, inner=0.5)

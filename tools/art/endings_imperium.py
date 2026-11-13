@@ -668,7 +668,7 @@ def imp_end_brood(e):
         c.line([(x, sy + 2), (x + h // 4, sy + 6)], col)
     # the tall one beside the player: hunched, four arms up, dark against the sky glow
     tall = fig(52, "arms_up", "#22103a", facing=1)
-    tx, ty = put_figure(c, tall, 118, 102, rim_col="#ff9ad8", toward=(1, -1),
+    tx, ty = put_figure(c, tall, 118, 102, rim_col="#d070c0", toward=(0, -1),
                         shadow=dict(toward_light=(1, -0.2), length=0.8, squash=0.25, col="#2a1a38", t=0.5))
     shy = ty + 14
     cx = 118
@@ -684,7 +684,7 @@ def imp_end_brood(e):
     c.line([(hhx - 3, hhy - 5), (hhx - 9, hhy - 10)], "#22103a", 2)
     # ---- the player, from behind, arms wide, in the foreground
     pf = player_fig("imperium", 50, "arms_up", facing=1)
-    put_figure(c, pf, 66, 106, rim_col="#ff9ad8", toward=(1, -1),
+    put_figure(c, pf, 66, 106, rim_col="#e890d0", toward=(0, -1),
                shadow=dict(toward_light=(1, -0.2), length=0.8, squash=0.25, col="#2a1a38", t=0.5))
     # foreground wheat heads, big and dark
     rr2 = e.rng("fg")
@@ -834,7 +834,7 @@ def imp_end_claim_nurgle(e):
     # ---- foreground left: the gardener, a dark silhouette with a watering can and a trowel
     pf = player_fig("imperium", 58, "carry", facing=1)
     pf["img"] = tint(pf["img"], "#0a0c06", 0.62)
-    px0, py0 = put_figure(c, pf, 30, 108, rim_col="#7a9a2a", toward=(1, 0),
+    px0, py0 = put_figure(c, pf, 30, 108, rim_col="#b8c860", toward=(1, 0),
                           shadow=dict(toward_light=(1, 0.3), length=0.6, squash=0.2, col="#050603", t=0.7))
     hx_, hy_ = pf["hands"][0]
     kx, ky = px0 + int(hx_) + 1, py0 + int(hy_) + 1
@@ -1101,14 +1101,15 @@ def _sandbags(c, x0, y0, x1, y1, seed, cols, bw=11, bh=6):
 
 @ending("imp_end_commissar")
 def imp_end_commissar(e):
-    """BAD.  The Commissar's Bullet: dawn in the trench; the commissar, back to us in his long coat and peaked cap,
-    pistol still level, a thread of smoke going up; at his feet a body under a grey greatcoat, two boots showing; the
-    squad on the parapet keep their faces to no-man's-land; a deacon far off already holds the list.  Cold grey-blue."""
+    """BAD.  The Commissar's Bullet: dawn in the trench; in the lit mud a deserter lies face down in a grey greatcoat, a
+    dropped rifle and a rolled helmet beside him; the commissar stands over him in his long coat and peaked cap, pistol
+    hanging at the end of his arm, a thread of smoke going up; the squad on the parapet keep their faces to no-man's-land;
+    a deacon far off to the left already holds the list.  Cold grey-blue."""
     c = e.c
     HZ = 46
-    sky(c, ["#161c28", "#26303e", "#44546a", "#7a8aa0", "#b0bccb", "#d8dee4"], 0, HZ)
-    clouds(c, e.seed_for("cl"), ["#2a3444", "#4a586c", "#7a8898"], 0, 36, scale=0.05, thresh=0.52, stretch=5.0)
-    glow(c, 118, HZ + 2, 80, ["#3a4658", "#5e6e84", "#92a2b4", "#c8d2dc", "#eef2f4"], power=1.5, strength=0.9, ry=30)
+    sky(c, ["#10151f", "#1c2532", "#34445a", "#5e6e84", "#8e9cb0", "#b4c0cc"], 0, HZ)
+    clouds(c, e.seed_for("cl"), ["#1e2836", "#38465a", "#5c6c80"], 0, 36, scale=0.05, thresh=0.52, stretch=5.0)
+    glow(c, 118, HZ + 2, 80, ["#2a3444", "#465670", "#7488a0", "#a8b8c8", "#d8e2ea"], power=1.5, strength=0.9, ry=30)
     # far plain: wire, stakes, a ruined tower in mist
     ridge(c, HZ + 4, 1, 4, "#3a4452", seed=e.seed_for("rd"), scale=0.04)
     for x in range(8, 192, 17):
@@ -1116,12 +1117,12 @@ def imp_end_commissar(e):
         c.rect(x - 1, HZ - 7, x + 1, HZ - 7, "#262e3a")
     c.line([(4, HZ - 3), (191, HZ - 4)], "#2e3846")
     c.line([(4, HZ), (191, HZ - 1)], "#2e3846")
-    haze(c, HZ - 12, HZ + 8, "#c8d2dc", t=0.55, seed=e.seed_for("hz"), profile="mid")
+    haze(c, HZ - 12, HZ + 8, "#b0bccb", t=0.45, seed=e.seed_for("hz"), profile="mid")
     # ---- parapet of sandbags across the picture
-    SB = ["#1e1c1a", "#3a3630", "#5e584c", "#8a8472"]
+    SB = ["#121110", "#26231f", "#403c34", "#5e5848"]
     c.rect(0, HZ + 5, 191, 107, "#201e1c")
     _sandbags(c, 0, HZ + 5, 192, HZ + 30, e.seed_for("sb"), SB)
-    haze(c, HZ + 4, HZ + 24, "#7a8aa0", t=0.35, seed=e.seed_for("hz2"), profile="top")
+    haze(c, HZ + 4, HZ + 24, "#5e6e84", t=0.35, seed=e.seed_for("hz2"), profile="top")
     # trench floor: wet mud and duckboards in perspective
     hband(c, HZ + 31, 107, ["#403c38", "#2e2b28", "#1c1a18", "#100f0e"], seed=e.seed_for("fl"), rough=0.3)
     for k in range(9):
@@ -1129,53 +1130,888 @@ def imp_end_commissar(e):
         c.rect(0, y, 191, y, "#12110f")
         c.rect(0, y + 1, 191, y + 1, "#5a5448" if k % 2 == 0 else "#46423a")
     c.rect(0, HZ + 31, 191, HZ + 31, "#0c0b0a")
-    light_pool(c, 130, 80, 70, 10, "#b0bccb", t=0.25)
+        # lit patch of mud where it happened
+    light_pool(c, 100, 96, 62, 9, "#aebccc", t=0.55)
+    light_pool(c, 100, 97, 40, 6, "#d8e2ea", t=0.35)
     # ---- the squad on the parapet: helmets and shoulders, backs to us
-    for (x, y, h) in [(98, HZ + 22, 22), (118, HZ + 21, 21), (142, HZ + 23, 24), (164, HZ + 22, 22)]:
+    for (x, y, h) in [(112, HZ + 22, 20), (132, HZ + 21, 19), (154, HZ + 23, 22), (174, HZ + 22, 20)]:
         f = fig(h, "hunch", "#12141a", facing=1)
-        put_figure(c, f, x, y, rim_col="#9aa6b6", toward=(0, -1))
+        put_figure(c, f, x, y, rim_col="#8c98aa", toward=(0, -1))
         hx_, hy_ = x - int(f["feet"][0]) + int(f["head"][0]), y - int(f["feet"][1]) + int(f["head"][1])
         _helmet(c, hx_, hy_ - 1, 3, "#1a1c22", "#7a8696", "#0c0e12")
-    # ---- the deacon, small, far right, the list hanging to the floor
-    dfig = fig(30, "carry", "#0a0b10", robe=0.8, facing=-1)
-    dx_, dy_ = put_figure(c, dfig, 181, 90, rim_col="#9aa6b6", toward=(-1, -1))
-    c.rect(dx_ + 2, dy_ + 14, dx_ + 6, dy_ + 28, "#d8d8cc")
-    c.rect(dx_ + 2, dy_ + 14, dx_ + 2, dy_ + 28, "#fffff0")
+    # ---- the deacon, small, far left, the list hanging to the floor
+    dfig = fig(34, "carry", "#0a0b10", robe=0.8, facing=1)
+    dx_, dy_ = put_figure(c, dfig, 18, 96, rim_col="#9aa6b6", toward=(1, -1))
+    c.rect(dx_ + 12, dy_ + 15, dx_ + 17, dy_ + 31, "#d8d8cc")
+    c.rect(dx_ + 12, dy_ + 15, dx_ + 12, dy_ + 31, "#fffff0")
     for k in range(5):
-        c.rect(dx_ + 3, dy_ + 17 + k * 2, dx_ + 5, dy_ + 17 + k * 2, "#6a6a62")
-    # ---- the body under the greatcoat, boots toward us
-    bx, by = 124, 99
-    c.poly([(bx, by), (bx + 10, by - 6), (bx + 50, by - 11), (bx + 52, by - 5), (bx + 12, by + 2)], "#3e444c")
-    c.poly([(bx + 10, by - 6), (bx + 50, by - 11), (bx + 51, by - 9), (bx + 11, by - 4)], "#7a8694")          # lit fold along the top
-    for k in range(5):                                                                                       # folds
-        c.line([(bx + 14 + k * 8, by - 3 - k * 1), (bx + 18 + k * 8, by - 7 - k * 1)], "#2a2e34")
-    c.rect(bx - 3, by - 1, bx + 3, by + 3, "#0a0a0c")                                                         # boots
-    c.rect(bx + 4, by - 3, bx + 9, by + 1, "#0a0a0c")
-    c.rect(bx - 3, by + 3, bx + 3, by + 3, "#5a5a5a")
-    c.rect(bx + 4, by + 1, bx + 9, by + 1, "#5a5a5a")
-    c.rect(bx - 3, by - 1, bx - 3, by + 2, "#6a7a8a")
-    # a dropped rifle along the near edge
-    c.line([(88, 104), (160, 97)], "#14120f", 2)
-    c.line([(88, 103), (160, 96)], "#5a5448")
-    # ---- the commissar: long coat, peaked cap, arm out, pistol level, a thread of smoke
-    cf = fig(62, "reach", "#0a0c12", robe=0.9, facing=1)
-    cx_, cy_ = put_figure(c, cf, 56, 106, rim_col="#c8d2dc", toward=(1, -1),
-                          shadow=dict(toward_light=(0.5, 1.0), length=0.9, squash=0.4, col="#05060a", t=0.7))
+        c.rect(dx_ + 13, dy_ + 18 + k * 2, dx_ + 16, dy_ + 18 + k * 2, "#6a6a62")
+    # ---- the deserter, face down in the mud, head left, one arm flung out, grey greatcoat catching the dawn
+    bx, by = 58, 99                                          # head end; ground line y = by
+    COAT, LITC, SHD = "#808a94", "#dce8f0", "#262c34"
+    cast_shadow(c, Image.new("RGBA", (56, 12), (0, 0, 0, 255)), bx + 28, by, anchor="bm", toward_light=(0.4, 0.5), length=0.0, squash=0.30, col="#04060a", t=0.8)
+    c.poly([(bx + 9, by - 6), (bx + 16, by - 11), (bx + 30, by - 10), (bx + 33, by - 3), (bx + 30, by), (bx + 9, by)], COAT)   # back and hips
+    c.poly([(bx + 30, by - 9), (bx + 42, by - 8), (bx + 52, by - 6), (bx + 52, by - 1), (bx + 40, by - 1), (bx + 30, by)], "#5a6068")  # legs
+    c.line([(bx + 34, by - 4), (bx + 52, by - 3)], SHD)                                                                    # gap between the legs
+    c.rect(bx + 51, by - 8, bx + 56, by - 1, "#0c0c10")                                                                    # boots, soles toward us
+    c.rect(bx + 51, by - 8, bx + 51, by - 1, "#7a8696")
+    c.poly([(bx + 9, by - 7), (bx - 4, by - 6), (bx - 8, by - 4), (bx - 8, by - 1), (bx + 8, by - 1)], "#5a6068")           # the flung arm
+    c.rect(bx - 12, by - 5, bx - 8, by - 2, "#b8a898")                                                                      # open hand
+    c.set(bx - 13, by - 4, "#b8a898")
+    c.ellipse(bx + 5, by - 5, 5, 4, "#20242c")                                                                              # head, hair only
+    c.rect(bx + 3, by - 9, bx + 8, by - 9, "#7a8696")
+    c.line([(bx + 10, by - 6), (bx + 16, by - 11), (bx + 30, by - 10)], LITC)
+    c.line([(bx + 30, by - 9), (bx + 42, by - 8), (bx + 52, by - 6)], "#a8b6c4")
+    for k in range(3):                                                                                                      # folds
+        c.line([(bx + 14 + k * 5, by - 9 + k // 2), (bx + 17 + k * 5, by - 2)], SHD)
+    # rolled helmet and a dropped rifle
+    _helmet(c, bx - 22, by - 1, 4, "#4a4e44", "#9aa090", "#1c1e18")
+    c.line([(bx + 14, by + 4), (bx + 64, by + 1)], "#0e0d0b", 2)
+    c.line([(bx + 14, by + 3), (bx + 64, by)], "#6a6a62")
+    # ---- the commissar: long coat, peaked cap, pistol at the end of a lowered arm, a thread of smoke
+    cf = fig(66, "stand", "#0c0e14", robe=0.62, facing=-1)
+    cx_, cy_ = put_figure(c, cf, 146, 108, rim_col="#aab6c6", toward=(-1, -1),
+                          shadow=dict(toward_light=(-0.5, 0.8), length=0.8, squash=0.36, col="#05060a", t=0.7))
     hx_, hy_ = cx_ + int(cf["head"][0]), cy_ + int(cf["head"][1])
-    c.rect(hx_ - 4, hy_ - 7, hx_ + 4, hy_ - 4, "#0a0c12")                     # cap
-    c.rect(hx_ - 5, hy_ - 4, hx_ + 6, hy_ - 4, "#0a0c12")
-    c.rect(hx_ - 4, hy_ - 7, hx_ + 4, hy_ - 7, "#7a8696")
-    c.set(hx_ + 1, hy_ - 5, "#c8a850")                                          # a single brass badge
-    c.rect(hx_ - 5, hy_ - 3, hx_ + 5, hy_ + 1, "#0a0c12")
-    ph = cf["hands"][0]
-    gx, gy = cx_ + int(ph[0]), cy_ + int(ph[1])
-    c.rect(gx, gy - 2, gx + 8, gy, "#0a0c12")                                  # pistol
-    c.rect(gx + 6, gy - 3, gx + 9, gy - 3, "#7a8696")
-    c.set(gx + 9, gy - 2, "#c8d2dc")
-    for k in range(18):                                                         # smoke
-        sx = gx + 9 + int(math.sin(k * 0.55) * 2.2 + k * 0.15)
-        blend(c, sx, gy - 3 - k, "#dfe6ea", 0.85 - k * 0.04, 3)
-        blend(c, sx + 1, gy - 3 - k, "#dfe6ea", 0.5 - k * 0.025, 3)
+    c.rect(hx_ - 5, hy_ - 7, hx_ + 4, hy_ - 4, "#0c0e14")                     # cap
+    c.rect(hx_ - 8, hy_ - 4, hx_ + 4, hy_ - 4, "#0c0e14")                     # peak toward the body
+    c.rect(hx_ - 5, hy_ - 7, hx_ + 4, hy_ - 7, "#7a8696")
+    c.set(hx_ - 1, hy_ - 5, "#c8a850")                                          # a single brass badge
+    shx, shy = hx_ + 1, hy_ + 9                                                # shoulder
+    c.rect(shx - 4, shy - 1, shx + 4, shy, "#aab6c6")                           # epaulette, catching the dawn
+    c.line([(shx - 3, shy + 2), (shx - 12, shy + 14), (shx - 16, shy + 24)], "#0c0e14", 4)       # the lowered arm
+    c.line([(shx - 4, shy + 3), (shx - 13, shy + 14), (shx - 17, shy + 24)], "#4a566a", 1)
+    gx, gy = shx - 17, shy + 24
+    c.rect(gx - 3, gy - 1, gx + 2, gy + 3, "#0c0e14")                           # pistol, muzzle down and toward the body
+    c.line([(gx - 2, gy + 3), (gx - 5, gy + 9)], "#0c0e14", 3)
+    c.set(gx - 5, gy + 10, "#dfe6ea")
+    c.set(gx - 4, gy + 9, "#aab6c6")
+    for k in range(26):                                                          # smoke thread from the muzzle
+        sx = gx - 5 + int(math.sin(k * 0.45) * 2.4 + k * 0.1)
+        blend(c, sx, gy + 8 - k, "#dfe6ea", 0.9 - k * 0.03, 3)
+        blend(c, sx + 1, gy + 8 - k, "#dfe6ea", 0.55 - k * 0.02, 3)
     # frost / ash drifting
     particles(c, "ash", 36, (0, 0, 191, 100), seed=e.seed_for("ash"), cols=("#9aa6b6", "#c8d2dc", "#6a7686"))
-    vignette_kind(c, "bad", col="#05060a", strength=0.7)
+    vignette_kind(c, "bad", col="#05060a", strength=0.72)
+
+
+# ====================================================================== wave-2 additions (heretic, purged, servitor, traitor, corruption, sanity)
+
+def _flame(c, cx, base, w, h, ramp, seed, lean=0.0, power=0.85, flick=0.5, bias=0.0, skip=None, fx=0.12, sharp=2.6,
+           wave=0.5, by_height=0.0):
+    """pixel flame: tapered tongue from (cx, base) up to base-h, `ramp` = outer -> hot core.  Noise-torn edge,
+    lean shifts the tip sideways, wave makes it snake, by_height 0..1 colours it hot at the base / cool at the tip
+    instead of hot in the middle of the tongue; bias lifts the heat."""
+    n = Noise(seed)
+    ph = (seed % 97) * 0.13
+    for y in range(int(base - h), int(base) + 1):
+        u = (base - y) / float(h)                       # 0 at the base, 1 at the tip
+        hw = w * 0.5 * (1 - u) ** power + 0.6
+        sway = lean * u * u * w + math.sin(u * 5.0 + ph) * wave * w * 0.22 * u + (n.fbm(0.35, y * 0.07, 2) - 0.5) * w * 0.6 * u
+        for x in range(int(cx - hw * 1.6 + sway - 2), int(cx + hw * 1.6 + sway + 3)):
+            if skip and skip(x, y):
+                continue
+            d = abs(x - cx - sway) / hw
+            core = (1.0 - d * d) * (1.0 - u * 0.30)
+            hgt = (1.0 - u * 0.9) - d * d * 0.45
+            v = core * (1 - by_height) + hgt * by_height
+            v += (n.fbm(x * fx, y * fx * 0.8 - seed * 0.01, 3) - 0.5) * flick + bias
+            if v > 0.08:
+                c.set(x, y, ramp_pick(ramp, clamp(v * 1.05), x, y, sharp))
+
+
+def _arch_mask(x0, x1, y_spring, y_apex, y_base):
+    """pointed (gothic) arch test: returns f(x, y) -> True inside the opening."""
+    cx = (x0 + x1) / 2.0
+    half = (x1 - x0) / 2.0
+    r = half * 1.9                                      # radius of each arc, centres offset so the tip is pointed
+
+    def inside(x, y):
+        if y > y_base or x < x0 or x > x1:
+            return False
+        if y >= y_spring:
+            return True
+        dy = y_spring - y
+        if dy > (y_spring - y_apex):
+            return False
+        if x <= cx:
+            return (x - (x0 + r)) ** 2 + dy * dy <= r * r
+        return (x - (x1 - r)) ** 2 + dy * dy <= r * r
+    return inside
+
+
+def _ink(c, f, x, y, col=None, anchor="feet"):
+    """draw a figure() result as a pure flat silhouette (no rim) with feet at (x, y); returns its top-left."""
+    img = f["img"] if col is None else tint(f["img"], col, 1.0)
+    ax, ay = f["feet"] if anchor == "feet" else f["head"]
+    px, py = int(round(x - ax)), int(round(y - ay))
+    place(c, img, px, py, anchor="tl")
+    return (px, py)
+@ending("imp_end_heretic")
+def imp_end_heretic(e):
+    """BAD.  Fire at the Gate: night at a hive-city gatehouse; in front of the shut gate a pyre burns the wrong colour
+    (teal-white core, violet tips) with the player's silhouette in it, arms up, a cursed dagger flaring in one hand;
+    in front of it a loose line of guardsmen with rifles pointing at the cobbles - the nearest one, Pell, has his
+    head bowed and has not fired.  Cold, unclean colour; the bright mass is low left."""
+    c = e.c
+    FX, FB = 72, 90                                          # fire x, base y
+    sky(c, ["#080c1a", "#0e1628", "#16243c", "#264058", "#3c6270"], 0, 40)
+    clouds(c, e.seed_for("cl"), ["#0c1424", "#182a40", "#2a4a5c"], 0, 30, scale=0.05, thresh=0.48, stretch=4.0)
+    stars(c, e.seed_for("st"), 22, 0, 12, cols=("#5a6a88", "#9aaac8"))
+    # ---- wall + gatehouse (mid-value stone so the fire light can lift it)
+    WALL = ["#0c121c", "#18222f", "#2a3a4c", "#40566a", "#5c7a88"]
+    n = e.noise("wall")
+    for y in range(27, 90):
+        for x in range(0, 192):
+            row = (y - 27) // 7
+            t = 0.42 + (n.fbm(x * 0.06, y * 0.09, 3) - 0.5) * 0.45
+            c.set(x, y, ramp_pick(WALL, t, x, y, 3.0))
+            if (y - 27) % 7 == 0 or (x + (row % 2) * 8) % 16 == 0:
+                c.set(x, y, WALL[0])
+    for x in range(0, 192, 9):                              # battlement notches along the curtain wall
+        c.rect(x, 22, x + 4, 26, WALL[1])
+        c.rect(x, 22, x + 4, 22, WALL[2])
+    for y in range(5, 90):                                  # gatehouse block, slightly lighter, with two towers
+        for x in range(20, 128):
+            t = 0.52 + (n.fbm(x * 0.07, y * 0.1 + 9, 3) - 0.5) * 0.45
+            c.set(x, y, ramp_pick(WALL, t, x, y, 3.0))
+            if (y - 5) % 7 == 0 or (x + ((y - 5) // 7 % 2) * 8) % 16 == 0:
+                c.set(x, y, WALL[0])
+    for tx0, tx1 in ((20, 40), (108, 128)):
+        c.rect(tx0 - 1, 3, tx1 + 1, 6, WALL[1])
+        for x in range(tx0 - 1, tx1 + 1, 6):
+            c.rect(x, 0, x + 3, 3, WALL[1])
+        c.rect(tx0 + 8, 14, tx0 + 9, 22, "#6ac8b8")
+        c.rect(tx0 + 8, 36, tx0 + 9, 42, "#3a8a88")
+    c.rect(40, 5, 108, 8, WALL[1])
+    for x in range(40, 108, 6):
+        c.rect(x, 2, x + 3, 5, WALL[1])
+    # the arch: dark opening with the shut gate (planks + iron bands) inside, stone ring around it
+    AX0, AX1, SPR, APX, BASE = 40, 104, 50, 20, 89
+    inside = _arch_mask(AX0, AX1, SPR, APX, BASE)
+    for y in range(APX - 7, BASE + 1):
+        for x in range(AX0 - 9, AX1 + 10):
+            if inside(x, y):
+                c.set(x, y, "#0a0f18" if (x - AX0) % 6 else "#04070c")
+                if (y // 16) % 2 == 0 and y % 16 in (2, 3):
+                    c.set(x, y, "#202c3a")
+                elif (y // 16) % 2 == 0 and y % 16 == 4:
+                    c.set(x, y, "#07090e")
+    for y in range(APX - 9, BASE + 1):
+        for x in range(AX0 - 10, AX1 + 11):
+            if inside(x, y):
+                continue
+            near = any(inside(x + dx, y + dy) for dx in range(-4, 5) for dy in range(-4, 5) if dx * dx + dy * dy <= 20)
+            if near:
+                c.set(x, y, "#4a6478" if (x + y) % 3 else "#34485a")
+    c.rect((AX0 + AX1) // 2, APX + 6, (AX0 + AX1) // 2 + 1, BASE, "#010204")    # seam where the two leaves meet
+    # fire light lifts the wall around it (soft pools, not a flat disc)
+    light_pool(c, FX, FB - 26, 70, 56, "#3aa89a", t=0.62, power=1.2)
+    light_pool(c, FX, FB - 18, 38, 34, "#7ae8c8", t=0.45, power=1.4)
+    # ---- ground: wet cobbles that mirror the fire
+    hband(c, 90, 107, ["#1e303a", "#122028", "#0a121a", "#05090e"], seed=e.seed_for("gr"), rough=0.3)
+    for k in range(7):
+        yy = int(91 + (k / 6.0) ** 1.4 * 16)
+        c.rect(0, yy, 191, yy, "#060c12")
+    for x0 in range(-10, 200, 11):
+        c.line([(x0 + (x0 - FX) * 0.02, 90), (FX + (x0 - FX) * 1.5, 108)], "#070d14")
+    light_pool(c, FX, 95, 64, 8, "#3aa89a", t=0.65)
+    light_pool(c, FX, 100, 40, 6, "#8af0d0", t=0.45)
+    # ---- the pyre: a mound of logs, a big flame, the player inside with arms up
+    for k in range(9):
+        x0 = FX - 18 + (k * 37) % 36
+        c.line([(x0, FB + 1), (FX + (x0 - FX) * 0.5, FB - 7 - (k % 3))], "#0a0e12", 3)
+        c.line([(x0 - 1, FB), (FX + (x0 - FX) * 0.5 - 1, FB - 8 - (k % 3))], "#26343a")
+    c.rect(FX - 20, FB + 1, FX + 20, FB + 3, "#04080c")
+    light_pool(c, FX + 1, FB - 30, 26, 40, "#9af0d8", t=0.75, power=0.9)
+    FR = ["#140c44", "#2a1ca0", "#1a7ac8", "#2ac8c0", "#80ffd8", "#f4fff8"]
+    for (dx, wd, hh, ln, sd) in [(-17, 11, 26, -0.25, "a1"), (-10, 13, 38, -0.15, "a2"), (-4, 14, 56, -0.05, "a3"),
+                                 (3, 15, 62, 0.04, "a4"), (10, 13, 44, 0.16, "a5"), (17, 11, 30, 0.26, "a6"),
+                                 (0, 28, 30, 0.0, "a7")]:
+        _flame(c, FX + dx, FB - 1, wd, hh, FR, e.seed_for(sd), lean=ln, power=0.9, flick=0.55, bias=0.12, sharp=2.2, fx=0.17, wave=1.0, by_height=0.8)
+    # violet tongues at the very tips
+    _flame(c, FX - 3, FB - 22, 18, 46, ["#12083a", "#4a1ea8", "#a040e0", "#f0a0ff"], e.seed_for("f4"), lean=-0.1, flick=0.7, bias=-0.12, power=0.7)
+    # bright backdrop behind the player so the silhouette reads
+    glow(c, FX + 1, FB - 17, 14, ["#2ac8c0", "#80ffd8", "#f4fff8"], power=1.0, strength=1.0, ry=22)
+    pf = figure(30, "arms_up", "#06070e", facing=1)
+    ppx, ppy = _ink(c, pf, FX + 1, FB - 3)
+    # front tongues over the legs, so he stands inside the fire
+    _flame(c, FX + 1, FB + 2, 30, 14, FR, e.seed_for("f5"), power=0.7, flick=0.6, bias=0.05)
+    # the dagger: a violet flare at the raised hand, a few shrieking rays
+    hxp, hyp = ppx + int(pf["hands"][0][0]), ppy + int(pf["hands"][0][1])
+    glow(c, hxp, hyp - 2, 8, ["#4a1a8a", "#b04ae8", "#ffa8ff", "#ffffff"], power=1.2, strength=1.0)
+    c.line([(hxp, hyp), (hxp, hyp - 6)], "#ffe8ff")
+    for (dx, dy) in ((-6, -6), (7, -8), (10, -1), (-1, -11), (-9, 1)):
+        blend(c, hxp + dx, hyp + dy, "#f0a0ff", 0.95, 3)
+        blend(c, hxp + dx // 2, hyp + dy // 2, "#f0a0ff", 0.7, 3)
+    e.protect += ["#f4fff8", "#ffa8ff", "#80ffd8"]
+    particles(c, "ember", 50, (FX - 34, 6, FX + 40, FB - 10), seed=e.seed_for("em"), cols=("#80ffd8", "#2ac8c0", "#f0a0ff", "#f4fff8"), wind=(1, 1))
+    # ---- the firing line: dark figures against the lit cobbles, rifles at the ground
+    G = "#06090e"
+    guards = [(112, 96, 34, "stand"), (132, 100, 40, "stand"), (153, 98, 38, "stand"), (176, 103, 46, "hunch")]
+    for (gx, gy, gh, gp) in guards:
+        gf = figure(gh, gp, G, facing=-1)
+        px_, py_ = _ink(c, gf, gx, gy, col=None)
+        hp = gf["hands"]
+        hx0, hy0 = px_ + int(hp[0][0]), py_ + int(hp[0][1])
+        c.line([(hx0 + int(gh * 0.12), hy0 - int(gh * 0.12)), (hx0 - int(gh * 0.30), hy0 + int(gh * 0.34))], G, 2)
+        hx_, hy_ = px_ + int(gf["head"][0]), py_ + int(gf["head"][1])
+        _helmet(c, hx_, hy_ - 1, max(3, gh // 11), "#0c1018", "#5ac0b0", G)
+        # long shadow toward the viewer-right (away from the fire)
+        cast_shadow(c, gf["img"], px_ + int(gf["feet"][0]), py_ + int(gf["feet"][1]), origin=gf["feet"], toward_light=(-1, 0.2), length=0.9, squash=0.1, col="#02040a", t=0.7)
+    haze(c, 86, 107, "#0a1620", t=0.30, seed=e.seed_for("lo"), profile="bottom")
+    vignette_kind(c, "bad", col="#04060c", strength=0.55)
+
+
+def _qb(c, x, y, col, t, levels=4, soft=0.45):
+    """banded light: t is snapped to flat steps of 1/levels, with dithering only on a narrow band around each step."""
+    if t <= 0 or not (0 <= x < c.w and 0 <= y < c.h):
+        return
+    f = t * levels
+    k = int(f + 0.5 + (bayer(x, y) - 0.5) * soft * 2)
+    k = max(0, min(levels, k))
+    if k:
+        c.set(x, y, mix(c.get(x, y), C(col), k / float(levels)))
+
+
+def _hand(d, x, y, s=1.0, ang=-80, fill=255):
+    """open hand on a PIL ImageDraw: palm blob + five fingers fanned around angle `ang` (degrees, -90 = up)."""
+    d.ellipse([x - 4 * s, y - 4 * s, x + 4 * s, y + 4 * s], fill=fill)
+    for k, da in enumerate((-48, -24, 0, 24, 46)):
+        a = math.radians(ang + da)
+        ln = (7.5 if k not in (0, 4) else 6.0) * s
+        d.line([(x, y), (x + math.cos(a) * ln, y + math.sin(a) * ln)], fill=fill, width=max(1, int(1.6 * s)))
+
+
+@ending("imp_end_purged")
+def imp_end_purged(e):
+    """BAD.  Shadow in the Light: an audit chamber; a tall brass lamp on the right throws a hard cone across the room
+    into the seated player's eyes; the auditor stands behind it as a dark silhouette; on the table a bowl of soup
+    steams; on the pale wall behind the player his shadow is twice his size and has three arms - the extra hand,
+    fingers spread, reaches for the bowl.  Cold, polite, clinical."""
+    from PIL import ImageDraw
+    c = e.c
+    LX, LY = 148, 49                                         # lamp lens
+    FL = 82                                                  # floor line
+    WALL = ["#080c14", "#111926", "#1c2838", "#2c3c50", "#46586a"]
+    n = e.noise("wall")
+    for y in range(0, FL + 1):
+        for x in range(0, 192):
+            t = 0.22 + (n.fbm(x * 0.05, y * 0.12, 3) - 0.5) * 0.25 + (y / float(FL)) * 0.06
+            c.set(x, y, ramp_pick(WALL, t, x, y, 3.0))
+    for x0 in range(-6, 200, 46):                             # pilasters: a lit edge and a dark gap
+        c.rect(x0, 0, x0 + 9, FL, "#0a0f18")
+        c.rect(x0 + 9, 0, x0 + 9, FL, "#26364a")
+        c.rect(x0 + 10, 0, x0 + 11, FL, "#060a10")
+    for yy in (13, 31):
+        c.rect(0, yy, 191, yy, "#060a12")
+    # the cone of the lamp across the back wall (angle-limited, fades with distance), in flat bands
+    for y in range(0, FL + 1):
+        for x in range(0, LX - 2):
+            dx, dy = LX - x, y - LY
+            ang = math.degrees(math.atan2(dy, dx))            # 0 = straight left
+            k = 1 - abs(ang - 2) / 40.0
+            if k <= 0:
+                continue
+            dist = math.hypot(dx, dy)
+            _qb(c, x, y, "#d4e0e4", 0.70 * clamp(k * 1.3) ** 0.9 * (1.0 - clamp(dist / 200.0) * 0.5), 4)
+    # floor: dark flags, lit by the lamp
+    hband(c, FL + 1, 107, ["#1a232e", "#121a24", "#0a1018", "#05080e"], seed=e.seed_for("fl"), rough=0.25)
+    for k in range(7):
+        yy = int(FL + 3 + (k / 6.0) ** 1.5 * 24)
+        c.rect(0, yy, 191, yy, "#070b12")
+    for x0 in range(-40, 240, 24):
+        c.line([(x0 * 0.4 + 60, FL + 1), (x0 * 1.6 - 60, 108)], "#070b12")
+    light_pool(c, 96, FL + 12, 70, 10, "#c8d8dc", t=0.5)
+    c.rect(0, FL, 191, FL, "#04070c")
+    # ---- the shadow on the wall: head, shoulders, two arms to the table - and a third arm with a spread hand
+    sh = Image.new("L", (192, 108), 0)
+    sd = ImageDraw.Draw(sh)
+    SX = 46                                                  # shadow axis
+    sd.ellipse([SX - 8, 22, SX + 8, 40], fill=255)            # head
+    sd.polygon([(SX - 4, 38), (SX + 4, 38), (SX + 6, 44), (SX - 6, 44)], fill=255)       # neck
+    sd.polygon([(SX - 22, 48), (SX - 8, 43), (SX + 9, 43), (SX + 24, 48), (SX + 27, FL), (SX - 26, FL)], fill=255)   # shoulders + body
+    sd.line([(SX + 20, 52), (SX + 30, 62), (SX + 46, 66)], fill=255, width=5)             # near arm forward to the table
+    sd.line([(SX - 16, 54), (SX - 24, 64), (SX - 8, 70)], fill=255, width=4)              # far arm
+    sd.line([(SX - 14, 52), (SX - 24, 44), (SX - 30, 34), (SX - 31, 25)], fill=255, width=4)   # the third arm, rising on the far side
+    _hand(sd, SX - 31, 21, s=1.45, ang=-88)
+    blend_mask(c, sh, "#04060c", 0.92, 0, 0, 4)
+    # ---- table, bowl of soup, steam
+    TY = 74
+    c.rect(64, TY + 2, 130, 96, "#0e141c")                  # heavy table: top slab + a dark front panel to the floor
+    c.rect(64, TY + 2, 130, TY + 3, "#2a3644")
+    for x in range(64, 131, 11):
+        c.rect(x, TY + 5, x, 95, "#080c12")
+    c.rect(64, TY + 5, 64, 96, "#26323e")
+    c.rect(64, TY, 130, TY + 1, "#9aa8b2")
+    light_pool(c, 98, 97, 38, 3, "#02040a", t=0.7)
+    bx, by = 111, TY                                          # bowl: rim ellipse, tapered body, warm soup
+    c.ellipse(bx, by - 3, 8, 2, "#e8f0f0")
+    c.ellipse(bx, by - 3, 6, 1, "#d09038")
+    c.rect(bx - 2, by - 3, bx + 1, by - 3, "#f0c060")
+    for j in range(4):
+        c.rect(bx - 7 + j, by - 2 + j, bx + 7 - j, by - 2 + j, "#a8b8be" if j < 3 else "#6a7a82")
+    c.rect(bx - 7, by - 2, bx - 7, by - 1, "#f8ffff")
+    for k in range(16):                                         # steam
+        sx = bx + int(math.sin(k * 0.55) * 2.6)
+        blend(c, sx, by - 6 - k, "#f4fafc", 0.95 - k * 0.04, 3)
+        blend(c, sx + 1, by - 6 - k, "#f4fafc", 0.6 - k * 0.03, 3)
+    # ---- the player, seated behind the table, arms forward, lit full in the face
+    pf = player_fig("imperium", 46, "reach", facing=1, lean=14)
+    ppx, ppy = put_figure(c, pf, 92, 95, rim_col="#f4f8f4", toward=(1, -0.2))
+    hxp, hyp = ppx + int(pf["head"][0]), ppy + int(pf["head"][1])
+    c.rect(hxp + 1, hyp - 2, hxp + 3, hyp + 1, "#d8b898")      # a face turned into the light
+    c.set(hxp + 3, hyp - 1, "#10141c")
+    c.rect(64, TY, 130, TY + 1, "#9aa8b2")                   # the table slab hides his lap
+    c.rect(64, TY + 2, 130, TY + 3, "#2a3644")
+    c.rect(64, TY + 4, 130, 96, "#0e141c")
+    for x in range(64, 131, 11):
+        c.rect(x, TY + 5, x, 95, "#080c12")
+    c.rect(64, TY + 4, 64, 96, "#26323e")
+    # ---- the lamp: tripod, brass housing, hot lens + bloom
+    glow(c, LX - 3, LY - 1, 34, ["#2e404c", "#5e7884", "#a0b8c0", "#e0eef0", "#fafcfc"], power=1.5, strength=1.0)
+    c.line([(LX + 8, LY + 5), (LX + 2, 103)], "#06080c", 2)
+    c.line([(LX + 8, LY + 5), (LX + 20, 103)], "#06080c", 2)
+    c.line([(LX + 8, LY + 5), (LX + 11, 103)], "#0e1218", 2)
+    # ---- the auditor behind the lamp, a dark silhouette against its bloom
+    af = figure(78, "stand", "#05070b", robe=0.88, facing=-1)
+    apx, apy = _ink(c, af, 168, 112)
+    hax, hay = apx + int(af["head"][0]), apy + int(af["head"][1])
+    c.rect(hax - 8, hay - 3, hax + 7, hay - 3, "#05070b")       # wide hat brim
+    c.rect(hax - 4, hay - 10, hax + 3, hay - 4, "#05070b")
+    c.rect(hax - 4, hay - 6, hax + 3, hay - 5, "#5a6c74")
+    c.rect(LX + 1, LY - 6, LX + 13, LY + 5, "#241c14")           # housing in front of him
+    c.rect(LX + 1, LY - 6, LX + 13, LY - 6, "#c8a858")
+    c.rect(LX + 9, LY - 6, LX + 13, LY + 5, "#100c08")
+    c.poly([(LX + 1, LY - 6), (LX - 4, LY - 10), (LX - 4, LY + 9), (LX + 1, LY + 5)], "#6a5a38")      # visor
+    c.line([(LX + 1, LY - 6), (LX - 4, LY - 10)], "#e0c070")
+    c.rect(LX - 3, LY - 7, LX - 1, LY + 6, "#fffefa")
+    e.protect += ["#ffffff", "#fafcfc"]
+    particles(c, "mote", 30, (0, 0, 150, 90), seed=e.seed_for("mo"), cols=("#e8f0f4", "#b8c8d0"))
+    vignette_kind(c, "bad", col="#04060c", strength=0.62)
+
+
+def _crate(c, x0, y0, w, h, body, trim, dark, lite):
+    """ammunition crate: lit top edge, steel corner straps, one brass band; no lettering."""
+    c.rect(x0, y0, x0 + w - 1, y0 + h - 1, body)
+    c.rect(x0, y0, x0 + w - 1, y0, lite)
+    c.rect(x0, y0, x0, y0 + h - 1, lite)
+    c.rect(x0 + w - 1, y0, x0 + w - 1, y0 + h - 1, dark)
+    c.rect(x0, y0 + h - 1, x0 + w - 1, y0 + h - 1, dark)
+    c.rect(x0 + 2, y0, x0 + 3, y0 + h - 1, trim)
+    c.rect(x0 + w - 4, y0, x0 + w - 3, y0 + h - 1, trim)
+    c.rect(x0 + 1, y0 + h // 2, x0 + w - 2, y0 + h // 2, dark)
+
+
+@ending("imp_end_servitor")
+def imp_end_servitor(e):
+    """BAD.  The Machine Needs Hands: a troopship hangar, years later.  A servitor walks left with an ammunition crate in
+    its arms under a hanging lamp; a clean new recruit has stopped dead in the cone of light and stares at it; a
+    second recruit walks on, not looking.  The wrong detail: a scrap of blue-grey coat with a brass band tied round
+    the servitor's upper arm.  Sick green-grey light."""
+    c = e.c
+    FL = 86
+    WALL = ["#080e0e", "#101a1a", "#1a2a2a", "#283c3c", "#3c524e"]
+    _plates(c, 0, 0, 191, FL, WALL, e.seed, pw=26, ph=18, patch=["#2a3a2a", "#3a4c3a", "#4a5c44", "#5c7058"], patch_n=3)
+    # ceiling girders + catwalk
+    c.rect(0, 0, 191, 6, "#060a0a")
+    c.rect(0, 7, 191, 7, "#2e4442")
+    for x in range(-4, 200, 30):
+        c.line([(x, 7), (x + 15, 0)], "#0c1414")
+        c.line([(x + 15, 0), (x + 30, 7)], "#0c1414")
+    c.rect(0, 22, 191, 24, "#0a1212")                       # catwalk rail
+    c.rect(0, 22, 191, 22, "#3a5250")
+    for x in range(2, 192, 8):
+        c.rect(x, 25, x, 31, "#0a1212")
+    # big shut hangar door behind (right half) with hazard chevrons down both edges
+    for y in range(34, FL):
+        for x in range(132, 186):
+            c.set(x, y, ramp_pick(["#0e1616", "#1a2828", "#263a38"], 0.35 + (x - 104) * 0.004 + ((y // 9) % 2) * 0.05, x, y, 3.0))
+    c.rect(132, 34, 185, 34, "#050808")
+    c.rect(132, 34, 132, FL, "#050808")
+    c.rect(185, 34, 185, FL, "#050808")
+    c.rect(158, 34, 159, FL, "#050808")
+    for y in range(34, FL):
+        for xs in (134, 176):
+            for x in range(xs, xs + 8):
+                if ((x + y) // 4) % 2 == 0:
+                    c.set(x, y, "#a88a2a")
+                else:
+                    c.set(x, y, "#101410")
+    # deck: dark plates, glossy, with a hazard line
+    hband(c, FL + 1, 107, ["#1c2a2a", "#121c1c", "#0a1212", "#050909"], seed=e.seed_for("fl"), rough=0.2)
+    for k in range(7):
+        yy = int(FL + 3 + (k / 6.0) ** 1.5 * 20)
+        c.rect(0, yy, 191, yy, "#060c0c")
+    for x0 in range(-40, 260, 26):
+        c.line([(x0 * 0.45 + 52, FL + 1), (x0 * 1.7 - 70, 108)], "#060c0c")
+    c.rect(0, FL, 191, FL, "#040707")
+    for x in range(0, 192):
+        if (x // 5) % 2 == 0:
+            c.rect(x, FL + 14, x, FL + 15, "#6a5a1c")
+    # hanging lamps and their cones (cold, a little sick)
+    for lx_, str_ in ((30, 0.38), (86, 0.7), (150, 0.4)):
+        c.line([(lx_, 7), (lx_, 14)], "#050808")
+        c.rect(lx_ - 5, 14, lx_ + 5, 16, "#0a1010")
+        c.rect(lx_ - 4, 15, lx_ + 4, 16, "#e4f4e4")
+        for y in range(17, 106):
+            half = 4 + (y - 17) * 0.55
+            for x in range(int(lx_ - half), int(lx_ + half) + 1):
+                u = 1 - abs(x - lx_) / half
+                _qb(c, x, y, "#cfe8d8", str_ * (0.30 + 0.55 * clamp(u * 1.3)) * (1 - (y - 17) / 130.0) * 0.8, 4)
+    light_pool(c, 86, FL + 10, 52, 7, "#cfe8d8", t=0.6)
+    light_pool(c, 86, FL + 16, 30, 4, "#e4f4e4", t=0.4)
+    # ---- stacked crates, far right in front of the door
+    CB = dict(body="#4a4a30", trim="#8a7a38", dark="#1c1c10", lite="#7a7a50")
+    for (cx0, cy0, cw, ch) in [(150, FL - 12, 20, 12), (172, FL - 12, 20, 12), (156, FL - 24, 20, 12), (176, FL - 24, 18, 12)]:
+        _crate(c, cx0, cy0, cw, ch, **CB)
+    haze(c, FL - 30, FL + 2, "#0a1412", t=0.4, seed=e.seed_for("hz"), profile="bottom", x0=100)
+    # ---- the second recruit, walking away left, small, back half turned
+    r2 = fig(30, "walk", "#0c1210", facing=-1)
+    put_figure(c, r2, 22, FL + 8, rim_col="#5a8a76", toward=(1, -1))
+    # ---- the recruit who has stopped, in the lamp cone, staring: clean olive uniform
+    rf = figure(46, "stand", "#5a6a46", facing=1, lean=4)
+    rpx, rpy = put_figure(c, rf, 54, FL + 14, rim_col="#d8f0d0", toward=(1, -1),
+                          shadow=dict(toward_light=(0.3, 0.2), length=0.5, squash=0.12, col="#04070a", t=0.7))
+    rhx, rhy = rpx + int(rf["head"][0]), rpy + int(rf["head"][1])
+    _helmet(c, rhx, rhy - 1, 4, "#4a5a3a", "#b8d0a0", "#1c2a1c")
+    c.rect(rhx + 1, rhy, rhx + 3, rhy + 2, "#d8b898")        # a face turned to the servitor
+    c.set(rhx + 3, rhy, "#101418")
+    rh = rf["hands"][0]
+    c.line([(rpx + int(rh[0]) - 3, rpy + int(rh[1]) + 5), (rpx + int(rh[0]) + 3, rpy + int(rh[1]) - 22)], "#10120e", 2)   # rifle held loosely
+    # ---- the servitor: walking left, a crate in its arms, lit from above, grey-green skin, steel, one red eye
+    sf = figure(64, "carry", "#586660", facing=-1, lean=14, thick=1.1)
+    spx, spy = put_figure(c, sf, 124, FL + 17, rim_col="#e4f4e4", toward=(0, -1),
+                          shadow=dict(toward_light=(0.2, 0.3), length=0.5, squash=0.12, col="#04070a", t=0.7))
+    shx, shy = spx + int(sf["head"][0]), spy + int(sf["head"][1])
+    # head: skin, steel jaw + crown plate, a red eye, dangling cables
+    c.ellipse(shx, shy, 5, 6, "#8c9c8a")
+    c.rect(shx - 5, shy + 1, shx + 4, shy + 6, "#68788a")
+    c.rect(shx - 5, shy + 1, shx - 5, shy + 6, "#a8b8c0")
+    c.rect(shx - 1, shy - 7, shx + 5, shy - 4, "#7a8a96")
+    c.rect(shx - 4, shy - 1, shx - 2, shy, "#ff3a2a")
+    c.set(shx - 3, shy - 1, "#ffb0a0")
+    c.rect(shx - 4, shy + 3, shx - 1, shy + 3, "#202a30")
+    for k, (dx, ln) in enumerate(((3, 14), (5, 11), (7, 17))):
+        for j in range(ln):
+            c.set(shx + dx + int(math.sin(j * 0.5 + k) * 1.2), shy - 2 + j, "#10181c" if j % 3 else "#3a4a52")
+    # torso details: a steel plate, two tubes
+    tx, ty_ = shx + 2, shy + 12
+    c.rect(tx - 6, ty_, tx + 6, ty_ + 9, "#7a8a92")
+    c.rect(tx - 6, ty_, tx + 6, ty_, "#c8d8dc")
+    c.rect(tx - 6, ty_ + 9, tx + 6, ty_ + 9, "#2a3640")
+    c.line([(tx - 3, ty_ + 1), (tx - 8, ty_ + 18)], "#10181c", 2)
+    c.line([(tx + 3, ty_ + 1), (tx + 9, ty_ + 14)], "#10181c", 2)
+    # the crate in its arms
+    hn, hf_ = sf["hands"]
+    cxm = spx + int((hn[0] + hf_[0]) / 2) - 12
+    cym = spy + int(max(hn[1], hf_[1])) - 9
+    _crate(c, cxm, cym, 24, 15, "#5a5a38", "#a89040", "#1e1e12", "#8a8a58")
+    c.rect(cxm - 3, cym + 7, cxm + 3, cym + 12, "#586660")     # a hand clamped on the crate corner
+    # the wrong detail: a scrap of blue-grey coat and a brass band tied round the upper arm
+    ax_, ay_ = shx + 7, shy + 13
+    c.rect(ax_, ay_, ax_ + 4, ay_ + 5, "#44546e")
+    c.rect(ax_, ay_, ax_ + 4, ay_, "#6a7c98")
+    c.rect(ax_, ay_ + 2, ax_ + 4, ay_ + 3, "#d8b060")
+    c.set(ax_ + 5, ay_ + 5, "#44546e")
+    c.set(ax_ + 4, ay_ + 6, "#44546e")
+    e.protect += ["#ff3a2a", "#d8b060", "#44546e", "#e4f4e4"]
+    particles(c, "mote", 34, (0, 10, 191, 100), seed=e.seed_for("mo"), cols=("#cfe8d8", "#8aa89a", "#e4f4e4"))
+    vignette_kind(c, "bad", col="#030606", strength=0.8)
+
+
+def _legion_img(h, col="#0a0606", facing=-1, stride=0.5, ss=6):
+    """power-armoured silhouette, flat colour: crested helm on a short neck, square pauldrons, narrow waist, backpack
+    with two stacks, heavy greaves, a long gun carried across the chest.  Returns (RGBA image, head_xy)."""
+    from PIL import ImageDraw
+    Wd, Hd = int(h * 1.0 * ss), int(h * 1.12 * ss)
+    big = Image.new("L", (Wd, Hd), 0)
+    d = ImageDraw.Draw(big)
+    ox, oy = Wd * 0.46, Hd * 0.97
+    u = h * ss
+
+    def T(x, y):                         # x right (+ = facing side), y up (unit = figure height)
+        return (ox + x * u, oy - y * u)
+
+    def poly(pts):
+        d.polygon([T(*p) for p in pts], fill=255)
+    # legs: a stride (near leg forward, far leg back), thick greaves, wide boots
+    for sg, w in ((-1, 0.115), (1, 0.125)):
+        hipx = 0.015 * sg
+        fx = sg * stride * 0.27
+        kneex = (hipx + fx) * 0.5 + sg * 0.03
+        poly([(hipx - w * 0.5, 0.50), (hipx + w * 0.5, 0.50), (kneex + w * 0.55, 0.27), (kneex - w * 0.55, 0.27)])
+        poly([(kneex - w * 0.55, 0.27), (kneex + w * 0.55, 0.27), (fx + w * 0.50, 0.04), (fx - w * 0.50, 0.04)])
+        poly([(fx - w * 0.60, 0.04), (fx + w * 0.95, 0.04), (fx + w * 0.95, 0.0), (fx - w * 0.60, 0.0)])
+        d.ellipse([T(kneex - w * 0.62, 0.30)[0], T(kneex, 0.30)[1], T(kneex + w * 0.62, 0.22)[0], T(kneex, 0.22)[1]], fill=255)
+    # backpack + stacks
+    poly([(-0.20, 0.80), (-0.05, 0.80), (-0.05, 0.50), (-0.19, 0.52)])
+    poly([(-0.185, 0.80), (-0.15, 0.80), (-0.15, 0.90), (-0.185, 0.90)])
+    poly([(-0.115, 0.80), (-0.08, 0.80), (-0.08, 0.89), (-0.115, 0.89)])
+    # torso: broad chest, narrow waist
+    poly([(-0.145, 0.80), (0.145, 0.80), (0.10, 0.52), (-0.10, 0.52)])
+    poly([(-0.11, 0.54), (0.11, 0.54), (0.125, 0.46), (-0.125, 0.46)])
+    # pauldrons: squarish, big
+    for sg in (-1, 1):
+        cx = sg * 0.20
+        poly([(cx - 0.085, 0.82), (cx + 0.085, 0.82), (cx + 0.09, 0.69), (cx - 0.09, 0.69)])
+        d.ellipse([T(cx - 0.09, 0.85)[0], T(cx, 0.85)[1], T(cx + 0.09, 0.79)[0], T(cx, 0.79)[1]], fill=255)
+    # head: helm with a crest ridge, short neck, a snub faceplate toward the facing side
+    poly([(-0.045, 0.79), (0.045, 0.79), (0.05, 0.85), (-0.05, 0.85)])
+    d.ellipse([T(-0.085, 1.0)[0], T(0, 1.0)[1], T(0.085, 0.835)[0], T(0, 0.835)[1]], fill=255)
+    poly([(-0.025, 1.0), (0.025, 1.0), (0.03, 1.03), (-0.03, 1.03)])
+    poly([(0.05, 0.90), (0.11, 0.89), (0.10, 0.85), (0.05, 0.84)])
+    # the gun across the chest, muzzle forward, a slim stock behind the shoulder
+    d.line([T(-0.14, 0.60), T(0.44, 0.70)], fill=255, width=max(1, int(0.045 * u)))
+    d.line([T(0.12, 0.66), T(0.15, 0.55)], fill=255, width=max(1, int(0.05 * u)))
+    # arms: near forearm bent across the body to the gun
+    d.line([T(0.20, 0.76), T(0.24, 0.62), T(0.10, 0.62)], fill=255, width=max(1, int(0.085 * u)))
+    small = big.resize((Wd // ss, Hd // ss), Image.BOX).point(lambda v: 255 if v >= 110 else 0)
+    bb = small.getbbox() or (0, 0, 1, 1)
+    small = small.crop(bb)
+    out = Image.new("RGBA", small.size, (0, 0, 0, 0))
+    out.paste(Image.new("RGBA", small.size, C(col) + (255,)), (0, 0), small)
+    hx_, hy_ = (ox / ss - bb[0]), (oy - 0.92 * u) / ss - bb[1]
+    if facing < 0:
+        out = out.transpose(Image.FLIP_LEFT_RIGHT)
+        hx_ = out.width - 1 - hx_
+    return out, (hx_, hy_)
+
+
+def _legion(c, x, y, h, facing=-1, col="#0a0606", stride=0.5, **_kw):
+    """draw a power-armoured silhouette with its feet at (x, y)."""
+    img, head = _legion_img(h, col, facing, stride)
+    place(c, img, int(x - img.width // 2), int(y - img.height), anchor="tl")
+    return img
+
+
+@ending("imp_end_traitor")
+def imp_end_traitor(e):
+    """BAD.  The Doorkeeper: seen from inside Manufactorum Six after the gate has been opened.  The great doors stand
+    wide; beyond, the hive burns orange-black; a column of huge armoured silhouettes strides in through the gap,
+    backlit.  In the lit floor-pool at the left the player points them on, coat orange-rimmed, and in the middle of
+    his chest a pale yellow-green eye has opened.  Red-orange against soot, one sick detail."""
+    c = e.c
+    GX0, GX1, GY0, GY1 = 30, 160, 14, 88              # the gap between the doors
+    # ---- what is beyond the gap: a burning night
+    sky(c, ["#1a0808", "#3a1210", "#7a2412", "#c2481a", "#ec7a28", "#ffaa44", "#ffdc90"], 0, 80)
+    clouds(c, e.seed_for("cl"), ["#1a0a0a", "#341612", "#5a2414", "#8a3a1a"], 2, 46, scale=0.05, thresh=0.54, stretch=3.5)
+    glow(c, 100, 84, 84, ["#5a1a10", "#8a2c12", "#c8501a", "#f08030", "#ffc060", "#fff0b0"], power=1.7, strength=0.95, ry=36)
+    skyline(c, e.seed_for("sk1"), 84, "#8a3414", 14, 4, 13, 3, 9, win_p=0.0, tips=0.3)
+    skyline(c, e.seed_for("sk2"), 87, "#4a1a0e", 10, 3, 10, 4, 11, win_p=0.12, wincol=("#ffb040", "#ff7a28"), tips=0.2)
+    for (sx, sh) in ((52, 34), (146, 42)):                 # burning stacks with flame at the top
+        c.rect(sx, 84 - sh, sx + 4, 84, "#160808")
+        _flame(c, sx + 2, 84 - sh, 7, 12, ["#4a1408", "#a83a14", "#f08a2a", "#ffe090"], e.seed_for("st%d" % sx), power=0.9, flick=0.5)
+    haze(c, 70, 90, "#f08a38", t=0.35, seed=e.seed_for("hz"), profile="mid", x0=GX0, x1=GX1)
+    # ---- the doors: two huge leaves, near edge of each in shadow, rim-lit on the inner edge, riveted
+    DOOR = ["#050303", "#0e0806", "#1a100c", "#2a1a12", "#3e281a"]
+    for y in range(0, 108):
+        for x in range(0, 192):
+            inside_gap = GX0 <= x <= GX1 and y >= GY0 and y <= 88
+            if inside_gap:
+                continue
+            # perspective: leaves open inward -> their inner edges are nearer, so they are taller toward the gap
+            near_l = x < GX0
+            near_r = x > GX1
+            if y <= 88 or near_l or near_r:
+                d = (GX0 - x) if near_l else ((x - GX1) if near_r else 0)
+                t = 0.26 + 0.30 * clamp(1 - d / 44.0) + (((y // 12) % 2) * 0.05)
+                c.set(x, y, ramp_pick(DOOR, t, x, y, 3.0))
+    c.rect(0, 0, 191, GY0 - 1, "#050303")                     # lintel
+    for x in range(0, 192, 10):                               # lintel ribs
+        c.rect(x, 0, x, GY0 - 1, "#120a08")
+    c.rect(0, GY0 - 1, 191, GY0 - 1, "#3a2216")
+    for xs0, xs1 in ((0, GX0 - 1), (GX1 + 1, 191)):           # plates + rivets
+        for y in range(GY0, 88, 12):
+            c.rect(xs0, y, xs1, y, "#050303")
+            for x in range(xs0 + 3, xs1, 8):
+                c.set(x, y + 3, "#4a2c1a")
+                c.set(x, y + 4, "#0a0504")
+    for x in (GX0, GX1):                                      # the inner edges of the doors catch the glow
+        for y in range(GY0, 88):
+            c.set(x, y, "#c8601e")
+            c.set(x + (1 if x == GX0 - 0 else -1) * -1, y, "#7a3414")
+    c.rect(GX0 - 1, GY0, GX0 - 1, 88, "#f08a2a")
+    c.rect(GX1 + 1, GY0, GX1 + 1, 88, "#f08a2a")
+    # ---- factory floor: dark plates, the gate-light pooled on them
+    hband(c, 89, 107, ["#2a1a14", "#1a100c", "#0e0806", "#060303"], seed=e.seed_for("fl"), rough=0.3)
+    for k in range(6):
+        yy = int(90 + (k / 5.0) ** 1.4 * 17)
+        c.rect(0, yy, 191, yy, "#080404")
+    for x0 in range(-30, 230, 20):
+        c.line([(98 + (x0 - 98) * 0.35, 89), (98 + (x0 - 98) * 1.6, 108)], "#0a0504")
+    light_pool(c, 100, 95, 86, 8, "#f08a38", t=0.85)
+    light_pool(c, 100, 99, 60, 7, "#ffc060", t=0.6)
+    for k in range(10):                                       # vertical streaks of reflected glow
+        xx = 60 + k * 9
+        for y in range(90, 104):
+            blend(c, xx, y, "#ffb050", 0.5 - (y - 90) * 0.03, 3)
+    # ---- the column: big ones in front, smaller further back, all walking in toward the left
+    for (lx, ly, lh, st) in [(152, 85, 24, 0.7), (131, 88, 34, -0.5), (105, 92, 46, 0.6), (76, 97, 60, -0.4)]:
+        _legion(c, lx, ly, lh, stride=st)
+    # ---- the doorkeeper: lit from behind-right, pointing them in; a pale eye in his chest
+    pf = player_fig("imperium", 48, "reach", facing=1, lean=6)
+    ppx, ppy = put_figure(c, pf, 44, 103, rim_col="#ffb050", toward=(1, -0.5),
+                          shadow=dict(toward_light=(1, 0.3), length=0.9, squash=0.18, col="#080303", t=0.8))
+    hxp, hyp = ppx + int(pf["head"][0]), ppy + int(pf["head"][1])
+    c.rect(hxp + 1, hyp - 1, hxp + 2, hyp + 1, "#8a6a50")      # face half lit
+    ex, ey = hxp - 1, hyp + 13                                  # chest
+    c.rect(ex - 3, ey, ex + 3, ey + 3, "#05080a")               # socket
+    c.rect(ex - 2, ey + 1, ex + 2, ey + 2, "#e8f078")           # the eye, open
+    c.rect(ex - 1, ey + 1, ex, ey + 2, "#fffff0")
+    c.set(ex, ey + 1, "#101810")
+    e.protect += ["#e8f078", "#fffff0", "#ffc060"]
+    particles(c, "ember", 70, (30, 10, 190, 100), seed=e.seed_for("em"), cols=("#ffb040", "#ff6a2a", "#ffe08a"), wind=(-1, 1))
+    particles(c, "ash", 30, (0, 0, 191, 100), seed=e.seed_for("ash"), cols=("#4a3a34", "#2a201c", "#6a5a52"))
+    vignette_kind(c, "bad", col="#060202", strength=0.72)
+
+
+@ending("imp_death_corruption")
+def imp_death_corruption(e):
+    """DEATH.  The Answer at the Door: a bunker corridor, almost black; the iron door behind the player has swung open
+    on a pink-white light; the player stands black against it, light cracking through his chest, and long pale arms
+    reach out of the glare to take him by the shoulders and head; above him in the light a crescent grin and two slit
+    eyes.  Far left a commissar's tiny silhouette, his muzzle flash and a tracer that stops short."""
+    c = e.c
+    FL = 80
+    WALL = ["#040408", "#08080f", "#10101a", "#1a1a28"]
+    _plates(c, 0, 0, 191, FL, WALL, e.seed, pw=28, ph=19)
+    # the doorway: dark stone reveal, the leaves thrown back on either side, the light behind
+    DX0, DX1, DY0 = 70, 130, 9
+    n = e.noise("door")
+    for y in range(DY0, FL + 1):
+        for x in range(DX0, DX1 + 1):
+            dx, dy = (x - 100) / 30.0, (y - 46) / 44.0
+            d = math.sqrt(dx * dx * 1.2 + dy * dy * 0.9)
+            t = clamp(1.0 - d * 0.85 + (n.fbm(x * 0.09, y * 0.07, 3) - 0.5) * 0.35)
+            c.set(x, y, ramp_pick(["#1c0a34", "#4a1c6a", "#7a3a98", "#a858b8", "#cc7cd0"], t, x, y, 3.0))
+    # iridescent bands crawling over the light
+    for y in range(DY0, FL + 1, 3):
+        for x in range(DX0, DX1 + 1):
+            if n.fbm(x * 0.05, y * 0.35, 2) > 0.62:
+                blend(c, x, y, "#78d8f0" if (x // 9) % 2 else "#f8e888", 0.45, 3)
+    for (x0, x1, sg) in ((DX0 - 22, DX0 - 1, -1), (DX1 + 1, DX1 + 22, 1)):      # open leaves, seen edge-on, as dark slabs
+        for y in range(DY0 - 2, FL + 1):
+            for x in range(x0, x1 + 1):
+                t = 0.15 + 0.2 * (1 - abs(x - (x1 if sg < 0 else x0)) / 22.0)
+                c.set(x, y, ramp_pick(["#030306", "#0a0a12", "#16161f", "#222230"], t, x, y, 3.0))
+        for y in range(DY0 + 4, FL, 13):
+            c.rect(x0, y, x1, y, "#030306")
+            for x in range(x0 + 3, x1, 7):
+                c.set(x, y + 3, "#34344a")
+    c.rect(DX0 - 22, DY0 - 3, DX1 + 22, DY0 - 2, "#0a0a12")                 # lintel
+    c.rect(DX0, DY0, DX0, FL, "#fff4ff")                                      # lit jambs
+    c.rect(DX1, DY0, DX1, FL, "#fff4ff")
+    # floor: the light spills toward us
+    hband(c, FL + 1, 107, ["#2a1a3a", "#150e1e", "#08060e", "#030306"], seed=e.seed_for("fl"), rough=0.25)
+    for k in range(6):
+        yy = int(FL + 3 + (k / 5.0) ** 1.5 * 24)
+        c.rect(0, yy, 191, yy, "#050509")
+    c.rect(0, FL, 191, FL, "#020204")
+    light_pool(c, 100, FL + 12, 42, 12, "#e090e8", t=0.8, power=1.0)
+    light_pool(c, 100, FL + 10, 22, 9, "#fff0ff", t=0.6)
+    # ---- the thing that has climbed out of him: tall, pale, its head high above his, long arms hanging
+    PX = 100
+    from PIL import ImageDraw, ImageChops, ImageFilter
+    mask = Image.new("L", (192, 108), 0)
+    md = ImageDraw.Draw(mask)
+    md.ellipse([PX - 11, 8, PX + 11, 40], fill=255)                                   # long skull
+    md.polygon([(PX - 6, 36), (PX + 6, 36), (PX + 26, 46), (PX + 27, 80), (PX - 27, 80), (PX - 26, 46)], fill=255)   # shoulders and chest
+    md.line([(PX - 24, 46), (PX - 38, 62), (PX - 38, 80), (PX - 36, 90)], fill=255, width=4)    # long arms, hanging, hands near the floor
+    md.line([(PX + 24, 46), (PX + 38, 62), (PX + 38, 80), (PX + 36, 90)], fill=255, width=4)
+    for sx in (-1, 1):                                                                # claws
+        for k in (-3, 0, 3):
+            md.line([(PX + sx * 36, 89), (PX + sx * 36 + k, 98)], fill=255, width=2)
+    inner = mask.filter(ImageFilter.MinFilter(3))
+    edge = ImageChops.subtract(mask, inner)
+    mp, ep = mask.load(), edge.load()
+    nn = e.noise("th")
+    for y in range(108):
+        for x in range(192):
+            if mp[x, y]:
+                t = 0.98 - 0.92 * clamp((y - 34) / 52.0) + (nn.fbm(x * 0.08, y * 0.1, 2) - 0.5) * 0.25
+                c.set(x, y, ramp_pick(["#3a1a58", "#6a4290", "#9a78c0", "#c8a8e8", "#f0e4fc"], t, x, y, 3.0))
+                if ep[x, y]:
+                    c.set(x, y, "#2a1048")
+    # face: laughing eyes (little upturned arcs), a very wide grin with teeth
+    for sx in (-1, 1):
+        for k in range(-4, 5):
+            yy = 20 - int(2.5 - (k * k) / 6.0)
+            c.set(PX + sx * 6 + k, yy, "#2a1048")
+            c.set(PX + sx * 6 + k, yy + 1, "#2a1048")
+    for k in range(-10, 11):
+        yy = 26 + 6 - int((k * k) / 7.0)
+        c.set(PX + k, yy, "#2a1048")
+        c.set(PX + k, yy + 1, "#2a1048")
+        c.set(PX + k, yy + 2, "#2a1048")
+        if abs(k) % 3 == 0:
+            c.set(PX + k, yy + 1, "#ffffff")
+    # ---- the player: black against the light, cracks of white running through him
+    pf = player_fig("imperium", 56, "stand", facing=1)
+    pf["img"] = tint(pf["img"], "#050509", 0.82)
+    ppx, ppy = put_figure(c, pf, PX, 99, shadow=dict(toward_light=(0, 1.0), length=0.0, squash=0.62, col="#02020a", t=0.9))
+    img = pf["img"]
+    pm = img.getchannel("A").load()
+    rr = e.rng("cr")
+    for k in range(7):
+        x = rr.uniform(img.width * 0.3, img.width * 0.7)
+        y = rr.uniform(img.height * 0.20, img.height * 0.32)
+        ang = rr.uniform(0.6, 2.5)
+        for step in range(rr.randint(12, 24)):
+            ix, iy = int(x), int(y)
+            if 0 <= ix < img.width and 0 <= iy < img.height and pm[ix, iy] >= 128:
+                c.set(ppx + ix, ppy + iy, "#fff4ff")
+                blend(c, ppx + ix + 1, ppy + iy, "#f088e0", 0.7, 3)
+                blend(c, ppx + ix - 1, ppy + iy, "#78d8f0", 0.7, 3)
+            ang += rr.uniform(-0.6, 0.6)
+            x += math.cos(ang) * 1.1
+            y += abs(math.sin(ang)) * 1.0 + 0.2
+    hxp, hyp = ppx + int(pf["head"][0]), ppy + int(pf["head"][1])
+    c.rect(hxp - 1, hyp + 3, hxp + 4, hyp + 8, "#07070c")                    # neck
+    c.rect(hxp + 1, hyp - 1, hxp + 2, hyp, "#ffffff")                        # eyes alight
+    c.rect(hxp + 4, hyp - 1, hxp + 4, hyp, "#ffffff")
+    # ---- the commissar, far left, small: arm out, a muzzle flash, a tracer that ends a hand's width short
+    cf = fig(34, "reach", "#050509", facing=1, robe=0.9)
+    cpx, cpy = put_figure(c, cf, 16, 97, rim_col="#c8a8d0", toward=(1, -0.3))
+    gx, gy = cpx + int(cf["hands"][0][0]) + 3, cpy + int(cf["hands"][0][1])
+    glow(c, gx + 2, gy, 6, ["#6a3a1a", "#ffb040", "#ffe8a0", "#ffffff"], power=1.2, strength=0.9)
+    for k in range(0, 44):
+        if k % 5 < 3:
+            blend(c, gx + 6 + k, gy - k // 44, "#ffe8b0", 0.95 - k * 0.016, 3)
+    e.protect += ["#fff4ff", "#ffe8a0", "#fff8ff", "#ffffff"]
+    particles(c, "mote", 40, (30, 6, 170, 100), seed=e.seed_for("mo"), cols=("#fff0ff", "#f088e0", "#78d8f0"))
+    vignette_kind(c, "death", strength=0.95)
+
+
+def _eye(c, x, y, s, col, pupil="#0a0c08", lid="#05070a"):
+    """a tiny almond eye, s = 1 (4x2) .. 3 (10x5): lid line, pale ball, dark pupil; no lashes, no text."""
+    w, h = 3 + 2 * s, 1 + s
+    cx = x + w // 2
+    for j in range(h):
+        half = (w // 2) * (1 - abs(j - (h - 1) / 2.0) ** 2 / (h * 0.6 + 0.5)) if h > 1 else w // 2
+        for i in range(-int(half + 0.5), int(half + 0.5) + 1):
+            c.set(cx + i, y + j, col)
+    for i in range(-(w // 2), w // 2 + 1):
+        if abs(i) <= w // 2 - 1:
+            c.set(cx + i, y - 1, lid)
+    c.set(cx, y + h // 2, pupil)
+    if s >= 2:
+        c.set(cx - 1, y + h // 2, pupil)
+        c.set(cx, y + h // 2 - 1, pupil)
+        c.set(cx - 1, y + h // 2 - 1, pupil)
+
+
+def _sitter(c, x, y, s, lit, mid, shade, strap, tilt=1, skin="#8a94a6", hair="#222a38"):
+    """a patient seen from behind, sitting on the floor in a restraint jacket: wide hips on the flags, a narrower waist
+    with a belt, sleeves wrapped round the body (two buckled bands), a pale nape and a head tipped back toward the
+    wall.  (x, y) = bottom centre, s = overall height in px; the moon is on the left."""
+    from PIL import ImageDraw
+    m = Image.new("L", (int(s * 1.4) + 4, int(s * 1.3) + 4), 0)
+    d = ImageDraw.Draw(m)
+    ox, oy = m.width // 2, m.height - 2
+    u = float(s)
+
+    def T(px_, py_):
+        return (ox + px_ * u, oy - py_ * u)
+    d.ellipse([T(-0.42, 0.40)[0], T(0, 0.40)[1], T(0.42, 0.0)[0], T(0, 0.0)[1]], fill=255)            # hips + folded legs
+    d.polygon([T(-0.30, 0.30), T(0.30, 0.30), T(0.36, 0.64), T(-0.36, 0.64)], fill=255)                # torso
+    d.ellipse([T(-0.38, 0.74)[0], T(0, 0.74)[1], T(0.38, 0.56)[0], T(0, 0.56)[1]], fill=255)           # shoulders
+    d.polygon([T(-0.06, 0.70), T(0.06, 0.70), T(0.07, 0.80), T(-0.07, 0.80)], fill=255)                # neck
+    mp = m.load()
+    for yy in range(m.height):
+        for xx in range(m.width):
+            if mp[xx, yy]:
+                dx = (xx - ox) / (0.42 * u)
+                t = clamp(0.62 - dx * 0.5 + ((oy - yy) / u - 0.3) * 0.15)
+                c.set(int(x - ox + xx), int(y - oy + yy), ramp_pick([shade, mid, lit], t, xx, yy, 2.4))
+    for (a, b) in (((-0.30, 0.60), (0.22, 0.34)), ((0.30, 0.60), (-0.22, 0.34))):                       # wrapped sleeves
+        px0, py0 = x + a[0] * u, y - a[1] * u
+        px1, py1 = x + b[0] * u, y - b[1] * u
+        c.line([(px0, py0), (px1, py1)], strap)
+    c.rect(int(x - 0.30 * u), int(y - 0.32 * u), int(x + 0.30 * u), int(y - 0.32 * u), strap)           # belt
+    c.set(int(x + 0.02 * u), int(y - 0.32 * u), "#c0c8d0")                                              # buckle
+    c.set(int(x - 0.02 * u), int(y - 0.50 * u), "#c0c8d0")
+    hr = 0.15 * u
+    hx_, hy_ = x + tilt * 0.03 * u, y - 0.90 * u
+    c.ellipse(hx_, hy_, hr, hr * 1.08, hair)
+    c.rect(int(hx_ - hr * 0.5), int(hy_ + hr * 0.55), int(hx_ + hr * 0.5), int(hy_ + hr * 1.1), skin)    # nape
+    c.rect(int(hx_ - hr), int(hy_ - hr * 0.8), int(hx_ - hr * 0.7), int(hy_ + hr * 0.3), "#5a6a84")      # moon on the hair
+    c.rect(int(hx_ - hr * 0.7), int(hy_ - hr * 1.05), int(hx_ + hr * 0.2), int(hy_ - hr * 1.0), "#5a6a84")
+
+
+@ending("imp_death_sanity")
+def imp_death_sanity(e):
+    """DEATH.  Counting Eyes: a quiet monastery ward at night; a moon shaft from a high narrow window falls across the
+    plaster wall; the wall is covered with tiny open eyes (thickest above the three patients who sit on the flags with
+    their backs to us, in restraint jackets, heads tipped back, counting them).  The nearest, in the shaft, is the
+    player.  Cold, hushed, nearly black."""
+    c = e.c
+    FL = 76
+    WALL = ["#05080e", "#0a1018", "#121a26", "#1c2838", "#2c3c50"]
+    n = e.noise("wall")
+    for y in range(0, FL + 1):
+        for x in range(0, 192):
+            t = 0.20 + (n.fbm(x * 0.05, y * 0.07, 3) - 0.5) * 0.35 + (y / float(FL)) * 0.10
+            c.set(x, y, ramp_pick(WALL, t, x, y, 3.0))
+    for x0 in (0, 62, 126, 190):                                # pilasters
+        c.rect(x0 - 3, 0, x0 + 3, FL, "#070b12")
+        c.rect(x0 + 3, 0, x0 + 3, FL, "#223044")
+    c.rect(0, 5, 191, 6, "#070b12")                            # ceiling beam
+    # the high narrow window and its shaft
+    WX0, WX1 = 24, 34
+    for y in range(8, 38):
+        for x in range(WX0, WX1 + 1):
+            if y > 14 or (x - (WX0 + WX1) / 2.0) ** 2 / 25.0 + (y - 14) ** 2 / 36.0 <= 1.0 + 0.2:
+                c.set(x, y, "#dce8f4" if y < 30 else "#b8c8dc")
+    c.rect(WX0 + 4, 8, WX0 + 5, 37, "#4a5a70")                 # a mullion
+    c.rect(WX0 - 1, 20, WX1 + 1, 20, "#4a5a70")
+    # shaft: a diagonal band of cold light across the wall to the floor
+    for y in range(8, 108):
+        for x in range(0, 192):
+            u = (x - WX0) - (y - 8) * 0.62
+            if 0 <= u <= 36 + (y - 8) * 0.3:
+                k = 1 - abs(u - (18 + (y - 8) * 0.15)) / (20 + (y - 8) * 0.15)
+                if k > 0:
+                    _qb(c, x, y, "#b8cce0", 0.55 * clamp(k * 1.4) * (1 - (y - 8) / 150.0), 4)
+    # floor
+    hband(c, FL + 1, 107, ["#1a2434", "#10182a", "#090e1a", "#04060c"], seed=e.seed_for("fl"), rough=0.25)
+    for k in range(7):
+        yy = int(FL + 3 + (k / 6.0) ** 1.5 * 28)
+        c.rect(0, yy, 191, yy, "#060a12")
+    for x0 in range(-60, 260, 26):
+        c.line([(x0 * 0.4 + 58, FL + 1), (x0 * 1.7 - 80, 108)], "#060a12")
+    c.rect(0, FL, 191, FL, "#04060c")
+    for y in range(FL + 1, 108):                               # the shaft lands on the flags
+        for x in range(40, 132):
+            dx = (x - (76 + (y - FL) * 0.5)) / 30.0
+            dy = (y - (FL + 17)) / 15.0
+            d = dx * dx + dy * dy
+            if d < 1:
+                _qb(c, x, y, "#b8cce0", 0.55 * (1 - d), 4)
+    # ---- the eyes: a jittered grid on the wall, thickest above the patients and in the shaft
+    sitters = [(106, 101, 42), (58, 90, 28), (152, 92, 30)]
+    rr = e.rng("eyes")
+    for gy in range(9, FL - 4, 8):
+        for gx in range(4, 190, 10):
+            x = gx + rr.randint(-3, 3) + (4 if (gy // 8) % 2 else 0)
+            y = gy + rr.randint(-2, 2)
+            near = min(math.hypot(x - sx, (y - (sy - 40)) * 1.4) for (sx, sy, ss) in sitters)
+            shaft = 1.0 if 0 <= (x - WX0) - (y - 8) * 0.62 <= 46 else 0.0
+            p = 0.40 + 0.55 * clamp(1 - near / 70.0) + 0.1 * shaft
+            if rr.random() > p:
+                continue
+            br = clamp(0.30 + 0.5 * clamp(1 - near / 80.0) + 0.3 * shaft) * (1.0 - 0.45 * clamp(abs(x - 96) / 100.0))
+            col = mix((70, 84, 74), (222, 232, 190), br)
+            s = 1 if near > 52 else (2 if near > 26 else 3)
+            _eye(c, x, y, s, "#%02x%02x%02x" % tuple(int(v) for v in col))
+    # a few big ones, higher up in the dark
+    for (x, y) in ((92, 18), (126, 28), (150, 14), (74, 36)):
+        _eye(c, x, y, 3, "#d8e0b8")
+    # ---- the patients, from behind
+    _sitter(c, 152, 92, 30, "#8a94a8", "#566078", "#2a3246", "#141a26", tilt=-1)
+    _sitter(c, 58, 90, 28, "#9aa6ba", "#5e6a82", "#2c364c", "#141a26", tilt=1)
+    _sitter(c, 106, 101, 42, "#d8e2ee", "#8a96ae", "#38445c", "#10151f", tilt=1)
+    haze(c, 70, 107, "#0a1018", t=0.35, seed=e.seed_for("hz"), profile="bottom")
+    particles(c, "mote", 26, (20, 8, 120, 100), seed=e.seed_for("mo"), cols=("#c8d8ec", "#8aa0bc"))
+    e.protect += ["#dce8f4", "#d8e0b8"]
+    vignette_kind(c, "death", strength=0.9)
