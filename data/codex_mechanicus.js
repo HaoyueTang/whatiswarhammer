@@ -53,8 +53,8 @@
     mech_skitarii: E("leader", "imperium", "imperium", "unit", "skitarius", L("护教军", "Skitarii"),
       L("机械神教的改造士兵，由铸造世界自己组建。一块教条晶片，就能改写他们的勇气。",
         "The Mechanicus's cyborg soldiers, raised by each forge world. A single doctrina wafer can rewrite their courage."),
-      L("护教军从小被改造，身体大半是机械，靠贤者远程下达的教条指令作战。辐射卡宾枪、电弧步枪是他们的标配。他们会记住自己的编号，很少记得自己的名字。",
-        "Augmented from youth, mostly machine, the Skitarii fight by doctrina imperatives broadcast from their Magi. Radium carbines and galvanic rifles are their standard. They remember their designations; seldom their names."),
+      L("护教军多半从小被改造（格拉维克斯缺员时，也从杂役里抽签）。身体大半是机械，靠贤者远程下达的教条指令作战。辐射卡宾枪、电弧步枪是他们的标配。他们会记住自己的编号，很少记得自己的名字。",
+        "Mostly augmented from youth (when Gravex runs short, menials are drafted by lot), largely machine, the Skitarii fight by doctrina imperatives broadcast from their Magi. Radium carbines and galvanic rifles are their standard. They remember their designations; seldom their names."),
       A(["护教军", "护教军士兵", "阿尔法"], ["Skitarii", "Skitarius", "Alpha"])),
 
     /* ---------------- lore ---------------- */
@@ -147,12 +147,12 @@
         "Hereteks and Chaos warpsmiths summon daemons and lock them in gun barrels, treads and iron claws, making living war machines. The daemon hates its cage, so it destroys everything outside it. To the Omnissiah's faithful it is the ultimate blasphemy: a machine spirit replaced by a daemon."),
       A(["恶魔引擎", "铸魔"], ["daemon engine", "Daemon Engine"])),
 
-    mech_warsmith: E("boss", "chaos", "chaos", "figure", "dark_mechanicus", L("铸魔匠塞瑞丁", "Warsmith Syrredin"),
-      L("黑暗机械教的铸魔匠，自称“未缚者”。他要的不是格拉维克斯，是它的熔炉。",
-        "A Dark Mechanicum warsmith who calls himself the Unbound. He doesn't want Gravex. He wants its furnaces."),
+    mech_warsmith: E("boss", "chaos", "chaos", "figure", "dark_mechanicus", L("黑暗马戈斯塞瑞丁", "Dark Magos Syrredin"),
+      L("黑暗机械教的马戈斯，自称“未缚者”。他要的不是格拉维克斯，是它的熔炉。",
+        "A Dark Mechanicum magos who calls himself the Unbound. He doesn't want Gravex. He wants its furnaces."),
       L("塞瑞丁曾是某个铸造世界的贤者，因为想“多知道一点”被判为异端。他逃进大裂隙，在那里找到了愿意回答一切问题的东西。他把恶魔引擎当作祈祷文来写，把被俘的铸造世界改造成生产恶魔的工厂。",
         "Syrredin was once a Magos of some forge world, condemned for wanting to know a little more. He fled into the Great Rift and found something there that would answer every question. He writes daemon engines like prayers and turns captured forge worlds into factories for daemons."),
-      A(["塞瑞丁", "铸魔匠", "未缚者"], ["Syrredin", "warsmith", "the Unbound"])),
+      A(["塞瑞丁", "黑暗马戈斯", "未缚者"], ["Syrredin", "Dark Magos", "the Unbound"])),
 
     /* ---------------- places ---------------- */
     place_gravex: P("imperium", "forge_floor", "omen_omnissiah", L("格拉维克斯铸造世界", "Forge World Gravex"),
@@ -175,8 +175,8 @@
       A(["火星", "红色星球"], ["Mars", "Red Planet"])),
 
     place_tomb_moon: P("necrons", "tomb_exterior", null, L("G-7号卫星", "Moonlet G-7"),
-      L("阿尔科萨星区边缘一颗没有名字的卫星。探索舰队在上面找到了一座黑色金字塔。",
-        "A nameless moon at the Arcosa Sector's edge. The explorators found a black pyramid on it."),
+      L("阿尔科萨星区边缘，一颗气态巨星的无名卫星。探索舰队在上面找到了一座黑色金字塔。",
+        "A nameless moon of a gas giant at the Arcosa Sector's edge. The explorators found a black pyramid on it."),
       null, A(["G-7", "墓穴卫星"], ["G-7", "tomb moon"])),
 
     /* ---------------- chronicle (SPEC §20 shape) ---------------- */

@@ -11,6 +11,13 @@
  *   current()                     mood currently playing (or null); wanted() = last requested mood
  *   moods, sfxNames, songInfo(mood)
  *   styles / getStyles() / getStyle() / setStyle(id) / previewStyle(id) — music styles (SPEC §29): chip (default), dark, organ, synth, piano
+ *   getMoods() -> [{id, group, zh, en}]   the 16 tracks with human names, grouped calm|tense|fight|end|faction (SPEC §29b)
+ *   setTrack(id|"auto") / getTrack()      "auto" (default) = story-driven moods; a mood id = that track loops whatever setMood() says;
+ *                                         unknown id -> "auto"; auto crossfades (~1.5 s) back to the remembered story mood
+ *   getPlayingMood()                      the mood sounding now (the previewed one during a preview), or null
+ *   previewMood(id)                       ~8 s sample of that mood from the top in the current style; stops itself, the running
+ *                                         music resumes after; muted or unknown id -> false (no-op)
+ *   onChange(fn) -> off()                 fn(playingMood) whenever what is playing changes (for "now playing" labels)
  * Optional real audio files: define WH.audioFiles = {battle:"assets/audio/battle.ogg", …} (assets/audio/files.js);
  * a mood with a file plays it through an <audio> element (looped, crossfaded); on load error it falls back to the synth.
  * Everything is original music written for this game. Runs from file:// (no fetch, no deps).
@@ -460,6 +467,26 @@
   };
 
   var MOODS = Object.keys(SONGS);
+  /* Track names for the player (SPEC §29b). Order = list order of the track picker; named after what the music is, not after a
+   * faction's lore terms (except the six faction themes). groups: calm | tense | fight | end | faction */
+  var MOOD_INFO = [
+    {id: "title",      group: "calm",    zh: "标题",     en: "Title"},       // organ lead over slow bells (the title screen)
+    {id: "calm",       group: "calm",    zh: "平静",     en: "Calm"},        // soft pulse lead, light shaker
+    {id: "holy",       group: "calm",    zh: "圣堂",     en: "Sanctum"},     // detuned "choir", bells, long reverb
+    {id: "tense",      group: "tense",   zh: "紧张",     en: "Tense"},       // heartbeat bass, clock ticks
+    {id: "warp",       group: "tense",   zh: "亚空间",   en: "Warp"},        // whole-tone, wobbling tempo, detuned everything
+    {id: "battle",     group: "fight",   zh: "战斗",     en: "Battle"},      // driving rock beat
+    {id: "boss",       group: "fight",   zh: "首领",     en: "Boss"},        // double-kick, brass stabs
+    {id: "happy",      group: "end",     zh: "黎明",     en: "Dawn"},        // bright major, oom-pah (good endings)
+    {id: "bad",        group: "end",     zh: "余烬",     en: "Ashes"},       // low sighing lead, wind (bad endings)
+    {id: "death",      group: "end",     zh: "安魂",     en: "Requiem"},     // a lament played once, then near silence
+    {id: "tau",        group: "faction", zh: "钛",       en: "T'au"},
+    {id: "aeldari",    group: "faction", zh: "灵族",     en: "Aeldari"},
+    {id: "necron",     group: "faction", zh: "死灵",     en: "Necrons"},
+    {id: "orks",       group: "faction", zh: "兽人",     en: "Orks"},
+    {id: "gsc",        group: "faction", zh: "基因教派", en: "Genestealer Cult"},
+    {id: "mechanicus", group: "faction", zh: "机械神教", en: "Mechanicus"}
+  ];
   var SFX_NAMES = ["click", "hover", "select", "start", "type", "damage", "heal", "sanity", "corrupt",
                    "event", "warp", "codex", "save", "death", "ending_good", "consequence", "scan"];
   var URGENT = {battle: 1, boss: 1, warp: 1, death: 1, bad: 1, happy: 1, title: 1};   // switch immediately (no hysteresis); warp = chaos events
@@ -1429,6 +1456,16 @@
   function pkey(style, mood) { return style === "chip" ? mood : style + ":" + mood; }
   function playerFor(style, mood) { var k = pkey(style, mood); return players[k] || (players[k] = new Player(E, mood, style)); }
   function knownStyle(id) { return STYLE_IDS.indexOf(id) >= 0 ? id : "chip"; }
+  /* track selection (SPEC §29b): "auto" = story-driven (wantMood); a mood id = fixed, wantMood is only remembered. The module does not
+   * persist it; the UI keeps settings.musicTrack. `stopped` = stop() was called (nothing restarts until the next setMood/setTrack). */
+  var curTrack = "auto", stopped = false, listeners = [];
+  function knownTrack(id) { return typeof id === "string" && MOODS.indexOf(id) >= 0 ? id : "auto"; }
+  function target() { return curTrack !== "auto" ? (stopped ? null : curTrack) : wantMood; }        // the mood that should be sounding
+  function playingMood() { return preview ? preview.now : curMood; }
+  function notify() {
+    var m = playingMood();
+    listeners.slice().forEach(function (fn) { try { fn(m); } catch (e) {} });
+  }
   var lastSwitch = -1e9, pendingTimer = null, timer = null, lastType = 0, lastHover = 0;
   var musicVol = 0.5, sfxVol = 0.7, muted = false, failed = {}, files = {}, fileTimer = null;
   try { var saved = JSON.parse(root.localStorage.getItem(LS_KEY) || "{}"); muted = !!saved.muted; } catch (e) {}
@@ -1495,6 +1532,11 @@
     else if (curPKey && players[curPKey]) players[curPKey].stop(ctx.currentTime, fadeSec);
   }
   function apply(mood, fadeMs) {
+    var before = playingMood();
+    applyMood(mood, fadeMs);
+    if (playingMood() !== before) notify();
+  }
+  function applyMood(mood, fadeMs) {
     if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
     if (!E) return;
     var fadeSec = (fadeMs == null ? (DEFAULT_FADE[mood] || 1500) : fadeMs) / 1000;
@@ -1530,43 +1572,71 @@
     preview.timers.forEach(clearTimeout);
     preview.players.forEach(function (p) { if (p.active) p.stop(ctx.currentTime, 0.3); });
     preview = null;
-    if (resume && wantMood && !curMood && unlocked) apply(wantMood, 700);
+    if (resume && target() && !curMood && unlocked) apply(target(), 700);
+    if (resume) notify();                                // (stop() and runPreview() notify on their own)
   }
-  function previewStyle(id) {
-    id = knownStyle(id);
+  /* A preview never overlaps the running music: it fades the current mood out, plays its phrases, then the target mood resumes.
+   * phrases: [{mood, at (ms), secs, fade, seq (start section)}]; endMs = when the preview ends and the music resumes. */
+  function runPreview(id, phrases, endMs) {
     if (!unlock() || muted) return false;
     var had = !!preview;
     endPreview(false);
     if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
     if (curMood) { stopCurrent(had ? 0.05 : 0.3); curMood = null; curKind = null; curPKey = null; }
-    var pv = preview = {timers: [], players: []};
-    var phrase = function (mood, secs, fade) {           // one phrase = the fullest section (A2) of that style's mood
-      var p = playerFor(id, mood);
-      if (p.active) p.halt();
-      p.start(ctx.currentTime, 0.12, 2); pv.players.push(p);
-      pv.timers.push(setTimeout(function () { if (preview === pv) p.stop(ctx.currentTime, fade); }, secs * 1000));
-    };
-    pv.timers.push(setTimeout(function () { if (preview === pv) phrase("calm", 3.9, 0.5); }, 350));
-    pv.timers.push(setTimeout(function () { if (preview === pv) phrase("tense", 3.8, 0.5); }, 4150));
-    pv.timers.push(setTimeout(function () { if (preview === pv) endPreview(true); }, 8700));   // ~8 s of sample, then the old style / mood resume
+    var pv = preview = {timers: [], players: [], now: null};
+    phrases.forEach(function (ph) {
+      pv.timers.push(setTimeout(function () {
+        if (preview !== pv) return;
+        var p = playerFor(id, ph.mood);
+        if (p.active) p.halt();
+        p.start(ctx.currentTime, 0.12, ph.seq); pv.players.push(p);
+        pv.now = ph.mood; kick(); notify();
+        pv.timers.push(setTimeout(function () { if (preview === pv) p.stop(ctx.currentTime, ph.fade); }, ph.secs * 1000));
+      }, ph.at));
+    });
+    pv.timers.push(setTimeout(function () { if (preview === pv) endPreview(true); }, endMs));   // ~8 s of sample, then the old style / mood resume
+    notify();
     return true;
+  }
+  function previewStyle(id) {                            // a calm phrase, then a tense one — each the fullest section (A2) of that style's mood
+    return runPreview(knownStyle(id), [{mood: "calm", at: 350, secs: 3.9, fade: 0.5, seq: 2}, {mood: "tense", at: 4150, secs: 3.8, fade: 0.5, seq: 2}], 8700);
+  }
+  /* SPEC §29b: ~8 s of one mood, from its top, in the current style */
+  function previewMood(id) {
+    if (typeof id !== "string" || MOODS.indexOf(id) < 0) return false;
+    return runPreview(curStyle, [{mood: id, at: 350, secs: 7.6, fade: 0.5, seq: 0}], 8700);
   }
 
   function setMood(mood, opts) {
     opts = opts || {};
     if (!mood || !SONGS[mood]) return false;
-    wantMood = mood;
+    wantMood = mood; stopped = false;
     if (!unlocked) return true;                          // will start on unlock()
     if (preview) return "deferred";                      // the style preview never overlaps the running mood; wantMood resumes after it
+    if (curTrack !== "auto") {                           // a fixed track (SPEC §29b): the story mood is only remembered
+      if (!curMood) apply(curTrack, opts.fade);          // (unless stop() left the track silent: any setMood() wakes it again)
+      return "fixed";
+    }
     if (mood === curMood) { if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; } return true; }
     var since = nowMs() - lastSwitch;
     if (!opts.force && !URGENT[mood] && curMood && since < HYSTERESIS_MS) {
       if (pendingTimer) clearTimeout(pendingTimer);
-      pendingTimer = setTimeout(function () { pendingTimer = null; if (wantMood && wantMood !== curMood) apply(wantMood, opts.fade); }, HYSTERESIS_MS - since);
+      pendingTimer = setTimeout(function () { pendingTimer = null; if (curTrack === "auto" && wantMood && wantMood !== curMood) apply(wantMood, opts.fade); }, HYSTERESIS_MS - since);
       return "deferred";
     }
     apply(mood, opts.fade);
     return true;
+  }
+
+  /* SPEC §29b: setTrack("auto") -> story-driven again (crossfade to the remembered story mood); setTrack(<mood id>) -> that mood loops,
+   * whatever the story does. Unknown id -> "auto". ~1.5 s crossfade, no hysteresis. */
+  function setTrack(id) {
+    id = knownTrack(id);
+    stopped = false;
+    if (id === curTrack) return id;
+    curTrack = id;
+    if (E && unlocked && !preview && target()) apply(target(), 1500);     // during a preview the new target resumes afterwards
+    return id;
   }
 
   function unlock() {
@@ -1580,7 +1650,7 @@
     }
     unlocked = true;
     if (!muted && !hidden() && ctx.state !== "running") { try { ctx.resume(); } catch (e) {} }
-    if (wantMood && !curMood && !preview) apply(wantMood, 800);
+    if (target() && !curMood && !preview) apply(target(), 800);
     return true;
   }
   function onVisibility() {
@@ -1666,7 +1736,7 @@
   WH.Audio = {
     unlock: unlock,
     setMood: setMood,
-    stop: function (opts) { wantMood = null; endPreview(false); if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; } if (E) { stopCurrent(((opts && opts.fade) || 1000) / 1000); curMood = null; curKind = null; } },
+    stop: function (opts) { wantMood = null; stopped = true; endPreview(false); if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; } if (E) { stopCurrent(((opts && opts.fade) || 1000) / 1000); curMood = null; curKind = null; } notify(); },
     sfx: sfx,
     setMusicVolume: function (v) { musicVol = Math.max(0, Math.min(1, +v || 0)); if (E) E.setMusic(musicVol); return musicVol; },
     setSfxVolume: function (v) { sfxVol = Math.max(0, Math.min(1, +v || 0)); if (E) E.setSfx(sfxVol); return sfxVol; },
@@ -1686,6 +1756,12 @@
     getStyle: function () { return curStyle; },
     setStyle: setStyle,
     previewStyle: previewStyle,
+    getMoods: function () { return MOOD_INFO.map(function (m) { return {id: m.id, group: m.group, zh: m.zh, en: m.en}; }); },
+    getTrack: function () { return curTrack; },
+    setTrack: setTrack,
+    getPlayingMood: playingMood,
+    previewMood: previewMood,
+    onChange: function (fn) { if (typeof fn !== "function") return function () {}; listeners.push(fn); return function () { var i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
     isPreviewing: function () { return !!preview; },
     // internals for tools/dev (not for game code)
     _songs: SONGS, _styleSong: songOf, _sfx: SFX, _compile: compileSong, _render: renderMood, _renderSfx: renderSfx,

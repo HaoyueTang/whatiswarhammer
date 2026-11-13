@@ -27,14 +27,20 @@
     if (persistent) { try { return root.localStorage.getItem(PREFIX + key); } catch (e) { persistent = false; } }
     return mem.hasOwnProperty(key) ? mem[key] : null;
   }
+  /* SPEC §34: cloud.js listens here (Save.onChange(fn)) to mirror every write / delete; never throws into the game */
+  var changeFns = [];
+  function changed(key) { for (var i = 0; i < changeFns.length; i++) { try { changeFns[i](key); } catch (e) { /* ignore */ } } }
   function set(key, val) {
     mem[key] = val;
-    if (persistent) { try { root.localStorage.setItem(PREFIX + key, val); return true; } catch (e) { persistent = false; } }
-    return false;
+    var ok = false;
+    if (persistent) { try { root.localStorage.setItem(PREFIX + key, val); ok = true; } catch (e) { persistent = false; } }
+    changed(key);
+    return ok;
   }
   function del(key) {
     delete mem[key];
     if (persistent) { try { root.localStorage.removeItem(PREFIX + key); } catch (e) { persistent = false; } }
+    changed(key);
   }
   function getJSON(key) {
     var s = get(key);
@@ -94,9 +100,8 @@
     try { rec = migrate(JSON.parse(JSON.stringify(rec))); } catch (e) { return {ok: false, error: "err_schema"}; }
     var f = WH.factions && WH.factions[rec.faction];
     if (!f) return {ok: false, error: "err_faction", arg: rec.faction};
-    var nodeOK = (f.nodes && f.nodes[rec.nodeId]) || rec.nodeId.indexOf("__death_") === 0;
-    if (!nodeOK) return {ok: false, error: "err_node", arg: rec.nodeId};
-    if (rec.pendingNext && !(f.nodes && f.nodes[rec.pendingNext])) return {ok: false, error: "err_node", arg: rec.pendingNext};
+    /* SPEC §32.4: a node id that no longer exists is NOT an error any more — WH.Game.fromRecord moves the run to the start of the saved chapter
+     * (stats / flags kept) and the UI shows a one-line notice. Unknown factions are still rejected. */
     if (!rec.stats || typeof rec.stats !== "object") return {ok: false, error: "err_schema"};
     if (rec.codex && !Array.isArray(rec.codex)) return {ok: false, error: "err_schema"};
     if (rec.seenEvents && !Array.isArray(rec.seenEvents)) return {ok: false, error: "err_schema"};
@@ -144,16 +149,20 @@
     /* settings */
     defaultSettings: function () {
       var nav = (root.navigator && (root.navigator.language || "")) || "";
-      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true, rewind: false, musicStyle: "chip"};
+      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", keywordLinks: true, loreAsked: false, knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true, rewind: false, musicStyle: "chip", musicTrack: "auto"};
     },
     loadSettings: function () {
       var d = Save.defaultSettings(), s = getJSON("settings") || {};
+      var askedStored = typeof s.loreAsked === "boolean";                  // SPEC §33: must be read before the defaults are merged in
       for (var k in d) if (s[k] === undefined) s[k] = d[k];
       if (s.lang !== "zh" && s.lang !== "en") s.lang = d.lang;
       if (s.loreCards === "auto" || ["new", "all", "codex"].indexOf(s.loreCards) < 0) s.loreCards = "new";   // v0.1 "auto" → "new"
       if (s.knownHint !== "silent") s.knownHint = "toast";
+      s.keywordLinks = s.keywordLinks !== false;                           // SPEC §33: underlined codex terms inside story text
+      if (!askedStored) s.loreAsked = Save.codexGlobal().length > 0 || Save.runs().length > 0;   // returning players are never asked
       s.rewind = s.rewind === true;                                        // SPEC §30 (default off)
       if (typeof s.musicStyle !== "string" || !/^[a-z0-9_-]{1,24}$/i.test(s.musicStyle)) s.musicStyle = "chip";   // SPEC §29 (audio.js maps unknown ids to chip)
+      if (typeof s.musicTrack !== "string" || !/^[a-z0-9_-]{1,24}$/i.test(s.musicTrack)) s.musicTrack = "auto";   // SPEC §29b ("auto" or a mood id; the UI/audio.js map unknown ids to auto)
       return s;
     },
     saveSettings: function (s) { set("settings", JSON.stringify(s)); },
@@ -284,6 +293,7 @@
       out.updated = true;
       return out;
     },
+    onChange: function (fn) { if (typeof fn === "function") changeFns.push(fn); },
     /* every whatiswh.* key as one object (values parsed when they are JSON) */
     exportAll: function () {
       var data = {};
@@ -391,11 +401,13 @@
         if (!v || typeof v !== "object") return;
         var cur = get(sl), txt = JSON.stringify(v);
         if (cur === txt) return;
-        if (cur !== null && !opts.overwrite) { sum.skipped.push(sl); return; }
+        var newer = false;                   // SPEC §34 (cloud pull): a slot saved later than the local one wins; the old one is kept as bak.import.<slot>
+        if (cur !== null && opts.newer) { try { newer = String(v.savedAt || "") > String((JSON.parse(cur) || {}).savedAt || ""); } catch (e) { newer = true; } }
+        if (cur !== null && !opts.overwrite && !newer) { sum.skipped.push(sl); return; }
         if (cur !== null && get("bak.import." + sl) === null) set("bak.import." + sl, cur);
         set(sl, txt); sum.slots.push(sl);
       });
-      if (d.settings && get("settings") === null) set("settings", JSON.stringify(d.settings));
+      if (d.settings && get("settings") === null) { set("settings", JSON.stringify(d.settings)); sum.settings = true; }
       // any other key we don't know: copy only if missing here
       var known = ["codexGlobal", "codexSeen", "tipsSeen", "eggTiers", "achievements", "achStats", "runs", "runsSeen", "runStats", "endingStats", "settings", "lastVersion"].concat(SLOTS);
       for (var k in d) {

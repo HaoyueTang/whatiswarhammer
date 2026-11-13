@@ -38,7 +38,7 @@ The eight sides share one sector (Arcosa, 111–115.M42), so one story's world c
 
 ### What's inside
 - **Choices with a price.** Health, Sanity, Corruption and a faction stat. Run out of the first two, or max out the third, and it's over. Every choice shows you what it cost.
-- **Many endings.** Good ones, bad ones, and a lot of ways to die. Each ending records how long you survived and what killed you.
+- **131 endings, each with its own picture.** Good ones, bad ones, and a lot of ways to die. Each ending records how long you survived and what killed you.
 - **People remember.** Betray, rob or abandon someone and they may turn up again, and the choice you make next to them gets more dangerous. A ⚠ mark tells you why. Nobody holds a grudge from somewhere they aren't.
 - **The gods are watching.** Khorne, Nurgle, Tzeentch and Slaanesh make you offers. Some are very generous. You won't see what they take until the end.
 - **Time doesn't behave.** Hours, days, sometimes years pass between scenes. Warp travel is worse.
@@ -46,7 +46,8 @@ The eight sides share one sector (Arcosa, 111–115.M42), so one story's world c
 - **Achievements.** 60 of them, from the sensible to the unwise. Keep an eye on the ones with question marks.
 - **Echoes.** Sometimes you'll hear, in passing, about someone who died on another route. Not every time, and not always kindly.
 - **Codex.** Every leader, monster, god and place you meet gets a short card, explained by what people do, not by lectures.
-- **Pixel art and music.** Original art and music; the soundtrack changes with the mood. Five styles to choose from in Settings: 8-bit chiptune (default), dark ambient, gothic organ, synthwave, and piano with strings.
+- **Ask once.** The first time you start, the game asks whether you already know Warhammer 40,000. New players get lore cards and clickable terms; veterans can switch them off (Settings, any time).
+- **Pixel art and music.** Original art and music; the soundtrack changes with the mood. Five styles to choose from in Settings: 8-bit chiptune (default), dark ambient, gothic organ, synthwave, and piano with strings. Or pick a fixed track from the ♪ panel.
 - **Take it back (optional).** Settings → Allow going back one choice adds a ↶ button (hotkey Z). It undoes your last choice, dice included: choose the same thing again and you get the same roll. What you've learned (codex, rumours, achievements) stays. Off by default; some achievements won't count a run that used it.
 - **Saves.** Three slots plus autosave. Updates never wipe your saves or records. Progress lives in your browser at the address you play from (local file, website…); use Settings → Data to export it and carry it elsewhere.
 
@@ -98,7 +99,7 @@ Warhammer 40,000 and associated names are trademarks of Games Workshop Limited. 
 
 ### 游戏内容
 - **每个选择都有代价。** 生命、理智、腐化，加一个阵营属性。前两个归零，或者腐化满了，就结束了。每次选择后你都会看到它的后果。
-- **多结局。** 好结局、坏结局，还有很多种死法。每个结局都会记下你活了多久、死于什么。
+- **131 个结局，每个都有专属插图。** 好结局、坏结局，还有很多种死法。每个结局都会记下你活了多久、死于什么。
 - **人会记仇。** 背叛、抢劫或抛下过某个人，他可能会再出现，你在他面前的下一个选择会更危险。选项上的 ⚠ 会告诉你原因。没有人会隔着不在场的地方记仇。
 - **诸神在注视。** 恐虐、纳垢、奸奇、色孽会给你开条件。有些条件非常慷慨。它们拿走了什么，要到结局你才知道。
 - **时间不老实。** 场景之间可能过去几小时、几天，有时是几年。亚空间航行更糟。
@@ -106,7 +107,8 @@ Warhammer 40,000 and associated names are trademarks of Games Workshop Limited. 
 - **成就。** 60 个，从明智到不明智都有。留意那些带问号的。
 - **回响。** 偶尔你会路过地听说，另一条路线里有人死了。不是每次都有，也不总是善意的。
 - **图鉴。** 遇到的每个领袖、怪物、神祇和地点都有一张短卡片——靠人物的言行来讲，不靠说教。
-- **像素美术与配乐。** 全部原创，配乐随剧情情绪变化。设置里可选五种风格：8 位芯片音乐（默认）、暗黑氛围、哥特管风琴、合成波、钢琴弦乐。
+- **只问一次。** 第一次开局会问你是否已经熟悉战锤 40K：新人会看到设定卡片和可点的词条，老玩家可以关掉（设置里随时能改）。
+- **像素美术与配乐。** 全部原创，配乐随剧情情绪变化。设置里可选五种风格：8 位芯片音乐（默认）、暗黑氛围、哥特管风琴、合成波、钢琴弦乐。也可以在 ♪ 面板里固定一首曲目。
 - **后悔药（可选）。** 设置 → 允许回到上一个选择，会多出一个 ↶ 按钮（快捷键 Z），撤销上一步选择，骰子也一并撤销：再选同一项，结果相同。你学到的东西（图鉴、传闻、成就）不会被收回。默认关闭；部分成就不计入用过它的那一局。
 - **存档。** 三个存档位加自动存档。版本更新不会清掉你的存档和记录。进度保存在你玩游戏的浏览器和地址里（本地文件、网页……），想换地方玩，用 设置 → 数据 导出再导入。
 

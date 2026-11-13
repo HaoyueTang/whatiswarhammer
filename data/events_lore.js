@@ -14,6 +14,7 @@
   WH.registerEvents([
     /* Second / Third War for Armageddon — an Imperial cook with his grandfather's tattoo */
     {id: "evt_lore_armageddon", god: "other", factions: ["imperium"], minChapter: 2,
+     where: {nodes: ["imp_208", "imp_400", "imp_501", "imp_611"]},   // troopship mess; never in battle or next to Brin's soup (imp_402/403/707)
      scene: "barracks", speaker: S("guardsman", "纹身的炊事兵", "The Tattooed Cook"), foe: null,
      text: L("炊事兵往你碗里多舀了一勺。他小臂上纹着一座冒烟的巢都，底下一行字：哈迪斯。\n“照我爷爷的纹的。”他说，“想听阿玛吉顿吗？那颗星球上的仗，从我爷爷的爷爷那辈一直打到现在。”",
              "The cook ladles an extra scoop into your bowl. On his forearm: a smoking hive spire, and beneath it one word, Hades.\n“Copied from my grandad's,” he says. “Want to hear about Armageddon? They've been fighting there since my grandad's grandad.”"),
@@ -33,6 +34,7 @@
 
     /* The Fall of Cadia — a refugee who won't talk about the Gate */
     {id: "evt_lore_cadia", god: "other", factions: ["imperium", "chaos"], minChapter: 3,
+     where: {scenes: ["ruins", "underhive"]},   // the text sets it in ruins: a lull, not a battle or a warp jump
      scene: "ruins", speaker: S("guard_sergeant", "不肯开口的卡迪亚人", "A Cadian Who Won't Talk"), foe: null,
      text: L("一个眼睛泛紫的老兵蹲在废墟里，擦着一块黑色石片。石片上的划痕在慢慢自己合拢。\n有人说他是卡迪亚人。你一提“那扇门”，他就停下手，盯着你，像在等你把话收回去。",
              "A violet-eyed veteran crouches in the ruins, polishing a shard of black stone. The scratches on it are slowly closing by themselves.\nThey say he's Cadian. When you mention ‘the Gate’, his hands stop. He stares at you as if waiting for you to take it back."),
@@ -53,6 +55,7 @@
 
     /* The Damocles Gulf Crusade — an old water-caste envoy */
     {id: "evt_lore_damocles", god: "other", factions: ["tau"], minChapter: 2,
+     where: {nodes: ["tau_312", "tau_601"]},   // SPEC §32.3: on the Dal'nor quay in a quiet time
      scene: "tau_city", speaker: S("tau_water_caste", "年迈的水族使节", "An Aged Water-Caste Envoy"), foe: null,
      text: L("老水族在码头边喂鱼，听说你是人类，笑了。\n“你们的帝国第一次来，是带着舰队来的。在达尔伊斯，我们的先辈花了好几个月才让他们停下。”他撒下最后一把饵，“后来，是我们先伸出的手。”",
              "An aged water-caste envoy is feeding fish at the quay. Hearing you're human, he smiles.\n“The first time your Imperium came, it came with a fleet. On Dal'yth our forebears needed months to stop it.” He scatters the last of the bait. “Afterwards, we were the ones who offered a hand.”"),
@@ -72,6 +75,7 @@
 
     /* The Fall of the Aeldari — an ancient soul in a wraith construct */
     {id: "evt_lore_fall", god: "other", factions: ["aeldari"], minChapter: 4,
+     where: {scenes: ["craftworld"], chapter: {min: 4, max: 7}},
      scene: "craftworld", speaker: S("wraith_construct", "灵骨中的古魂", "An Old Soul in Wraithbone"), foe: null,
      text: L("一具灵骨巨人在走廊尽头停下，朝你低下头。它的声音像从很深的井底传来：\n“猿人。你身上有麦子的味道。陨落那天，我们的田野也是这个味道。然后，群星开始尖叫。”",
              "A wraithbone giant halts at the end of the corridor and bows its head to you. Its voice comes as if from the bottom of a deep well:\n“Mon-keigh. You smell of wheat. Our fields smelled so, the day of the Fall. Then the stars began to scream.”"),
@@ -88,6 +92,7 @@
 
     /* The War in Heaven — a cryptek bored by "recent" history */
     {id: "evt_lore_war_in_heaven", god: "other", factions: ["necrons"], minChapter: 3,
+     where: {scenes: ["tomb_interior", "stasis_gallery"], chapter: {min: 3, max: 5}},   // SPEC §32.3: crypteks labelling cubes, tomb or gallery
      scene: "tomb_interior", speaker: S("cryptek", "无聊的技师", "A Bored Cryptek"), foe: null,
      text: L("一位技师正在给一排停滞立方贴标签。见你经过，它叫住你：“有机体。你们人类管多久以前叫‘古代史’？”\n你说了个数字。它的眼光闪了两下，像在笑：“可爱。天堂之战都只算近代史。”",
              "A cryptek is labelling a row of stasis cubes. As you pass, it calls out: “Organic. How long ago does your kind call ‘ancient history’?”\nYou name a number. Its eye-lights flicker twice, like laughter. “Adorable. The War in Heaven counts as recent.”"),
@@ -107,6 +112,7 @@
 
     /* The Silent King returns — a necron overlord, rattled */
     {id: "evt_lore_silent_king", god: "other", factions: ["necrons"], minChapter: 3,
+     where: {nodes: ["nec_401"]},   // SPEC §32.3: weeks after the King's summons (nec_311), back in the tomb
      scene: "tomb_interior", speaker: S("necron_lord", "焦躁的霸主", "A Restless Overlord"), foe: null,
      text: L("一位霸主在王座前来回踱步，金属脚步声响个不停。\n“王回来了。”他对你说——大概因为你是唯一不会传话的东西，“六千万年不闻不问，现在要我们排队听令。你们人类怎么对付突然回家的祖宗？”",
              "An overlord paces before his throne, metal feet ringing without pause.\n“The King has returned,” he tells you, presumably because you're the only thing here that won't repeat it. “Sixty million years of silence, and now we queue for orders. How do humans deal with an ancestor who suddenly comes home?”"),
@@ -126,6 +132,7 @@
 
     /* The Siege of Terra — a vision, for every route where the warp can still reach you */
     {id: "evt_lore_terra_vision", god: "other", factions: ["imperium", "chaos", "tau", "aeldari"], minChapter: 4,
+     where: {notScenes: ["webway"]},
      scene: "throne_light", speaker: S("omen_emperor", "金色的幻象", "A Golden Vision"), foe: null,
      text: L("一瞬间，你站在一座燃烧的宫殿城墙上。炮火把天空烧成红色，城下的叛军多得像海。\n远处一艘巨舰的舰桥里，一道金光正与一道黑影交锋。你知道这是一万年前。你不知道自己为什么看得见。",
              "For an instant you stand on the walls of a burning palace. Gunfire turns the sky red; the traitor host below is an ocean.\nOn the bridge of a vast ship far off, a golden light clashes with a black shadow. You know this was ten thousand years ago. You don't know why you can see it."),
@@ -161,6 +168,7 @@
 
     /* The Badab War — a Red Corsair recruiting over an open channel */
     {id: "evt_lore_badab", god: "other", factions: ["imperium", "chaos", "tau"], minChapter: 4,
+     where: {notScenes: ["warp", "daemon_world"]},   // a vox channel: not mid-jump, not inside the Eye
      scene: "void", speaker: S("heretic_astartes", "红甲海盗", "A Red-Armoured Corsair"), foe: null,
      text: L("一段通讯突然切进你附近的频道。一个嗓音懒洋洋地说：\n“这里是漩涡风暴来的朋友。我们头儿当年也给帝国交过税——基因、人命，什么都交。后来他不交了。要一起吗？我们不问出身。”",
              "A transmission cuts into a nearby channel. A lazy voice:\n“Friends from the Maelstrom here. Our boss paid the Imperium's tithe once. Gene-seed, lives, everything. Then he stopped paying. Want in? We don't ask where you're from.”"),
