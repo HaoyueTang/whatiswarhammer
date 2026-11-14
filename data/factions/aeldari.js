@@ -1705,7 +1705,7 @@
   N.eld_end_thirst = {chapter: 8, scene: "jungle", speaker: DAEMON, time: {y: 1, warp: true},
     text: L("你点了头。瓦尔达的麦田在你周围展开，完美无缺，妮尔在门口等你。\n你进门，坐下，吃饭。每一顿都一样完美。\n每一天都一样。你想停下，却想不起该怎么停。很远的地方，有什么正吃得很开心。",
             "You nod. Valda's fields unfold around you, flawless; Nell waits at the door.\nYou go in, sit down, eat. Every supper is just as perfect.\nEvery single day. You want to stop, but can't remember how. Far away, something is feasting happily."),
-    ending: {kind: "bad", title: L("完美的晚餐", "The Perfect Supper"), cause: L("灵魂被色孽吞噬", "Soul devoured by Slaanesh")}};
+    ending: {kind: "bad", title: L("完美的晚餐", "The Perfect Supper"), cause: L("被色孽慢慢饮尽", "Slowly drunk dry by Slaanesh")}};
 
   N.eld_end_sealed = {chapter: 8, scene: "webway", speaker: null, foe: "greater_daemon_slaanesh", time: {d: 1, warp: true},
     text: L("门合上了。另一边，先知垂下眼睛，在符文上划掉一根线。\n你和大魔一起被封在网道里。它不急，它有的是时间；你会慢慢变得不那么干净。",
@@ -1746,7 +1746,7 @@
     text: L("那段甜甜的音乐再也不停了。你坐下来听，听了一天，一个月，一年。\n后来有人发现你，你还坐着微笑，灵魂早已不在，没有灵魂石接住它。\n渴求者饿了一万年。一个猿人的灵魂，只是饭前的甜点。",
             "The sweet music never stops now. You sit and listen: a day, a month, a year.\nWhen someone finally finds you, you are still sitting and smiling, your soul long gone. No spirit stone caught it.\nShe Who Thirsts has hungered for ten thousand years. A mon-keigh soul is a sweet before the meal."),
     codex: ["god_slaanesh"],
-    ending: {kind: "bad", title: L("饭前的甜点", "A Sweet Before the Meal"), cause: L("灵魂被色孽吞噬", "Soul devoured by Slaanesh")}};
+    ending: {kind: "bad", title: L("饭前的甜点", "A Sweet Before the Meal"), cause: L("被色孽的乐声吞噬", "Devoured by Slaanesh's music")}};
 
   /* ============ Death nodes (engine-triggered; location-neutral, varied by alt fromChapter) ============ */
   N.eld_death_hp = {scene: "webway", speaker: null,
@@ -1772,8 +1772,8 @@
     ending: {kind: "death", title: L("墙里的客人", "Guest of the Walls"), cause: L("理智崩溃", "Mind shattered")}};
 
   N.eld_death_corruption = {scene: "daemon_world", speaker: S("sigil_slaanesh", "渴求者", "She Who Thirsts"),
-    text: L("你想要的越来越多，多到身体装不下。皮肤发光，长出不该有的颜色，声音甜得像音乐。\n看见你的人都举起了枪，眼里没有恨，只有怜悯。\n在他们开枪之前，很远的地方，有什么东西先一步把你喝干了。",
-            "You want more and more, more than a body can hold. Your skin begins to glow in colours it should not have; your voice turns sweet as music.\nEveryone who sees you raises a gun, with no hatred in their eyes, only pity.\nBefore they fire, something very far away drinks you dry."),
+    text: L("你想要的越来越多，多到身体装不下。皮肤发光，长出不该有的颜色，声音甜得像音乐。\n看见你的人都举起了武器，眼里没有恨，只有怜悯。\n在他们开枪之前，很远的地方，有什么东西先一步把你喝干了。",
+            "You want more and more, more than a body can hold. Your skin begins to glow in colours it should not have; your voice turns sweet as music.\nEveryone who sees you raises a weapon, with no hatred in their eyes, only pity.\nBefore they fire, something very far away drinks you dry."),
     ending: {kind: "death", title: L("被饮尽", "Drunk Dry"), cause: L("被色孽之欲吞没", "Consumed by Slaanesh's hunger")}};
 
   /* ============ Route-specific events (SPEC §12: 1–2 per route) ============ */

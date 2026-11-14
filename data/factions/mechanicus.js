@@ -1506,8 +1506,8 @@
 
   N.mech_end_purged = {chapter: 8, scene: "tech_vault", speaker: S("magos", "铸造世界法庭", "The Forge Tribunal"), time: {d: 9},
     alt: [ADD(F("resealed"), "你重新封过禁库。法庭记下了，没有改判。", "You once resealed the forbidden archive. The tribunal notes it, and does not change the verdict.")],
-    text: L("你把恶魔引擎的核心带回圣库，只想看看它是怎么运转的。\n法庭的判决只有一个二进制词：异端。\n他们没有把你改成机仆。他们怕那颗核心已经教会了你的大脑什么。",
-            "You bring the engine's core back to the Vault. You only want to see how it works.\nThe tribunal's verdict is one binary word: heresy.\nThey don't make you a servitor. They fear what the core has already taught your brain."),
+    text: L("你把恶魔引擎的核心带回圣库，只想看看它是怎么运转的。\n法庭的判决只有一个二进制词：异端。\n他们没有把你改成机仆。他们怕那颗核心已经教会了你什么，于是当场在冷光下执行。",
+            "You bring the engine's core back to the Vault. You only want to see how it works.\nThe tribunal's verdict is one binary word: heresy.\nThey don't make you a servitor. They fear what the core has already taught you, and carry out the sentence on the spot, under the cold light."),
     ending: {kind: "bad", title: L("最后的好奇心", "The Last Curiosity"), cause: L("因技术异端被处决", "Executed for tech-heresy")}};
 
   N.mech_end_looted = {chapter: 5, scene: "ork_scrapyard", speaker: MEK, time: {y: 1},
