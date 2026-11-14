@@ -211,8 +211,8 @@
     "en": "A Sweet Before the Meal"
    },
    "cause": {
-    "zh": "灵魂被色孽吞噬",
-    "en": "Soul devoured by Slaanesh"
+    "zh": "被色孽的乐声吞噬",
+    "en": "Devoured by Slaanesh's music"
    },
    "text": {
     "zh": "那段甜甜的音乐再也不停了。你坐下来听，听了一天，一个月，一年。\n后来有人发现你，你还坐着微笑，灵魂早已不在，没有灵魂石接住它。\n渴求者饿了一万年。一个猿人的灵魂，只是饭前的甜点。",
@@ -367,8 +367,8 @@
     "en": "The Perfect Supper"
    },
    "cause": {
-    "zh": "灵魂被色孽吞噬",
-    "en": "Soul devoured by Slaanesh"
+    "zh": "被色孽慢慢饮尽",
+    "en": "Slowly drunk dry by Slaanesh"
    },
    "text": {
     "zh": "你点了头。瓦尔达的麦田在你周围展开，完美无缺，妮尔在门口等你。\n你进门，坐下，吃饭。每一顿都一样完美。\n每一天都一样。你想停下，却想不起该怎么停。很远的地方，有什么正吃得很开心。",
@@ -400,8 +400,8 @@
     "en": "Consumed by Slaanesh's hunger"
    },
    "text": {
-    "zh": "你想要的越来越多，多到身体装不下。皮肤发光，长出不该有的颜色，声音甜得像音乐。\n看见你的人都举起了枪，眼里没有恨，只有怜悯。\n在他们开枪之前，很远的地方，有什么东西先一步把你喝干了。",
-    "en": "You want more and more, more than a body can hold. Your skin begins to glow in colours it should not have; your voice turns sweet as music.\nEveryone who sees you raises a gun, with no hatred in their eyes, only pity.\nBefore they fire, something very far away drinks you dry."
+    "zh": "你想要的越来越多，多到身体装不下。皮肤发光，长出不该有的颜色，声音甜得像音乐。\n看见你的人都举起了武器，眼里没有恨，只有怜悯。\n在他们开枪之前，很远的地方，有什么东西先一步把你喝干了。",
+    "en": "You want more and more, more than a body can hold. Your skin begins to glow in colours it should not have; your voice turns sweet as music.\nEveryone who sees you raises a weapon, with no hatred in their eyes, only pity.\nBefore they fire, something very far away drinks you dry."
    },
    "scene": "daemon_world",
    "speaker": {
@@ -1737,8 +1737,8 @@
     "en": "Burned at the gate as heretic"
    },
    "text": {
-    "zh": "匕首在你手里尖叫，像终于等到了这一刻。\n后来，维瑟尔的人只记得那晚城门口烧起了一堆火，颜色很奇怪。\n佩尔没有开枪。他闭上了眼睛。",
-    "en": "The dagger shrieks in your hand, as if it had waited for this moment.\nAfterward, the people of Vessel remember only a fire at the gate that night, burning an odd colour.\nPell didn't fire. He closed his eyes."
+    "zh": "匕首在你手里尖叫，像终于等到了这一刻。\n后来，维瑟尔的人只记得那晚城门口烧起了一堆火，颜色很奇怪，火里有个人影。\n佩尔没有开枪。他闭上了眼睛。",
+    "en": "The dagger shrieks in your hand, as if it had waited for this moment.\nAfterward, the people of Vessel remember only a fire at the gate that night, burning an odd colour, with a figure inside it.\nPell didn't fire. He closed his eyes."
    },
    "scene": "burning_city",
    "speaker": null,
@@ -2223,8 +2223,8 @@
     "en": "Executed for tech-heresy"
    },
    "text": {
-    "zh": "你把恶魔引擎的核心带回圣库，只想看看它是怎么运转的。\n法庭的判决只有一个二进制词：异端。\n他们没有把你改成机仆。他们怕那颗核心已经教会了你的大脑什么。",
-    "en": "You bring the engine's core back to the Vault. You only want to see how it works.\nThe tribunal's verdict is one binary word: heresy.\nThey don't make you a servitor. They fear what the core has already taught your brain."
+    "zh": "你把恶魔引擎的核心带回圣库，只想看看它是怎么运转的。\n法庭的判决只有一个二进制词：异端。\n他们没有把你改成机仆。他们怕那颗核心已经教会了你什么，于是当场在冷光下执行。",
+    "en": "You bring the engine's core back to the Vault. You only want to see how it works.\nThe tribunal's verdict is one binary word: heresy.\nThey don't make you a servitor. They fear what the core has already taught you, and carry out the sentence on the spot, under the cold light."
    },
    "scene": "tech_vault",
    "speaker": {

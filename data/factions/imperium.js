@@ -572,8 +572,8 @@
     ]};
 
   N.imp_end_heretic = {chapter: 4, scene: "burning_city", speaker: null, time: {h: 1},
-    text: L("匕首在你手里尖叫，像终于等到了这一刻。\n后来，维瑟尔的人只记得那晚城门口烧起了一堆火，颜色很奇怪。\n佩尔没有开枪。他闭上了眼睛。",
-            "The dagger shrieks in your hand, as if it had waited for this moment.\nAfterward, the people of Vessel remember only a fire at the gate that night, burning an odd colour.\nPell didn't fire. He closed his eyes."),
+    text: L("匕首在你手里尖叫，像终于等到了这一刻。\n后来，维瑟尔的人只记得那晚城门口烧起了一堆火，颜色很奇怪，火里有个人影。\n佩尔没有开枪。他闭上了眼睛。",
+            "The dagger shrieks in your hand, as if it had waited for this moment.\nAfterward, the people of Vessel remember only a fire at the gate that night, burning an odd colour, with a figure inside it.\nPell didn't fire. He closed his eyes."),
     ending: {kind: "bad", title: L("城门之火", "Fire at the Gate"), cause: L("持邪刃反抗，焚于城门", "Burned at the gate as heretic")}};
 
   N.imp_411 = {chapter: 4, scene: "cathedral", speaker: HAAK, time: {h: 6},
