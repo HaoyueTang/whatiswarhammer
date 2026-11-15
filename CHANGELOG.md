@@ -2,6 +2,13 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
+## [Unreleased] — 0.5.0 (shared birth point, SPEC §35)
+### Changed — Your choices decide who you are
+- Every route now starts at **one shared birth scene** (3–4 nodes: a muster, a census, a landing, a levy…). The choices you make there decide which of the route's three origins (class / career) you become; the three origins, their stats, caps, openings and the rest of the story are unchanged. Each origin's first node has an `alt` that reads right after the birth.
+- New setting **直接选出身 / Pick an origin card** (default off): on = the old origin cards before the game. Rewind (↶) works across the fork; a save made before the fork reloads with the origin still undecided; ↻ again starts a new run at the birth scene.
+### Tools
+- Validator: `checkBirth` (static rules) + `birthSelfTest` (90 random runs per route from the birth node, fork rewind, save round trip); `story_lib` / `route_graph` / `date_audit` / `playthrough --birth` know the birth node; MAY-flag propagation now expands nodes reached with an empty flag set. Smoke: `--only-birth --real`; `CLEAR` sets `chooseOrigin: true` so the old tests keep walking the origin cards.
+
 ## [0.4.0] - 2026-11-13
 ### Changed — Story overhaul of all 8 routes (SPEC §32)
 - Every route rewritten by an Opus author and then read through by a QA reader (≈ 280 continuity fixes): no cosmetic choices (false choices 43–69 % → 0 %), no forced chapter steps (6–10 per route → 0), every chapter step goes through a bridge node (where / when / who is present), every flag that is set is read later (21–49 never-read flags per route → 0), hard jumps explained or removed (18–48 → 0 unexplained).

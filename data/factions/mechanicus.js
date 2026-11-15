@@ -49,11 +49,46 @@
   var CAWL     = S("omen_cawl", "考尔的数据包", "Cawl's Data-Packet");
   var CLERK    = S("hive_foreman", "债务官", "The Debt Clerk");
   var KASTELAN = S("kastelan_robot", "卡斯特兰机器人", "Kastelan Robot");
+  var DRUMALPHA = S("skitarius", "守签筒的阿尔法", "Alpha at the Drum");
 
   var N = {};
 
+  /* ============ Shared birth (SPEC §35) · Levy Day at the foot of the hab-spire ============
+   * b01 → b02 (debt roll: savant / menial / walk to the drum) | b03 (lot-drum: conscript ×2 / menial) */
+  N.mech_b01 = {chapter: 1, scene: "hive_hab", speaker: null,
+    text: L("格拉维克斯，阿尔科萨星区唯一的铸造世界。居住尖塔脚下，征调日的号角响了三遍。\n欠神教债的人家，每户交出一个人。广场一头挂着债务榜，另一头摆着护教军的签筒。\n你家的名字在榜上。",
+            "Gravex, the Arcosa Sector's only forge world. At the foot of the hab-spire the Levy Day horn sounds three times.\nEvery household in debt to the Cult gives up one person. At one end of the square hangs the debt roll; at the other, the Skitarii lot-drum.\nYour family's name is on the roll."),
+    codex: ["place_gravex", "place_arcosa"],
+    choices: [
+      C("挤到债务榜前，看欠了多少", "Push through to the roll and see what you owe", "mech_b02"),
+      C("排进签筒前的队伍", "Join the line at the lot-drum", "mech_b03")
+    ]};
+
+  N.mech_b02 = {chapter: 1, scene: "hive_hab", speaker: CLERK, time: {h: 1},
+    text: L("债务官坐在榜下，账本摊在膝上，两个机仆替他撑着雨棚。\n“欠神教的电费。拿什么抵都行，”他头也不抬，“背，或者脑子。”\n第七熔炉的招工牌钉在他身旁，墨迹还没干。",
+            "The debt clerk sits under the roll, ledger open on his knees, two servitors holding an awning over him.\n“Arrears on the Cult's power tithe. Any payment in kind will do,” he says without looking up. “A back, or a brain.”\nThe Seventh Furnace's hiring board is nailed beside him, the ink still wet."),
+    choices: [
+      C("把欠款一笔笔背给他听", "Recite the whole debt back to him, line by line", "mech_o_savant_1", {effects: {origin: "savant", set: {born_shared: true, origin_savant: true}}, result: L("你背到小数点后第四位，又指出他漏记了一笔利息。债务官终于抬起头，合上欠费账，翻开另一本黑皮的。", "You recite it to the fourth decimal place and point out an interest charge he missed. The clerk finally looks up, shuts the arrears ledger and opens a black-bound one.")}),
+      C("撕下一张熔炉工牌", "Tear a furnace tag off the board", "mech_101", {effects: {origin: "menial", set: {born_shared: true, origin_menial: true}}, result: L("工牌能抵掉家里的欠款，抵不掉你的背。债务官把你家的名字划掉：“第七熔炉，今天就上工。”", "A tag pays off the family's debt. Nothing pays off your back. The clerk strikes your family's name. “Seventh Furnace. You start today.”")}),
+      C("什么也不给他，去排签筒", "Give him nothing; go and queue at the drum", "mech_b03")
+    ]};
+
+  N.mech_b03 = {chapter: 1, scene: "hive_hab", speaker: DRUMALPHA, time: {h: 1},
+    text: L("签筒是黄铜的。守着它的护教军阿尔法一动不动，只有镜头挨个扫过排队的人。\n抽中齿轮纹的，当场带走；抽到空签的，去熔炉领工牌。\n你前面的少年抖得握不住签。",
+            "The drum is brass. The Skitarii Alpha guarding it never moves; only her lens sweeps the line, face by face.\nDraw the cog and you are taken on the spot. Draw blank and you go to the furnace for a tag.\nThe boy ahead of you is shaking too hard to hold a lot."),
+    choices: [
+      C("把手伸进签筒", "Put your hand into the drum", "mech_o_conscript_1", {effects: {origin: "conscript", set: {born_shared: true, origin_conscript: true}}, result: L("签是凉的，上面刻着齿轮。阿尔法扣住你的手腕：“恐惧会被处理。走。”", "The lot is cold, and it bears the cog. The Alpha closes her hand round your wrist. “Fear will be handled. Walk.”")}),
+      C("替发抖的少年抽签", "Draw the shaking boy's lot for him", "mech_o_conscript_1", {effects: {origin: "conscript", set: {born_shared: true, origin_conscript: true, drewForBoy: true}}, result: L("你替他抽出一支，刻着齿轮。少年哭出了声。阿尔法看的不是名字，是那只手：“你。”", "You draw for him. The lot bears the cog. The boy sobs. The Alpha looks not at the name but at the hand. “You.”")}),
+      C("不抽了，直接去熔炉领工牌", "Skip the drum; go to the furnace for a tag", "mech_101", {effects: {origin: "menial", set: {born_shared: true, origin_menial: true}}, result: L("签筒里九成是空签，可那一成你不想赌。熔炉至少管饭。", "Nine lots in ten are blank, but you won't bet on the tenth. The furnace at least feeds you.")})
+    ]};
+
   /* ============ Chapter 1 · The Quota ============ */
   N.mech_101 = {chapter: 1, scene: "forge_floor", speaker: null,
+    alt: [ALT({all: [F("born_shared"), FROM(["mech_b02"])]}, "榜上划掉了你家的名字，记到了你身上。第七熔炉登记处给你一个旧编号：G7-2291。上一个戴它的杂役昨天倒在炉边，记录跟着编号一起传。\n配额板上，它已经两次红。三次红，就送去转化线。",
+              "Your family's name is struck from the roll, and written onto you. The Seventh Furnace registry hands you a used number: G7-2291. The menial who wore it fell by the furnace yesterday; the record goes with the number.\nOn the quota board it already has two reds. Three, and it's the conversion line."),
+          ALT(F("born_shared"), "签筒那边还在叫号。第七熔炉的登记处给你一张饭票和一个旧编号：G7-2291。上一个戴它的杂役昨天倒在炉边，记录跟着编号一起传。\n配额板上，它已经两次红。三次红，就送去转化线。",
+              "Behind you they're still calling lots at the drum. The Seventh Furnace registry hands you a meal chit and a used number: G7-2291. The menial who wore it fell by the furnace yesterday; the record goes with the number.\nOn the quota board it already has two reds. Three, and it's the conversion line."),
+          ADD(F("born_shared"), "带你的老杂役叫托宾，咳得厉害，这会儿在配给队列里。", "The old hand assigned to show you around is Tobin. He coughs badly; he's in the ration queue now.")],
     text: L("格拉维克斯，阿尔科萨星区唯一的铸造世界。天是红的，雨里有铁味。\n你是第七熔炉的杂役，编号G7-2291。\n配额板上，你的数字又是红的。三次红，就送去转化线。",
             "Gravex, the Arcosa Sector's only forge world. The sky is red; the rain tastes of iron.\nYou are a menial of the Seventh Furnace, number G7-2291.\nOn the quota board your number is red again. Three reds, and it's the conversion line."),
     codex: ["place_gravex", "mech_menials", "place_arcosa"],
@@ -209,6 +244,8 @@
 
   /* ---------- Origin prologue · Hive-born savant ---------- */
   N.mech_o_savant_1 = {chapter: 1, scene: "hive_hab", speaker: CLERK,
+    alt: [ALT(F("born_shared"), "“经院出来的？”债务官看你的眼神，像在估一台计算机的价钱。你念过三年经院，背得出四千位数字。\n他在你家的名字旁画了个齿轮。\n“欠款不用你家还了。抵债：你的脑子，十年。”",
+              "“Scholam-schooled?” The clerk looks at you the way one prices a cogitator. Three years of scholam; four thousand digits by heart.\nHe draws a cog beside your family's name.\n“Your family owes nothing now. Payment in kind: your brain. Ten years.”")],
     text: L("你在格拉维克斯的居住尖塔长大，念过三年经院，背得出四千位数字。\n后来家里欠了神教的电费。\n债务官翻开账本：“抵债。你的脑子，十年。”",
             "You grew up in Gravex's hab-spire: three years of scholam, four thousand digits memorised.\nThen your family fell behind on the Cult's power tithe.\nThe debt clerk opens his ledger. “Payment in kind. Your brain. Ten years.”"),
     codex: ["place_gravex", "place_arcosa"],
@@ -279,6 +316,9 @@
 
   /* ---------- Origin prologue · Skitarii conscript ---------- */
   N.mech_o_conscript_1 = {chapter: 1, scene: "barracks", speaker: KESH,
+    alt: [ALT(F("born_shared"), "阿尔法没让你回家，直接押进兵营。手术只花了十分钟：后颈多了一个插槽。\n她插进一枚晶片，你突然不怕了，不怕得很奇怪。\n“恐惧已关闭，”凯什-43阿尔法说，“以后由我决定你什么时候怕。”",
+              "The Alpha doesn't let you go home; she marches you straight to the barracks. The surgery takes ten minutes: a socket in the back of your neck.\nShe slots in a wafer and suddenly you're unafraid. Strangely so.\n“Fear disabled,” says Alpha Kesh-43. “From now on, I decide when you're afraid.”"),
+          ADD(F("drewForBoy"), "那支签本是那个少年的。她只记是谁的手抽出来的。", "That lot was the boy's. She only logs whose hand drew it.")],
     text: L("你抽中了护教军辅兵的签。手术只花了十分钟：后颈多了一个插槽。\n凯什-43阿尔法插进一枚晶片，你突然不怕了，不怕得很奇怪。\n“恐惧已关闭，”她说，“以后由我决定你什么时候怕。”",
             "Your lot was drawn for the Skitarii auxilia. The surgery took ten minutes: a socket in the back of your neck.\nAlpha Kesh-43 slots in a wafer and suddenly you're unafraid. Strangely so.\n“Fear disabled,” she says. “From now on, I decide when you're afraid.”"),
     codex: ["mech_skitarii", "place_gravex", "place_arcosa"],
@@ -1731,6 +1771,7 @@
     playerSprite: "player_mechanicus",
     color: "#c0392b",
     startNode: "mech_101",
+    birthNode: "mech_b01",
     startDate: {year: 113, mill: 42},
     startStats: {hp: 110, sanity: 95, corruption: 0, renown: 5},
     renownLabel: L("机眷", "Grace"),

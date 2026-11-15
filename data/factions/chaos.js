@@ -30,8 +30,45 @@
 
   var N = {};
 
+    /* ============ Shared birth (SPEC §35) · the Sump Gate night market ============ */
+  N.cha_b01 = {chapter: 1, scene: "underhive", speaker: null,
+    text: L("沃恩巢都，夜。大升降井落到污池的地方叫闸口，每晚这里摆夜市：中巢人下来买便宜货，污池人卖垃圾瀑布冲下来的东西。\n你和所有人一样来了，身上有一样能换的，也有一样要藏的。",
+            "Hive Vorne, night. Where the Great Lift touches the Sump is the Gate, and every night a market sets up there: mid-hivers come down to buy cheap, Sump folk sell what the garbage falls wash down.\nYou've come like everyone else, with one thing to trade and one thing to hide."),
+    codex: ["imp_hive", "place_carcharos"],
+    choices: [
+      C("挤进人群", "Push into the crowd", "cha_b02")
+    ]};
+
+  N.cha_b02 = {chapter: 1, scene: "underhive", speaker: null, time: {h: 3},
+    text: L("午夜，升降井上那只老喇叭忽然响了，放出一支谁也没听过的调子，甜得发腻，又说不出哪里不对。\n整个夜市停了。有人跟着哼了起来。\n站台上，教会的执事举起灯开始念祷词；摊位后面的暗处一片死寂。",
+            "At midnight the old vox-horn on the lift shaft crackles and plays a tune nobody has ever heard: cloying sweet, and wrong in a way no one can name.\nThe whole market stops. Some start humming along.\nOn the platform, the cathedral deacon raises his lamp and begins a prayer. In the dark behind the stalls, dead silence."),
+    choices: [
+      C("挤向执事的灯", "Push toward the deacon's lamp", "cha_b03", {result: L("人群在祷词里缩成一团，你被推到了灯下的桌边。", "The crowd huddles into the prayer. You're shoved up against the table under the lamp.")}),
+      C("退进摊位后面的暗处", "Back into the dark behind the stalls", "cha_b04", {result: L("你贴着摊位退进阴影，那支调子跟在后面，一步也没落下。", "You slip back along the stalls into the shadow. The tune follows, not one step behind.")})
+    ]};
+
+  N.cha_b03 = {chapter: 1, scene: "underhive", speaker: S("preacher", "执事", "Deacon"),
+    text: L("桌上摊着亡者名录。大教堂每月派人下来，念上月死在污池的名字；交一枚硬币，就能添一个。\n调子还在响。执事手一抖，笔滚到了桌沿。\n旁边柱子上，执法官刚贴了张通缉单：一张穿军装的脸。",
+            "The roll of the dead lies open on the table. Once a month the cathedral sends someone down to read the names of last month's Sump dead; a coin adds one more.\nThe tune plays on. The deacon's hand jerks; the pen rolls to the table's edge.\nOn the post beside it, the enforcers have just pasted a fresh wanted sheet: a face in uniform."),
+    choices: [
+      C("接住笔，替他写完", "Catch the pen and finish the line", "cha_o_scribe_1", {effects: {origin: "scribe", set: {born_shared: true, origin_scribe: true}}, result: L("你的手先认出了笔画：缮写室里的十一年。执事本就是带你下来记名录的：“坐末班升降机走。那支歌，别提。”", "Your hand knows the strokes first: eleven years in the scriptorium. The deacon brought you down to keep the roll. “Last lift up. Not a word about that song.”")}),
+      C("拉低兜帽，背过身去", "Pull your hood low and turn away", "cha_o_deserter_1", {effects: {origin: "deserter", set: {born_shared: true, origin_deserter: true}}, result: L("通缉单上是三周前穿军装的你。执法官都仰头盯着喇叭，没人看你。你走回污池，没有跑。", "The face on the sheet is yours, three weeks ago, in uniform. The enforcers are staring up at the vox-horn. You walk back into the Sump without running.")})
+    ]};
+
+  N.cha_b04 = {chapter: 1, scene: "underhive", speaker: null,
+    text: L("摊位后面，一个贩子守着火盆收东西：枪、靴子、牙，什么都称。调子一响，他的秤停在半空。\n再往里，一群饿肚子的人蹲在垃圾瀑布底下，等上巢天亮时倒下来的东西。",
+            "Behind the stalls a dealer keeps a brazier and buys anything: guns, boots, teeth, it all goes on the scale. When the tune starts, his scale stops in mid-air.\nFurther in, a hungry crowd squats at the foot of the garbage falls, waiting for whatever the spire tips down at dawn."),
+    choices: [
+      C("卖掉锉了编号的激光枪", "Sell the lasgun with the filed-off number", "cha_o_deserter_1", {effects: {origin: "deserter", set: {born_shared: true, origin_deserter: true}}, result: L("贩子摸了摸枪托上锉掉团徽的地方：“星界军的货，半价。”欠的饭钱得还，你没还价。军装也扔进了他的火盆。", "The dealer thumbs the stock where the regiment's mark was filed away. “Guard issue. Half price.” You owe for too many meals to haggle. The uniform goes in his brazier too.")}),
+      C("挤到瀑布底下等天亮", "Squeeze in under the falls till dawn", "cha_101", {effects: {origin: "scavenger", set: {born_shared: true, origin_scavenger: true}}, result: L("你三天没吃东西了。污池只有这一个厨房。你缩在一堆陌生人中间，等上巢扔剩下的。", "You haven't eaten in three days, and the falls are the only kitchen the Sump has. You fold yourself in among strangers and wait for the spire's leavings.")})
+    ]};
+
     /* ============ Chapter 1 · The Sump ============ */
   N.cha_101 = {chapter: 1, scene: "underhive", speaker: null,
+    alt: [
+      {if: {flag: "born_shared"}, text: L("天亮了。垃圾瀑布一夜只落下冷水。你空着手走回窝棚，已经三天没吃东西了。\n蒂卡蹲在门口等你，昨夜那支调子她也听见了。她说，今天瀑布会下“好货”。",
+        "Dawn. All night the garbage falls dropped nothing but cold water. You trudge back to the shack empty-handed; three days now without food.\nTikka is crouched at the door. She heard the tune last night too. Today, she swears, the falls will drop “good stuff.”")}
+    ],
     text: L("污池。上巢扔下来的东西，掉到这里都成了宝贝：半截电线，一只鞋，一颗还会眨的义眼。\n你三天没吃东西了。蒂卡说，今天垃圾瀑布会下“好货”。",
             "The Sump. Anything the spire throws away is treasure down here: half a cable, one shoe, a bionic eye that still blinks.\nYou haven't eaten in three days. Tikka swears the garbage falls will drop “good stuff” today."),
     codex: ["imp_hive", "place_carcharos", "place_sump"],
@@ -148,6 +185,12 @@
   /* ============ Origin prologues (SPEC §16) · merge at cha_107 ============ */
   /* --- 星界军逃兵 / Guard deserter (origin_deserter) --- */
   N.cha_o_deserter_1 = {chapter: 1, scene: "underhive", speaker: null,
+    alt: [
+      {if: {all: [{flag: "born_shared"}, {fromNode: ["cha_b04"]}]}, text: L("天亮前，卖枪的钱已经还掉一半，军装在贩子的火盆里成了灰，只剩一双军靴舍不得给。\n三周前你逃出了团，政委一定还在找你。在污池，没人问你从哪来，只问你还有什么能换。",
+        "By dawn half the lasgun money has gone on debts, and the uniform is ash in the dealer's brazier. Only the boots are left; you couldn't part with them.\nThree weeks since you ran from the regiment. The commissar must still be looking. Down here nobody asks where you're from. Only what you've got left to trade.")},
+      {if: {flag: "born_shared"}, text: L("你压着兜帽回到窝棚，一夜没合眼。三周前你逃出了团，政委一定还在找你。\n激光枪早卖了，军装早烧了，只剩一双军靴舍不得扔。在污池，没人问你从哪来，只问你有什么能换。",
+        "You keep your hood down all the way to your shack and don't sleep. Three weeks since you ran from the regiment; the commissar must still be looking.\nThe lasgun's long sold, the uniform long burned; only the boots remain. Down here nobody asks where you're from. Only what you've got to trade.")}
+    ],
     text: L("污池。三周前你还是星界军。激光枪卖了，军装烧了，只剩一双军靴舍不得扔。\n团里的政委一定还在找你。\n在这里，没人问你从哪来，只问你有什么能换。",
             "The Sump. Three weeks ago you were Astra Militarum. The lasgun's sold, the uniform's burned; only the boots remain, too good to throw away.\nThe regiment's commissar must still be looking.\nDown here nobody asks where you're from. Only what you've got to trade."),
     codex: ["imp_hive", "place_carcharos", "place_sump"],
@@ -205,6 +248,10 @@
 
   /* --- 教会抄写员 / Ecclesiarchy scribe (origin_scribe) --- */
   N.cha_o_scribe_1 = {chapter: 1, scene: "cathedral", speaker: null,
+    alt: [
+      {if: {flag: "born_shared"}, text: L("末班升降机把你和执事送回中巢。天亮时你已坐回圣沃恩大教堂的缮写室，那支调子还在耳边。\n执事送来一本无名旧书，封皮是温的：抄一份存档，原本烧掉。\n你从不读自己抄的东西。今天，你翻开了。",
+        "The last lift takes you and the deacon back up. By dawn you're back at your desk in St Vorne's scriptorium, the tune still in your ears.\nThe deacon brings a nameless old book, its cover warm: copy it for the archive, burn the original.\nYou never read what you copy. Today, you open it.")}
+    ],
     text: L("中巢圣沃恩大教堂的缮写室。你抄了十一年经文，指头上的墨渍早就洗不掉了。\n今天送来一本无名旧书，封皮是温的。执事吩咐：抄一份存档，原本烧掉。\n你从不读自己抄的东西。今天，你翻开了。",
             "The scriptorium of St Vorne's, the mid-hive cathedral. Eleven years copying scripture; the ink on your fingers will never wash out.\nToday a nameless old book arrives, its cover warm. The deacon's order: copy it for the archive, burn the original.\nYou never read what you copy. Today, you open it."),
     codex: ["imp_hive", "place_carcharos", "imp_ecclesiarchy"],
@@ -1473,6 +1520,7 @@
     playerSprite: "player_chaos",
     color: "#a3242b",
     startNode: "cha_101",
+    birthNode: "cha_b01",
     startDate: {year: 111, mill: 42},
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("神恩", "Favor"),

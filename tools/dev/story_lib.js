@@ -110,12 +110,13 @@ function mayFlags(F, WH) {
   const starts = [];
   const origins = Array.isArray(F.origins) && F.origins.length ? F.origins : [{startNode: F.startNode, set: {}}];
   origins.forEach((o) => { truthyKeys(o.set).forEach((k) => universe.add(k)); if (o.startNode && N[o.startNode]) starts.push([o.startNode, truthyKeys(o.set)]); });
+  if (F.birthNode && N[F.birthNode]) starts.push([F.birthNode, []]);                // SPEC §35: shared birth point (the fork choices set origin_* + born_shared)
   for (const e of (WH && WH.events) || []) {
     if (!appliesTo(e, F.id)) continue;
     (e.choices || []).forEach((c) => truthyKeys(c.effects && c.effects.set).forEach((k) => { evFlags.add(k); universe.add(k); }));
   }
-  const q = [];
-  const offer = (id, fl) => { let ch = false; fl.forEach((k) => { if (!may[id].has(k)) { may[id].add(k); ch = true; } }); if (ch || !q.includes(id)) q.push(id); };
+  const q = [], seen = new Set();
+  const offer = (id, fl) => { seen.add(id); let ch = false; fl.forEach((k) => { if (!may[id].has(k)) { may[id].add(k); ch = true; } }); if (ch || !q.includes(id)) q.push(id); };
   starts.forEach(([id, fl]) => offer(id, new Set(fl)));
   roots.forEach((id) => offer(id, universe));
   let guard = 0;
@@ -125,7 +126,7 @@ function mayFlags(F, WH) {
     out[id].forEach((e) => {
       const c = n.choices[e.ci], f2 = new Set(after);
       truthyKeys(c.effects && c.effects.set).forEach((k) => f2.add(k));
-      let ch = false; f2.forEach((k) => { if (!may[e.to].has(k)) { may[e.to].add(k); ch = true; } });
+      let ch = !seen.has(e.to); seen.add(e.to); f2.forEach((k) => { if (!may[e.to].has(k)) { may[e.to].add(k); ch = true; } });   // a node reached for the first time is expanded even with an empty flag set (SPEC §35 birth nodes)
       if (ch) q.push(e.to);
     });
   }
@@ -134,6 +135,14 @@ function mayFlags(F, WH) {
 }
 
 /* ---------- per-route metrics (SPEC §32.1) ---------- */
+/* SPEC §35: nodes of the shared birth scene = reachable from F.birthNode without passing through an origin's startNode */
+function birthSet(F) {
+  const N = F.nodes || {}, r = new Set(), stops = new Set((Array.isArray(F.origins) ? F.origins : []).map((o) => o.startNode));
+  if (!F.birthNode || !N[F.birthNode]) return r;
+  const q = [F.birthNode]; r.add(F.birthNode);
+  while (q.length) for (const c of (N[q.shift()].choices || [])) for (const t of (c.roll ? [c.roll.success, c.roll.fail] : [c.next])) if (t && N[t] && !stops.has(t) && !r.has(t)) { r.add(t); q.push(t); }
+  return r;
+}
 function storyMetrics(WH, fid, opts) {
   opts = opts || {};
   const F = WH.factions[fid], N = F.nodes || {}, ids = Object.keys(N);
@@ -151,8 +160,10 @@ function storyMetrics(WH, fid, opts) {
   const m = {faction: fid, nodes: ids.length, endings: 0, multi: 0, falseChoice: [], falseByFlagOnly: 0, branching: 0, shallow: [], rejoin1: [], rejoin1Echoed: [], forced: [], hard: [], hardUnjustified: [],
              bridges: [], jumps: [], gather: [], altNodes: 0, altEntries: 0, resultAlt: 0, choicesTotal: 0, choicesOwnFollowUp: 0, neverRead: [], readByOtherOnly: [], eventRoll: {nodes: 0, dead: [], avg: 0}};
   const seenEdge = new Set();
+  const birth = birthSet(F);                                   // SPEC §35: the shared birth scene is exempt from the branching metrics (its fork is the origin choice)
   ids.forEach((id) => {
     const n = N[id];
+    if (birth.has(id)) return;
     if (n.bridge) m.bridges.push(id);
     if (n.jump) m.jumps.push(id);
     if (n.gather) m.gather.push(id);

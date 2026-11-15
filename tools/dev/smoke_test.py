@@ -8,6 +8,7 @@
     python3 tools/dev/smoke_test.py --only-gather [--real]   # just the SPEC §20c gathering-place checks (tag, rumours / echoes only on gather nodes; also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-v034 [--real]     # just the SPEC §31 ending-illustration checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-cloud [--real]    # just the SPEC §34 cloud-save checks with a fake window.claude db (also part of the default and --real runs)
+    python3 tools/dev/smoke_test.py --only-birth --real      # just the SPEC §35 shared-birth checks (real data)
     python3 tools/dev/smoke_test.py --only-fam [--real]      # just the SPEC §33 "do you know Warhammer?" dialog checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-v040 [--real]     # just the SPEC §32 story-overhaul checks: alt / resultAlt / event where / save fallback (also part of the default and --real runs)
     options: --chrome /usr/bin/google-chrome   --out tools/dev/screenshots   --headed
@@ -26,7 +27,8 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 # SPEC §33: a fresh profile gets a "do you know Warhammer?" dialog before the first new game. Tests that wipe storage use
 # CLEAR (wipe + settings.loreAsked = true) so they are unaffected; only new_ctx(fam=True) / run_fam keep the pristine profile.
 # (An add_init_script that touches localStorage on every load was tried first: it raced with page.reload() and lost writes.)
-CLEAR = "() => { localStorage.clear(); localStorage.setItem('whatiswh.settings', '{\"loreAsked\":true}'); if (window.WH && WH.UI && WH.UI.settings) WH.UI.settings.loreAsked = true; }"
+# SPEC §35: the old tests walk faction → origin cards, so CLEAR also sets chooseOrigin = true; run_real_birth switches it off again.
+CLEAR = "() => { localStorage.clear(); localStorage.setItem('whatiswh.settings', '{\"loreAsked\":true,\"chooseOrigin\":true}'); if (window.WH && WH.UI && WH.UI.settings) { WH.UI.settings.loreAsked = true; WH.UI.settings.chooseOrigin = true; } }"
 ARGS = sys.argv[1:]
 REAL = "--real" in ARGS
 def opt(name, default):
@@ -2860,6 +2862,63 @@ def run_v040(p):
     page.screenshot(path=os.path.join(OUT, "m80_alt.png"))
     ctx.close(); b.close()
 
+def run_real_birth(p):
+    """SPEC §35 on real data: every route that has a birthNode starts there from the faction card (no origin cards), the fork assigns an origin
+    (stats / caps / flags like the card path), the HUD shows the origin's caps, a birth-phase save reloads, settings → 直接选出身 brings the cards back,
+    and ↻ again starts at the birth point."""
+    print("\n== shared birth point (SPEC §35, real data) ==")
+    b, ctx, page = new_ctx(p, tag="birth")
+    fids = page.evaluate("() => Object.keys(WH.factions).filter(id => WH.Game.hasBirth(WH.factions[id]))")
+    check("birth: every route has a birth point", len(fids) == len(page.evaluate("() => Object.keys(WH.factions)")), str(fids))
+    if not fids:
+        b.close(); return
+    page.evaluate("() => { WH.UI.settings.chooseOrigin = false; WH.Save.saveSettings(WH.UI.settings); }")
+    rng = random.Random(35)
+    seen = {}
+    for fid in fids:
+        page.reload(); page.wait_for_selector("#scr-title .title-main")
+        page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(250)
+        card = page.locator(f'.fcard[data-faction="{fid}"]')
+        card.click(); page.wait_for_timeout(300)
+        wait_idle(page); finish_text(page)
+        info = page.evaluate("() => ({node: WH.UI.game.state.nodeId, origin: WH.UI.game.state.origin, ocards: document.querySelectorAll('.ocard').length, birth: WH.UI.game.faction.birthNode})")
+        check(f"birth {fid}: faction card goes straight to the birth node (no origin cards)", info["node"] == info["birth"] and info["origin"] is None and info["ocards"] == 0, str(info))
+        # play the birth: click choices until an origin exists
+        steps = 0
+        while page.evaluate("() => WH.UI.game.state.origin === null") and steps < 12:
+            click_choice(page, rng=rng); steps += 1
+        res = page.evaluate("""() => { const g = WH.UI.game, o = g.origin(), st = g.state;
+          return {origin: st.origin, start: o && o.startNode, node: st.nodeId, born: !!st.flags.born_shared, flag: !!st.flags['origin_' + st.origin],
+                  hp: st.stats.hp, maxhp: st.max.hp, ohp: o && o.stats.hp, omax: o && o.max && o.max.hp,
+                  hud: (document.querySelector('#stats') || document.body).innerText}; }""")
+        seen[fid] = res["origin"]
+        check(f"birth {fid}: the fork assigned an origin ({res['origin']}) in ≤ 12 choices", bool(res["origin"]) and steps <= 12, str(res))
+        check(f"birth {fid}: stats/caps/flags match the origin card", res["born"] and res["flag"] and res["hp"] == res["ohp"] and res["maxhp"] == (res["omax"] or 100), str(res))
+        check(f"birth {fid}: the HUD shows the origin's hp cap", str(res["maxhp"]) in res["hud"], res["hud"][:80])
+        # save in the middle of the run, reload it
+        rec = page.evaluate("() => JSON.parse(JSON.stringify(WH.UI.game.toRecord()))")
+        check(f"birth {fid}: record keeps the origin", rec.get("origin") == res["origin"], str(rec.get("origin")))
+    # a record saved BEFORE the fork reloads with no origin
+    page.reload(); page.wait_for_selector("#scr-title .title-main")
+    fid = fids[0]
+    out = page.evaluate("""(fid) => { const g = new WH.Game(fid, {rng: WH.RNG(4)}); g.start(WH.Game.BIRTH);
+      const rec = JSON.parse(JSON.stringify(g.toRecord())); const g2 = WH.Game.fromRecord(rec, {rumors: false, echoes: false});
+      return [rec.origin, g2.state.origin, g2.state.nodeId === WH.factions[fid].birthNode, g2.origin()]; }""", fid)
+    check("birth: a record saved before the fork has origin null and reloads at the birth node", out[0] is None and out[1] is None and out[2] is True and out[3] is None, str(out))
+    # settings row exists (title screen → 设置)
+    page.locator("#scr-title .menu .btn", has_text="设置").first.click(); page.wait_for_timeout(250)
+    check("birth: settings has the 直接选出身 row", page.locator(".origin-row", has_text="直接选出身").count() == 1)
+    page.keyboard.press("Escape"); page.wait_for_timeout(200)
+    # settings toggle brings the origin cards back
+    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(250)
+    page.evaluate("() => { WH.UI.settings.chooseOrigin = true; }")
+    page.locator(f'.fcard[data-faction="{fid}"]').click(); page.wait_for_timeout(300)
+    check("birth: with 直接选出身 on, the faction card opens the origin cards", page.locator(".ocard").count() == 3 and page.evaluate("() => !WH.UI.game || WH.UI.game.state.nodeId !== WH.UI.game.faction.birthNode"))
+    page.locator(".ocard").nth(1).click(); page.wait_for_timeout(300); wait_idle(page); finish_text(page)
+    st = page.evaluate("() => ({o: WH.UI.game.state.origin, node: WH.UI.game.state.nodeId, born: !!WH.UI.game.state.flags.born_shared, start: WH.UI.game.origin().startNode})")
+    check("birth: origin-card path starts at the origin's own start node without born_shared", st["o"] and st["node"] == st["start"] and not st["born"], str(st))
+    b.close()
+
 def run_real_v040(p):
     """--real: every `alt` node of every route resolves without throwing (no flags / every flag the node tests set), the engine tolerates each
     route's unknown-node fallback, and no event `where` references a missing scene or node."""
@@ -2938,6 +2997,13 @@ with sync_playwright() as p:
         for e in errors: print("  " + e)
         print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
         sys.exit(1 if fails or errors else 0)
+    if "--only-birth" in ARGS:                       # SPEC §35 quick loop (needs --real: sample data has no birth point)
+        run_real_birth(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
     if "--only-fam" in ARGS:                         # SPEC §33 quick loop (sample data, or --real)
         run_fam(p)
         fails = [r for r in results if not r[1]]
@@ -2985,6 +3051,7 @@ with sync_playwright() as p:
         run_real_v03(p)
         run_real_grudge(p)
         run_real_v040(p)
+        run_real_birth(p)
         run_real_gather(p)
     fails = [r for r in results if not r[1]]
     print(f"\nconsole/page errors: {len(errors)}")

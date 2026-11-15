@@ -23,9 +23,10 @@ const origins = WH.Game.origins(F);
 let oi = opt("origin", 0); oi = isNaN(+oi) ? Math.max(0, origins.findIndex((o) => o.id === oi)) : (+oi % origins.length);
 const L = (x) => (x && typeof x === "object" && ("zh" in x || "en" in x)) ? (EN ? x.en : x.zh) : (x || "");
 const g = new WH.Game(fid, {rng: WH.RNG(seed), rumors: true});
-let step = g.start(origins[oi].id);
+const BIRTH = process.argv.includes("--birth") && WH.Game.hasBirth(F);      // --birth: start at the shared birth point (SPEC §35); the fork picks the origin
+let step = g.start(BIRTH ? WH.Game.BIRTH : origins[oi].id);
 const rnd = WH.RNG(seed * 7 + 3);
-console.log(`# ${fid} · origin ${origins[oi].id} · seed ${seed} · ${EN ? "en" : "zh"}`);
+console.log(`# ${fid} · origin ${BIRTH ? "(shared birth)" : origins[oi].id} · seed ${seed} · ${EN ? "en" : "zh"}`);
 for (let n = 0; n < MAX; n++) {
   if (step.kind === "event") {
     const ev = step.event || {};

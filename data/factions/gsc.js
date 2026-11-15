@@ -64,8 +64,37 @@
 
   var N = {};
 
+  /* ============ Shared birth point (SPEC §35) · Tithe-census day at the Shaft Nine pithead ============ */
+  var VEILED  = S("gsc_acolyte", "戴头巾的女人", "Woman in a headscarf");
+
+  N.gsc_b01 = {chapter: 1, scene: "mine_shaft", speaker: null,
+    text: L("凯辛三号，九号矿井的井口广场。什一税普查日，全区的人都得来排队，大人孩子一个不落。\n执法官守着长桌点名，甘特工头在一旁招人。\n队伍尾巴上，霍林家的人全戴着兜帽。",
+            "Kessin Tertius, the square at the head of Shaft Nine. Tithe-census day: everyone in the district must queue, adults and children alike.\nEnforcers call names at a long table; Foreman Gant hires beside them.\nAt the tail of the line, the Hollins all wear hoods."),
+    codex: ["place_kessin", "place_shaft_nine"],
+    choices: [
+      C("往前挤，到登记桌前", "Push forward to the registration table", "gsc_b02", {result: L("人群推着你往前走。桌上摊着一本厚厚的名册。", "The crowd carries you forward. A thick roll lies open on the table.")}),
+      C("退到队尾，站到兜帽人旁边", "Drop back beside the hooded folk", "gsc_b03", {result: L("兜帽下的人往旁边让了让，给你空出一个位子，像早就给你留着。", "The hooded folk shift aside and make room, as if the place were kept for you.")})
+    ]};
+
+  N.gsc_b02 = {chapter: 1, scene: "mine_shaft", speaker: MARR, time: {h: 1},
+    text: L("长桌后坐着玛尔警长，一页页翻名册：“姓名。亲属。”\n甘特工头敲着桌角：“九号井缺人，最深处给双倍工分。”\n警长身边的文书位子空着，笔还搁在墨水瓶上。",
+            "Sergeant Marr sits behind the table, turning the roll page by page. “Name. Kin.”\nForeman Gant raps the table's corner. “Shaft Nine's short-handed. Double tally at the deep face.”\nThe clerk's seat beside the sergeant is empty, the pen still resting on the inkpot."),
+    choices: [
+      C("在亲属一栏，照旧写“无”", "Under “Kin”, write “none” as always", "gsc_101", {effects: {origin: "miner", set: {born_shared: true, origin_miner: true}}, result: L("十年来每次普查，你都这么写。甘特把一枚工牌拍在你手心：“夜班。别迟到。”", "Every census for ten years you have written the same. Gant slaps a tally token into your palm. “Night shift. Don't be late.”")}),
+      C("绕到桌后，坐上文书的位子", "Go round the table and take the clerk's seat", "gsc_o_warden_1", {effects: {origin: "warden", set: {born_shared: true, origin_warden: true}}, result: L("警长头也不抬：“去哪儿了？”她是你母亲，你在她手下当文书。你拿起笔，一个名字一个名字往下抄。", "The sergeant doesn't look up. “Where were you?” She is your mother; you clerk for her. You take the pen and copy name after name.")})
+    ]};
+
+  N.gsc_b03 = {chapter: 1, scene: "mine_shaft", speaker: VEILED, time: {h: 1},
+    text: L("执法官沿着队尾喊：“兜帽摘了！”霍林家的大人退进阴影，把一个素脸的孩子推到前面。\n戴头巾的女人攥着孩子的手，指节发白。\n念到九号井那一页，好几个名字没人应。",
+            "An enforcer walks the tail of the line. “Hoods off!” The Hollin adults step back into shadow and push one plain-faced child to the front.\nA woman in a headscarf grips the child's hand, knuckles white.\nWhen the Shaft Nine page is read, several names get no answer."),
+    choices: [
+      C("握紧她的手，抬起脸给他看", "Squeeze her hand and lift your face to him", "gsc_o_kin_1", {effects: {origin: "kin", set: {born_shared: true, origin_kin: true}}, result: L("那个孩子就是你，十岁。执法官挥手放行。头巾女人是你母亲；兜帽下传来一阵松了口气的嗡鸣。", "The child is you, ten years old. The enforcer waves you on. The woman is your mother; under the hoods, a relieved hum.")})
+    ]};
+
   /* ============ Chapter 1 · Shaft Nine ============ */
   N.gsc_101 = {chapter: 1, scene: "mine_shaft", speaker: null,
+    alt: [ALT(F("born_shared"), "当天夜班，地下两千米。工牌还硌着你的手心。\n一班十四个小时，挖出来的矿石装上升降机，再装上矿船，运去奥雷克斯二号的工厂。\n没人在井口等你下班。你的灯，是你唯一的朋友。",
+            "Night shift that same day, two thousand metres down. The tally token still digs into your palm.\nFourteen-hour shifts. The ore goes up the lift, onto the haulers, off to the manufactoria of Aurex Secundus.\nNobody waits for you at the pithead. Your lamp is your only friend.")],
     text: L("凯辛三号，九号矿井，地下两千米。\n一班十四个小时，挖出来的矿石装上升降机，再装上矿船，运去奥雷克斯二号的工厂。\n你没有家人。你的灯，是你唯一的朋友。",
             "Kessin Tertius. Shaft Nine, two thousand metres down.\nFourteen-hour shifts. The ore goes up the lift, onto the haulers, off to the manufactoria of Aurex Secundus.\nYou have no family. Your lamp is your only friend."),
     codex: ["place_kessin", "place_shaft_nine"],
@@ -221,6 +250,8 @@
 
   /* ---------- Origin prologue · The enforcer's child ---------- */
   N.gsc_o_warden_1 = {chapter: 1, scene: "underhive", speaker: MARR,
+    alt: [ALT(F("born_shared"), "当天下午，执法分局。你把今天的普查名册，和柜子里的失踪报告对了一遍。\n今年三十一份，全部来自九号矿井。\n“矿工会失踪，”母亲说，“可不会这么整齐。”",
+            "That afternoon, at the enforcer precinct. You check today's census roll against the missing-persons reports in the cabinet.\nThirty-one this year, every one from Shaft Nine.\n“Miners go missing,” your mother says. “Not this neatly.”")],
     text: L("你母亲是凯辛三号执法分局的玛尔警长。你在局里当文书，整理失踪报告。\n今年三十一份，全部来自九号矿井。\n“矿工会失踪，”母亲说，“可不会这么整齐。”",
             "Your mother is Sergeant Marr of the Kessin enforcer precinct. You clerk there, filing missing-persons reports.\nThirty-one this year, every one from Shaft Nine.\n“Miners go missing,” your mother says. “Not this neatly.”"),
     codex: ["place_kessin", "imp_arbites"],
@@ -274,6 +305,8 @@
 
   /* ---------- Origin prologue · Brood-born (fourth generation, passes as human) ---------- */
   N.gsc_o_kin_1 = {chapter: 1, scene: "gsc_chapel", speaker: MOTHER,
+    alt: [ALT(F("born_shared"), "当晚，霍林家的小礼拜堂。母亲解下头巾，露出带骨棱的头皮，她是第三代。\n你生出来一点也不像她，家里人叫你“素脸的孩子”。\n主祭摸着你的头：“今天他们什么也没看出来。你能走在他们中间。”",
+            "That night, in the Hollin family chapel, your mother unwinds her headscarf over a smooth, ridged scalp; she is third generation.\nYou came out looking nothing like her. The family calls you “the plain one.”\nThe Magus touches your head. “Today they saw nothing. You will walk among them.”")],
     text: L("你生在霍林家。母亲头巾下是带着骨棱的头皮，她是第三代。\n你生出来时，一点也不像她。家里人叫你“素脸的孩子”，说这是最大的福分。\n你十岁那年，主祭摸着你的头说：“你能走在他们中间。”",
             "You were born in the Hollin house. Under her headscarf your mother's scalp is smooth and ridged; she is third generation.\nYou came out looking nothing like her. The family calls you “the plain one” and says it is the greatest blessing.\nWhen you are ten, the Magus touches your head: “You will walk among them.”"),
     codex: ["place_kessin", "place_hollin_house", "gsc_generations"],
@@ -1990,6 +2023,7 @@
     playerSprite: "player_gsc",
     color: "#9b59b6",
     startNode: "gsc_101",
+    birthNode: "gsc_b01",
     startDate: {year: 100, mill: 42},
     startStats: {hp: 110, sanity: 95, corruption: 0, renown: 5},
     renownLabel: L("血亲", "Kinship"),

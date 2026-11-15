@@ -46,7 +46,7 @@ Object.values(WH.factions || {}).forEach((f) => {
   const start = f.startDate || {year: 111, mill: 42};
   const t0 = absYear(start) * HPY;                       // hours on an absolute scale
   const lo = {}, hi = {};
-  const seeds = [f.startNode].concat((f.origins || []).map((o) => o.startNode)).filter(Boolean);
+  const seeds = [f.startNode].concat((f.origins || []).map((o) => o.startNode), f.birthNode ? [f.birthNode] : []).filter(Boolean);
   const succ = (id) => { const o = []; ((nodes[id] || {}).choices || []).forEach((c) => (c.roll ? [c.roll.success, c.roll.fail] : [c.next]).forEach((t) => { if (t && nodes[t]) o.push(t); })); return o; };
   /* DFS from the starts: drop back edges (cycles), then relax in topological order → earliest / latest arrival */
   const state = {}, order = [], back = new Set();

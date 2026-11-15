@@ -52,6 +52,7 @@ const engineRoots = new Set(Object.values(F.deathNodes || {}));
 }));
 const starts = (F.origins || []).map((o) => ({node: o.startNode || F.startNode, flags: Object.keys(o.set || {}).filter((k) => o.set[k])}));
 if (!starts.length) starts.push({node: F.startNode, flags: []});
+if (F.birthNode && N[F.birthNode]) starts.push({node: F.birthNode, flags: []});         // SPEC §35 shared birth point
 const setOf = (eff) => { const on = [], off = []; const s = (eff && eff.set) || {}; Object.keys(s).forEach((k) => (s[k] ? on : off).push(k)); return {on, off}; };
 
 /* ---- data-flow: MUST (guaranteed on every path) / MAY flags, and MUST-visited nodes ---- */

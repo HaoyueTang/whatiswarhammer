@@ -202,6 +202,7 @@ function checkEffects(e, where) {
     if (STATS.includes(k)) { if (typeof e[k] !== "number") err(`${where}: effect ${k} not a number`); }
     else if (k === "set") { if (typeof e.set !== "object") err(`${where}: effects.set must be an object`); }
     else if (k === "unset") { if (!Array.isArray(e.unset)) err(`${where}: effects.unset must be an array`); }
+    else if (k === "origin") { if (typeof e.origin !== "string" || !e.origin) err(`${where}: effects.origin must be an origin id string (SPEC §35)`); }
     else if (k === "taint") {
       if (!e.taint || typeof e.taint !== "object" || Array.isArray(e.taint)) { err(`${where}: effects.taint must be {god:±n} or {all:±n}`); continue; }
       for (const g of Object.keys(e.taint)) {
@@ -981,6 +982,85 @@ function checkOrigins(f, origins, nodes, flagsSet) {
   void flagsSet;
 }
 
+/* ---------- shared birth point (SPEC §35) ---------- */
+/* nodes of the birth subgraph: everything reachable from f.birthNode WITHOUT passing through an origin's startNode */
+function birthSubgraph(f) {
+  const nodes = f.nodes || {}, stops = new Set(WH.Game.origins(f).map((o) => o.startNode)), r = [], seen = new Set(), q = [];
+  if (f.birthNode && nodes[f.birthNode]) { q.push(f.birthNode); seen.add(f.birthNode); }
+  while (q.length) {
+    const id = q.shift(); r.push(id);
+    for (const c of nodes[id].choices || []) for (const t of targetsOf(c)) if (t && nodes[t] && !stops.has(t) && !seen.has(t)) { seen.add(t); q.push(t); }
+  }
+  return r;
+}
+const BIRTH_MIN = 3, BIRTH_MAX = 8;
+function checkBirth(f, nodes, origins) {
+  const w = `faction.${f.id}.birth`;
+  const forkNodes = Object.keys(nodes).filter((id) => (nodes[id].choices || []).some((c) => c.effects && c.effects.origin !== undefined));
+  if (f.birthNode === undefined) {
+    if (forkNodes.length) err(`${w}: ${forkNodes[0]} has effects.origin but the faction has no birthNode (SPEC §35)`);
+    return;
+  }
+  if (!nodes[f.birthNode]) { err(`${w}: birthNode "${f.birthNode}" does not exist`); return; }
+  if (origins.length < 2) { err(`${w}: a shared birth needs ≥ 2 origins`); return; }
+  const prefix = String(f.startNode || "").split("_")[0];
+  const sub = birthSubgraph(f), subSet = new Set(sub), starts = new Map(origins.map((o) => [o.startNode, o.id]));
+  const unlockedBy = new Map();
+  if (!new RegExp("^" + prefix + "_b\\d\\d$").test(f.birthNode)) warn(`${w}: birthNode "${f.birthNode}" does not follow <prefix>_bNN (SPEC §35)`);
+  for (const id of sub) if (!new RegExp("^" + prefix + "_b\\d\\d$").test(id)) warn(`${w}: node "${id}" in the birth subgraph is not named ${prefix}_bNN`);
+  if (sub.length < BIRTH_MIN || sub.length > BIRTH_MAX) warn(`${w}: ${sub.length} birth node(s) (SPEC §35: ${BIRTH_MIN}–${BIRTH_MAX})`);
+  // every origin start is entered ONLY from a fork choice that assigns it, and every path from birthNode ends in such a choice
+  for (const id of sub) {
+    const n = nodes[id], nw = `${w}.${id}`;
+    if (n.ending) err(`${nw}: an ending inside the birth subgraph`);
+    if (n.chapter !== 1) err(`${nw}: birth nodes belong to chapter 1 (chapter ${n.chapter})`);
+    if (n.eventRoll !== undefined) err(`${nw}: eventRoll in the birth subgraph (SPEC §35: no random events before the origin is fixed)`);
+    if (n.gather) err(`${nw}: gather node in the birth subgraph`);
+    if (n.effects) for (const k of Object.keys(n.effects)) if (k !== "set") err(`${nw}.effects: "${k}" — birth nodes are stat-neutral (SPEC §35)`);
+    if (n.effects && n.effects.set) for (const k of Object.keys(n.effects.set)) err(`${nw}.effects.set: flag "${k}" — only the fork choices set flags (SPEC §35)`);
+    if (!n.choices || !n.choices.length) err(`${nw}: no choices (dead end before an origin is chosen)`);
+    (n.choices || []).forEach((c, ci) => {
+      const cw = `${nw}.choices[${ci}]`;
+      if (c.roll) err(`${cw}: roll in the birth subgraph (SPEC §35: no dice before the origin is fixed)`);
+      if (c.grudge !== undefined) err(`${cw}: grudge in the birth subgraph`);
+      const e = c.effects || {};
+      for (const k of Object.keys(e)) if (k !== "set" && k !== "origin") err(`${cw}.effects: "${k}" — birth choices are stat-neutral (SPEC §35)`);
+      const target = c.next;
+      if (e.origin !== undefined) {
+        const og = origins.find((o) => o.id === e.origin);
+        if (!og) { err(`${cw}: effects.origin "${e.origin}" is not an origin of ${f.id}`); return; }
+        if (target !== og.startNode) err(`${cw}: assigns origin "${og.id}" but leads to "${target}" (must be its startNode "${og.startNode}")`);
+        const need = ["born_shared", "origin_" + og.id];
+        for (const k of need) if (!(e.set && e.set[k])) err(`${cw}: fork choice must also set flag "${k}" (so route_graph / the validator see it; SPEC §35)`);
+        unlockedBy.set(og.id, (unlockedBy.get(og.id) || 0) + 1);
+      } else {
+        if (e.set) for (const k of Object.keys(e.set)) err(`${cw}.effects.set: flag "${k}" — only fork choices set flags (SPEC §35)`);
+        if (starts.has(target)) err(`${cw}: leads to origin start "${target}" without effects.origin (the run would have no origin)`);
+        else if (!subSet.has(target)) err(`${cw}: leads out of the birth subgraph to "${target}" without choosing an origin`);
+      }
+    });
+  }
+  for (const o of origins) if (!unlockedBy.has(o.id)) err(`${w}: no fork choice assigns origin "${o.id}"`);
+  // acyclic?
+  const color = {};
+  const dfs = (id) => {
+    color[id] = 1;
+    for (const c of nodes[id].choices || []) { const t = c.next; if (t && subSet.has(t)) { if (color[t] === 1) { err(`${w}: cycle in the birth subgraph at "${t}"`); } else if (!color[t]) dfs(t); } }
+    color[id] = 2;
+  };
+  dfs(f.birthNode);
+  // origin start nodes carry an alt on born_shared; effects.origin anywhere else is an error
+  for (const o of origins) {
+    const sn = nodes[o.startNode];
+    if (!sn) continue;
+    const has = (sn.alt || []).some((a) => JSON.stringify(a && a["if"] || {}).indexOf("born_shared") >= 0);
+    if (!has) err(`${w}.origin.${o.id}: start node "${o.startNode}" has no alt on {flag:"born_shared"} (SPEC §35: the opening must read right after the shared birth)`);
+  }
+  for (const id of forkNodes) if (!subSet.has(id)) err(`${w}: ${id} has effects.origin but is not in the birth subgraph`);
+  // branch weight: every origin should be reachable through ≥ 1 fork choice in at most 3 steps of the birth path (informational)
+  note(`${f.id}: shared birth ${sub.length} node(s): ${sub.join(" ")} — fork choices ${[...unlockedBy].map(([k, v]) => k + "×" + v).join(", ")}`);
+}
+
 /* ---------- faction static checks ---------- */
 function targetsOf(c) { return c.roll ? [c.roll.success, c.roll.fail] : [c.next]; }
 function checkFaction(f) {
@@ -991,6 +1071,7 @@ function checkFaction(f) {
   WH.events.forEach((e) => (e.choices || []).forEach((c) => collect(c.effects)));
   const origins = WH.Game.origins(f);
   origins.forEach((o) => collect(o));                 // origin.set flags (SPEC §16)
+  if (f.birthNode) flagsSet.add("born_shared");       // SPEC §35: the engine sets it when an origin is chosen at the fork
 
   checkL(f.name, w + ".name"); checkL(f.tagline, w + ".tagline", 20, 12); checkL(f.role, w + ".role");
   checkL(f.renownLabel, w + ".renownLabel");
@@ -1002,6 +1083,7 @@ function checkFaction(f) {
   if (!f.startDate || typeof f.startDate.year !== "number" || typeof f.startDate.mill !== "number") err(`${w}: startDate {year,mill} missing`);
   if (!nodes[f.startNode]) err(`${w}: startNode "${f.startNode}" missing`);
   checkOrigins(f, origins, nodes, flagsSet);
+  checkBirth(f, nodes, origins);
   // SPEC §19 taintMod
   if (f.taintMod === undefined) { if (!SAMPLE && TAINT_GUIDE[f.id]) warn(`${w}: no taintMod (SPEC §19; all gods ×1)`); }
   else if (!f.taintMod || typeof f.taintMod !== "object" || Array.isArray(f.taintMod)) err(`${w}.taintMod: must be {khorne,nurgle,tzeentch,slaanesh}`);
@@ -1145,7 +1227,7 @@ function checkFaction(f) {
     return r;
   };
   const gotoT = eventGotoTargets(f.id).filter((x) => nodes[x]);       // SPEC §19: event gotos are entry points too
-  const reach = reachFrom([f.startNode].concat(origins.map((o) => o.startNode), Object.values(f.deathNodes || {}), gotoT));
+  const reach = reachFrom([f.startNode].concat(origins.map((o) => o.startNode), f.birthNode ? [f.birthNode] : [], Object.values(f.deathNodes || {}), gotoT));
   // every origin's prologue must merge into the spine of the first (default) origin
   if (origins.length > 1) {
     const deathIds = new Set(Object.values(f.deathNodes || {}));
@@ -1642,7 +1724,8 @@ for (const id of factionIds) {
     if (s.crashes) err(`${id}: ${s.crashes} simulated runs crashed — ${s.firstCrash}`);
     if (s.loops) err(`${id}: ${s.loops} runs hit the ${STEP_LIMIT}-step limit (infinite loop?)`);
     for (const [n, c] of s.softlocks) err(`${id}/${n}: all choices locked in ${c} simulated visit(s) (softlock; engine opened the last choice)`);
-    const never = Object.keys(f.nodes).filter((n) => !s.visited.has(n));
+    const birthIds = new Set(birthSubgraph(f));                       // SPEC §35: the simulation starts at the origin start nodes, so birth nodes are not visited by design
+    const never = Object.keys(f.nodes).filter((n) => !s.visited.has(n) && !birthIds.has(n));
     if (never.length) warn(`${id}: ${never.length} node(s) never visited in ${RUNS} random runs: ${never.join(", ")}`);
     const a = avg(s.visits);
     void a;                                // the run-length target (SPEC §32.1 rule 14: median 45–70) is checked by storyGate()
@@ -1835,6 +1918,91 @@ function rewindSelfTest(f, seed, nRuns) {
     res.mismatches.forEach((m) => err(`rewind (SPEC §30) ${fid}: ${m}`));
   }
   console.log(`\n§30 rewind determinism (engine, random play with random rewind + same/other choice): ${rows.join(" · ")}`);
+}
+/* ---------- SPEC §35 shared-birth self-test: start at the birth point, random play to an ending; the fork must assign an origin (stats/caps/flags
+   exactly as the origin card would), survive a rewind across the fork and a save-record round trip ---------- */
+function birthSelfTest(f, seed, nRuns) {
+  const out = {runs: 0, picked: {}, forkSteps: [], problems: [], rewinds: 0, roundTrips: 0, finished: 0};
+  const origins = WH.Game.origins(f);
+  origins.forEach((o) => { out.picked[o.id] = 0; });
+  const strip = (st) => { const c = JSON.parse(JSON.stringify(st)); delete c.playMs; delete c.codex; return JSON.stringify(c); };
+  for (let r = 0; r < nRuns; r++) {
+    const drv = WH.RNG(seed * 6151 + r * 17 + 3);
+    const g = new WH.Game(f.id, {rng: WH.RNG(seed * 31337 + r), data: WH, rewind: true});
+    let step = g.start(WH.Game.BIRTH), n = 0, steps = 0, assigned = null;
+    out.runs++;
+    if (g.state.nodeId !== f.birthNode || g.state.origin !== null || g.origin() !== null) { out.problems.push(`start: expected birthNode with no origin, got ${g.state.nodeId}/${g.state.origin}`); break; }
+    while (!g.state.ended && n < 500) {
+      n++;
+      if (step && step.kind === "event") {
+        const open = g.eventChoices().filter((v) => !v.locked);
+        g.eventChoose(open[Math.floor(drv() * open.length)].index);
+        step = g.eventContinue();
+        continue;
+      }
+      const cs = g.choices(), open = cs.map((c, i) => [c, i]).filter(([c]) => !c.locked);
+      if (!open.length) { out.problems.push(`${g.state.nodeId}: no open choice`); break; }
+      const a = open[Math.floor(drv() * open.length)][1];
+      const wasBirth = assigned === null;
+      if (wasBirth) steps++;
+      const before = wasBirth ? strip(g.state) : null;
+      step = g.choose(a);
+      if (wasBirth && g.state.origin) {
+        assigned = g.state.origin;
+        const o = origins.find((x) => x.id === assigned);
+        if (!o) { out.problems.push(`${f.id}: fork assigned unknown origin "${assigned}"`); break; }
+        out.picked[assigned]++; out.forkSteps.push(steps);
+        // same stats / caps / flags as a fresh start at that origin
+        const ref = new WH.Game(f.id, {rng: WH.RNG(1), data: WH}); ref.start(assigned);
+        const A = g.state, B = ref.state;
+        ["hp", "sanity", "corruption", "renown"].forEach((k) => { if (A.stats[k] !== B.stats[k]) out.problems.push(`${assigned}: ${k} ${A.stats[k]} after the fork ≠ ${B.stats[k]} from the origin card`); });
+        if (A.max.hp !== B.max.hp || A.max.sanity !== B.max.sanity) out.problems.push(`${assigned}: caps ${A.max.hp}/${A.max.sanity} ≠ ${B.max.hp}/${B.max.sanity}`);
+        Object.keys(B.flags).forEach((k) => { if (B.flags[k] && !A.flags[k]) out.problems.push(`${assigned}: flag ${k} missing after the fork`); });
+        if (!A.flags.born_shared) out.problems.push(`${assigned}: flag born_shared not set after the fork`);
+        if (A.nodeId !== o.startNode) out.problems.push(`${assigned}: fork leads to ${A.nodeId}, not ${o.startNode}`);
+        // rewind across the fork: origin goes back to null, state identical to before the choice; then pick again
+        if (drv() < 0.5) {
+          if (!g.canRewind() || !g.rewind()) out.problems.push(`${g.state.nodeId}: rewind refused at the fork`);
+          else {
+            out.rewinds++;
+            if (g.state.origin !== null) out.problems.push(`rewind at the fork kept origin "${g.state.origin}"`);
+            if (strip(g.state) !== before) out.problems.push(`${g.state.nodeId}: state after rewinding the fork differs from before it`);
+            assigned = null; step = g.choose(a);
+            if (!g.state.origin) out.problems.push(`${g.state.nodeId}: re-choosing the fork assigned nothing`);
+            else assigned = g.state.origin;
+          }
+        }
+        // save record round trip
+        const rec = JSON.parse(JSON.stringify(g.toRecord()));
+        const g2 = WH.Game.fromRecord(rec, {data: WH});
+        out.roundTrips++;
+        if (!g2 || g2.state.origin !== g.state.origin || g2.state.nodeId !== g.state.nodeId) out.problems.push(`${assigned}: save round trip lost origin/node`);
+      }
+      if (wasBirth && !g.state.origin && steps > 12) { out.problems.push(`${f.id}: no origin after ${steps} birth steps`); break; }
+    }
+    if (g.state.ended) out.finished++;
+    // mid-birth save round trip (record while origin is still null)
+  }
+  { const g = new WH.Game(f.id, {rng: WH.RNG(5), data: WH}); g.start(WH.Game.BIRTH);
+    const g2 = WH.Game.fromRecord(JSON.parse(JSON.stringify(g.toRecord())), {data: WH});
+    if (!g2 || g2.state.nodeId !== f.birthNode || g2.state.origin !== null) out.problems.push("mid-birth save round trip lost the birth state"); }
+  return out;
+}
+{
+  const rows = [];
+  for (const fid of factionIds) {
+    const f = WH.factions[fid];
+    if (!f.birthNode) continue;
+    const rp = reports.find((r) => r.id === fid);
+    if (rp && !rp.sim && !argv.includes("--force-sim")) { rows.push(`${fid} skipped (static errors)`); continue; }
+    let res;
+    try { res = birthSelfTest(f, SEED, SAMPLE ? 40 : 90); } catch (e) { err(`birth (SPEC §35) ${fid}: self-test threw — ${e.message}`); rows.push(`${fid} threw`); continue; }
+    res.problems.slice(0, 6).forEach((m) => err(`birth (SPEC §35) ${fid}: ${m}`));
+    Object.entries(res.picked).forEach(([oid, k]) => { if (!k) warn(`birth (SPEC §35) ${fid}: origin ${oid} never chosen in ${res.runs} random birth runs`); });
+    const avgFork = res.forkSteps.length ? (res.forkSteps.reduce((a, b) => a + b, 0) / res.forkSteps.length).toFixed(1) : "-";
+    rows.push(`${fid} ${Object.entries(res.picked).map(([k, v]) => k + " " + v).join("/")} · fork after ${avgFork} choices · ${res.rewinds} fork rewinds · ${res.finished}/${res.runs} finished`);
+  }
+  if (rows.length) console.log(`\n§35 shared birth (start at the birth node, random play, rewind across the fork, save round trip): ${rows.join(" · ")}`);
 }
 /* ---------- SPEC §24 difficulty levels ---------- */
 if (WH.difficulty && !WRITE_DIFF) {
