@@ -30,11 +30,51 @@
 
   var N = {};
 
+  /* ============ Shared birth (SPEC §35) · Port Dal'nor, one night: the hiring screen or the unlit boat ============ */
+  var MARROW = S("guard_sergeant", "马洛中士", "Sergeant Marrow");
+
+  N.tau_b01 = {chapter: 1, scene: "tau_city", speaker: null,
+    text: L("达尔诺尔港，黄昏。帝国的船六年没来了；三年前，钛人的白船来了。\n你兜里只剩两枚硬币。主码头的屏幕亮着：明早招工，按手印领工牌。\n第七泊位后面，老摊主冲你招手：“这几晚有条不点灯的船。”",
+            "Port Dal'nor, dusk. No Imperial ship has come in six years; three years ago the white T'au ships came.\nYou have two coins left. On the main quay a screen glows: hiring at dawn, press your palm, get a work card.\nBehind Berth Seven the old stallkeeper beckons. “There's a boat with no lights, these nights.”"),
+    codex: ["place_dalnor", "place_dalnor_port"],
+    choices: [
+      C("去主码头排队过夜", "Queue at the main quay overnight", "tau_b02", {result: L("你在海堤下找了块干地方躺下。前后都是人，没人睡得着。", "You find a dry spot under the sea wall. People ahead of you and behind; nobody sleeps.")}),
+      C("跟老摊主去第七泊位", "Follow the old stallkeeper to Berth Seven", "tau_b03", {result: L("老摊主走得很快，一路回头看天上的无人机。", "The old man walks fast, glancing back at the drones overhead.")})
+    ]};
+
+  N.tau_b02 = {chapter: 1, scene: "tau_city", speaker: S("tau_drone", "招工无人机", "Hiring Drone"), time: {h: 10},
+    text: L("天亮时，队伍排到了海堤尽头。钛人的工钱从不迟到一天，人人都知道。\n轮到你，屏幕上只剩最后一个名额。身后抱孩子的女人脸色发灰；更后面，有人举着钱喊：“前排的位置，我买！”",
+            "By dawn the queue reaches the end of the sea wall. T'au wages are never a day late; everyone knows it.\nYour turn, and the screen shows one place left. The woman behind you, a child on her hip, has gone grey. Further back someone waves money: “I'll buy a front place!”"),
+    choices: [
+      C("按下手印", "Press your palm to it", "tau_101", {effects: {origin: "colonist", set: {born_shared: true, origin_colonist: true}}, result: L("屏幕绿了，工牌吐出来，还带着机器的余温。那个女人抱紧孩子走开了，没回头。", "The screen turns green and a work card slides out, still warm. The woman hugs her child and walks away without looking back.")}),
+      C("把位置卖给出价的人", "Sell your place to the bidder", "tau_o_trader_1", {effects: {origin: "trader", set: {born_shared: true, origin_trader: true}}, result: L("你把价钱抬了三轮才松手。这笔钱，正够盘下老摊主第七泊位后面的货摊——他今晚就走。", "You push the price up three times before you let go. It's just enough to buy the old stallkeeper's stall behind Berth Seven. He leaves tonight.")}),
+      C("把位置让给那个女人", "Give your place to the woman", "tau_b03", {result: L("女人愣住，然后哭了。你在海堤上坐到天黑，只剩一个地方可去：第七泊位。", "She stares at you, then cries. You sit on the sea wall till dark. There's only one place left to go: Berth Seven.")})
+    ]};
+
+  N.tau_b03 = {chapter: 1, scene: "tau_city", speaker: MARROW, time: {h: 4},
+    text: L("第七泊位底下，一艘不点灯的船靠了岸。来人穿着打补丁的星界军大衣，自称马洛中士。\n“大裂隙把我们团困在海湾这边，守着一颗卫星。缺人，缺电池。”\n老摊主扛起包袱要跟他走，把货摊钥匙递向你。",
+            "Under Berth Seven a boat with no lights comes alongside. The man who steps off wears a patched Guard greatcoat: Sergeant Marrow, he says.\n“The Great Rift stranded my regiment on this side of the Gulf. We hold a moon. Short of hands, short of cells.”\nThe old stallkeeper shoulders his bundle to go with him, and holds his stall key out to you."),
+    codex: ["imp_guard"],
+    alt: [
+      {if: {fromNode: "tau_b02"}, add: L("你是从主码头空着手回来的。", "You've come back from the main quay empty-handed.")}
+    ],
+    choices: [
+      C("披上中士递来的大衣", "Take the greatcoat he holds out", "tau_o_pow_1", {effects: {origin: "pow", set: {born_shared: true, origin_pow: true}}, result: L("大衣有机油和别人的汗味。船上，中士在你袖口缝上团的番号：“从今晚起，帝皇记得你。”", "The coat smells of gun oil and someone else's sweat. On the boat the sergeant stitches the regiment's number to your cuff. “From tonight, the Emperor knows you.”")}),
+      C("接过老摊主的钥匙", "Take the old man's key", "tau_o_trader_1", {effects: {origin: "trader", set: {born_shared: true, origin_trader: true}}, result: L("“货款从利钱里还我，”老摊主说，“要是我回得来。”那艘船没点灯，开走了。", "“Pay me for the stock out of the profits,” the old man says. “If I come back.” The boat slips away, unlit.")}),
+      C("退回岸上的灯光里", "Back away into the shore lights", "tau_101", {effects: {origin: "colonist", set: {born_shared: true, origin_colonist: true}}, result: L("无人机的红光从堤上扫过。你一路没停；天亮时，你在主码头的招工屏幕上按下了手印。", "A drone's red light sweeps the sea wall. You don't stop walking. At dawn you press your palm to the main quay's hiring screen.")})
+    ]};
+
   /* ============ Chapter 1 · New Neighbours ============ */
   N.tau_101 = {chapter: 1, scene: "tau_city", speaker: null,
     text: L("新卡尔德，现在叫达尔诺尔。\n六年前，帝国的船不再来了。三年前，白色的船来了。总督签了字，广场上的帝皇像换成了一个光滑的圆环。\n你在港口卸货。钛人发工钱，从不迟到一天。",
             "New Calder. Dal'nor, now.\nSix years ago the Imperial ships stopped coming. Three years ago the white ships came. The governor signed, and the Emperor's statue in the square became a smooth ring.\nYou unload cargo at the port. The T'au pay wages, never a day late."),
     codex: ["tau_empire", "place_dalnor", "imp_great_rift"],
+    alt: [
+      {if: {all: [{flag: "born_shared"}, {fromNode: "tau_b03"}]}, text: L("工牌到手三天了。你在港口卸货，钛人发工钱，从不迟到一天。\n那条不点灯的船再没来过，老摊主也没有。第七泊位后面的货摊，门板钉死了。",
+        "Three days with a work card. You unload cargo at the port; the T'au pay wages, never a day late.\nThe boat with no lights hasn't come back, nor has the old stallkeeper. His stall behind Berth Seven is boarded up.")},
+      {if: {flag: "born_shared"}, text: L("工牌到手三天了。你在港口卸货，钛人发工钱，从不迟到一天。\n有时你会想起海堤上那个抱孩子的女人。你再没见过她。",
+        "Three days with a work card. You unload cargo at the port; the T'au pay wages, never a day late.\nSometimes you think of the woman on the sea wall with the child on her hip. You never saw her again.")}
+    ],
     choices: [
       C("去港口上工", "Head to the docks", "tau_102", {result: L("汽笛响了。今天码头不开工——所有人都被叫去听演讲。", "The whistle blows. No unloading today: everyone is called to hear a speech.")}),
       C("先去看看邻居雷娜姨", "Visit your neighbour, Aunt Rena, first", "tau_103", {result: L("人类街区的巷子还是老样子。雷娜姨家的门没锁，屋里有股蜡烛味。", "The human quarter's alleys haven't changed. Rena's door is unlocked; the room smells of candle wax.")})
@@ -146,6 +186,10 @@
     text: L("大裂隙把你的驻防团困在了海湾这一边。你们在一颗无名卫星上守了十一天，然后投降了。\n战俘营没有铁丝网，只有一道蓝光。每天两顿热饭。\n水族使节瓦尚微笑着问每个人：“你愿意为什么而活？”",
             "The Great Rift stranded your garrison regiment on this side of the Gulf. You held a nameless moon for eleven days, then surrendered.\nThe prison camp has no wire, only a line of blue light. Two hot meals a day.\nThe water-caste envoy Vash'aun smiles and asks each of you: “What would you like to live for?”"),
     codex: ["tau_empire", "tau_water_caste", "place_damocles_gulf"],
+    alt: [
+      {if: {flag: "born_shared"}, text: L("那条船把你送上了卫星。团里两百来人，援军等了好几年。\n第四十天，白船来了：钛人一直跟着那条船。你们守了十一天，投降了。\n战俘营只有一道蓝光。水族使节瓦尚笑着问：“你愿意为什么而活？”",
+        "The boat took you up to the moon. Two hundred-odd men, who had waited years for relief.\nOn the fortieth day the white ships came: the T'au had been following that boat all along. You held eleven days, then surrendered.\nThe camp has only a line of blue light. The water-caste envoy Vash'aun smiles and asks: “What would you like to live for?”")}
+    ],
     choices: [
       C("“为了吃饱。”", "“A full belly.”", "tau_o_pow_2", {effects: {hp: 5, renown: 3}, result: L("瓦尚记下你的回答，像记下一个可以接受的价格。“诚实。很好。”", "Vash'aun notes your answer like an acceptable price. “Honest. Good.”")}),
       C("“为了帝皇。”", "“The Emperor.”", "tau_o_pow_2", {effects: {sanity: 5, renown: -3, set: {powDefiant: true}}, result: L("瓦尚的笑容没变，在你名字旁画了个小记号。那天的晚饭，你的那份照样是热的。", "Vash'aun's smile doesn't change; he makes a small mark by your name. Your dinner that night is still hot.")})
@@ -176,6 +220,10 @@
     text: L("签了字的人被装上运输船，十天后到了达尔诺尔。你借住在人类街区的雷娜姨家，她以前是教堂的执事。\n她看见你袖口的星界军线头，眼眶红了。\n她儿子乔里却只想听钛人是怎么赢的。",
             "Those who signed are shipped out and reach Dal'nor ten days later. You lodge with Aunt Rena in the human quarter; she was once the chapel's deaconess.\nShe sees the old Guard threads on your cuff and her eyes fill.\nHer son Jory only wants to hear how the T'au won."),
     codex: ["place_dalnor", "place_human_quarter", "imp_imperium"],
+    alt: [
+      {if: {flag: "born_shared"}, text: L("签了字的人被装上运输船，十天后回到达尔诺尔。你走了三个多月，旧屋已租出去；邻居雷娜姨收留了你，她以前是教堂的执事。\n她看见你袖口的番号，眼眶红了。\n她儿子乔里却只想听钛人是怎么赢的。",
+        "Those who signed are shipped out and reach Dal'nor ten days later. You've been gone three months and more; your old room is let. Your neighbour Aunt Rena, once the chapel's deaconess, takes you in.\nShe sees the regiment's number on your cuff and her eyes fill.\nHer son Jory only wants to hear how the T'au won.")}
+    ],
     choices: [
       C("跟雷娜姨讲帝国", "Tell Rena about the Imperium", "tau_104", {effects: {sanity: 5, set: {knowAquila: true}}, result: L("你讲大教堂和阅兵，不讲政委和战壕。雷娜姨从围裙里掏出一枚双头鹰吊坠，攥了很久。", "You tell of cathedrals and parades, not commissars and trenches. Rena draws an eagle pendant from her apron and holds it a long time.")}),
       C("跟乔里讲钛人怎么赢的", "Tell Jory how the T'au won", "tau_104", {effects: {renown: 3, set: {joryHero: true}}, result: L("“他们等，”你说，“等到你自己走进去。”乔里听得两眼发亮。厨房里，雷娜姨摔了一只碗。", "“They wait,” you say. “Until you walk in yourself.” Jory's eyes shine. In the kitchen, Rena drops a bowl.")})
@@ -186,6 +234,12 @@
     text: L("达尔诺尔的港口集市，摊贩挤成一排，两边的货都有人叫卖。第七泊位后面那个小货摊是你的。\n帝国的船不来以后，旧圣像、双头鹰吊坠成了稀罕货；钛人的电池在走私船上也一样。你两边都卖。",
             "Dal'nor's port market: stalls crammed in a row, hawkers crying both sides' goods. The little stall behind Berth Seven is yours.\nSince the Imperial ships stopped coming, old icons and eagle pendants have grown rare; so have T'au power cells, out on the smugglers' boats. You sell to both."),
     codex: ["tau_empire", "place_dalnor", "place_dalnor_port"],
+    alt: [
+      {if: {all: [{flag: "born_shared"}, {fromNode: "tau_b02"}]}, text: L("第二天，港口集市照常开张。第七泊位后面的小货摊归你了，是用卖位置的钱盘下的；老摊主跟那条船走了。\n旧圣像、双头鹰吊坠成了稀罕货，走私来的电池也一样。你两边都卖。",
+        "Next morning the port market opens as usual. The little stall behind Berth Seven is yours, bought with the price of your place in the queue; the old man left on that boat.\nOld icons and eagle pendants are rare now, and so are smuggled power cells. You sell to both sides.")},
+      {if: {flag: "born_shared"}, text: L("第二天，港口集市照常开张。第七泊位后面的小货摊归你了，货款还欠着老摊主。\n旧圣像、双头鹰吊坠成了稀罕货，走私来的电池也一样。你两边都卖，先把账还上。",
+        "Next morning the port market opens as usual. The little stall behind Berth Seven is yours, and you still owe the old man for the stock.\nOld icons and eagle pendants are rare now, and so are smuggled power cells. You sell to both sides, to pay off the debt first.")}
+    ],
     choices: [
       C("清点今天的货", "Count today's stock", "tau_o_trader_2", {effects: {set: {knowBatteries: true}}, result: L("柜台底下压着两箱激光枪电池，戳印是“奥雷克斯二号·第六工厂”。走私船换来的，两边都有人要。", "Under the counter sit two crates of lasgun power cells, stamped ‘Aurex Secundus · Manufactorum Six’. Smuggler goods. Both sides want them.")}),
       C("去码头打听走私船", "Ask after the smugglers' boat", "tau_o_trader_2", {effects: {renown: -3, set: {knowSmuggler: true}}, result: L("老船工朝海面努努嘴：“今晚，没灯的那艘。第七泊位底下有条水道。”他收下了你一包烟。", "The old boatman jerks his chin at the water. “Tonight. The one without lights. There's a channel under Berth Seven.” He pockets your smokes.")})
@@ -553,6 +607,7 @@
     effects: {sanity: -10},
     codex: ["imp_guard"],
     alt: [
+      {if: {all: [{flag: "origin_pow"}, {flag: "born_shared"}]}, text: L("帝国的登陆部队冲进了达尔诺尔。你透过瞄准镜看见他们：和你一样的脸，念着和你一样的祷词，扛着你在卫星上扛过的激光枪。\n凯尔拉在频道里说：“目标确认。开火。”", "Imperial landing forces storm Dal'nor. Through your scope: faces like yours, mouthing the prayers you were taught, carrying the lasguns you carried on the moon.\nKel'ra on the comm: “Targets confirmed. Fire.”")},
       {if: {flag: "origin_pow"}, text: L("帝国的登陆部队冲进了达尔诺尔。你透过瞄准镜看见他们：和你一样的脸，念着和你一样的祷词，扛着你扛了好多年的激光枪。\n凯尔拉在频道里说：“目标确认。开火。”", "Imperial landing forces storm Dal'nor. Through your scope: faces like yours, mouthing the prayers you were taught, carrying the lasguns you carried for years.\nKel'ra on the comm: “Targets confirmed. Fire.”")},
       {if: {flag: "knowBatteries"}, add: L("他们的电池上印着“奥雷克斯二号”。你卖过同一批。", "Their power cells say ‘Aurex Secundus’. You sold that batch.")},
       {if: {flag: "haskTaught"}, add: L("哈斯克趴在你旁边，枪口一动不动。", "Hask lies beside you, his muzzle perfectly still.")}
@@ -1249,6 +1304,7 @@
     playerSprite: "player_tau",
     color: "#3fa7c9",
     startNode: "tau_101",
+    birthNode: "tau_b01",
     startDate: {year: 111, mill: 42},
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("大义", "Greater Good"),

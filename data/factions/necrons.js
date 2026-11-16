@@ -50,10 +50,70 @@
 
   var N = {};
 
+  /* ============ Shared birth (SPEC §35) · the supply lander ============
+   * You signed on at Carcharos port as a hold-hand; at landing the purser says you owe more than you earned and
+   * the lander will not carry a debtor back. Three people on the pad need a body: Marrow (a draughtsman),
+   * Kaal (one convict died in the hold, the governor is paid per head), Vektrix-9 (his scribe burned out in the void).
+   * b01 -> b02 (convict side) | b03 (crate side); b02: convict | b04; b03: archivist | b04; b04: lexmech | convict | archivist. */
+  N.nec_b01 = {chapter: 1, scene: "ship_interior", speaker: null,
+    text: L("补给登陆艇在忒萨零号上空颠簸。你是在卡尔卡罗斯港签的舱工，合同写着“到港结清”。\n事务长刚算完：你欠的铺位钱比工钱多。回程不载欠债的人。\n货舱一头锁着犯人，一头堆着盖印的样本箱。",
+            "The supply lander bucks above Thessa Null. You signed on at Carcharos port as a hold-hand; the contract said “paid in full on landing.”\nThe purser has just done the sums: you owe more for your bunk than you earned. The lander takes no debtors back.\nAt one end of the hold, chained convicts; at the other, sealed sample crates."),
+    codex: ["place_thessa_null", "place_carcharos"],
+    choices: [
+      C("挤到犯人那头去", "Squeeze over to the convicts", "nec_b02"),
+      C("去帮忙搬盖印的箱子", "Help shift the sealed crates", "nec_b03")
+    ]};
+
+  N.nec_b02 = {chapter: 1, scene: "ship_interior", speaker: HOLLIS,
+    text: L("笼边一个老犯人咳个不停，脚边的毯子底下是昨晚死的人。\n“我叫霍利斯。下坡道时卡尔中士要点人头，”他说，“总督按人头收钱，少一个总得有人补。”\n事务长走过，腰上挂着你的工钱。",
+            "By the cage an old convict coughs and coughs. A blanket at his feet covers the man who died last night.\n“Name's Hollis. Sergeant Kaal counts heads at the ramp,” he says. “The governor's paid per head. One short, somebody makes it up.”\nThe purser walks past the convicts, your wages on his belt."),
+    choices: [
+      C("抢回被扣的工钱", "Take your wages back", "nec_o_convict_1", {effects: {origin: "convict", set: {born_shared: true, origin_convict: true}},
+        result: L("你一拳打翻事务长。坡道放下，卡尔中士上来点数，没收钱袋，只把死人的镣铐扣到你脚上：“数对了。”",
+                  "You put the purser down on the deck plates. The ramp drops; Sergeant Kaal comes up to count. He leaves you the purse and locks the dead man's shackle onto your ankle. “Count's right.”")}),
+      C("问霍利斯哪里还要人", "Ask Hollis who else is hiring", "nec_b04", X(null,
+        "霍利斯朝坡道努努嘴。“那个铁脑袋贤者，在人堆里找脑后有插口的。你不是开过货舱的思考机吗？”",
+        "Hollis nods at the ramp. “The iron-headed magos. He's combing the crowd for anyone with a skull socket. Didn't you run the hold cogitator?”"))
+    ]};
+
+  N.nec_b03 = {chapter: 1, scene: "ship_interior", speaker: MARROW,
+    text: L("你边搬边念箱子上的印：“前帝国……勿倒置……”\n一个女人从文件堆里抬起头。“你识字？会画吗？”她是这支考察队的玛罗教授。\n“我的档案员不够用。不发工钱，管饭，名字能进脚注。”",
+            "You read the stamps aloud as you lift: “Pre-Imperial… this way up…”\nA woman looks up from a heap of papers. “You can read? Can you draw?” She is Professor Marrow, head of the dig.\n“I'm short of archivists. No wages. Meals. Your name in a footnote.”"),
+    choices: [
+      C("接过她的素描簿和灯", "Take her sketchbook and lamp", "nec_101", {effects: {origin: "archivist", set: {born_shared: true, origin_archivist: true}},
+        result: L("债还在，事务长还在骂。可你第一次觉得，自己看见的东西值得被写下来。",
+                  "The debt is still there; the purser is still swearing. But for the first time, what you see seems worth writing down.")}),
+      C("问她能不能替你还债", "Ask if she'll pay your debt", "nec_b04", X(null,
+        "她笑了。“学问还不起债。去问那位贤者，他们的教派买人。”",
+        "She laughs. “Scholarship pays no debts. Ask the magos. His creed buys people.”"))
+    ]};
+
+  N.nec_b04 = {chapter: 1, scene: "dig_site", speaker: VEKTRIX, time: {h: 1},
+    text: L("登陆坪上，卡尔中士点完犯人，骂了一声：少一个。\n维克崔斯-9贤者的镜头扫过人群，停在你耳后的旧插口上。\n“我的书记死于数据灼伤。合同还剩二十九年，”他说，“可以转让。你的债，我付。”",
+            "On the landing pad Sergeant Kaal finishes the convict count and swears: one short.\nMagos Vektrix-9's lens sweeps the crowd and stops on the old socket behind your ear.\n“My scribe died of data-burn. Twenty-nine years left on the contract,” he says. “Transferable. I pay your debt.”"),
+    alt: [
+      {if: {fromNode: ["nec_b02"]}, add: L("坡道下，考察队的玛罗教授在清点样本箱，抱怨档案员不够用。", "At the foot of the ramp the dig's leader, Professor Marrow, counts sample crates and complains she is short of archivists.")}
+    ],
+    choices: [
+      C("把插口露给他看", "Turn your socket to him", "nec_o_lexmech_1", {effects: {origin: "lexmech", set: {born_shared: true, origin_lexmech: true}},
+        result: L("贤者替你付清了铺位钱。从今天起，你欠的不是事务长，是机械神教。",
+                  "The magos settles your bunk debt. From today you owe nothing to the purser, and everything to the Mechanicus.")}),
+      C("去卡尔那儿顶上空缺", "Go and fill Kaal's gap", "nec_o_convict_1", {effects: {origin: "convict", set: {born_shared: true, origin_convict: true}},
+        result: L("十年总比二十九年短。卡尔看了你很久，把空着的镣铐扣上。“数对了。”",
+                  "Ten years beats twenty-nine. Kaal looks at you a long while, then locks the empty shackle on. “Count's right.”")}),
+      C("追上玛罗教授求她收下", "Run after Professor Marrow", "nec_101", {effects: {origin: "archivist", set: {born_shared: true, origin_archivist: true}},
+        result: L("教授听完，把素描簿和灯塞给你。“不发工钱，管饭。你的债，自己想办法。”",
+                  "The Professor hears you out and hands you a sketchbook and a lamp. “No wages. Meals. Your debt is your own problem.”")})
+    ]};
+
   /* ============ Chapter 1 · The Dead World ============ */
   N.nec_101 = {chapter: 1, scene: "dig_site", speaker: null,
     text: L("忒萨零号，帝国星图上标着“死寂”。没有风，没有苔藓，连细菌都没有。\n可沙丘排得整整齐齐，像有人每天来扫。\n你是考察队最年轻的档案员，带着一本素描簿和一盏灯。",
             "Thessa Null. Imperial charts call it dead. No wind, no moss, not even bacteria.\nYet the dunes lie in neat rows, as if someone sweeps them daily.\nYou are the dig's youngest archivist, with a sketchbook and a lamp."),
+    alt: [
+      {if: {flag: "born_shared"}, text: L("你在素描簿上画下第一页：登陆坪外的沙丘排得整整齐齐，像有人每天来扫。\n这颗星没有风，没有苔藓，连细菌都没有。\n登陆艇轰鸣着升空，你提着教授给的灯，站在营地边上。",
+        "On the first page of the sketchbook you draw the dunes beyond the pad, lying in neat rows as if someone sweeps them daily.\nThis world has no wind, no moss, not even bacteria.\nThe lander roars back to the sky. You stand at the camp's edge with the Professor's lamp.")}
+    ],
     codex: ["place_thessa_null", "imp_mechanicus"],
     choices: [
       C("去主帐篷向教授报到", "Report to the Professor's tent", "nec_102"),
@@ -159,6 +219,10 @@
   N.nec_o_convict_1 = {chapter: 1, scene: "dig_site", speaker: null,
     text: L("你脚镣上的编号是4471。卡尔卡罗斯的总督把一整船犯人卖给了考察队：挖满十年，刑期勾销。\n忒萨零号没有风。监工说这是好事，坑不会被沙子填回去。\n第一铲下去，沙子底下是金属。",
             "Your shackle number is 4471. The governor of Carcharos sold a whole hold of convicts to the dig: ten years' digging, sentence wiped.\nThessa Null has no wind. The overseer says that's good; the pits won't fill back in.\nYour first spadeful hits metal."),
+    alt: [
+      {if: {flag: "born_shared"}, text: L("脚镣上的编号是4471，原主人昨晚死在货舱里。总督按人头卖犯人：挖满十年，刑期勾销。这刑期现在归你了。\n监工说这颗星没有风，坑不会被填回去。\n第一铲下去，沙子底下是金属。",
+        "The number on your shackle is 4471; its owner died in the hold last night. The governor sells convicts by the head: ten years' digging, sentence wiped. The sentence is yours now.\nThe overseer says this world has no wind; the pits won't fill back in.\nYour first spadeful hits metal.")}
+    ],
     codex: ["place_thessa_null", "place_carcharos"],
     choices: [
       C("接着挖，别多问", "Keep digging, ask nothing", "nec_o_convict_2", X({hp: -5, renown: 3, set: {quota: true}},
@@ -218,6 +282,10 @@
   N.nec_o_lexmech_1 = {chapter: 1, scene: "dig_site", speaker: VEKTRIX,
     text: L("你耳后插着一根数据线，另一头连在维克崔斯-9贤者的腰上。\n你是他的契约书记，把他的念头写成文件。三十年合同，还剩二十九年。\n“记录，”他说，“今天，我们发现一位神。”",
             "A data-cable runs from behind your ear to Magos Vektrix-9's belt.\nYou are his indentured lexmechanic, turning his thoughts into documents. A thirty-year contract; twenty-nine to go.\n“Record,” he says. “Today, we discover a god.”"),
+    alt: [
+      {if: {flag: "born_shared"}, text: L("贤者的数据线插进你耳后的旧插口，接上死者没用完的合同：三十年，还剩二十九年。\n从此你是他的契约书记，把他的念头写成文件。\n“记录，”他说，“今天，我们发现一位神。”",
+        "The magos's data-cable seats in the old socket behind your ear, and a dead man's unfinished contract passes to you: thirty years, twenty-nine to go.\nYou are his indentured lexmechanic now, turning his thoughts into documents.\n“Record,” he says. “Today, we discover a god.”")}
+    ],
     codex: ["place_thessa_null", "imp_mechanicus"],
     choices: [
       C("一字不差地记录", "Record it word for word", "nec_o_lexmech_2", X({renown: 3},
@@ -1724,6 +1792,7 @@
     playerSprite: "player_necrons",
     color: "#4fd16b",
     startNode: "nec_101",
+    birthNode: "nec_b01",
     startDate: {year: 113, mill: 42},
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("价值", "Worth"),

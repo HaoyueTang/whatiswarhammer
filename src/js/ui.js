@@ -796,13 +796,16 @@
 
   /* Two steps (SPEC §16): 选择势力 (faction cards) → 选择出身 (origin cards of that faction) → game.
    * A faction without `origins` has one synthesized default origin → the origin step is skipped. */
+  /* SPEC §35: a route with a shared birth point starts there (the fork decides the origin) unless Settings → 直接选出身 is on */
+  function usesBirth(f) { return !!(f && WH.Game.hasBirth(f) && !(UI.settings && UI.settings.chooseOrigin)); }
   function renderSelect() {
     var f = UI.sel.faction && WH.factions[UI.sel.faction];
-    if (f && WH.Game.origins(f).length > 1) renderOrigins(f);
+    if (f && WH.Game.origins(f).length > 1 && !usesBirth(f)) renderOrigins(f);
     else { UI.sel.faction = null; renderRaces(); }
   }
   function pickRace(f) {
     var os = WH.Game.origins(f);
+    if (usesBirth(f)) { startGame(f.id, WH.Game.BIRTH); return; }
     if (os.length <= 1) { startGame(f.id, os[0] ? os[0].id : null); return; }
     UI.sel.faction = f.id;
     renderSelect();
@@ -2029,6 +2032,7 @@
     var list = WH.Game.origins(f), o = null;
     for (var i = 0; i < list.length; i++) if (list[i].id === oid) o = list[i];
     if (!o && stored) return L(stored);
+    if (!o && (oid === null || oid === undefined) && WH.Game.hasBirth(f)) return t("origin_open");      // SPEC §35: saved before the fork
     return L((o || list[0] || {}).name || f.role);
   }
   function survivedHours(g) { return Math.max(0, g.state.hours - WH.Rules.startHours(g.faction)); }
@@ -2178,7 +2182,7 @@
     s.style.setProperty("--accent", fcolor(f));
     s.appendChild(h("div", {class: "bg"}, art("scene", node.scene || "void")));
     s.appendChild(h("div", {class: "corner"}, soundButton(), musicButton(), langButton()));
-    var again = h("button", {class: "btn primary px", type: "button", onclick: function () { startGame(f.id, g.state.origin); }}, "↻ " + t("again"));
+    var again = h("button", {class: "btn primary px", type: "button", onclick: function () { startGame(f.id, usesBirth(f) ? WH.Game.BIRTH : g.state.origin); }}, "↻ " + t("again"));
     var back = UI.settings.rewind === true && g.canRewind() ?              // SPEC §30
       h("button", {class: "btn px rewind-end", type: "button", id: "rewind-end", "aria-keyshortcuts": "Z", title: t("rewind_end") + " (Z)", onclick: function () { rewindStep(); }}, "\u21B6 " + t("rewind_end")) : null;
     s.appendChild(h("div", {class: "ending-wrap"},
@@ -2789,6 +2793,9 @@
       h("div", {class: "setrow"}, h("span", {class: "k"}, t("lore_cards")),
         seg([["new", t("lore_new_only")], ["all", t("lore_all")], ["codex", t("lore_codex_only")]],
           st.loreCards === "all" || st.loreCards === "codex" ? st.loreCards : "new", function (v) { st.loreCards = v; save(); openSettings(true); })),
+      h("div", {class: "setrow hint-row origin-row"}, h("span", {class: "k"}, t("origin_pick")),
+        seg([[true, t("on")], [false, t("off")]], st.chooseOrigin === true, function (v) { st.chooseOrigin = v; save(); openSettings(true); }),
+        h("p", {class: "set-hint"}, t("origin_pick_hint"))),
       h("div", {class: "setrow hint-row kw-row"}, h("span", {class: "k"}, t("kw_links")),
         seg([[true, t("on")], [false, t("off")]], st.keywordLinks !== false, function (v) { st.keywordLinks = v; save(); openSettings(true); }),
         h("p", {class: "set-hint"}, t("kw_links_hint"))),

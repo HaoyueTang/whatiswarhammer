@@ -44,10 +44,56 @@
 
   var N = {};
 
+  /* ============ Shared birth point (SPEC §35) · dusk at the dock-gate scrap market ============ */
+  N.ork_b01 = {chapter: 1, scene: "ork_scrapyard", speaker: null,
+    text: L("伊斯卡隆。黄昏，船坞大门外的废品集市。你住居住堆底层，在这儿打零工。\n东边天上浮起一块绿光，像化脓的淤青。集市静了。\n征兵桌后的中士站起来；玛格达大婶收摊；锈牙帮的小钉子冲你招手。",
+            "Iskaron. Dusk at the scrap market by the dock gates. You live at the bottom of the hab-stacks and do odd jobs here.\nIn the east a green patch rises like a festering bruise. The market falls silent.\nThe sergeant at the levy table stands; Old Magda packs her stall; Little Nail of the Rustfang gang waves you over."),
+    codex: ["place_iskaron", "place_arcosa"],
+    choices: [
+      C("走到征兵桌前", "Walk up to the levy table", "ork_b02"),
+      C("帮玛格达大婶收摊", "Help Old Magda pack up", "ork_b03"),
+      C("跟上小钉子", "Follow Little Nail", "ork_b04")
+    ]};
+
+  N.ork_b02 = {chapter: 1, scene: "barracks", speaker: VOSS,
+    text: L("中士姓沃斯，嚼着烟草，把名册往桌上一拍。\n“星界军什一征兵，提前了。每户出一个，十六岁以上，两只手。管饭，发枪。”\n他看了一眼天上的绿：“枪不够，先到先得。”排队的人没一个说话。",
+            "The sergeant's name is Voss. He chews tobacco and slaps the roll on the table.\n“Astra Militarum tithe levy, brought forward. One per household, sixteen and up, two hands. You get fed, you get a gun.”\nHe glances at the green sky. “Not enough guns. First come, first served.” Nobody in the queue says a word."),
+    codex: ["imp_guard"],
+    choices: [
+      C("在名册上按下手印", "Press your thumb to the roll", "ork_o_guard_1", {effects: {origin: "guard", set: {born_shared: true, origin_guard: true}},
+        result: L("沃斯看都没看你的脸，扔过来一件旧大衣：“欢迎入伍。今晚就用得上。”", "Voss doesn't even look at your face. He tosses you an old greatcoat. “Welcome to the Guard. You'll need it tonight.”")}),
+      C("溜出队伍，去找小钉子", "Slip out of the queue to find Little Nail", "ork_o_ganger_1", {effects: {origin: "ganger", set: {born_shared: true, origin_ganger: true}},
+        result: L("前面的人小声说，被征走的从没回来过。你退出队伍，钻进人群，在居住堆的楼梯井追上了小钉子。", "The man ahead whispers that nobody taken by the levy ever comes back. You step out, slip into the crowd, and catch Little Nail at the hab-stack stairwell.")})
+    ]};
+
+  N.ork_b03 = {chapter: 1, scene: "ork_scrapyard", speaker: null,
+    text: L("玛格达大婶的摊子堆满铜线和阀门。她手抖，锁扣了三次才扣上。\n“征兵令下来了，每户一个。我儿子才十六。”\n她把摊子钥匙塞进你手里：“替我看一夜摊子。我带他躲进居住堆。”",
+            "Old Magda's stall is heaped with copper wire and valves. Her hands shake; the lock takes three tries.\n“The levy's come. One per household. My boy's only sixteen.”\nShe presses the stall key into your hand. “Mind the stall for me tonight. I'm hiding him in the stacks.”"),
+    choices: [
+      C("接过钥匙，守着摊子", "Take the key and mind the stall", "ork_101", {effects: {origin: "scrap", set: {born_shared: true, origin_scrap: true}},
+        result: L("她走了，没回头。铜线、阀门、一箱伺服马达，今晚都归你看。她说要是她回不来，就全归你。", "She goes without looking back. Copper wire, valves, a crate of servo-motors: all yours to mind tonight. If she doesn't come back, she says, it's all yours.")}),
+      C("替她儿子去按手印", "Go sign the roll in her boy's place", "ork_o_guard_1", {effects: {origin: "guard", set: {born_shared: true, origin_guard: true}},
+        result: L("玛格达拽着你的袖子哭。征兵桌后的沃斯中士不在乎来的是谁，只在乎人数。你按下了手印。", "Magda clutches your sleeve, weeping. Sergeant Voss at the levy table doesn't care who comes, only that the numbers add up. You press your thumb down.")})
+    ]};
+
+  N.ork_b04 = {chapter: 1, scene: "hive_hab", speaker: null,
+    text: L("小钉子领你钻进居住堆的楼梯井。锈牙帮的人都在，撬棍堆了一地。\n帮主盯着天上的绿光，咧嘴笑：“总督的卫兵在打包。今晚上面要乱。”\n他把一根撬棍递到你面前。",
+            "Little Nail leads you into the hab-stack stairwell. The whole Rustfang gang is there, crowbars piled on the floor.\nThe boss watches the green light and grins. “The governor's guards are packing. Tonight it all comes loose up top.”\nHe holds a crowbar out to you."),
+    choices: [
+      C("接过撬棍", "Take the crowbar", "ork_o_ganger_1", {effects: {origin: "ganger", set: {born_shared: true, origin_ganger: true}},
+        result: L("撬棍是凉的，比你的手稳。你从小饿到大，今晚头一回觉得能吃饱。帮主拍拍你的肩。", "The crowbar is cold, steadier than your hand. You've been hungry all your life; tonight, for once, you might eat. The boss claps your shoulder.")}),
+      C("推开撬棍，回船坞去", "Push it away and head back to the docks", "ork_101", {effects: {origin: "scrap", set: {born_shared: true, origin_scrap: true}},
+        result: L("乱的时候，阀门比撬棍值钱。你回到船坞，把攒下的零件摆成一个摊子，打算天亮开价。", "When things come loose, a valve is worth more than a crowbar. You go back to the docks, lay out the parts you've saved as a stall, and wait to name your price at dawn.")})
+    ]};
+
   /* ============ Chapter 1 · Da Big Scrap ============ */
   N.ork_101 = {chapter: 1, scene: "ork_scrapyard", speaker: null,
     text: L("伊斯卡隆，阿尔科萨星区的拆船星。你在废船骨架之间倒卖铜线和阀门，日子不坏。\n那天，天空变绿了。一块块装着引擎的大石头砸进船坞。\n石头里传出笑声。",
             "Iskaron, ship-breaking world of the Arcosa Sector. You trade copper wire and valves among the bones of dead ships. Not a bad life.\nThen the sky turns green. Huge rocks with engines slam into the docks.\nThe rocks are laughing."),
+    alt: [
+      {if: {flag: "born_shared"}, text: L("你守着船骨之间的那个摊子：铜线、阀门、一箱伺服马达。\n半夜，绿光铺满了整个天空。一块块装着引擎的大石头砸进船坞。\n石头里传出笑声。",
+        "You keep the stall among the bones of dead ships: copper wire, valves, a crate of servo-motors.\nAt midnight the green fills the whole sky. Huge rocks with engines slam into the docks.\nThe rocks are laughing.")}
+    ],
     codex: ["place_iskaron", "place_arcosa", "xenos_ork"],
     choices: [
       C("钻进一艘废船的肚子里躲起来", "Hide in the belly of a wreck", "ork_102"),
@@ -162,6 +208,10 @@
   N.ork_o_guard_1 = {chapter: 1, scene: "trench", speaker: VOSS,
     text: L("你是星界军的列兵，驻守伊斯卡隆的船坞。沃斯中士嚼着烟草，看着天边那片绿。\n“兽人，”他说，“别想着赢。想着多拉几个垫背的。”\n第一块带引擎的石头落在三公里外。",
             "You're an Astra Militarum trooper posted to Iskaron's docks. Sergeant Voss chews tobacco and watches the green on the horizon.\n“Orks,” he says. “Don't think about winning. Think about taking a few with you.”\nThe first rock with engines lands three kilometres off."),
+    alt: [
+      {if: {flag: "born_shared"}, text: L("手印还没干，你已穿上旧大衣，蹲进船坞边的壕沟。沃斯中士嚼着烟草，看着天边那片绿。\n“兽人，”他说，“别想着赢。想着多拉几个垫背的。”\n第一块带引擎的石头落在三公里外。",
+        "Your thumbprint isn't dry, and you're already in an old greatcoat, crouched in the trench by the docks. Sergeant Voss chews tobacco and watches the green on the horizon.\n“Orks,” he says. “Don't think about winning. Think about taking a few with you.”\nThe first rock with engines lands three kilometres off.")}
+    ],
     codex: ["imp_guard", "place_iskaron"],
     choices: [
       C("把激光枪电池擦得锃亮", "Polish your lasgun power packs", "ork_o_guard_2", X({renown: 3, set: {packs: true}},
@@ -231,6 +281,10 @@
   N.ork_o_ganger_1 = {chapter: 1, scene: "underhive", speaker: null,
     text: L("你是伊斯卡隆居住堆底层“锈牙帮”的人。绿天降临那晚，总督的卫兵全跑了。\n帮主说：上面的人在逃，上面的东西没人看。\n你们背起撬棍，往上爬。",
             "You run with the Rustfang gang at the bottom of Iskaron's hab-stacks. The night the sky turned green, the governor's guards all fled.\nThe boss says: the people up top are running; their stuff isn't.\nYou shoulder crowbars and climb."),
+    alt: [
+      {if: {flag: "born_shared"}, text: L("锈牙帮在楼梯井里等到半夜。绿光铺满了天，总督的卫兵全跑了。\n帮主说：上面的人在逃，上面的东西没人看。\n你们背起撬棍，往上爬。",
+        "The Rustfangs wait in the stairwell until midnight. The green fills the sky, and the governor's guards all flee.\nThe boss says: the people up top are running; their stuff isn't.\nYou shoulder crowbars and climb.")}
+    ],
     codex: ["place_iskaron"],
     choices: [
       C("带头往上爬", "Lead the climb", "ork_o_ganger_2", X({hp: -5, renown: 3, set: {gangLead: true}},
@@ -2077,6 +2131,7 @@
     playerSprite: "player_orks",
     color: "#6aa84f",
     startNode: "ork_101",
+    birthNode: "ork_b01",
     startDate: {year: 112, mill: 42},
     startStats: {hp: 105, sanity: 95, corruption: 0, renown: 10},
     renownLabel: L("牙币", "Teef"),

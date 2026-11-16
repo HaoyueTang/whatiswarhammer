@@ -54,10 +54,57 @@
 
   var N = {};
 
+  /* ============ Shared birth (SPEC §35) · the supply ship coming down to Valda ============
+   * b01 hold → b02 (listen to the crew: escort sergeant's enlistment sheet → trooper | home → agri)
+   *          → b03 (sleep: the dream → pilgrim | Nell's letter → agri). */
+  var ESCORT = S("guardsman", "押船的军士", "Escort Sergeant");
+
+  N.eld_b01 = {chapter: 1, scene: "ship_interior", speaker: null,
+    text: L("补给船正往瓦尔达降落。货舱里挤着回乡赶收割的季节工和几个船员，一壶酒在人手间传。\n你挤在农具箱中间，包袱压在膝上。\n舱壁那头，船员在嘀咕：瓦尔达的星语塔三天没回过一句话。",
+            "The supply ship is coming down to Valda. Its hold is packed with seasonal hands going home for the harvest, plus a few crew; a flask goes round.\nYou're wedged among crates of farm tools, your bundle on your knees.\nAcross the hold the crew mutter: Valda's astropath tower hasn't answered a word in three days."),
+    codex: ["place_valda"],
+    choices: [
+      C("挤过去听船员说什么", "Squeeze over to hear the crew", "eld_b02",
+        RS("你跨过几条腿。一个背着激光枪的人正和船员争：塔不说话，这船还落不落？", "You step over a few legs. A man with a lasgun on his back is arguing with the crew: if the tower's silent, do they still land?")),
+      C("靠着木箱闭上眼", "Lean on the crates and close your eyes", "eld_b03",
+        RS("发动机嗡嗡地响。酒壶从你面前传过去，你没接。", "The engines drone. The flask passes you by; you don't take it."))
+    ]};
+
+  N.eld_b02 = {chapter: 1, scene: "ship_interior", speaker: ESCORT,
+    text: L("押船的是星防卫军的军士，枪横在膝上。“塔不说话，运粮船也没来。上个月星界军的什一税抽走了第三连一半人。”\n他把一张征兵单拍在木箱上：“管饭，有饷。练过民兵的，签个名。”",
+            "The escort is a Defence Force sergeant, lasgun across his knees. “Tower's silent, no grain ships either. Last month the Astra Militarum tithe took half of Third Company.”\nHe slaps an enlistment sheet on a crate. “Food and pay. Anyone who's done militia drill, sign.”"),
+    codex: ["imp_guard"],
+    choices: [
+      C("在征兵单上签名", "Sign the enlistment sheet", "eld_o_trooper_1", {effects: {origin: "trooper", set: {born_shared: true, origin_trooper: true}},
+        result: L("军士把单子折进胸袋：“欢迎来第三连。”\n你这辈子头一回有人管饭，也头一回有人管你的命。",
+                  "The sergeant pockets the sheet. “Welcome to Third Company.”\nFor the first time in your life someone will feed you, and someone will own your life.")}),
+      C("把单子推回去，回家收麦", "Push it back: the wheat at home won't wait", "eld_101", {effects: {origin: "agri", set: {born_shared: true, origin_agri: true}},
+        result: L("军士耸耸肩，收回了单子。你想的是妹妹妮尔：塔不说话，家里只有她和爸妈守着那片麦子。",
+                  "The sergeant shrugs and takes the sheet back. You're thinking of your little sister Nell: the tower is silent, and only she and your parents are minding the wheat.")})
+    ]};
+
+  N.eld_b03 = {chapter: 1, scene: "ship_interior", speaker: S("omen_farseer", "梦", "Dream"),
+    text: L("你在轰鸣里睡着了。梦里，麦田尽头站着一个白袍女人，几颗石头绕着她的头慢慢转。\n她看着你，好像早就认得你。\n船身一震，你醒了。舷窗外，瓦尔达的麦田金得发亮，一直铺到天边。",
+            "You fall asleep in the roar. In the dream a white-robed woman stands where the wheat ends, stones turning slowly round her head.\nShe looks at you as if she has always known you.\nThe hull jolts and you wake. Through the port, Valda's wheat shines gold all the way to the horizon."),
+    choices: [
+      C("跟着梦走，去找那片麦田", "Follow the dream to that field", "eld_o_pilgrim_1", {effects: {origin: "pilgrim", set: {born_shared: true, origin_pilgrim: true}},
+        result: L("十年了，夜夜都是这个梦。你为它离了家，走过半个星区。\n这一次，梦里的麦田就在舱板底下。",
+                  "Ten years, the same dream every night. For it you left home and crossed half the sector.\nThis time the field from the dream lies right below the deck.")}),
+      C("甩开梦，摸出家书", "Shake it off and take out the letter from home", "eld_101", {effects: {origin: "agri", set: {born_shared: true, origin_agri: true}},
+        result: L("只是个梦。你摸出妹妹妮尔的信，字歪歪扭扭：“麦子熟了，你什么时候回来？”\n你决定一落地就回家。",
+                  "Only a dream. You take out your little sister Nell's letter, in crooked handwriting: “The wheat's ripe. When are you coming home?”\nYou'll go straight home once you land.")})
+    ]};
+
   /* ============ Chapter 1 · Omens in the Wheat (origin: agri — the default opening) ============ */
   N.eld_101 = {chapter: 1, scene: "jungle", speaker: null,
     text: L("瓦尔达农业星，收割季。麦浪一直铺到天边，空气里全是谷壳。\n妹妹妮尔骑在你肩上数运粮船：“一、二……今年怎么一艘都没有？”\n天上确实空荡荡的。星语塔已经三天没亮灯了。",
             "Valda, an agri-world, harvest season. Wheat rolls to the horizon; the air is all chaff.\nYour little sister Nell rides your shoulders, counting grain ships. “One, two... why aren't there any this year?”\nThe sky is empty. The astropath tower hasn't lit up in three days."),
+    alt: [AT({all: [F("born_shared"), FROM("eld_b02")]},
+             "落地一个钟头后，你走进自家麦田。妹妹妮尔扑过来，爬上你的肩头数运粮船：“一、二……今年怎么一艘都没有？”\n军士的话你没告诉她。星语塔还是没亮灯。",
+             "An hour after landing you walk into your family's wheat. Your little sister Nell runs at you and climbs onto your shoulders to count grain ships. “One, two... why aren't there any this year?”\nYou don't tell her what the sergeant said. The astropath tower is still dark."),
+          AT(F("born_shared"),
+             "落地一个钟头后，你走进自家麦田。写信的人扑过来，爬上你的肩头数运粮船：“一、二……今年怎么一艘都没有？”\n是妹妹妮尔。梦里那个女人，你一个字也没提。星语塔还是没亮灯。",
+             "An hour after landing you walk into your family's wheat. The letter-writer runs at you and climbs onto your shoulders to count grain ships. “One, two... why aren't there any this year?”\nIt's Nell, your little sister. You say not a word about the woman in the dream. The tower is still dark.")],
     codex: ["place_valda"],
     choices: [
       C("去打谷场上工", "Head to the threshing floor", "eld_102",
@@ -168,6 +215,9 @@
     gather: G("货舱", "cargo hold"),
     text: L("补给船的货舱里挤着回乡的季节工和几个船员，一壶酒在人手间传。你缩在农具箱中间。\n十年来你一直做同一个梦：一个白袍女人，几颗石头绕着她的头转。大多数人当你是疯子。\n下一站，瓦尔达。",
             "In the supply ship's cargo hold, seasonal hands heading home and a few crew pass a flask around. You huddle among crates of farm tools.\nFor ten years you've dreamed one dream: a white-robed woman, stones circling her head. Most people think you mad.\nNext stop: Valda."),
+    alt: [AT(F("born_shared"),
+             "你擦掉鼻子底下的一点血。酒壶在货舱里又传了一圈，你摇摇头。\n那个白袍女人还站在你眼皮后面。说出来，他们只会当你是疯子；十年了，你早习惯了。\n舱壁的灯转红：准备着陆。",
+             "You wipe a little blood from under your nose. The flask makes another round of the cargo hold; you shake your head.\nThe white-robed woman still stands behind your eyelids. Say it aloud and they'll call you mad. Ten years; you're used to it.\nThe bulkhead lamp turns red: prepare for landing.")],
     codex: ["place_valda"],
     choices: [
       C("把梦讲给船员听", "Tell the crew your dream", "eld_o_pilgrim_2",
@@ -236,6 +286,9 @@
     gather: G("营房", "barracks"),
     text: L("营房里，第三连挤在弹药箱边打牌，邻铺的老兵在吹牛。你们这辈子最大的敌人是偷粮的老鼠。\n埃达把牌一拍：“星语塔三天没出声了。中尉说是小故障。”\n她压低声音，“小故障要派两个人带枪去看？”",
             "In the barracks Third Company crowds round an ammo crate playing cards; a veteran on the next bunk is boasting. The worst enemy any of you has faced is grain rats.\nEdda slaps down her cards. “Tower's been silent three days. Lieutenant says it's a small fault.”\nShe lowers her voice. “A small fault that needs two armed troopers?”"),
+    alt: [AT(F("born_shared"),
+             "下午你领了军服，被塞进第三连营房。弹药箱边在打牌，邻铺的老兵吹牛：这辈子最大的敌人是偷粮的老鼠。\n女兵埃达给你也发了一手：“塔三天没出声，中尉说是小故障。小故障要派两个人带枪去看？”",
+             "By afternoon you've drawn a uniform and been pushed into Third Company's barracks. Cards on an ammo crate; the veteran on the next bunk boasts that his worst enemy ever was grain rats.\nA trooper named Edda deals you in. “Tower's been silent three days. Lieutenant says small fault. A small fault that needs two armed troopers?”")],
     codex: ["place_valda", "imp_guard"],
     choices: [
       C("主动请缨去查看", "Volunteer to go check", "eld_o_trooper_2",
@@ -300,7 +353,9 @@
   N.eld_o_trooper_5 = {chapter: 1, scene: "burning_city", speaker: null, time: {h: 2},
     text: L("你们驻扎时借住的那户农家着了火。你冲进去，只找到了小女儿妮尔，缩在水缸后面。\n她认得你，你给她削过木头小兵。\n她没哭，只问：“你的枪呢？”",
             "The farmhouse where you were billeted is on fire. You charge in and find only the little daughter, Nell, curled behind the water barrel.\nShe knows you. You once whittled her a wooden soldier.\nShe doesn't cry. She only asks, “Where's your gun?”"),
-    alt: [A(F("wronged_edda"), "你一路跑到这里，身后再没传来埃达的声音。", "You ran all the way here. No more of Edda's voice came from behind you."),
+    alt: [AT(F("born_shared"), "连队这两天借住的那户农家着了火。你冲进去，只找到了小女儿妮尔，缩在水缸后面。\n她认得你：昨天下午你给她削过一个木头小兵。\n她没哭，只问：“你的枪呢？”",
+             "The farmhouse where the company has been billeted these two days is on fire. You charge in and find only the little daughter, Nell, curled behind the water barrel.\nShe knows you: yesterday afternoon you whittled her a wooden soldier.\nShe doesn't cry. She only asks, “Where's your gun?”"),
+          A(F("wronged_edda"), "你一路跑到这里，身后再没传来埃达的声音。", "You ran all the way here. No more of Edda's voice came from behind you."),
           A(NF("wronged_edda"), "埃达把你拖到水渠边，塞给你她的手枪，就回路口收拢剩下的人了。", "Edda dragged you to the ditch, pressed her pistol on you, and went back to gather the others at the crossroads.")],
     effects: {hp: -5},
     choices: [
@@ -1822,6 +1877,7 @@
     playerSprite: "player_aeldari",
     color: "#5fb3a1",
     startNode: "eld_101",
+    birthNode: "eld_b01",
     startDate: {year: 113, mill: 42},
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("命运", "Fate"),

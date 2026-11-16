@@ -149,7 +149,7 @@
     /* settings */
     defaultSettings: function () {
       var nav = (root.navigator && (root.navigator.language || "")) || "";
-      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", keywordLinks: true, loreAsked: false, knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true, rewind: false, musicStyle: "chip", musicTrack: "auto"};
+      return {lang: /^zh/i.test(nav) || !nav ? "zh" : "en", textSpeed: "normal", effects: true, musicVol: 60, sfxVol: 80, muted: false, loreCards: "new", keywordLinks: true, loreAsked: false, knownHint: "toast", consequences: true, rumors: true, echoes: true, tzeentchJoke: true, rewind: false, chooseOrigin: false, musicStyle: "chip", musicTrack: "auto"};
     },
     loadSettings: function () {
       var d = Save.defaultSettings(), s = getJSON("settings") || {};
@@ -161,6 +161,7 @@
       s.keywordLinks = s.keywordLinks !== false;                           // SPEC §33: underlined codex terms inside story text
       if (!askedStored) s.loreAsked = Save.codexGlobal().length > 0 || Save.runs().length > 0;   // returning players are never asked
       s.rewind = s.rewind === true;                                        // SPEC §30 (default off)
+      s.chooseOrigin = s.chooseOrigin === true;                            // SPEC §35 (default off: the shared birth point decides the origin)
       if (typeof s.musicStyle !== "string" || !/^[a-z0-9_-]{1,24}$/i.test(s.musicStyle)) s.musicStyle = "chip";   // SPEC §29 (audio.js maps unknown ids to chip)
       if (typeof s.musicTrack !== "string" || !/^[a-z0-9_-]{1,24}$/i.test(s.musicTrack)) s.musicTrack = "auto";   // SPEC §29b ("auto" or a mood id; the UI/audio.js map unknown ids to auto)
       return s;

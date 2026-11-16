@@ -4,6 +4,7 @@
  * Usage:
  *   var g = new WH.Game("imperium", {rng: WH.RNG(1234)});
  *   var step = g.start(originId);    // enters the origin's startNode (SPEC §16); no id = first origin
+ *   g.start(Game.BIRTH)               // SPEC §35: enters faction.birthNode (shared birth point); the origin is assigned later by a choice effect {origin:id}
  *   WH.newGame("imperium", "agri")   // same, returns {game, step}
  *   WH.Game.origins(faction)         // faction.origins, or one default origin synthesized from the faction fields
  *   g.choices();                     // visible choices with lock / roll info
@@ -286,6 +287,13 @@
     for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
     return list[0] || null;
   }
+  /* SPEC §35: strict lookup (no fallback to the first origin) and the shared birth point */
+  function originById(f, id) {
+    var list = origins(f);
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
+  }
+  function hasBirth(f) { return !!(f && f.birthNode && f.nodes && f.nodes[f.birthNode]); }
 
   /* ---------- Game ---------- */
   function Game(factionId, opts) {
@@ -313,9 +321,15 @@
   Game.STATS = STATS;
   Game.origins = origins;
   Game.findOrigin = findOrigin;
+  Game.hasBirth = hasBirth;
+  Game.BIRTH = "birth";                                            // SPEC §35: pseudo origin id for g.start()
 
   /* the origin of the current run (falls back to the first origin for legacy saves / unknown ids) */
-  Game.prototype.origin = function () { return findOrigin(this.faction, this.state && this.state.origin); };
+  Game.prototype.origin = function () {
+    var id = this.state && this.state.origin;
+    if ((id === null || id === undefined) && this.state && hasBirth(this.faction)) return null;      // SPEC §35: before the fork the run has no origin yet
+    return findOrigin(this.faction, id);
+  };
   /* SPEC §23: upper bound of a stat this run (hp/sanity per origin, corruption/renown 100) */
   Game.prototype.cap = function (k) {
     var m = this.state && this.state.max;
@@ -352,6 +366,12 @@
   };
 
   Game.prototype.start = function (originId) {
+    if (originId === Game.BIRTH && hasBirth(this.faction)) {         // SPEC §35: shared birth point, origin still unknown
+      this.state = this.freshState(null);
+      var step0 = newStep();
+      step0.origin = null;
+      return this._enter(this.faction.birthNode, step0);
+    }
     var o = findOrigin(this.faction, originId);
     this.state = this.freshState(o);
     if (o && o.set) for (var k in o.set) this.state.flags[k] = o.set[k];
@@ -370,6 +390,7 @@
   Game.prototype._applyEffects = function (eff, into) {
     var d = {};
     if (!eff) return d;
+    if (eff.origin) this._assignOrigin(eff.origin);                  // SPEC §35: before any stat delta of the same effect
     var st = this.state.stats;
     for (var i = 0; i < STATS.length; i++) {
       var k = STATS[i];
@@ -384,6 +405,21 @@
     if (eff.set) for (var f in eff.set) this.state.flags[f] = eff.set[f];
     if (eff.unset) for (var j = 0; j < eff.unset.length; j++) delete this.state.flags[eff.unset[j]];
     return d;
+  };
+
+  /* SPEC §35: the fork of a shared birth point assigns the origin — once, and only while the run has none. The run becomes
+   * exactly what g.start(originId) would have made (caps, start stats, origin flags) plus the flag born_shared. Not part of the
+   * visible deltas (the consequence panel shows the choice, the HUD shows the new caps). */
+  Game.prototype._assignOrigin = function (id) {
+    var st = this.state, o = originById(this.faction, id);
+    if (!o || (st.origin !== null && st.origin !== undefined)) return false;
+    var ss = o.stats || {}, mx = capsOf(o);
+    st.origin = o.id; st.max = mx;
+    st.stats = {hp: ss.hp !== undefined ? clamp(ss.hp, 0, mx.hp) : mx.hp, sanity: ss.sanity !== undefined ? clamp(ss.sanity, 0, mx.sanity) : mx.sanity,
+                corruption: ss.corruption || 0, renown: ss.renown || 0};
+    if (o.set) for (var k in o.set) st.flags[k] = o.set[k];
+    st.flags.born_shared = true;
+    return true;
   };
 
   /* SPEC §19: per-route multiplier for one god (positive deltas only), default 1 */
@@ -992,6 +1028,7 @@
   function fallbackNode(f, chapter, originId) {
     var nodes = (f && f.nodes) || {}, ids = Object.keys(nodes), o = findOrigin(f, originId);
     var startId = (o && o.startNode && nodes[o.startNode]) ? o.startNode : (nodes[f.startNode] ? f.startNode : ids.sort(natCmp)[0]);
+    if ((originId === null || originId === undefined) && hasBirth(f)) startId = f.birthNode;     // SPEC §35: a run that has not reached the fork yet
     chapter = Math.floor(+chapter);
     if (!isFinite(chapter) || chapter <= 1) return startId;
     var entered = {};
@@ -1015,7 +1052,8 @@
     var g = new Game(rec.faction, opts);
     var st = g.freshState();
     st.nodeId = rec.nodeId;
-    st.origin = findOrigin(g.faction, rec.origin) ? findOrigin(g.faction, rec.origin).id : null;
+    st.origin = (rec.origin === null && hasBirth(g.faction) && /^[a-z]+_b\d\d$/.test(String(rec.nodeId || ""))) ? null                       // SPEC §35: saved before the fork of the shared birth point
+              : (findOrigin(g.faction, rec.origin) ? findOrigin(g.faction, rec.origin).id : null);
     st.runId = rec.runId || ("legacy-" + rec.faction + "-" + (rec.savedAt || ""));
     st.chapter = rec.chapter || 1;
     st.max = capsOf({max: rec.max});                                   // SPEC §23: saves without max → 100/100

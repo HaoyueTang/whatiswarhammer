@@ -38,8 +38,41 @@
 
   var N = {};
 
+  /* ============ Shared birth (SPEC §35) · Tithe Eve on the cathedral square → hive / agri / noble ============ */
+  var DEACON = S("preacher", "执事", "Deacon");
+  var BORN = function (o) { var s = {born_shared: true}; s["origin_" + o] = true; return {origin: o, set: s}; };
+
+  N.imp_b01 = {chapter: 1, scene: "cathedral", speaker: null,
+    text: L("什一税日前夜，巢都底层的大教堂广场。伺服天使一遍遍念总督的法令：组建新兵团，每层都要交人。\n尖塔的轿子、灰原的粮车、下班的工人全挤在这里。三号塔塌了才一个月，角落里堆着没人认领的鞋。",
+            "Tithe Eve, the cathedral square at the foot of the hive. Servo-cherubs recite the governor's decree again and again: a new regiment is to be raised, and every level must give people.\nSpire sedans, ash-plains grain carts, workers off shift: all crammed in here. Tower Three fell only a month ago; unclaimed shoes are still piled in a corner."),
+    codex: ["place_aurex", "imp_tithe"],
+    choices: [
+      C("挤到台阶前，听清配额", "Push to the steps to hear the quotas", "imp_b02", {result: L("人流推着你往前走，鞋底踩过一张掉落的祷文。", "The crowd carries you forward. Your boot treads on a dropped prayer sheet.")}),
+      C("退到广场边上，躲开人挤人", "Drift to the edge, out of the crush", "imp_b03", {result: L("你侧着身子往外挤，赞美诗的声音落在背后。", "You edge sideways out of the press. The hymn falls away behind you.")})
+    ]};
+
+  N.imp_b02 = {chapter: 1, scene: "cathedral", speaker: DEACON, time: {h: 1},
+    text: L("台阶上，执事展开长卷念配额：“第六工厂，四十人。灰原诸农庄，缺粮者以人补。”\n他顿了顿，像在念一笔旧账：“尖塔诸家，各出一子。赛伦家族——欠一人。”\n台阶边，一顶旧轿子的帘子动了动。",
+            "On the steps, a deacon unrolls the scroll of quotas. “Manufactorum Six: forty. The ash-plains farms: grain owed is made up in people.”\nHe pauses, as if reading an old debt. “The spire houses, one child each. House Serrin: owes one.”\nBeside the steps, the curtain of an old sedan stirs."),
+    choices: [
+      C("在心里数班组的人头", "Count your shift-gang in your head", "imp_101", {effects: BORN("hive"), result: L("四十人。你数着班组里的人头，数到自己时停住了。监工吹哨收队，你跟着人流爬回居住块。明早，名单就下来。", "Forty. You count the heads in your shift-gang and stop when you reach your own. The overseer whistles everyone in; you follow the crowd back up to the hab-block. Tomorrow the names come down.")}),
+      C("替赛伦家应一声", "Answer for House Serrin", "imp_o_noble_1", {effects: BORN("noble"), result: L("帘后是家里的老管家。他认出你，叹了口气：“老爷今晚要见您，次子少爷。”升降梯把你送回尖塔。", "Behind the curtain sits the house's old steward. He knows you, and sighs. “The master will see you tonight, young sir. The second-born.” The lift carries you back up the spire.")})
+    ]};
+
+  N.imp_b03 = {chapter: 1, scene: "cathedral", speaker: null, time: {h: 1},
+    text: L("广场边上，灰原来的粮车已经卸空，车夫们在套牲口，准备连夜回穹顶。一个妇人站在车辕上朝人群张望，像在找走散的孩子。\n另一头，执法官拉起人墙查工牌：“明早上工的，现在回去。”",
+            "At the edge of the square the ash-plains grain carts stand empty; drivers hitch their beasts to head back to the domes tonight. A woman stands on a cart shaft, scanning the crowd like someone looking for a lost child.\nAt the far end, enforcers form a line and check work-tags. “Morning shift? Home, now.”"),
+    choices: [
+      C("朝那个张望的妇人挥手", "Wave to the woman on the cart", "imp_o_agri_1", {effects: BORN("agri"), result: L("她看见你，长出一口气，把缰绳扔给你：“热闹看够了？回家，麦子不等人。”粮车在灰原上颠了一夜。", "She sees you and lets out a long breath, then tosses you the reins. “Seen enough? Home. The wheat won't wait.” The cart rattles across the ash plains all night.")}),
+      C("亮出工牌，挤过人墙", "Show your work-tag and push through", "imp_101", {effects: BORN("hive"), result: L("执法官拿灯照了照你的工牌：第六工厂，第六班。“迟到就记名。”你挤回居住块，只睡了四个小时。", "The enforcer shines a lamp on your tag: Manufactorum Six, sixth shift. “Late, and you're on the list.” You squeeze back to the hab-block and sleep four hours.")})
+    ]};
+
   /* ============ Chapter 1 · The Tithe ============ */
   N.imp_101 = {chapter: 1, scene: "hive_hab", speaker: null,
+    alt: [ALT({all: [F("born_shared"), {fromNode: ["imp_b02"]}]}, "天还没亮，第六班汽笛响了三声。你一夜没睡踏实，梦里一直在数人头，数到四十。\n墙上的帝皇画像被蒸汽熏得只剩一双眼睛。今天名单下来，整栋居住块都在假装自己很忙。",
+              "Before dawn, the sixth-shift siren blows three times. You slept badly, counting heads in your dreams, all the way to forty.\nThe Emperor's portrait on the wall has been steamed down to a pair of eyes. Today the names come down, and the whole hab-block is pretending to be busy."),
+          ALT(F("born_shared"), "天还没亮，第六班汽笛响了三声。工牌还攥在你手里，执法官那句“迟到就记名”还在耳边。\n墙上的帝皇画像被蒸汽熏得只剩一双眼睛。今天名单下来，整栋居住块都在假装自己很忙。",
+              "Before dawn, the sixth-shift siren blows three times. Your work-tag is still in your fist; the enforcer's “Late, and you're on the list” still rings in your ears.\nThe Emperor's portrait on the wall has been steamed down to a pair of eyes. Today the names come down, and the whole hab-block is pretending to be busy.")],
     text: L("第六班汽笛响了三声。墙上的帝皇画像被蒸汽熏得只剩一双眼睛。\n今天是什一税日。整栋居住块都在假装自己很忙。",
             "The sixth-shift siren blows three times. The Emperor's portrait on the wall has been steamed down to a pair of eyes.\nToday is Tithe Day. The whole hab-block is pretending to be busy."),
     codex: ["imp_hive", "imp_emperor", "place_aurex", "place_tower_three"],
@@ -147,6 +180,8 @@
   /* ============ Origin prologues (SPEC §16) · merge at the chapter-2 bridge imp_200 ============ */
   /* --- 农庄之子 / Farmer's child (origin_agri) --- */
   N.imp_o_agri_1 = {chapter: 1, scene: "jungle", speaker: null,
+    alt: [ALT(F("born_shared"), "天亮时，粮车回到七号穹顶农庄。玻璃顶的裂缝里漏进黄色的天。\n父亲听完配额，只说了一句：巢都一天吃掉的麦子，比这里一年种的还多。\n偏偏今天，收割机又坏了。",
+              "At dawn the cart rolls back into Dome Farm Seven. Yellow sky leaks through the crack in the glass roof.\nFather hears out the quotas and says only this: the hive eats more wheat in a day than this farm grows in a year.\nAnd today, of all days, the harvester has broken down again.")],
     text: L("巢都外的灰原上，七号穹顶农庄。玻璃顶裂了一道缝，黄色的天从缝里漏进来。\n父亲说，巢都一天吃掉的麦子，比这里一年种的还多。\n今天，收割机又坏了。",
             "Out on the ash plains beyond the hive: Dome Farm Seven. A crack runs through the glass roof, and the yellow sky leaks in.\nFather says the hive eats more wheat in a day than this farm grows in a year.\nToday the harvester has broken down again."),
     codex: ["imp_hive", "imp_emperor", "place_aurex"],
@@ -205,6 +240,8 @@
 
   /* --- 落魄贵族次子 / Fallen noble's second-born (origin_noble) --- */
   N.imp_o_noble_1 = {chapter: 1, scene: "hive_spire", speaker: null,
+    alt: [ALT(F("born_shared"), "升降梯停在尖塔第九十层。赛伦家族的家徽——一座塔和一柄断剑——还挂在早已抵押出去的大厅里。\n长子继承家名和债务。“欠一人”的那一个，是次子。\n今晚，父亲第一次请你喝酒。",
+              "The lift stops at level ninety of the spire. House Serrin's crest, a tower and a broken sword, still hangs in a hall long since mortgaged.\nThe eldest inherits the name and the debts. The “one owed” is the second-born.\nTonight, for the first time, Father pours you a drink.")],
     text: L("尖塔第九十层，赛伦家族。家徽是一座塔和一柄断剑，挂在早已抵押出去的大厅里。\n长子继承家名和债务。次子，用来还债。\n今晚，父亲第一次请你喝酒。",
             "Level ninety of the spire: House Serrin. The family crest, a tower and a broken sword, hangs in a hall long since mortgaged.\nThe eldest inherits the name and the debts. The second-born pays them.\nTonight, for the first time, Father pours you a drink."),
     codex: ["imp_hive", "imp_emperor", "place_aurex"],
@@ -1298,6 +1335,7 @@
     playerSprite: "player_imperium",
     color: "#c9a227",
     startNode: "imp_101",
+    birthNode: "imp_b01",
     startDate: {year: 111, mill: 42},
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("信仰", "Faith"),
