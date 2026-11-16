@@ -2,7 +2,7 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
-## [Unreleased] — 0.5.0 (shared birth point, SPEC §35)
+## [0.5.0] — 2026-11-16 (shared birth point, SPEC §35)
 ### Changed — Your choices decide who you are
 - Every route now starts at **one shared birth scene** (3–4 nodes: a muster, a census, a landing, a levy…). The choices you make there decide which of the route's three origins (class / career) you become; the three origins, their stats, caps, openings and the rest of the story are unchanged. Each origin's first node has an `alt` that reads right after the birth.
 - New setting **直接选出身 / Pick an origin card** (default off): on = the old origin cards before the game. Rewind (↶) works across the fork; a save made before the fork reloads with the origin still undecided; ↻ again starts a new run at the birth scene.
