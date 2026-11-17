@@ -2,6 +2,12 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
+## [Unreleased] — Settings tabs (SPEC §36)
+### Changed — Settings is easier to scan
+- Settings is split into four tabs: **游戏 / Game** (rewind, pick an origin card, scene hints, past-life echoes, rumours), **显示 / Display** (language, text speed, effects, lore cards, keyword links, known-entry hint), **声音 / Sound** (mute, volumes, music style, track), **存档 / Saves** (backup / import, cloud mirror in the artifact). Each setting lives in exactly one tab; the tab you were on is kept while the game is open (toggling, switching language and re-opening stay on it). Keyboard: ← → Home End.
+### Tools
+- `smoke_test.py --only-tabs` (25 checks) and `--only-data`; `settab()` helper. Fixed the §22 backup test fixtures (they used `CLEAR`, which writes settings, so "fresh install" and "settings restored by import" could never pass in sample mode).
+
 ## [0.5.0] — 2026-11-16 (shared birth point, SPEC §35)
 ### Changed — Your choices decide who you are
 - Every route now starts at **one shared birth scene** (3–4 nodes: a muster, a census, a landing, a levy…). The choices you make there decide which of the route's three origins (class / career) you become; the three origins, their stats, caps, openings and the rest of the story are unchanged. Each origin's first node has an `alt` that reads right after the birth.

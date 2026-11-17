@@ -9,6 +9,7 @@
     python3 tools/dev/smoke_test.py --only-v034 [--real]     # just the SPEC §31 ending-illustration checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-cloud [--real]    # just the SPEC §34 cloud-save checks with a fake window.claude db (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-birth --real      # just the SPEC §35 shared-birth checks (real data)
+    python3 tools/dev/smoke_test.py --only-tabs              # just the SPEC §36 Settings-tab checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-fam [--real]      # just the SPEC §33 "do you know Warhammer?" dialog checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-v040 [--real]     # just the SPEC §32 story-overhaul checks: alt / resultAlt / event where / save fallback (also part of the default and --real runs)
     options: --chrome /usr/bin/google-chrome   --out tools/dev/screenshots   --headed
@@ -67,6 +68,12 @@ def shot(page, name):
     p = os.path.join(OUT, name + ".png")
     page.screenshot(path=p)
     return p
+
+def settab(page, tab):
+    """SPEC §36: Settings is tabbed (game / show / sound / data) and only the active tab is in the DOM — switch to one (no-op when already there)."""
+    t = page.locator(f'.modal [role="tab"][data-tab="{tab}"]')
+    if t.count() and t.get_attribute("aria-selected") != "true":
+        t.click(); page.wait_for_timeout(120)
 
 def state(page):
     return page.evaluate("() => WH.UI.game ? JSON.parse(JSON.stringify(WH.UI.game.state)) : null")
@@ -342,13 +349,16 @@ def run_desktop(p):
         shot(page, "13c_place_detail")
     page.keyboard.press("Escape")
     page.locator("#tools button", has_text="设置").click(); page.wait_for_timeout(200)
+    settab(page, "show")
     page.locator(".modal .seg button", has_text="瞬间").click(); page.wait_for_timeout(150)
     page.locator(".modal .seg button", has_text="不弹出").click(); page.wait_for_timeout(100)
     check("lore-card setting saved (3 modes)", json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["loreCards"] == "codex"
           and page.locator(".modal .seg button", has_text="全部弹出").count() == 1)
     page.locator(".modal .seg button", has_text="仅新条目弹出").click(); page.wait_for_timeout(100)
-    check("known-entry hint toggle + consequence toggle present", page.locator(".modal .seg button", has_text="静默").count() == 1
-          and page.locator(".modal .setrow", has_text="过场提示").count() == 1)
+    silent_ok = page.locator(".modal .seg button", has_text="静默").count() == 1       # 显示 tab
+    settab(page, "game")
+    check("known-entry hint toggle + consequence toggle present", silent_ok and page.locator(".modal .setrow", has_text="过场提示").count() == 1)
+    settab(page, "sound")
     check("settings text speed saved", json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["textSpeed"] == "instant")
     page.locator("#vol-music").fill("30"); page.locator("#vol-music").dispatch_event("change"); page.wait_for_timeout(100)
     check("music volume slider saved + setMusicVolume", json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["musicVol"] == 30 and "setMusicVolume:0.3" in page.evaluate("window.__au"))
@@ -865,6 +875,7 @@ def run_v022(p):
     goto_node(page, "smp_004", rumor=st["rumor"])
     check("footer back on reload of the rumour node", page.locator("#dlg-rumor").is_visible())
     page.locator("#tools button", has_text="设置").click(); page.wait_for_timeout(150)
+    settab(page, "game")
     row = page.locator(".modal .setrow", has_text="传闻")
     check("settings: 传闻 on/off row", row.count() == 1)
     row.locator("button", has_text="关").click(); page.wait_for_timeout(100)
@@ -1003,6 +1014,7 @@ def run_egg(p):
         shot(page, "77_egg_title_after")
         check("egg 100: NEW badge does not count the hidden entry", not page.evaluate("WH.Save.codexUnseen().includes('egg_tzeentch_letter')") or page.evaluate("(document.querySelector('#scr-title .nbadge')||{}).hidden !== false"))
         page.locator("#scr-title .menu button", has_text="设置").click(); page.wait_for_timeout(150)
+        settab(page, "game")
         check("egg 100: Settings gains 奸奇的玩笑", page.locator(".modal .setrow.tz-row").count() == 1)
         page.keyboard.press("Escape"); page.wait_for_timeout(80)
         page.evaluate("() => WH.UI.openCodex()"); page.wait_for_timeout(150)
@@ -1014,6 +1026,7 @@ def run_egg(p):
         check("…and reverts to ???", page.locator(".codex-body [data-joke]").count() == 0)
         page.keyboard.press("Escape"); page.wait_for_timeout(80)
         page.locator("#scr-title .menu button", has_text="设置").click(); page.wait_for_timeout(150)
+        settab(page, "game")
         page.locator(".modal .setrow.tz-row button", has_text="关").click(); page.wait_for_timeout(80)
         page.keyboard.press("Escape"); page.wait_for_timeout(80)
         page.evaluate("() => WH.UI.openCodex()"); page.wait_for_timeout(2700)
@@ -1042,7 +1055,7 @@ def run_data(p):
     ctx = b.new_context(viewport={"width": 1280, "height": 720}, locale="zh-CN", accept_downloads=True)
     page = ctx.new_page(); attach_console(page, "data")
     page.goto(BASE + QS + ("&" if QS else "?") + "seed=7"); page.wait_for_selector("#scr-title .title-main")
-    page.evaluate(CLEAR); page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
+    page.evaluate("() => localStorage.clear()"); page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)     # (CLEAR would write settings, i.e. not a fresh install)
     check("fresh install: no update notice, lastVersion recorded silently", page.locator(".toasts").count() == 0
           and page.evaluate("localStorage.getItem('whatiswh.lastVersion')") == page.evaluate("WH.VERSION"))
     page.evaluate("""(L) => { localStorage.clear(); for (const k in L) localStorage.setItem('whatiswh.' + k, JSON.stringify(L[k])); }""", LEGACY)
@@ -1074,6 +1087,7 @@ def run_data(p):
     keys = ["runs", "runStats", "endingStats", "codexGlobal", "slot1", "settings"]
     snap = page.evaluate("(ks) => Object.fromEntries(ks.map(k => [k, localStorage.getItem('whatiswh.' + k)]))", keys)
     page.locator("#scr-title .menu button", has_text="设置").click(); page.wait_for_timeout(150)
+    settab(page, "data")
     page.locator("#data-btn").click(); page.wait_for_timeout(150)
     check("Settings → 数据 opens the backup panel", page.locator(".modal .data-view").count() == 1 and "导出全部进度" in page.locator(".modal .data-view").inner_text())
     shot(page, "81_data_panel")
@@ -1086,7 +1100,7 @@ def run_data(p):
     check("复制到剪贴板 fallback shows the JSON text", page.locator("#data-out").is_visible() and '"whatiswh-backup"' in page.locator("#data-out").input_value())
     text = page.locator("#data-out").input_value()
     page.keyboard.press("Escape"); page.wait_for_timeout(80); page.keyboard.press("Escape")
-    page.evaluate(CLEAR)
+    page.evaluate("() => localStorage.clear()")                                 # (not CLEAR: an existing settings key would not be overwritten by the merge)
     page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
     check("cleared browser: nothing left", page.evaluate("WH.Save.runs().length") == 0 and page.evaluate("WH.Save.codexGlobal().length") == 0)
     page.evaluate("() => WH.UI.openData()"); page.wait_for_timeout(150)
@@ -1302,6 +1316,7 @@ def run_v03(p):
     goto_node(page, "smp_004", echo={"runId": "past1", "text": {"zh": "测试死讯", "en": "test echo"}})
     check("§27: echo restored from a save", "测试死讯" in page.locator("#dlg-rumor").inner_text())
     page.locator("#tools button", has_text="设置").click(); page.wait_for_timeout(150)
+    settab(page, "game")
     page.locator(".modal .setrow", has_text="前世死讯").locator("button", has_text="关").click(); page.wait_for_timeout(100)
     check("§27: 前世死讯 off hides it (persisted)", not page.locator("#dlg-rumor").is_visible() and json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["echoes"] is False)
     page.keyboard.press("Escape")
@@ -1684,6 +1699,7 @@ def run_rewind(p):
           and page.evaluate("WH.UI.game.rewindStack.length") == 0 and page.evaluate("WH.UI.game.canRewind()") is False)
     # --- turn it on in the settings panel (in game) ---
     page.locator("#tools button", has_text="设置").click(); page.wait_for_timeout(150)
+    settab(page, "game")
     row = page.locator(".modal .rewind-row")
     check("§30 UI: settings row 允许回到上一个选择 with a hint that names the hotkey", row.count() == 1 and "允许回到上一个选择" in row.inner_text() and "Z" in row.inner_text())
     row.scroll_into_view_if_needed(); page.wait_for_timeout(100)
@@ -1760,6 +1776,7 @@ def run_rewind(p):
     page.evaluate("() => WH.UI.show('title')"); page.wait_for_timeout(100)
     # --- off again: hides everything incl. the ending button ---
     page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(150)
+    settab(page, "game")
     page.locator(".modal .rewind-row").locator("button", has_text="关").click(); page.wait_for_timeout(150); page.keyboard.press("Escape")
     check("§30 UI: turning it off removes the button and drops the history", page.locator("#rewind-btn").count() == 0 and page.evaluate("WH.UI.game.rewindStack.length") == 0)
     # --- English ---
@@ -1767,6 +1784,7 @@ def run_rewind(p):
     page.locator("#tools button", has_text="EN").click(); page.wait_for_timeout(200)
     check("§30 en: button label + aria", "Back one choice" in page.locator("#rewind-btn").inner_text() and "hotkey Z" in (page.locator("#rewind-btn").get_attribute("aria-label") or ""))
     page.locator("#tools button", has_text="Settings").click(); page.wait_for_timeout(150)
+    settab(page, "game")
     check("§30 en: settings row", "Allow going back one choice" in page.locator(".modal .rewind-row").inner_text())
     page.locator(".modal .rewind-row").scroll_into_view_if_needed(); page.wait_for_timeout(100)
     shot(page, "104_settings_rewind_en")
@@ -1800,6 +1818,7 @@ def run_style(p):
         tap = (lambda loc: loc.tap()) if mobile else (lambda loc: loc.click())
         tap(page.locator("#scr-title .menu .btn", has_text="设置").first) if page.locator("#scr-title .menu .btn", has_text="设置").count() else page.evaluate("() => WH.UI.openSettings()")
         page.wait_for_timeout(200)
+        settab(page, "sound")
         row = page.locator(".modal .style-row")
         check(f"§29{' mobile' if mobile else ''}: 配乐风格 row with one radio card per style, exactly one checked (chip)", row.count() == 1 and "配乐风格" in row.inner_text()
               and row.locator('[role="radio"]').count() == len(ids) and row.locator('[aria-checked="true"]').count() == 1 and row.locator('[aria-checked="true"]').get_attribute("data-style") == "chip"
@@ -1844,6 +1863,7 @@ def run_style(p):
         check(f"§29{' mobile' if mobile else ''}: the style survives a reload (settings store)", page.evaluate("WH.UI.settings.musicStyle") == "dark")
         if not mobile:
             page.evaluate(STYLE_STUBS); page.evaluate("() => WH.UI.setLang('en')"); page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(200)
+            settab(page, "sound")
             check("§29 en: row label + card names switch language", "Music style" in page.locator(".modal .style-row").inner_text() and page.locator(".modal .style-pick").count() >= 1
                   and (not page.evaluate("!!window.__fakeStyles") or "8-bit chiptune" in page.locator(".modal .style-row").inner_text()))
             page.locator(".modal .style-row").scroll_into_view_if_needed(); page.wait_for_timeout(100)
@@ -1945,6 +1965,7 @@ def run_gather(p):
         page.evaluate("() => WH.UI.show('game')"); page.wait_for_timeout(100)
         # settings hint
         page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(200)
+        settab(page, "game")
         row = page.locator(".modal .setrow", has_text="传闻")
         check(f"§20c {lab}: Settings → 传闻 shows the hint '只会在聚集区听到'", row.count() == 1 and "只会在聚集区听到" in row.inner_text(), row.inner_text() if row.count() else "")
         page.evaluate("() => WH.UI.setLang('en')"); page.wait_for_timeout(200)
@@ -2119,6 +2140,7 @@ def run_track(p):
         page.keyboard.press("Escape"); page.wait_for_timeout(100)
         # ---- Settings list
         page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        settab(page, "sound")
         row = page.locator(".modal .track-row")
         row.scroll_into_view_if_needed(); page.wait_for_timeout(100)
         radios = row.locator('[role="radio"]')
@@ -2167,6 +2189,7 @@ def run_track(p):
         page.locator(".music-pop select.track-select").select_option("holy"); page.wait_for_timeout(120)
         page.keyboard.press("Escape"); page.wait_for_timeout(100)
         page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        settab(page, "sound")
         row = page.locator(".modal .track-row")
         check(f"§29b {tag}: …and Settings shows the track chosen in the panel", row.locator('[aria-checked="true"]').get_attribute("data-track") == "holy")
         # settings export, reload, unknown values
@@ -2176,6 +2199,7 @@ def run_track(p):
         page.evaluate("() => { WH.UI.settings.musicTrack = 'no-such-track'; WH.Save.saveSettings(WH.UI.settings); }")
         page.reload(); page.wait_for_selector("#scr-title .title-main"); page.wait_for_timeout(200)
         page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        settab(page, "sound")
         check(f"§29b {tag}: an unknown stored track falls back to auto (audio + UI)", page.evaluate("WH.Audio.getTrack()") == "auto"
               and page.locator('.modal .track-row [aria-checked="true"]').get_attribute("data-track") == "auto")
         page.evaluate("() => { localStorage.setItem('whatiswh.settings', JSON.stringify({musicTrack: 'a b!', loreAsked: true})); }")
@@ -2209,6 +2233,7 @@ def run_track(p):
         check(f"§29b {tag}: back to auto = the story mood again", page.evaluate("WH.Audio.getTrack()") == "auto" and page.evaluate("WH.Audio.current()") == want, f"{page.evaluate('WH.Audio.current()')} vs {want}")
         # now-playing in auto follows the story mood (name from getMoods)
         page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        settab(page, "sound")
         nm = next(m["zh"] for m in moods if m["id"] == page.evaluate("WH.Audio.getPlayingMood()"))
         check(f"§29b {tag}: the 现在播放 line shows the story mood in auto mode ({nm})", nm in page.locator(".modal .track-now").inner_text(), page.locator(".modal .track-now").inner_text())
         # ---- English
@@ -2230,6 +2255,7 @@ def run_track(p):
         check(f"§29b {tag}: switching language closes the panel", page.locator(".music-pop").count() == 0)
         # ---- the audio module is optional: no WH.Audio -> no track row, no ♪, nothing breaks
         page.evaluate("() => { window.__A = WH.Audio; WH.Audio = undefined; WH.UI.openSettings(); }"); page.wait_for_timeout(250)
+        settab(page, "sound")
         check(f"§29b {tag}: without WH.Audio the Settings panel has no track row and still opens", page.locator(".modal").count() == 1 and page.locator(".modal .track-row").count() == 0)
         page.evaluate("() => { WH.Audio = window.__A; }")
         ctx.close(); b.close()
@@ -2526,6 +2552,7 @@ def run_cloud(p):
     page.wait_for_timeout(3400)                                             # (the 3 s grace period for window.claude has passed)
     check("§34: without window.claude the status is off and available stays false", page.evaluate("WH.Cloud.status") == "off" and page.evaluate("WH.Cloud.available") is False)
     page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+    settab(page, "data")
     check("§34: Settings has no cloud row outside an artifact", page.locator(".cloud-row").count() == 0)
     page.keyboard.press("Escape")
     text = page.evaluate("JSON.stringify(WH.Save.exportAll())")
@@ -2556,6 +2583,7 @@ def run_cloud(p):
     page.evaluate("() => { WH.Save.addCodexGlobal([window.__newId]); }"); page.wait_for_timeout(700)
     check("§34: an unchanged profile is not re-sent", page.evaluate("window.__cdbLog.length") == n_log)
     page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+    settab(page, "data")
     row = page.locator(".cloud-row")
     check("§34: Settings shows the cloud row with a synced state", row.count() == 1 and "已同步" in row.inner_text(), row.inner_text() if row.count() else "")
     row.locator("#cloud-now").click(); page.wait_for_timeout(800)
@@ -2589,6 +2617,7 @@ def run_cloud(p):
         page.evaluate("() => { WH.Save.addCodexGlobal([Object.keys(WH.codex)[0]]); }"); page.wait_for_timeout(500)
         check(f"§34: {label} -> status off, no cloud writes, game data intact", page.evaluate("window.__cdbLog.length") == 0 and page.evaluate("WH.Save.codexGlobal().length") >= 1)
         page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        settab(page, "data")
         if kw.get("no_db"):
             check(f"§34: {label} -> no cloud row at all (the capability is not there)", page.locator(".cloud-row").count() == 0 and page.evaluate("WH.Cloud.available") is False)
         else:
@@ -2612,6 +2641,96 @@ def run_cloud(p):
     page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(300)
     check("§34: ... and the game still starts", page.locator("#scr-select").is_visible() or page.locator(".modal-back").count() == 1)
     ctx.close(); b.close()
+
+def run_settings_tabs(p):
+    """SPEC §36: Settings is split into 4 tabs (游戏 / 显示 / 声音 / 存档); only the active tab's rows are in the DOM, each row lives in exactly one tab,
+    the tab survives toggles, a language switch and a re-open, keyboard arrows work, mobile fits."""
+    print("\n== SPEC §36 settings tabs ==")
+    for mobile in (False, True):
+        tag = "mobile" if mobile else "desktop"
+        b, ctx, page = new_ctx(p, mobile=mobile, tag="tabs" + tag[0])
+        tap = (lambda loc: loc.tap()) if mobile else (lambda loc: loc.click())
+        page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        tabs = page.locator('.modal [role="tablist"] [role="tab"]')
+        ids = [tabs.nth(i).get_attribute("data-tab") for i in range(tabs.count())]
+        names = [tabs.nth(i).inner_text().strip() for i in range(tabs.count())]
+        check(f"§36 {tag}: four tabs game/show/sound/data in one tablist, labelled 游戏 显示 声音 存档", ids == ["game", "show", "sound", "data"] and names == ["游戏", "显示", "声音", "存档"], f"{ids} {names}")
+        check(f"§36 {tag}: first open is 游戏; one tab selected (roving tabindex), one tabpanel labelled by it",
+              page.locator('.modal [role="tab"][aria-selected="true"]').count() == 1 and tabs.nth(0).get_attribute("aria-selected") == "true"
+              and page.locator('.modal [role="tab"][tabindex="0"]').count() == 1 and page.locator('.modal [role="tabpanel"]').count() == 1
+              and page.locator('.modal [role="tabpanel"]').get_attribute("aria-labelledby") == "settab-game")
+        shot(page, f"120_settings_tab_game_{tag}")
+        # each row in exactly one tab; the other tabs' controls are not in the DOM
+        inv = {}
+        for tid in ids:
+            settab(page, tid)
+            inv[tid] = page.evaluate("() => [...document.querySelectorAll('.modal .set-panel > .setrow')].map(r => (r.querySelector('.k, label') || r).textContent.trim())")
+            if tid != "game": shot(page, f"120_settings_tab_{tid}_{tag}")
+        flat = [x for tid in ids for x in inv[tid]]
+        check(f"§36 {tag}: 17 settings rows in total, none repeated across tabs (cloud / egg rows appear only when available)", len(flat) == 17 and len(set(flat)) == 17, json.dumps(inv, ensure_ascii=False))
+        settab(page, "game")
+        check(f"§36 {tag}: 游戏 holds rewind / origin-pick / rumours; sound controls are not in the DOM",
+              page.locator(".modal .rewind-row").count() == 1 and page.locator(".modal .origin-row").count() == 1 and page.locator(".modal .setrow", has_text="传闻").count() == 1
+              and page.locator("#vol-music").count() == 0 and page.locator(".modal .style-row").count() == 0 and page.locator(".modal .track-row").count() == 0)
+        settab(page, "sound")
+        check(f"§36 {tag}: 声音 holds mute / both sliders / music style / track; game rows are gone",
+              page.locator("#vol-music").count() == 1 and page.locator("#vol-sfx").count() == 1 and page.locator(".modal .style-row").count() == 1 and page.locator(".modal .track-row").count() == 1
+              and page.locator(".modal .rewind-row").count() == 0)
+        settab(page, "show")
+        check(f"§36 {tag}: 显示 holds language / text speed / effects / lore cards / keyword links / known hint",
+              page.locator(".modal .kw-row").count() == 1 and page.locator(".modal .seg button", has_text="English").count() == 1 and page.locator(".modal .seg button", has_text="瞬间").count() == 1
+              and page.locator(".modal .seg button", has_text="静默").count() == 1 and page.locator(".modal .seg button", has_text="全部弹出").count() == 1)
+        settab(page, "data")
+        check(f"§36 {tag}: 存档 holds the backup button (cloud row only inside an artifact)", page.locator("#data-btn").count() == 1 and page.locator(".cloud-row").count() == 0)
+        # nothing focusable is hidden (the focus trap walks every button in the modal)
+        check(f"§36 {tag}: every button in the modal is rendered (no hidden panels for the focus trap to land on)",
+              page.evaluate("() => [...document.querySelectorAll('.modal button')].filter(b => !b.offsetParent && getComputedStyle(b).position !== 'fixed').length") == 0)
+        if mobile:
+            box = page.locator(".modal").bounding_box(); tb = page.locator(".modal .set-tabs").bounding_box()
+            check("§36 mobile: tab bar fits inside the modal, every tab is at least 44 px wide, page does not overflow",
+                  tb["x"] >= box["x"] - 1 and tb["x"] + tb["width"] <= box["x"] + box["width"] + 1 and all(tabs.nth(i).bounding_box()["width"] >= 44 for i in range(4))
+                  and page.evaluate("document.documentElement.scrollWidth") <= 391, f"{box} {tb}")
+            settab(page, "game")
+            tap(tabs.nth(2)); page.wait_for_timeout(200)
+            check("§36 mobile: tapping a tab switches to it", page.locator('.modal [role="tab"][aria-selected="true"]').get_attribute("data-tab") == "sound")
+            ctx.close(); b.close(); continue
+        # keyboard: arrows / Home / End, wrapping, focus follows
+        settab(page, "game")
+        page.locator('.modal [role="tab"][aria-selected="true"]').focus()
+        sel = lambda: page.locator('.modal [role="tab"][aria-selected="true"]').get_attribute("data-tab")
+        foc = lambda: page.evaluate("document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.tab || '' : ''")
+        page.keyboard.press("ArrowRight"); page.wait_for_timeout(200)
+        a = (sel(), foc())
+        page.keyboard.press("End"); page.wait_for_timeout(200)
+        b2 = (sel(), foc())
+        page.keyboard.press("ArrowRight"); page.wait_for_timeout(200)
+        c = (sel(), foc())
+        page.keyboard.press("ArrowLeft"); page.wait_for_timeout(200)
+        d = (sel(), foc())
+        page.keyboard.press("Home"); page.wait_for_timeout(200)
+        e = (sel(), foc())
+        check("§36 keyboard: → / End / → wraps / ← / Home move the selection and the focus together", a == ("show", "show") and b2 == ("data", "data") and c == ("game", "game") and d == ("data", "data") and e == ("game", "game"), str([a, b2, c, d, e]))
+        check("§36 keyboard: the modal is still open after arrow keys (they do not reach the game hotkeys)", page.locator(".modal").count() == 1)
+        # a toggle keeps the tab; a language switch keeps the tab and translates the labels; a re-open returns to the last tab
+        settab(page, "show")
+        page.locator(".modal .seg button", has_text="瞬间").click(); page.wait_for_timeout(150)
+        check("§36: a toggle keeps the tab and saves the setting", sel() == "show" and json.loads(page.evaluate("localStorage.getItem('whatiswh.settings')"))["textSpeed"] == "instant")
+        page.locator(".modal .seg button", has_text="English").click(); page.wait_for_timeout(250)
+        en_names = [page.locator('.modal [role="tablist"] [role="tab"]').nth(i).inner_text().strip() for i in range(4)]
+        check("§36 en: language switch keeps the 显示 tab open, tabs read Game / Display / Sound / Saves", sel() == "show" and en_names == ["Game", "Display", "Sound", "Saves"], str(en_names))
+        shot(page, "121_settings_tabs_en")
+        page.keyboard.press("Escape"); page.wait_for_timeout(100)
+        page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(250)
+        check("§36: re-opening Settings returns to the last tab", sel() == "show")
+        page.locator(".modal .seg button", has_text="中文").click(); page.wait_for_timeout(250)
+        settab(page, "data"); page.keyboard.press("Escape"); page.wait_for_timeout(100)
+        page.evaluate("() => WH.UI.openSettings()"); page.wait_for_timeout(300)
+        check("§36: opening on 存档 focuses the backup button", sel() == "data" and page.evaluate("document.activeElement && document.activeElement.id") == "data-btn")
+        page.keyboard.press("Escape"); page.wait_for_timeout(100)
+        # Settings button inside a game and the title menu both open it
+        page.locator("#scr-title .menu button", has_text="设置").click(); page.wait_for_timeout(200)
+        check("§36: title menu → 设置 opens the tabbed panel", page.locator('.modal [role="tablist"]').count() == 1)
+        ctx.close(); b.close()
 
 def run_fam(p):
     """SPEC §33: first-run "do you know Warhammer?" dialog -> lore cards + keyword links on/off; asked once; returning players skipped."""
@@ -2684,6 +2803,7 @@ def run_fam(p):
 
     b, ctx, page = new_ctx(p, tag="fam6")
     page.locator("#scr-title .menu button", has_text="设置").click(); page.wait_for_timeout(250)
+    settab(page, "show")
     row = page.locator(".kw-row")
     check("§33: Settings has a 台词里的条目链接 on/off row", row.count() == 1 and "台词里的条目链接" in row.inner_text())
     row.locator("button", has_text="关").click(); page.wait_for_timeout(200)
@@ -2907,6 +3027,7 @@ def run_real_birth(p):
     check("birth: a record saved before the fork has origin null and reloads at the birth node", out[0] is None and out[1] is None and out[2] is True and out[3] is None, str(out))
     # settings row exists (title screen → 设置)
     page.locator("#scr-title .menu .btn", has_text="设置").first.click(); page.wait_for_timeout(250)
+    settab(page, "game")
     check("birth: settings has the 直接选出身 row", page.locator(".origin-row", has_text="直接选出身").count() == 1)
     page.keyboard.press("Escape"); page.wait_for_timeout(200)
     # settings toggle brings the origin cards back
@@ -3004,6 +3125,20 @@ with sync_playwright() as p:
         for e in errors: print("  " + e)
         print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
         sys.exit(1 if fails or errors else 0)
+    if "--only-data" in ARGS:                        # SPEC §22 quick loop (backup export / import, sample data)
+        run_data(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
+    if "--only-tabs" in ARGS:                        # SPEC §36 quick loop (Settings tabs; sample data is enough)
+        run_settings_tabs(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
     if "--only-fam" in ARGS:                         # SPEC §33 quick loop (sample data, or --real)
         run_fam(p)
         fails = [r for r in results if not r[1]]
@@ -3045,6 +3180,7 @@ with sync_playwright() as p:
     run_v034(p)
     run_fam(p)
     run_cloud(p)
+    run_settings_tabs(p)
     if REAL:
         run_new_routes(p)
         run_real_v022(p)

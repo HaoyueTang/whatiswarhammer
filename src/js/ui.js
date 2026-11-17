@@ -2749,66 +2749,112 @@
         h("p", {class: "track-now", "aria-live": "off"}, nowPlaying()),
         h("div", {class: "track-list", role: "radiogroup", "aria-labelledby": "track-label"}, body)));
   }
-  function openSettings(replace) {
+  /* SPEC §36: Settings is split into tabs (game / display / sound / saves). Only the active tab's rows are built and put in the DOM
+   * (hidden rows would still be reached by Tab and by the modal's focus trap). The tab is kept for the session in UI.setTab. */
+  var SET_TABS = ["game", "show", "sound", "data"];
+  function settingsTab(tab) {
+    return SET_TABS.indexOf(tab) >= 0 ? tab : (SET_TABS.indexOf(UI.setTab) >= 0 ? UI.setTab : SET_TABS[0]);
+  }
+  function openSettings(replace, tab, focusTab) {
     var st = UI.settings;
     var save = function () { WH.Save.saveSettings(st); };
-    var body = h("div", null,
-      h("div", {class: "setrow"}, h("span", {class: "k"}, t("text_speed")),
-        seg([["slow", t("speed_slow")], ["normal", t("speed_normal")], ["fast", t("speed_fast")], ["instant", t("speed_instant")]], st.textSpeed,
-          function (v) { st.textSpeed = v; save(); openSettings(true); })),
-      h("div", {class: "setrow"}, h("span", {class: "k"}, t("effects")),
-        seg([[true, t("on")], [false, t("off")]], !!st.effects, function (v) {
-          st.effects = v; save(); applyFxSetting(); if (UI.game && UI.screen === "game") applyStateFx(); openSettings(true);
-        })),
-      h("div", {class: "setrow"}, h("label", {for: "vol-music"}, t("music_vol")), slider("vol-music", "musicVol", "setMusicVolume")),
-      h("div", {class: "setrow"}, h("label", {for: "vol-sfx"}, t("sfx_vol")), slider("vol-sfx", "sfxVol", "setSfxVolume")),
-      h("div", {class: "setrow"}, h("span", {class: "k"}, t("sound")),
-        seg([[false, "🔊 " + t("on")], [true, "🔇 " + t("mute")]], !!st.muted, function (v) { if (!!st.muted !== v) toggleMute(); else openSettings(true); })),
-      h("div", {class: "setrow"}, h("span", {class: "k"}, t("consequences")),
-        seg([[true, t("on")], [false, t("off")]], st.consequences !== false, function (v) { st.consequences = v; save(); openSettings(true); })),
-      h("div", {class: "setrow"}, h("span", {class: "k"}, t("echoes")),
-        seg([[true, t("on")], [false, t("off")]], st.echoes !== false, function (v) {
-          st.echoes = v; save();
-          if (UI.game) { UI.game.echoes = v; if (UI.screen === "game" && !UI.conseq) renderRumor(UI.game.currentRumor(), !UI.typer.active); }
-          openSettings(true);
-        })),
-      h("div", {class: "setrow hint-row"}, h("span", {class: "k"}, t("rumors")),
-        seg([[true, t("on")], [false, t("off")]], st.rumors !== false, function (v) {
-          st.rumors = v; save();
-          if (UI.game) { UI.game.rumors = v; if (UI.screen === "game" && !UI.conseq) renderRumor(v ? UI.game.currentRumor() : null, !UI.typer.active); }
-          openSettings(true);
-        }), h("p", {class: "set-hint", id: "rumor-hint"}, t("rumor_hint"))),
-      h("div", {class: "setrow rewind-row"}, h("span", {class: "k"}, t("rewind_set")),
-        seg([[true, t("on")], [false, t("off")]], st.rewind === true, function (v) {
-          st.rewind = v; save();
-          if (UI.game) UI.game.setRewind(v);                          // off: the snapshot stack is dropped (zero overhead)
-          buildTools(); updateRewindBtn();
-          openSettings(true);
-        }), h("p", {class: "set-hint"}, t("rewind_hint"))),
-      styleRow(),
-      trackRow(),
-      cloudRow(),
-      eggDone("planned") ? h("div", {class: "setrow tz-row"}, h("span", {class: "k"}, t("tz_joke")),
-        seg([[true, t("on")], [false, t("off")]], st.tzeentchJoke !== false, function (v) { st.tzeentchJoke = v; save(); openSettings(true); })) : null,
-      h("div", {class: "setrow"}, h("span", {class: "k"}, t("lore_cards")),
-        seg([["new", t("lore_new_only")], ["all", t("lore_all")], ["codex", t("lore_codex_only")]],
-          st.loreCards === "all" || st.loreCards === "codex" ? st.loreCards : "new", function (v) { st.loreCards = v; save(); openSettings(true); })),
-      h("div", {class: "setrow hint-row origin-row"}, h("span", {class: "k"}, t("origin_pick")),
-        seg([[true, t("on")], [false, t("off")]], st.chooseOrigin === true, function (v) { st.chooseOrigin = v; save(); openSettings(true); }),
-        h("p", {class: "set-hint"}, t("origin_pick_hint"))),
-      h("div", {class: "setrow hint-row kw-row"}, h("span", {class: "k"}, t("kw_links")),
-        seg([[true, t("on")], [false, t("off")]], st.keywordLinks !== false, function (v) { st.keywordLinks = v; save(); openSettings(true); }),
-        h("p", {class: "set-hint"}, t("kw_links_hint"))),
-      h("div", {class: "setrow"}, h("span", {class: "k"}, t("known_hint")),
-        seg([["toast", t("hint_toast")], ["silent", t("hint_silent")]], st.knownHint === "silent" ? "silent" : "toast",
-          function (v) { st.knownHint = v; save(); openSettings(true); })),
-      h("div", {class: "setrow"}, h("span", {class: "k"}, t("data")),
-        h("button", {class: "btn small px", type: "button", id: "data-btn", onclick: function () { openData(); }}, "⇅ " + t("data_manage"))),
-      h("div", {class: "setrow"}, h("span", {class: "k"}, t("language")),
-        seg([["zh", "中文"], ["en", "English"]], WH.lang, function (v) { setLang(v); })),
-      UI.reduced ? h("p", {style: "font-size:12px;color:var(--ink-dim)"}, t("reduced_motion")) : null);
+    var cur = settingsTab(typeof tab === "string" ? tab : null);
+    UI.setTab = cur;
+    var rows = {
+      /* 游戏: how a run plays */
+      game: function () {
+        return [
+          h("div", {class: "setrow rewind-row"}, h("span", {class: "k"}, t("rewind_set")),
+            seg([[true, t("on")], [false, t("off")]], st.rewind === true, function (v) {
+              st.rewind = v; save();
+              if (UI.game) UI.game.setRewind(v);                          // off: the snapshot stack is dropped (zero overhead)
+              buildTools(); updateRewindBtn();
+              openSettings(true);
+            }), h("p", {class: "set-hint"}, t("rewind_hint"))),
+          h("div", {class: "setrow hint-row origin-row"}, h("span", {class: "k"}, t("origin_pick")),
+            seg([[true, t("on")], [false, t("off")]], st.chooseOrigin === true, function (v) { st.chooseOrigin = v; save(); openSettings(true); }),
+            h("p", {class: "set-hint"}, t("origin_pick_hint"))),
+          h("div", {class: "setrow"}, h("span", {class: "k"}, t("consequences")),
+            seg([[true, t("on")], [false, t("off")]], st.consequences !== false, function (v) { st.consequences = v; save(); openSettings(true); })),
+          h("div", {class: "setrow"}, h("span", {class: "k"}, t("echoes")),
+            seg([[true, t("on")], [false, t("off")]], st.echoes !== false, function (v) {
+              st.echoes = v; save();
+              if (UI.game) { UI.game.echoes = v; if (UI.screen === "game" && !UI.conseq) renderRumor(UI.game.currentRumor(), !UI.typer.active); }
+              openSettings(true);
+            })),
+          h("div", {class: "setrow hint-row"}, h("span", {class: "k"}, t("rumors")),
+            seg([[true, t("on")], [false, t("off")]], st.rumors !== false, function (v) {
+              st.rumors = v; save();
+              if (UI.game) { UI.game.rumors = v; if (UI.screen === "game" && !UI.conseq) renderRumor(v ? UI.game.currentRumor() : null, !UI.typer.active); }
+              openSettings(true);
+            }), h("p", {class: "set-hint", id: "rumor-hint"}, t("rumor_hint"))),
+          eggDone("planned") ? h("div", {class: "setrow tz-row"}, h("span", {class: "k"}, t("tz_joke")),
+            seg([[true, t("on")], [false, t("off")]], st.tzeentchJoke !== false, function (v) { st.tzeentchJoke = v; save(); openSettings(true); })) : null
+        ];
+      },
+      /* 显示: language, text, effects, lore cards and keyword links */
+      show: function () {
+        return [
+          h("div", {class: "setrow"}, h("span", {class: "k"}, t("language")),
+            seg([["zh", "中文"], ["en", "English"]], WH.lang, function (v) { setLang(v); })),
+          h("div", {class: "setrow"}, h("span", {class: "k"}, t("text_speed")),
+            seg([["slow", t("speed_slow")], ["normal", t("speed_normal")], ["fast", t("speed_fast")], ["instant", t("speed_instant")]], st.textSpeed,
+              function (v) { st.textSpeed = v; save(); openSettings(true); })),
+          h("div", {class: "setrow"}, h("span", {class: "k"}, t("effects")),
+            seg([[true, t("on")], [false, t("off")]], !!st.effects, function (v) {
+              st.effects = v; save(); applyFxSetting(); if (UI.game && UI.screen === "game") applyStateFx(); openSettings(true);
+            })),
+          h("div", {class: "setrow"}, h("span", {class: "k"}, t("lore_cards")),
+            seg([["new", t("lore_new_only")], ["all", t("lore_all")], ["codex", t("lore_codex_only")]],
+              st.loreCards === "all" || st.loreCards === "codex" ? st.loreCards : "new", function (v) { st.loreCards = v; save(); openSettings(true); })),
+          h("div", {class: "setrow hint-row kw-row"}, h("span", {class: "k"}, t("kw_links")),
+            seg([[true, t("on")], [false, t("off")]], st.keywordLinks !== false, function (v) { st.keywordLinks = v; save(); openSettings(true); }),
+            h("p", {class: "set-hint"}, t("kw_links_hint"))),
+          h("div", {class: "setrow"}, h("span", {class: "k"}, t("known_hint")),
+            seg([["toast", t("hint_toast")], ["silent", t("hint_silent")]], st.knownHint === "silent" ? "silent" : "toast",
+              function (v) { st.knownHint = v; save(); openSettings(true); })),
+          UI.reduced ? h("p", {style: "font-size:12px;color:var(--ink-dim)"}, t("reduced_motion")) : null
+        ];
+      },
+      /* 声音: mute, volumes, music style, track */
+      sound: function () {
+        return [
+          h("div", {class: "setrow"}, h("span", {class: "k"}, t("sound")),
+            seg([[false, "🔊 " + t("on")], [true, "🔇 " + t("mute")]], !!st.muted, function (v) { if (!!st.muted !== v) toggleMute(); else openSettings(true); })),
+          h("div", {class: "setrow"}, h("label", {for: "vol-music"}, t("music_vol")), slider("vol-music", "musicVol", "setMusicVolume")),
+          h("div", {class: "setrow"}, h("label", {for: "vol-sfx"}, t("sfx_vol")), slider("vol-sfx", "sfxVol", "setSfxVolume")),
+          styleRow(),
+          trackRow()
+        ];
+      },
+      /* 存档: backup / import, cloud mirror (artifact only) */
+      data: function () {
+        return [
+          h("div", {class: "setrow"}, h("span", {class: "k"}, t("data")),
+            h("button", {class: "btn small px", type: "button", id: "data-btn", onclick: function () { openData(); }}, "⇅ " + t("data_manage"))),
+          cloudRow()
+        ];
+      }
+    };
+    var go = function (id) { UI.setTab = id; openSettings(true, id, true); };
+    var bar = h("div", {class: "views set-tabs", role: "tablist", "aria-label": t("settings_title")});
+    SET_TABS.forEach(function (id, i) {
+      var b = h("button", {class: "btn px", type: "button", role: "tab", id: "settab-" + id, "data-tab": id, "aria-selected": String(id === cur),
+        "aria-controls": "setpanel", tabindex: id === cur ? 0 : -1}, t("settab_" + id));
+      b.addEventListener("click", function () { if (id !== cur) go(id); });
+      b.addEventListener("keydown", function (e) {
+        var n = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? SET_TABS.length - 1 : null;
+        if (n === null) return;
+        e.preventDefault(); e.stopPropagation();
+        go(SET_TABS[(n + SET_TABS.length) % SET_TABS.length]);
+      });
+      bar.appendChild(b);
+    });
+    var body = h("div", null, bar,
+      h("div", {class: "set-panel", id: "setpanel", role: "tabpanel", "aria-labelledby": "settab-" + cur, "data-tab": cur}, rows[cur]()));
     openModal({title: t("settings_title"), narrow: true, body: body, replace: replace === true,
-      focus: ".modal-body [aria-pressed='true']", reopen: function () { openSettings(true); }});
+      focus: focusTab === true ? ".modal-body [role='tab'][aria-selected='true']" : cur === "data" ? "#data-btn" : ".modal-body .set-panel [aria-pressed='true']",
+      reopen: function () { openSettings(true); }});
   }
   UI.openSettings = openSettings;
 
