@@ -2,7 +2,7 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
-## [Unreleased] — Settings tabs (SPEC §36)
+## [0.5.1] — 2026-11-17 (settings tabs, SPEC §36)
 ### Changed — Settings is easier to scan
 - Settings is split into four tabs: **游戏 / Game** (rewind, pick an origin card, scene hints, past-life echoes, rumours), **显示 / Display** (language, text speed, effects, lore cards, keyword links, known-entry hint), **声音 / Sound** (mute, volumes, music style, track), **存档 / Saves** (backup / import, cloud mirror in the artifact). Each setting lives in exactly one tab; the tab you were on is kept while the game is open (toggling, switching language and re-opening stay on it). Keyboard: ← → Home End.
 ### Tools
