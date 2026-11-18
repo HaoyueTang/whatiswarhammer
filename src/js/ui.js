@@ -410,7 +410,7 @@
   function endingArt(factionId, nodeId) {
     var a = WH.scenes["end_" + nodeId];
     if (a && a.src) return "end_" + nodeId;
-    var f = WH.factions[factionId], n = f && f.nodes && f.nodes[nodeId];
+    var f = WH.faction(factionId), n = f && f.nodes && f.nodes[nodeId];
     return (n && n.scene) || "void";
   }
   /* A fixed 16:9 box (so nothing jumps while the image decodes) framed in the kind colour. Unlocked: the ending picture, falling back
@@ -418,7 +418,7 @@
    * broken-image icon and never the slime / "ph-scene" placeholder. size "sm" = endings-grid thumbnail. */
   function endingPic(factionId, nodeId, kind, title, size) {
     var wrap = h("div", {class: "end-pic " + kind + (size ? " " + size : ""), "data-ending": nodeId});
-    var f = WH.factions[factionId], n = f && f.nodes && f.nodes[nodeId];
+    var f = WH.faction(factionId), n = f && f.nodes && f.nodes[nodeId];
     var alt = t("end_art_alt", {x: title || ""});
     var tried = {};
     (function put(key) {
@@ -844,6 +844,13 @@
     });
     if (!list.length) cards.appendChild(h("div", {class: "empty-msg"}, h("p", null, t("no_factions")), h("p", null, h("small", null, t("no_factions_hint")))));
     wrap.appendChild(cards);
+    /* SPEC §37: the second way in — one universal birth, the choices decide the faction (prototype) */
+    var u = WH.universal;
+    if (u && u.nodes && u.startNode && WH.Game.hasBirth(u)) {
+      wrap.appendChild(h("button", {class: "btn px ucard", type: "button", "data-universal": u.id, "data-sfx": "select",
+        "aria-label": t("universal_btn") + ". " + t("universal_sub"), onclick: function () { UI.sel.faction = null; startGame(u.id, WH.Game.BIRTH); }},
+        h("b", null, "▶ " + t("universal_btn")), h("small", null, t("universal_sub"))));
+    }
     var first = cards.querySelector("button");
     if (first) setTimeout(function () { if (!UI.modals.length) first.focus({preventScroll: true}); }, 0);
   }
@@ -938,6 +945,17 @@
     show("game");
     renderHud();
     UI.lastTick = performance.now();
+  }
+
+  /* SPEC §37: the run can change faction mid-way (the door of the universal birth, or a rewind across it) — re-theme the screen */
+  function syncFactionTheme(g) {
+    var f = g.faction, scr = $("scr-game");
+    if (!scr || scr.getAttribute("data-faction") === f.id) return;
+    UI.accent = fcolor(f);
+    $("stage").style.setProperty("--accent", UI.accent);
+    scr.setAttribute("data-faction", f.id);
+    buildStats();
+    buildTools();
   }
 
   function buildTools() {
@@ -1052,6 +1070,7 @@
   function renderHud(skipDate) {
     var g = UI.game;
     if (!g) return;
+    syncFactionTheme(g);
     updateRewindBtn();
     var view = UI.conseq && UI.conseq.view;          // during a consequence beat: stats before the next node's own effects
     var s = view ? view.stats : g.state.stats;
@@ -2140,7 +2159,7 @@
     var badge = opts.badge ? h("span", {class: "rbadge", vars: {"--rc": rc, "--rc-ink": inkOn(rc)}}, badgeText(id)) : null;
     if (!unlocked) return h("div", {class: "centry locked", "data-id": id, vars: {"--rc": rc}}, pic,
       h("div", null, h("div", {class: "nm"}, t("codex_locked")), opts.badge ? h("div", {class: "bd"}, badge) : null, h("div", {class: "tx"}, "……")));
-    var fac = !opts.badge && c.faction && WH.factions[c.faction] ? L(WH.factions[c.faction].name) : "";
+    var fac = !opts.badge && c.faction && WH.faction(c.faction) ? L(WH.faction(c.faction).name) : "";
     return h("div", {class: "centry" + (opts.isNew ? " is-new" : ""), "data-id": id, vars: {"--rc": rc}}, pic, h("div", {class: "cbody"},
       h("div", {class: "chead"}, h("span", {class: "nm"}, L(c.name)), fac ? h("span", {class: "fa"}, fac) : null,
         opts.isNew ? h("span", {class: "new-badge"}, t("cx_new")) : null),
@@ -2532,7 +2551,7 @@
       h("div", null, h("div", {class: "k"}, t("common_cause")), h("div", {class: "v"}, common ? L(common.label) + " " + t("times", {n: common.count}) : "—"))));
     if (!runs.length) body.appendChild(h("p", {class: "empty-msg"}, t("no_runs")));
     runs.forEach(function (r) {
-      var f = WH.factions[r.faction], color = (f && fcolor(f)) || r.color || FACTION_COLOR[r.faction] || "#c9a227";
+      var f = WH.faction(r.faction), color = (f && fcolor(f)) || r.color || FACTION_COLOR[r.faction] || "#c9a227";
       var gods = (r.gods || []).length ? h("span", {class: "run-gods"}, r.gods.map(function (gd) {
         var el = art("sprite", "sigil_" + gd, "sig", "#8a4fd0"); if (el && el.setAttribute) el.setAttribute("title", godName(gd)); return el; })) : "—";
       var cell = function (k, v) { return h("div", null, h("div", {class: "k"}, k), h("div", {class: "v"}, v)); };
@@ -2597,7 +2616,7 @@
     var canClick = mode === "save" ? (s !== "auto" && UI.game && !UI.game.state.ended) : !!rec;
     var kids = [h("div", {class: "sh"}, h("span", null, slotLabel(s)), rec ? h("span", null, fmtSavedAt(rec.savedAt)) : null)];
     if (rec) {
-      var f = WH.factions[rec.faction], ct = f.chapters && f.chapters[rec.chapter];
+      var f = WH.faction(rec.faction), ct = f.chapters && f.chapters[rec.chapter];
       kids.push(h("div", {class: "fac", style: "color:" + fcolor(f)}, L(f.name) + " · " + originLabel(f, rec.origin)));
       kids.push(h("div", {class: "ln"}, t("chapter_n", {n: WH.chapterNum(rec.chapter || 1)}) + (ct ? " · " + L(ct) : "")));
       kids.push(h("div", {class: "ln dim"}, WH.fmtDate(WH.Rules.dateParts(rec.hours, f.startDate)) + "   ⏱ " + WH.fmtPlay(rec.playMs)));

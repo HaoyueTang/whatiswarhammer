@@ -17,6 +17,10 @@
   WH.achievements = WH.achievements || [];   // global achievements (SPEC §25)
 
   WH.registerFaction = function (f) { WH.factions[f.id] = f; };
+  /* SPEC §37: the universal birth route (id "arcosa") lives OUTSIDE WH.factions; WH.faction(id) finds either */
+  WH.universal = WH.universal || null;
+  WH.registerUniversal = function (u) { WH.universal = u; };
+  WH.faction = function (id) { return WH.factions[id] || (WH.universal && WH.universal.id === id ? WH.universal : null); };
   WH.registerEvents  = function (list) { Array.prototype.push.apply(WH.events, list); };
   WH.registerRumors  = function (list) { Array.prototype.push.apply(WH.rumors, list); };
   WH.registerAchievements = function (list) { Array.prototype.push.apply(WH.achievements, list); };

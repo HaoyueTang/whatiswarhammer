@@ -17,13 +17,13 @@ const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 for (const t of [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((m) => m[1]).filter((s) => /^(src\/js\/(registry|engine)|assets\/manifest|data\/)/.test(s))) {
   try { vm.runInContext(fs.readFileSync(path.join(root, t), "utf8"), ctx, {filename: t}); } catch (e) { console.error("load fail", t, e.message); }
 }
-const WH = ctx.WH, F = WH.factions[fid];
-if (!F) { console.log("unknown faction", fid, Object.keys(WH.factions).join(",")); process.exit(1); }
+const WH = ctx.WH, F = WH.faction ? WH.faction(fid) : WH.factions[fid];      // SPEC §37: "arcosa" = the universal birth route
+if (!F) { console.log("unknown faction", fid, Object.keys(WH.factions).concat(WH.universal ? [WH.universal.id] : []).join(",")); process.exit(1); }
 const origins = WH.Game.origins(F);
 let oi = opt("origin", 0); oi = isNaN(+oi) ? Math.max(0, origins.findIndex((o) => o.id === oi)) : (+oi % origins.length);
 const L = (x) => (x && typeof x === "object" && ("zh" in x || "en" in x)) ? (EN ? x.en : x.zh) : (x || "");
 const g = new WH.Game(fid, {rng: WH.RNG(seed), rumors: true});
-const BIRTH = process.argv.includes("--birth") && WH.Game.hasBirth(F);      // --birth: start at the shared birth point (SPEC §35); the fork picks the origin
+const BIRTH = (process.argv.includes("--birth") || F === WH.universal) && WH.Game.hasBirth(F);      // --birth: start at the shared birth point (SPEC §35); the fork picks the origin
 let step = g.start(BIRTH ? WH.Game.BIRTH : origins[oi].id);
 const rnd = WH.RNG(seed * 7 + 3);
 console.log(`# ${fid} · origin ${BIRTH ? "(shared birth)" : origins[oi].id} · seed ${seed} · ${EN ? "en" : "zh"}`);
@@ -50,6 +50,7 @@ for (let n = 0; n < MAX; n++) {
   const pick = opt("first", false) ? pool[0].i : opt("last", false) ? pool[pool.length - 1].i : pool[Math.floor(rnd() * pool.length)].i;
   console.log("   → pick", pick);
   step = g.choose(pick);
+  if (step.factionChanged) console.log(`   ↪ faction ${step.factionChanged.from} → ${step.factionChanged.to} · origin ${g.state.origin} · caps ${JSON.stringify(g.state.max)}`);
   { const cq = step.consequence || {}, rt = cq.text || cq.result; if (rt) console.log("   ⤷", L(rt).slice(0, 400)); }
   if (step.roll) console.log("   🎲", JSON.stringify(step.roll).slice(0, 120));
 }

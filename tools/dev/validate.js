@@ -43,6 +43,7 @@ const DIFF_SEEDS = [1, 5, 9];
 const diffLevel = (deathPct) => deathPct < 24 ? 1 : deathPct < 29 ? 2 : 3;   // SPEC §24
 const STEP_LIMIT = 1500;
 
+const order0 = (arr, x) => arr.indexOf(x);
 const errors = [], warnings = [], notes = [];
 const err = (m) => errors.push(m), warn = (m) => warnings.push(m), note = (m) => notes.push(m);
 
@@ -147,12 +148,15 @@ else {
   }) : [];
   for (const id of FACTION_FILES) if (!files.includes(id + ".js")) warn(`data/factions/${id}.js missing (index.html loads it)`);
   for (const f of files) load("data/factions/" + f, false);
+  const hasUniversal = fs.existsSync(path.join(ROOT, "data", "universal.js"));      // SPEC §37
+  if (hasUniversal) load("data/universal.js", false);
   // index.html must load every data file that exists (plain <script> tags, no fetch)
   const html = fs.existsSync(path.join(ROOT, "index.html")) ? fs.readFileSync(path.join(ROOT, "index.html"), "utf8") : "";
   const tags = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((m) => m[1]);
   const onDisk = CODEX_FILES.concat(EVENT_FILES, files.map((f) => "data/factions/" + f)).filter((r) => fs.existsSync(path.join(ROOT, r)));
   for (const r of onDisk) if (!tags.includes(r)) err(`index.html does not load ${r}`);
-  for (const r of ["data/difficulty.js", "data/achievements.js"]) if (fs.existsSync(path.join(ROOT, r)) && !tags.includes(r)) err(`index.html does not load ${r}`);
+  for (const r of ["data/difficulty.js", "data/achievements.js", "data/universal.js"]) if (fs.existsSync(path.join(ROOT, r)) && !tags.includes(r)) err(`index.html does not load ${r}`);
+  { const ui = order0(tags, "data/universal.js"), lf = tags.lastIndexOf("data/factions/mechanicus.js"); if (ui >= 0 && lf >= 0 && ui < lf) err("index.html: data/universal.js must load after data/factions/* (SPEC §37)"); }
   for (const id of FACTION_FILES) if (!tags.includes(`data/factions/${id}.js`)) warn(`index.html has no <script> for data/factions/${id}.js`);
   load("data/difficulty.js", false);
   load("data/achievements.js", false);
@@ -203,6 +207,7 @@ function checkEffects(e, where) {
     else if (k === "set") { if (typeof e.set !== "object") err(`${where}: effects.set must be an object`); }
     else if (k === "unset") { if (!Array.isArray(e.unset)) err(`${where}: effects.unset must be an array`); }
     else if (k === "origin") { if (typeof e.origin !== "string" || !e.origin) err(`${where}: effects.origin must be an origin id string (SPEC §35)`); }
+    else if (k === "faction") { if (typeof e.faction !== "string" || !WH.factions[e.faction]) err(`${where}: effects.faction must be a registered faction id (SPEC §37)`); }
     else if (k === "taint") {
       if (!e.taint || typeof e.taint !== "object" || Array.isArray(e.taint)) { err(`${where}: effects.taint must be {god:±n} or {all:±n}`); continue; }
       for (const g of Object.keys(e.taint)) {
@@ -1072,6 +1077,7 @@ function checkFaction(f) {
   const origins = WH.Game.origins(f);
   origins.forEach((o) => collect(o));                 // origin.set flags (SPEC §16)
   if (f.birthNode) flagsSet.add("born_shared");       // SPEC §35: the engine sets it when an origin is chosen at the fork
+  if (WH.universal) flagsSet.add("born_universal");   // SPEC §37: set by the door of the universal birth route
 
   checkL(f.name, w + ".name"); checkL(f.tagline, w + ".tagline", 20, 12); checkL(f.role, w + ".role");
   checkL(f.renownLabel, w + ".renownLabel");
@@ -2003,6 +2009,213 @@ function birthSelfTest(f, seed, nRuns) {
     rows.push(`${fid} ${Object.entries(res.picked).map(([k, v]) => k + " " + v).join("/")} · fork after ${avgFork} choices · ${res.rewinds} fork rewinds · ${res.finished}/${res.runs} finished`);
   }
   if (rows.length) console.log(`\n§35 shared birth (start at the birth node, random play, rewind across the fork, save round trip): ${rows.join(" · ")}`);
+}
+/* ---------- SPEC §37 universal birth route: static checks + self-test (start at the birth, choose a class, walk through a door, play on) ---------- */
+const UNI_CLASSES = ["low", "mid", "up"];
+function uniLayout(u) {                       // { fork, doors: {low: id, ...}, strand: {low: [ids]}, birth: [ids] } from the graph alone
+  const nodes = u.nodes || {}, classOf = (c) => { const k = Object.keys((c.effects && c.effects.set) || {}).find((x) => /^class_(low|mid|up)$/.test(x)); return k ? k.slice(6) : null; };
+  const fork = Object.keys(nodes).filter((id) => (nodes[id].choices || []).some((c) => classOf(c)));
+  const lay = {fork: fork[0] || null, forks: fork, strand: {}, doors: {}, birth: [], forkClass: {}};
+  if (!lay.fork) return lay;
+  (nodes[lay.fork].choices || []).forEach((c, i) => { const k = classOf(c); if (k) lay.forkClass[k] = {index: i, next: c.next}; });
+  const seen = new Set(), q = [u.birthNode];
+  while (q.length) {                          // birth = reachable from birthNode up to and including the fork
+    const id = q.shift(); if (seen.has(id) || !nodes[id]) continue; seen.add(id); lay.birth.push(id);
+    if (id === lay.fork) continue;
+    for (const c of nodes[id].choices || []) if (c.next) q.push(c.next);
+  }
+  for (const k of UNI_CLASSES) {              // strand = reachable from the class entry, not crossing a door choice
+    const e = lay.forkClass[k]; lay.strand[k] = [];
+    if (!e) continue;
+    const s2 = new Set(), q2 = [e.next];
+    while (q2.length) {
+      const id = q2.shift(); if (s2.has(id) || !nodes[id]) continue; s2.add(id); lay.strand[k].push(id);
+      for (const c of nodes[id].choices || []) if (c.next && !(c.effects && c.effects.faction)) q2.push(c.next);
+    }
+    lay.doors[k] = lay.strand[k].find((id) => (nodes[id].choices || []).some((c) => c.effects && c.effects.faction)) || null;
+  }
+  return lay;
+}
+function checkUniversal(u) {
+  const w = `universal.${u.id}`, nodes = u.nodes || {}, ids = Object.keys(nodes);
+  checkL(u.name, w + ".name"); checkL(u.tagline, w + ".tagline", 20, 12); checkL(u.role, w + ".role"); checkL(u.world, w + ".world"); checkL(u.renownLabel, w + ".renownLabel");
+  sprite(u.playerSprite, w + ".playerSprite"); uiIcon(u.renownIcon, w + ".renownIcon");
+  if (!/^#[0-9a-f]{3,8}$/i.test(u.color || "")) warn(`${w}: color "${u.color}" is not a hex color`);
+  if (WH.factions[u.id]) err(`${w}: id clashes with a faction id (the universal route must stay out of WH.factions)`);
+  for (const k of STATS) if (!u.startStats || typeof u.startStats[k] !== "number") warn(`${w}: startStats.${k} missing`);
+  if (!u.chapters || !u.chapters[1]) err(`${w}: chapters.1 (title) missing`); else for (const c of Object.keys(u.chapters)) checkL(u.chapters[c], `${w}.chapters.${c}`);
+  if (!nodes[u.birthNode]) { err(`${w}: birthNode "${u.birthNode}" missing`); return; }
+  if (u.startNode !== u.birthNode) err(`${w}: startNode must equal birthNode (SPEC §37)`);
+  if (!u.startDate || typeof u.startDate.year !== "number" || typeof u.startDate.mill !== "number") err(`${w}: startDate {year,mill} missing`);
+  const lay = uniLayout(u);
+  if (lay.forks.length !== 1) { err(`${w}: expected exactly 1 class fork node (a node whose choices set class_low/class_mid/class_up), found ${lay.forks.length}`); return; }
+  const fk = nodes[lay.fork];
+  if ((fk.choices || []).length !== 3 || !UNI_CLASSES.every((k) => lay.forkClass[k])) err(`${w}: fork ${lay.fork} must have 3 choices, one per class (low/mid/up)`);
+  if (lay.birth.length < 3 || lay.birth.length > 4) warn(`${w}: ${lay.birth.length} birth node(s) (SPEC §37: 3–4, incl. the fork)`);
+  for (const id of lay.birth) if (!/^u_b\d\d$/.test(id)) warn(`${w}: birth node "${id}" is not named u_bNN`);
+  const pairs = [], usedFactions = new Set();
+  for (const k of UNI_CLASSES) {
+    const sid = lay.strand[k];
+    if (!sid || !sid.length) { err(`${w}: class ${k} has no strand`); continue; }
+    if (sid.length < 2 || sid.length > 3) warn(`${w}: class ${k} strand has ${sid.length} node(s) (SPEC §37: 2–3, incl. the door)`);
+    for (const id of sid) if (!id.startsWith(`u_${k}_`)) warn(`${w}: strand node "${id}" is not named u_${k}_*`);
+    const did = lay.doors[k];
+    if (!did) { err(`${w}: class ${k} has no door node (a node whose choices switch faction)`); continue; }
+    if (did !== `u_${k}_door`) warn(`${w}: door of class ${k} is "${did}", expected u_${k}_door`);
+    const dn = nodes[did], cs = dn.choices || [], seenF = new Set();
+    if (cs.length !== 3) err(`${w}.${did}: ${cs.length} choices (SPEC §37: exactly 3 doors)`);
+    cs.forEach((c, i) => {
+      const cw = `${w}.${did}.choice${i + 1}`, e = c.effects || {}, F = WH.factions[e.faction];
+      if (!F) { err(`${cw}: effects.faction "${e.faction}" is not a registered faction`); return; }
+      const o = WH.Game.origins(F).find((x) => x.id === e.origin);
+      if (!o) { err(`${cw}: effects.origin "${e.origin}" is not an origin of ${e.faction}`); return; }
+      if (c.next !== o.startNode) err(`${cw}: next "${c.next}" is not the start node "${o.startNode}" of ${e.faction}/${o.id}`);
+      if (c.roll || c.require || c.hideIfLocked) err(`${cw}: doors are unlocked and unrolled (SPEC §37)`);
+      if (c.result === undefined) err(`${cw}: a door needs a result line (SPEC §37)`);
+      for (const key of Object.keys(e)) if (!["faction", "origin", "set"].includes(key)) err(`${cw}.effects: "${key}" — doors only switch faction/origin and set flags`);
+      if (seenF.has(e.faction)) err(`${cw}: class ${k} offers ${e.faction} twice (3 different factions per class)`);
+      seenF.add(e.faction); usedFactions.add(e.faction); pairs.push(`${e.faction}/${o.id}`);
+      if (!e.set || !Object.keys(e.set).length) warn(`${cw}: no u_* flag set at the door`);
+      // the entry node must read right after the door (SPEC §37.3)
+      const en = F.nodes[o.startNode], has = (en && en.alt || []).some((a) => JSON.stringify(a.if || {}).includes('"born_universal"'));
+      if (!has) err(`${cw}: entry node ${o.startNode} has no alt on {flag:"born_universal"} (SPEC §37.3)`);
+      for (const a of (en && en.alt) || []) { const j = JSON.stringify(a.if || {}); if (j.includes('"born_universal"') && j.includes('"born_shared"')) warn(`${F.id}/${o.startNode}: an alt mixes born_universal and born_shared (never set together)`); }
+      if (!Array.isArray(en && en.alt) || !(en.alt || []).some((a) => JSON.stringify(a.if || {}).includes('"born_shared"'))) { /* the per-route birth alt may legitimately be missing on a route without one — not required here */ }
+    });
+  }
+  const dup = pairs.filter((p, i) => pairs.indexOf(p) !== i);
+  for (const d of new Set(dup)) err(`${w}: door target ${d} appears more than once over the 3 classes (SPEC §37: each origin exactly once)`);
+  for (const fid of usedFactions) for (const o of WH.Game.origins(WH.factions[fid])) if (!pairs.includes(`${fid}/${o.id}`)) warn(`${w}: ${fid}/${o.id} has no door (SPEC §37: every origin of a used faction exactly once)`);
+  for (const fid of usedFactions) { const sd = WH.factions[fid].startDate; if (u.startDate && (sd.year !== u.startDate.year || sd.mill !== u.startDate.mill)) err(`${w}: startDate ${JSON.stringify(u.startDate)} ≠ ${fid}'s ${JSON.stringify(sd)} (SPEC §37: shared clock)`); }
+  // every universal node
+  const reach = new Set(), q = [u.birthNode];
+  while (q.length) { const id = q.shift(); if (reach.has(id) || !nodes[id]) continue; reach.add(id); for (const c of nodes[id].choices || []) if (c.next && nodes[c.next]) q.push(c.next); }
+  for (const id of ids) {
+    const n = nodes[id], nw = `${w}/${id}`;
+    if (!/^u_/.test(id)) err(`${nw}: universal node ids start with u_`);
+    if (!reach.has(id)) err(`${nw}: unreachable from ${u.birthNode}`);
+    if (n.chapter !== 1) err(`${nw}: chapter ${n.chapter} (universal nodes are chapter 1)`);
+    scene(n.scene, nw);
+    if (n.speaker) { sprite(n.speaker.sprite, nw + ".speaker"); checkL(n.speaker.name, nw + ".speaker.name"); }
+    checkL(n.text, nw + ".text", 90, 65);
+    for (const a of n.alt || []) { checkL(a.text || a.add, nw + ".alt", 90, 65); }
+    if (n.ending) err(`${nw}: ending inside the universal route`);
+    if (n.eventRoll !== undefined) err(`${nw}: eventRoll (SPEC §37: no random events before the faction is fixed)`);
+    if (n.gather) err(`${nw}: gather node in the universal route`);
+    if (n.codex && n.codex.length) err(`${nw}: codex unlock in the universal route (it has no faction to file it under)`);
+    if (n.effects) for (const k of Object.keys(n.effects)) if (k !== "set") err(`${nw}.effects: "${k}" — universal nodes are stat-neutral (SPEC §37)`);
+    const cs = n.choices || [];
+    if (!cs.length) err(`${nw}: no choices (dead end)`);
+    if (cs.length > 4) err(`${nw}: ${cs.length} choices (max 4)`);
+    cs.forEach((c, i) => {
+      const cw = `${nw}.choice${i + 1}`, e = c.effects || {}, isDoor = e.faction !== undefined;
+      checkL(c.text, cw + ".text", 24, 14);
+      if (c.result !== undefined) checkL(c.result, cw + ".result", RESULT_ZH, RESULT_EN);
+      if (c.roll) err(`${cw}: roll in the universal route`);
+      if (c.grudge !== undefined) err(`${cw}: grudge in the universal route`);
+      if (c.require) err(`${cw}: require in the universal route (nothing is locked before the door)`);
+      for (const k of Object.keys(e)) if (!(k === "set" || (isDoor && (k === "faction" || k === "origin")))) err(`${cw}.effects: "${k}" — universal choices are stat-neutral (SPEC §37)`);
+      if (c.next && !isDoor && !nodes[c.next]) err(`${cw}: next "${c.next}" is not a universal node`);
+      if (c.next && isDoor && nodes[c.next]) err(`${cw}: a door must leave the universal route`);
+    });
+  }
+  const cyc = {}; const dfs = (id) => { cyc[id] = 1; for (const c of nodes[id].choices || []) { const t = c.next; if (t && nodes[t]) { if (cyc[t] === 1) err(`${w}: cycle at "${t}"`); else if (!cyc[t]) dfs(t); } } cyc[id] = 2; };
+  dfs(u.birthNode);
+  note(`universal ${u.id}: birth ${lay.birth.join(" ")} · strands ${UNI_CLASSES.map((k) => k + " " + (lay.strand[k] || []).join(">")).join(" · ")} · doors ${pairs.join(", ")}`);
+}
+function universalSelfTest(u, seed, perDoor) {
+  const out = {runs: 0, doors: {}, problems: [], rewinds: 0, roundTrips: 0, finished: 0};
+  const lay = uniLayout(u), nodes = u.nodes;
+  const strip = (st) => { const c = JSON.parse(JSON.stringify(st)); delete c.playMs; delete c.codex; return JSON.stringify(c); };
+  const P = (m) => { if (out.problems.length < 12) out.problems.push(m); };
+  for (const k of UNI_CLASSES) {
+    const did = lay.doors[k]; if (!did || !lay.forkClass[k]) continue;
+    (nodes[did].choices || []).forEach((dc, di) => {
+      const fid = dc.effects.faction, oid = dc.effects.origin, key = `${k}→${fid}/${oid}`;
+      out.doors[key] = 0;
+      for (let r = 0; r < perDoor; r++) {
+        const drv = WH.RNG(seed * 7919 + di * 131 + r * 17 + k.length * 3);
+        const g = new WH.Game(u.id, {rng: WH.RNG(seed * 104729 + r * 31 + di), data: WH, rewind: true});
+        let step = g.start(WH.Game.BIRTH), n = 0, through = false;
+        out.runs++;
+        if (g.state.nodeId !== u.birthNode || g.state.origin !== null || g.faction.id !== u.id) { P(`${key}: start is ${g.state.nodeId}/${g.state.origin}/${g.faction.id}`); break; }
+        const s0 = JSON.stringify(g.state.stats), m0 = JSON.stringify(g.state.max);
+        while (!g.state.ended && n < 600) {
+          n++;
+          if (step && step.kind === "event") {
+            const open = g.eventChoices().filter((v) => !v.locked); g.eventChoose(open[Math.floor(drv() * open.length)].index); step = g.eventContinue(); continue;
+          }
+          const id = g.state.nodeId, cs = g.choices(), open = cs.map((c, i) => [c, i]).filter(([c]) => !c.locked);
+          if (!open.length) { P(`${key}: no open choice at ${id}`); break; }
+          let a;
+          if (!through) {
+            if (id === lay.fork) a = lay.forkClass[k].index;
+            else if (id === did) a = di;
+            else a = 0;
+            if (!cs[a] || cs[a].locked) { P(`${key}: wanted choice ${a} at ${id} is missing/locked`); break; }
+            if (g.faction.id === u.id && (JSON.stringify(g.state.stats) !== s0 || JSON.stringify(g.state.max) !== m0)) { P(`${key}: stats/caps changed before the door at ${id}`); break; }
+          } else a = open[Math.floor(drv() * open.length)][1];
+          const before = (!through && id === did) ? strip(g.state) : null;
+          step = g.choose(a);
+          if (!through && id === did) {
+            through = true;
+            const F = WH.factions[fid], o = WH.Game.origins(F).find((x) => x.id === oid), A = g.state;
+            if (g.faction.id !== fid || A.faction !== fid) P(`${key}: faction after the door is ${g.faction.id}/${A.faction}`);
+            if (A.origin !== oid) P(`${key}: origin after the door is ${A.origin}`);
+            if (!A.flags.born_universal || A.flags.born_shared) P(`${key}: flags after the door: born_universal=${A.flags.born_universal} born_shared=${A.flags.born_shared}`);
+            if (A.nodeId !== o.startNode) P(`${key}: door leads to ${A.nodeId}, not ${o.startNode}`);
+            if (!step.factionChanged || step.factionChanged.from !== u.id || step.factionChanged.to !== fid) P(`${key}: step.factionChanged = ${JSON.stringify(step.factionChanged)}`);
+            const ref = new WH.Game(fid, {rng: WH.RNG(1), data: WH}); ref.start(oid); const B = ref.state;
+            ["hp", "sanity", "corruption", "renown"].forEach((s) => { if (A.stats[s] !== B.stats[s]) P(`${key}: ${s} ${A.stats[s]} after the door ≠ ${B.stats[s]} from the origin card`); });
+            if (A.max.hp !== B.max.hp || A.max.sanity !== B.max.sanity) P(`${key}: caps ${A.max.hp}/${A.max.sanity} ≠ ${B.max.hp}/${B.max.sanity}`);
+            Object.keys(B.flags).forEach((f2) => { if (B.flags[f2] && !A.flags[f2]) P(`${key}: flag ${f2} missing after the door`); });
+            if (WH.Rules.dateParts(A.hours, F.startDate).year !== u.startDate.year) P(`${key}: clock jumped at the door`);
+            // rewind across the door: back on the universal route, state identical, then take another door
+            if (drv() < 0.5) {
+              if (!g.canRewind() || !g.rewind()) P(`${key}: rewind refused at the door`);
+              else {
+                out.rewinds++;
+                if (g.faction.id !== u.id || g.state.faction !== u.id || g.state.origin !== null) P(`${key}: rewind kept faction/origin ${g.faction.id}/${g.state.faction}/${g.state.origin}`);
+                if (strip(g.state) !== before) P(`${key}: state after rewinding the door differs from before it`);
+                step = g.choose(di);
+                if (g.faction.id !== fid || g.state.origin !== oid) P(`${key}: re-choosing the door gave ${g.faction.id}/${g.state.origin}`);
+              }
+            }
+            // save-record round trip after the door
+            const rec = JSON.parse(JSON.stringify(g.toRecord())), g2 = WH.Game.fromRecord(rec, {data: WH});
+            out.roundTrips++;
+            if (!g2 || g2.faction.id !== fid || g2.state.origin !== oid || g2.state.nodeId !== g.state.nodeId) P(`${key}: save round trip after the door lost faction/origin/node`);
+          } else if (!through && g.faction.id === u.id && (id === lay.fork || id === did) === false && r === 0 && n === 2) {
+            // mid-birth round trip (record while the run is still on the universal route)
+            const g2 = WH.Game.fromRecord(JSON.parse(JSON.stringify(g.toRecord())), {data: WH}); out.roundTrips++;
+            if (!g2 || g2.faction.id !== u.id || g2.state.origin !== null || g2.state.nodeId !== g.state.nodeId) P(`${key}: mid-birth save round trip lost the state`);
+          }
+        }
+        if (!through) { P(`${key}: never reached the door`); continue; }
+        out.doors[key]++;
+        if (g.state.ended) out.finished++; else P(`${key}: run did not finish in 600 steps`);
+      }
+    });
+  }
+  { const g = new WH.Game(u.id, {rng: WH.RNG(5), data: WH}); g.start(WH.Game.BIRTH);        // at the door node itself (still universal): record round trip
+    const dk = UNI_CLASSES.find((k) => lay.doors[k]);
+    if (dk) { g.state.nodeId = lay.doors[dk]; const g2 = WH.Game.fromRecord(JSON.parse(JSON.stringify(g.toRecord())), {data: WH});
+      if (!g2 || g2.faction.id !== u.id || g2.state.origin !== null || g2.state.nodeId !== lay.doors[dk]) P("record at the door node (before choosing) did not round-trip"); } }
+  return out;
+}
+if (WH.universal) {
+  const u = WH.universal;
+  checkUniversal(u);
+  const rp = errors.filter((e) => e.startsWith("universal.")).length;
+  if (rp && !argv.includes("--force-sim")) console.log(`\n§37 universal birth: self-test skipped (${rp} static error(s))`);
+  else {
+    let res;
+    try { res = universalSelfTest(u, SEED, SAMPLE ? 3 : 10); } catch (e) { err(`universal (SPEC §37): self-test threw — ${e.message}`); res = null; }
+    if (res) {
+      res.problems.forEach((m) => err(`universal (SPEC §37): ${m}`));
+      console.log(`\n§37 universal birth (class fork → door → play to an ending; rewind across the door; save round trips): ${Object.entries(res.doors).map(([k, v]) => k + " " + v).join(" · ")} · ${res.rewinds} door rewinds · ${res.roundTrips} round trips · ${res.finished}/${res.runs} finished`);
+    }
+  }
 }
 /* ---------- SPEC §24 difficulty levels ---------- */
 if (WH.difficulty && !WRITE_DIFF) {
