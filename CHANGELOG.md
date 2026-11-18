@@ -2,6 +2,13 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
+## [Unreleased] — 0.6.0 prototype (universal birth, SPEC §37)
+### Added — "Let my choices decide" (prototype: Imperium / Chaos / T'au)
+- New wide button on the faction-select screen **由选项决定势力 / Let my choices decide**: one shared birth on Aurex Secundus → your family class (low / mid / up) → a short strand → a **door** with 3 ways out; the door decides the **faction** (and origin) you continue in. 3 classes × 3 factions = 9 doors, each landing on an existing origin opening (which gets a `born_universal` text so it reads right after the door). The faction cards and the §35 per-route birth stay as they are.
+- Engine: `effects.faction` switches the run's faction mid-way (`WH.universal` route outside `WH.factions`, `WH.faction(id)`, flag `born_universal`, `step.factionChanged`); rewind across the door, save/continue before and after the door, the faction theme / HUD repaint, autosave at the door; saves list shows 「出身未定」 before the door.
+### Tools
+- Validator `checkUniversal` + `universalSelfTest` (9 doors × 10 runs: right faction/origin/caps/flags, rewind across the door, save round trips, play to an ending); `playthrough.js arcosa`; `smoke_test.py --only-universal --real`.
+
 ## [0.5.1] — 2026-11-17 (settings tabs, SPEC §36)
 ### Changed — Settings is easier to scan
 - Settings is split into four tabs: **游戏 / Game** (rewind, pick an origin card, scene hints, past-life echoes, rumours), **显示 / Display** (language, text speed, effects, lore cards, keyword links, known-entry hint), **声音 / Sound** (mute, volumes, music style, track), **存档 / Saves** (backup / import, cloud mirror in the artifact). Each setting lives in exactly one tab; the tab you were on is kept while the game is open (toggling, switching language and re-opening stay on it). Keyboard: ← → Home End.

@@ -847,6 +847,7 @@
     /* SPEC §37: the second way in — one universal birth, the choices decide the faction (prototype) */
     var u = WH.universal;
     if (u && u.nodes && u.startNode && WH.Game.hasBirth(u)) {
+      wrap.classList.add("has-u");
       wrap.appendChild(h("button", {class: "btn px ucard", type: "button", "data-universal": u.id, "data-sfx": "select",
         "aria-label": t("universal_btn") + ". " + t("universal_sub"), onclick: function () { UI.sel.faction = null; startGame(u.id, WH.Game.BIRTH); }},
         h("b", null, "▶ " + t("universal_btn")), h("small", null, t("universal_sub"))));
@@ -1485,7 +1486,7 @@
   function autosave(step) {
     var g = UI.game;
     if (g.state.ended) { WH.Save.remove("auto"); return; }
-    if (step.chapterChanged || g.state.visits % 5 === 0) WH.Save.write("auto", g.toRecord({lang: WH.lang}));
+    if (step.chapterChanged || step.factionChanged || g.state.visits % 5 === 0) WH.Save.write("auto", g.toRecord({lang: WH.lang}));      // SPEC §37: the door of the universal birth is a commit
   }
 
   /* ---------- FX ---------- */
@@ -2201,7 +2202,10 @@
     s.style.setProperty("--accent", fcolor(f));
     s.appendChild(h("div", {class: "bg"}, art("scene", node.scene || "void")));
     s.appendChild(h("div", {class: "corner"}, soundButton(), musicButton(), langButton()));
-    var again = h("button", {class: "btn primary px", type: "button", onclick: function () { startGame(f.id, usesBirth(f) ? WH.Game.BIRTH : g.state.origin); }}, "↻ " + t("again"));
+    var again = h("button", {class: "btn primary px", type: "button", onclick: function () {
+      if (WH.universal && g.state.flags && g.state.flags.born_universal) startGame(WH.universal.id, WH.Game.BIRTH);      // SPEC §37: a run that came through the universal birth starts there again
+      else startGame(f.id, usesBirth(f) ? WH.Game.BIRTH : g.state.origin);
+    }}, "↻ " + t("again"));
     var back = UI.settings.rewind === true && g.canRewind() ?              // SPEC §30
       h("button", {class: "btn px rewind-end", type: "button", id: "rewind-end", "aria-keyshortcuts": "Z", title: t("rewind_end") + " (Z)", onclick: function () { rewindStep(); }}, "\u21B6 " + t("rewind_end")) : null;
     s.appendChild(h("div", {class: "ending-wrap"},

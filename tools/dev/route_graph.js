@@ -26,6 +26,7 @@ const ctx = {console}; ctx.window = ctx; ctx.self = ctx; vm.createContext(ctx);
 const load = (f) => vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), ctx, {filename: f});
 load("src/js/registry.js"); load("assets/manifest.js");
 for (const f of fs.readdirSync(path.join(ROOT, "data", "factions")).sort()) load("data/factions/" + f);
+try { load("data/universal.js"); } catch (e) { /* optional (SPEC §37) */ }
 for (const f of ["data/events.js", "data/events_lore.js", "data/events_taint.js"]) { try { load(f); } catch (e) { /* optional */ } }
 const F = ctx.WH.factions[FID];
 if (!F) { console.error("unknown faction " + FID); process.exit(2); }
@@ -50,7 +51,8 @@ const engineRoots = new Set(Object.values(F.deathNodes || {}));
   const t = typeof g === "string" ? g : g[FID];
   if (t && N[t]) engineRoots.add(t);
 }));
-const starts = (F.origins || []).map((o) => ({node: o.startNode || F.startNode, flags: Object.keys(o.set || {}).filter((k) => o.set[k])}));
+const doorOrg = SL.doorOrigins(ctx.WH, FID);        // SPEC §37: origins entered through a door of the universal birth get born_universal from the engine
+const starts = (F.origins || []).map((o) => ({node: o.startNode || F.startNode, flags: Object.keys(o.set || {}).filter((k) => o.set[k]).concat(doorOrg.has(o.id) ? ["born_universal"] : [])}));
 if (!starts.length) starts.push({node: F.startNode, flags: []});
 if (F.birthNode && N[F.birthNode]) starts.push({node: F.birthNode, flags: []});         // SPEC §35 shared birth point
 const setOf = (eff) => { const on = [], off = []; const s = (eff && eff.set) || {}; Object.keys(s).forEach((k) => (s[k] ? on : off).push(k)); return {on, off}; };

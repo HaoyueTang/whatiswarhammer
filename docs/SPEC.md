@@ -559,10 +559,16 @@ Each gets one more `alt` entry `{if: {flag: "born_universal"}, text: L(...)}` (t
 ### 37.5 UI
 - Faction-select screen: a wide button **「由选项决定势力」 / "Let my choices decide"** under the faction cards (prototype; becomes one of the two start options of the later home-page redesign) → `startGame("arcosa", Game.BIRTH)`.
 - `renderHud()` syncs the faction theme whenever `$("scr-game")[data-faction]` differs from `g.faction.id` (accent colour, stat labels and icons, tools), so the switch at the door and a rewind across it both repaint. Saves list / records / codex use `WH.faction(id)`; a save made before the door shows the universal route's name and role「出身未定」.
+- The ending screen's "↻ again" starts the universal route again when the run has `born_universal`.
+- `autosave(step)` also writes when `step.factionChanged` (the door is a commit; otherwise the cadence is chapter change / every 5th node).
 ### 37.6 Validator (`validate.js`, `checkUniversal` + `universalSelfTest`)
 Static: ids `u_*`; reachable from `birthNode`; birth + strands as 37.2 (3 classes, one door node each, 3 choices, factions distinct per class, 9 distinct origins overall, `next` = that origin's `startNode`, `effects.faction/origin` consistent); stat-neutral rules; only allowed flags; ≤ 90 zh chars; each of the 9 entry nodes has a `born_universal` alt (error if missing). Self-test: 90 random runs per door from `u_b01` — after the door stats / caps / flags equal a fresh `start(origin)` plus `born_universal` and the universal `set` flags; rewind across the door; save-record round trip before and after the door; play to an ending.
 ### 37.7 Tests
 `smoke_test.py --only-universal --real`: the select-screen button, the class fork, all 9 doors reach the right faction (theme `data-faction`, HUD labels, origin name), autosave/continue before and after the door, rewind across the door, no console errors.
+### 37.7b As built (2026-11-18)
+- Story: birth `u_b01–u_b03` (the day before Tithe Day on Aurex Secundus; the governor's decree "下层出人，灰原补粮，尖塔清债"); strands of 3 nodes each (low: Manufactorum Six / recruiting table / one-legged veteran; mid: Dome Farm Seven / ash road / evening at home; up: House Serrin counting-room / two visitors / night with the seal). Doors: low = imperium/hive (wait for the draw) · chaos/deserter (sign for the line regiment, desert in transit at Carcharos) · tau/pow (sign for the garrison regiment, stranded at the Gulf); mid = imperium/agri · chaos/scavenger (salvage crew) · tau/colonist (labour ship); up = imperium/noble · chaos/scribe (Church letter) · tau/trader (smugglers' manifests).
+- The player's age is not stated (scribe origin says "eleven years copying"); the game clock does **not** advance at the door (known limit; a later step could add `time` on door results).
+- Tools: `story_lib.doorOrigins(WH, fid)` gives `born_universal` to door-entered origins in `mayFlags` / `route_graph`; `route_graph.js` loads `data/universal.js`.
 ### 37.8 Later (not in the prototype)
 5 more factions (aeldari, necrons, orks, gsc, mechanicus) as extra doors (≈ 3 classes × 8 = 24 doors, or fewer by sharing); the two big start options on the home page (preset faction / decided by choices, replacing the `chooseOrigin` toggle); the universal birth text then grows with the doors.
 

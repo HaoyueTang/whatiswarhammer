@@ -9,6 +9,7 @@
     python3 tools/dev/smoke_test.py --only-v034 [--real]     # just the SPEC §31 ending-illustration checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-cloud [--real]    # just the SPEC §34 cloud-save checks with a fake window.claude db (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-birth --real      # just the SPEC §35 shared-birth checks (real data)
+    python3 tools/dev/smoke_test.py --only-universal --real  # just the SPEC §37 universal-birth checks (real data)
     python3 tools/dev/smoke_test.py --only-tabs              # just the SPEC §36 Settings-tab checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-fam [--real]      # just the SPEC §33 "do you know Warhammer?" dialog checks (also part of the default and --real runs)
     python3 tools/dev/smoke_test.py --only-v040 [--real]     # just the SPEC §32 story-overhaul checks: alt / resultAlt / event where / save fallback (also part of the default and --real runs)
@@ -3040,6 +3041,133 @@ def run_real_birth(p):
     check("birth: origin-card path starts at the origin's own start node without born_shared", st["o"] and st["node"] == st["start"] and not st["born"], str(st))
     b.close()
 
+def run_real_universal(p):
+    """SPEC §37 on real data: the faction-select screen has the 「由选项决定势力」 button; the class fork + 9 doors each land in the right faction
+    (theme, HUD caps/labels, origin, entry text), autosave/continue before and after the door, rewind across the door, save list label."""
+    print("\n== universal birth (SPEC §37, real data) ==")
+    b, ctx, page = new_ctx(p, tag="uni")
+    has = page.evaluate("() => !!(WH.universal && WH.Game.hasBirth(WH.universal))")
+    check("universal: data/universal.js registers a route with a birth node", has)
+    if not has:
+        b.close(); return
+    check("universal: the route is not in WH.factions (no card, no achievements, no difficulty)", page.evaluate("() => !WH.factions[WH.universal.id]"))
+    doors = page.evaluate("""() => { const u = WH.universal, N = u.nodes, out = [], cls = (c) => { const k = Object.keys((c.effects && c.effects.set) || {}).find(x => /^class_/.test(x)); return k ? k.slice(6) : null; };
+      const fork = Object.keys(N).find(id => (N[id].choices || []).some(cls));
+      (N[fork].choices || []).forEach((fc, fi) => { const k = cls(fc); if (!k) return; const seen = new Set(), q = [fc.next];
+        while (q.length) { const id = q.shift(); if (seen.has(id) || !N[id]) continue; seen.add(id);
+          const ch = N[id].choices || [];
+          if (ch.some(c => c.effects && c.effects.faction)) { ch.forEach((c, di) => { const F = WH.factions[c.effects.faction], o = WH.Game.origins(F).find(x => x.id === c.effects.origin);
+            out.push({cls: k, fork, forkIdx: fi, door: id, doorIdx: di, fid: F.id, oid: o.id, start: o.startNode, hp: o.max.hp, label: F.renownLabel[WH.lang] || F.renownLabel.zh,
+              entry: ((WH.factions[F.id].nodes[o.startNode].alt || []).find(a => JSON.stringify(a.if || {}).includes('born_universal')) || {text: null}).text}); }); }
+          else ch.forEach(c => c.next && q.push(c.next)); } });
+      return out; }""")
+    check("universal: 9 doors (3 classes x 3 factions)", len(doors) == 9, str(len(doors)))
+
+    def to_select():
+        page.reload(); page.wait_for_selector("#scr-title .title-main")
+        page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(250)
+
+    def start_universal():
+        to_select()
+        page.locator(".ucard").click(); page.wait_for_timeout(300)
+        wait_idle(page); finish_text(page)
+
+    def walk_to(node_id, d, limit=14):
+        """click through the universal route to `node_id`: first choice everywhere, the class at the fork"""
+        n = 0
+        while page.evaluate("() => WH.UI.game.state.nodeId") != node_id and n < limit:
+            cur = page.evaluate("() => WH.UI.game.state.nodeId")
+            click_choice(page, idx=(d["forkIdx"] if cur == d["fork"] else 0)); n += 1
+        return page.evaluate("() => WH.UI.game.state.nodeId") == node_id
+
+    def through_door(d):
+        click_choice(page, idx=d["doorIdx"]); wait_idle(page); finish_text(page)
+
+    def landed(d, tag):
+        info = page.evaluate("""() => { const g = WH.UI.game, hud = document.querySelector('#stats'); let t = g.nodeText(); t = typeof t === 'string' ? t : (t[WH.lang] || t.zh);
+          return {fid: g.faction.id, sfid: g.state.faction, theme: document.querySelector('#scr-game').getAttribute('data-faction'), o: g.state.origin, node: g.state.nodeId,
+                  born: !!g.state.flags.born_universal, shared: !!g.state.flags.born_shared, maxhp: g.state.max.hp, hud: hud.innerText,
+                  renown: (document.querySelector('#stat-renown') || {getAttribute: () => ''}).getAttribute('aria-label') || '', text: t}; }""")
+        ok = (info["fid"] == d["fid"] and info["sfid"] == d["fid"] and info["theme"] == d["fid"] and info["o"] == d["oid"] and info["node"] == d["start"]
+              and info["born"] and not info["shared"])
+        check(f"universal {tag}: the door lands in {d['fid']}/{d['oid']} at {d['start']} (theme, state, flags)", ok, str(info)[:260])
+        check(f"universal {tag}: HUD shows the origin's hp cap {d['hp']} and the {d['fid']} stat label", str(d["hp"]) in info["hud"] and d["label"] in info["renown"], f"{info['renown']} | {info['hud'][:60]}")
+        check(f"universal {tag}: the entry node reads the born_universal text", bool(d["entry"]) and (d["entry"] if isinstance(d["entry"], str) else d["entry"].get("zh", "")) in info["text"], info["text"][:80])
+
+    # --- the entry button on the faction-select screen
+    to_select()
+    check("universal: faction-select screen has the 「由选项决定势力」 button", page.locator(".ucard").count() == 1 and "由选项决定势力" in page.locator(".ucard").inner_text())
+    check("universal: no faction card for the universal route", page.locator('.fcard[data-faction="%s"]' % page.evaluate("() => WH.universal.id")).count() == 0)
+    shot(page, "universal_select")
+    # mobile layout: the button fits the screen
+    b2, ctx2, pm = new_ctx(p, mobile=True, tag="uni-m")
+    pm.locator("#scr-title .menu .btn.primary").click(); pm.wait_for_timeout(300)
+    bb = pm.locator(".ucard").bounding_box()
+    check("universal: the button fits a phone screen", bool(bb) and bb["x"] >= 0 and bb["x"] + bb["width"] <= 392, str(bb))
+    b2.close()
+
+    # --- all 9 doors through the real UI
+    for d in doors:
+        tag = f"{d['cls']}→{d['fid']}/{d['oid']}"
+        start_universal()
+        info0 = page.evaluate("() => ({f: WH.UI.game.faction.id, n: WH.UI.game.state.nodeId, o: WH.UI.game.state.origin, theme: document.querySelector('#scr-game').getAttribute('data-faction')})")
+        if d is doors[0]:
+            check("universal: the button starts the universal route at its birth node, origin undecided", info0["f"] == page.evaluate("() => WH.universal.id") and info0["n"] == page.evaluate("() => WH.universal.birthNode") and info0["o"] is None, str(info0))
+        if not walk_to(d["door"], d):
+            check(f"universal {tag}: reach the door node", False, page.evaluate("() => WH.UI.game.state.nodeId")); continue
+        if d is doors[0] or d["doorIdx"] == 0 and d["cls"] == "mid":
+            wait_idle(page); finish_text(page)
+            page.evaluate("() => WH.Save.write('auto', WH.UI.game.toRecord({lang: WH.lang}))")      # (the autosave cadence itself is not under test here)
+            rec = page.evaluate("() => JSON.parse(JSON.stringify(WH.Save.read('auto')))")
+            check(f"universal {tag}: autosave at the door still belongs to the universal route", bool(rec) and rec.get("faction") == page.evaluate("() => WH.universal.id") and rec.get("origin") is None, str(rec and (rec.get("faction"), rec.get("origin"), rec.get("nodeId"))))
+            page.reload(); page.wait_for_selector("#scr-title .title-main")
+            page.locator("#scr-title .menu .btn", has_text="继续").first.click(); page.wait_for_timeout(300); wait_idle(page); finish_text(page)
+            at = page.evaluate("() => ({f: WH.UI.game.faction.id, n: WH.UI.game.state.nodeId, o: WH.UI.game.state.origin, theme: document.querySelector('#scr-game').getAttribute('data-faction')})")
+            check(f"universal {tag}: Continue before the door resumes the door node", at["f"] == page.evaluate("() => WH.universal.id") and at["n"] == d["door"] and at["o"] is None and at["theme"] == at["f"], str(at))
+        through_door(d)
+        landed(d, tag)
+        if d["cls"] == "mid" and d["doorIdx"] == 0:
+            # autosave after the door → Continue lands in the new faction with its own theme
+            rec = page.evaluate("() => JSON.parse(JSON.stringify(WH.Save.read('auto')))")
+            check(f"universal {tag}: autosave after the door is a record of {d['fid']}/{d['oid']}", bool(rec) and rec.get("faction") == d["fid"] and rec.get("origin") == d["oid"], str(rec and (rec.get("faction"), rec.get("origin"))))
+            page.reload(); page.wait_for_selector("#scr-title .title-main")
+            page.locator("#scr-title .menu .btn", has_text="继续").first.click(); page.wait_for_timeout(300); wait_idle(page); finish_text(page)
+            at = page.evaluate("() => ({f: WH.UI.game.faction.id, o: WH.UI.game.state.origin, theme: document.querySelector('#scr-game').getAttribute('data-faction'), flag: !!WH.UI.game.state.flags.born_universal})")
+            check(f"universal {tag}: Continue after the door resumes in {d['fid']} with its theme", at["f"] == d["fid"] and at["o"] == d["oid"] and at["theme"] == d["fid"] and at["flag"], str(at))
+
+    # --- save list label for a run that has not reached the door
+    start_universal()
+    page.evaluate("() => { WH.Save.write(1, WH.UI.game.toRecord({lang: WH.lang})); }")
+    page.reload(); page.wait_for_selector("#scr-title .title-main")
+    page.locator("#scr-title .menu .btn", has_text="读档").first.click(); page.wait_for_timeout(300)
+    fac = page.locator(".slot .fac").first.inner_text() if page.locator(".slot .fac").count() else ""
+    check("universal: the save list shows the universal route with 「出身未定」", "出身未定" in fac, fac)
+    page.keyboard.press("Escape"); page.wait_for_timeout(200)
+
+    # --- the ending screen's "again" starts the universal route again (not the final faction's own birth)
+    d = doors[4]
+    start_universal(); walk_to(d["door"], d); through_door(d)
+    endn = page.evaluate("(fid) => Object.keys(WH.factions[fid].nodes).find(id => WH.factions[fid].nodes[id].ending && WH.factions[fid].nodes[id].ending.kind === 'bad')", d["fid"])
+    show_ending_of(page, endn)
+    page.wait_for_selector("#scr-ending .btn.primary", timeout=8000)
+    page.locator("#scr-ending .btn.primary").first.click(); page.wait_for_timeout(400); wait_idle(page); finish_text(page)
+    again = page.evaluate("() => ({f: WH.UI.game.faction.id, n: WH.UI.game.state.nodeId, o: WH.UI.game.state.origin, theme: document.querySelector('#scr-game').getAttribute('data-faction')})")
+    check("universal: ending → ↻ again restarts the universal route at its birth node", again["f"] == page.evaluate("() => WH.universal.id") and again["n"] == page.evaluate("() => WH.universal.birthNode") and again["o"] is None and again["theme"] == again["f"], str(again))
+
+    # --- rewind across the door
+    page.evaluate("() => { WH.UI.settings.rewind = true; WH.Save.saveSettings(WH.UI.settings); }")
+    d = doors[0]; d2 = [x for x in doors if x["cls"] == d["cls"] and x["fid"] != d["fid"]][0]
+    start_universal()
+    walk_to(d["door"], d); through_door(d)
+    check("universal rewind: on the far side of the door", page.evaluate("() => WH.UI.game.faction.id") == d["fid"] and page.evaluate("() => document.querySelector('#scr-game').getAttribute('data-faction')") == d["fid"])
+    page.evaluate("() => WH.UI.rewindStep()"); page.wait_for_timeout(300); wait_idle(page); finish_text(page)
+    back = page.evaluate("() => ({f: WH.UI.game.faction.id, sf: WH.UI.game.state.faction, o: WH.UI.game.state.origin, n: WH.UI.game.state.nodeId, theme: document.querySelector('#scr-game').getAttribute('data-faction'), born: !!WH.UI.game.state.flags.born_universal})")
+    check("universal rewind: back on the universal route (faction, origin, door node, theme repainted)", back["f"] == page.evaluate("() => WH.universal.id") and back["sf"] == back["f"] and back["o"] is None and back["n"] == d["door"] and back["theme"] == back["f"] and not back["born"], str(back))
+    through_door(d2)
+    landed(d2, f"rewind→{d2['fid']}/{d2['oid']}")
+    page.evaluate("() => { WH.UI.settings.rewind = false; WH.Save.saveSettings(WH.UI.settings); }")
+    b.close()
+
 def run_real_v040(p):
     """--real: every `alt` node of every route resolves without throwing (no flags / every flag the node tests set), the engine tolerates each
     route's unknown-node fallback, and no event `where` references a missing scene or node."""
@@ -3125,6 +3253,13 @@ with sync_playwright() as p:
         for e in errors: print("  " + e)
         print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
         sys.exit(1 if fails or errors else 0)
+    if "--only-universal" in ARGS:                   # SPEC §37 quick loop (needs --real: sample data has no universal route)
+        run_real_universal(p)
+        fails = [r for r in results if not r[1]]
+        print(f"\nconsole/page errors: {len(errors)}")
+        for e in errors: print("  " + e)
+        print(f"\n{len(results) - len(fails)}/{len(results)} checks passed, {len(errors)} console errors · {time.time() - t0:.1f}s · screenshots in {OUT}")
+        sys.exit(1 if fails or errors else 0)
     if "--only-data" in ARGS:                        # SPEC §22 quick loop (backup export / import, sample data)
         run_data(p)
         fails = [r for r in results if not r[1]]
@@ -3188,6 +3323,7 @@ with sync_playwright() as p:
         run_real_grudge(p)
         run_real_v040(p)
         run_real_birth(p)
+        run_real_universal(p)
         run_real_gather(p)
     fails = [r for r in results if not r[1]]
     print(f"\nconsole/page errors: {len(errors)}")

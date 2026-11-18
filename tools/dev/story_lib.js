@@ -99,6 +99,13 @@ function engineRoots(WH, F) {
   return roots;
 }
 
+/* SPEC §37: ids of the origins of faction `fid` that a door of the universal birth route leads to (the engine sets born_universal on entry) */
+function doorOrigins(WH, fid) {
+  const out = new Set(), u = WH && WH.universal;
+  if (u) for (const n of Object.values(u.nodes || {})) for (const c of n.choices || []) if (c.effects && c.effects.faction === fid && c.effects.origin) out.add(c.effects.origin);
+  return out;
+}
+
 /* flags that MAY be set on arrival at each node: {node → Set}, + preds {node → Set of predecessor ids}, + roots. Event-set flags count as possible everywhere. */
 function mayFlags(F, WH) {
   const N = F.nodes || {}, ids = Object.keys(N), roots = engineRoots(WH || {}, F), edges = edgesOf(F);
@@ -109,7 +116,9 @@ function mayFlags(F, WH) {
   Object.keys(setsOf(F)).forEach((k) => universe.add(k));
   const starts = [];
   const origins = Array.isArray(F.origins) && F.origins.length ? F.origins : [{startNode: F.startNode, set: {}}];
-  origins.forEach((o) => { truthyKeys(o.set).forEach((k) => universe.add(k)); if (o.startNode && N[o.startNode]) starts.push([o.startNode, truthyKeys(o.set)]); });
+  const doors = doorOrigins(WH, F.id);                                                  // SPEC §37
+  if (doors.size) universe.add("born_universal");
+  origins.forEach((o) => { truthyKeys(o.set).forEach((k) => universe.add(k)); if (o.startNode && N[o.startNode]) starts.push([o.startNode, truthyKeys(o.set).concat(doors.has(o.id) ? ["born_universal"] : [])]); });
   if (F.birthNode && N[F.birthNode]) starts.push([F.birthNode, []]);                // SPEC §35: shared birth point (the fork choices set origin_* + born_shared)
   for (const e of (WH && WH.events) || []) {
     if (!appliesTo(e, F.id)) continue;
@@ -241,4 +250,4 @@ function storyMetrics(WH, fid, opts) {
 
 const median = (a) => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
 
-module.exports = {COND_KEYS, WHERE_KEYS, BIG_HOURS, condFlags, whereFlags, requireFlags, setsOf, readsOf, edgesOf, engineRoots, mayFlags, storyMetrics, median, appliesTo, targetsOfChoice};
+module.exports = {COND_KEYS, WHERE_KEYS, BIG_HOURS, condFlags, whereFlags, requireFlags, setsOf, readsOf, edgesOf, engineRoots, mayFlags, doorOrigins, storyMetrics, median, appliesTo, targetsOfChoice};

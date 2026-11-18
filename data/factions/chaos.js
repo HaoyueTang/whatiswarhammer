@@ -67,7 +67,9 @@
   N.cha_101 = {chapter: 1, scene: "underhive", speaker: null,
     alt: [
       {if: {flag: "born_shared"}, text: L("天亮了。垃圾瀑布一夜只落下冷水。你空着手走回窝棚，已经三天没吃东西了。\n蒂卡蹲在门口等你，昨夜那支调子她也听见了。她说，今天瀑布会下“好货”。",
-        "Dawn. All night the garbage falls dropped nothing but cold water. You trudge back to the shack empty-handed; three days now without food.\nTikka is crouched at the door. She heard the tune last night too. Today, she swears, the falls will drop “good stuff.”")}
+        "Dawn. All night the garbage falls dropped nothing but cold water. You trudge back to the shack empty-handed; three days now without food.\nTikka is crouched at the door. She heard the tune last night too. Today, she swears, the falls will drop “good stuff.”")},
+      {if: {flag: "born_universal"}, text: L("污池：上巢扔下来的东西，掉到这里都成了宝贝。拾荒队卖光了废铁就散了伙，你在卡尔卡罗斯熬了半年。\n你三天没吃东西了。蒂卡说，今天垃圾瀑布会下“好货”。",
+        "The Sump: whatever the spire throws away becomes treasure down here. The salvage crew sold its scrap and broke up, and you've scraped by on Carcharos for half a year.\nYou haven't eaten in three days. Tikka swears the garbage falls will drop “good stuff” today.")}
     ],
     text: L("污池。上巢扔下来的东西，掉到这里都成了宝贝：半截电线，一只鞋，一颗还会眨的义眼。\n你三天没吃东西了。蒂卡说，今天垃圾瀑布会下“好货”。",
             "The Sump. Anything the spire throws away is treasure down here: half a cable, one shoe, a bionic eye that still blinks.\nYou haven't eaten in three days. Tikka swears the garbage falls will drop “good stuff” today."),
@@ -189,7 +191,9 @@
       {if: {all: [{flag: "born_shared"}, {fromNode: ["cha_b04"]}]}, text: L("天亮前，卖枪的钱已经还掉一半，军装在贩子的火盆里成了灰，只剩一双军靴舍不得给。\n三周前你逃出了团，政委一定还在找你。在污池，没人问你从哪来，只问你还有什么能换。",
         "By dawn half the lasgun money has gone on debts, and the uniform is ash in the dealer's brazier. Only the boots are left; you couldn't part with them.\nThree weeks since you ran from the regiment. The commissar must still be looking. Down here nobody asks where you're from. Only what you've got left to trade.")},
       {if: {flag: "born_shared"}, text: L("你压着兜帽回到窝棚，一夜没合眼。三周前你逃出了团，政委一定还在找你。\n激光枪早卖了，军装早烧了，只剩一双军靴舍不得扔。在污池，没人问你从哪来，只问你有什么能换。",
-        "You keep your hood down all the way to your shack and don't sleep. Three weeks since you ran from the regiment; the commissar must still be looking.\nThe lasgun's long sold, the uniform long burned; only the boots remain. Down here nobody asks where you're from. Only what you've got to trade.")}
+        "You keep your hood down all the way to your shack and don't sleep. Three weeks since you ran from the regiment; the commissar must still be looking.\nThe lasgun's long sold, the uniform long burned; only the boots remain. Down here nobody asks where you're from. Only what you've got to trade.")},
+      {if: {flag: "born_universal"}, text: L("污池。运兵船从奥雷克斯开到卡尔卡罗斯，三周前，你夜里翻了转运港的闸。激光枪卖了，军装烧了，只剩一双军靴舍不得扔。\n团里的政委一定还在找你。在这里，没人问你从哪来，只问你有什么能换。",
+        "The Sump. The troopship ran from Aurex to Carcharos, and three weeks ago you climbed the transit-port gate in the night. The lasgun's sold, the uniform's burned; only the boots remain, too good to throw away.\nThe regiment's commissar must still be looking. Down here nobody asks where you're from. Only what you've got to trade.")}
     ],
     text: L("污池。三周前你还是星界军。激光枪卖了，军装烧了，只剩一双军靴舍不得扔。\n团里的政委一定还在找你。\n在这里，没人问你从哪来，只问你有什么能换。",
             "The Sump. Three weeks ago you were Astra Militarum. The lasgun's sold, the uniform's burned; only the boots remain, too good to throw away.\nThe regiment's commissar must still be looking.\nDown here nobody asks where you're from. Only what you've got to trade."),
@@ -250,7 +254,9 @@
   N.cha_o_scribe_1 = {chapter: 1, scene: "cathedral", speaker: null,
     alt: [
       {if: {flag: "born_shared"}, text: L("末班升降机把你和执事送回中巢。天亮时你已坐回圣沃恩大教堂的缮写室，那支调子还在耳边。\n执事送来一本无名旧书，封皮是温的：抄一份存档，原本烧掉。\n你从不读自己抄的东西。今天，你翻开了。",
-        "The last lift takes you and the deacon back up. By dawn you're back at your desk in St Vorne's scriptorium, the tune still in your ears.\nThe deacon brings a nameless old book, its cover warm: copy it for the archive, burn the original.\nYou never read what you copy. Today, you open it.")}
+        "The last lift takes you and the deacon back up. By dawn you're back at your desk in St Vorne's scriptorium, the tune still in your ears.\nThe deacon brings a nameless old book, its cover warm: copy it for the archive, burn the original.\nYou never read what you copy. Today, you open it.")},
+      {if: {flag: "born_universal"}, text: L("中巢圣沃恩大教堂的缮写室。家里送你来抄经，一晃十一年，墨渍早洗不掉了。\n今天送来一本无名旧书，封皮是温的。执事吩咐：抄一份存档，原本烧掉。\n你从不读自己抄的东西。今天，你翻开了。",
+        "The scriptorium of St Vorne's, the mid-hive cathedral. Your family sent you to copy scripture, and eleven years on the ink never washes out.\nToday a nameless old book arrives, its cover warm. The deacon's order: copy it for the archive, burn the original.\nYou never read what you copy. Today, you open it.")}
     ],
     text: L("中巢圣沃恩大教堂的缮写室。你抄了十一年经文，指头上的墨渍早就洗不掉了。\n今天送来一本无名旧书，封皮是温的。执事吩咐：抄一份存档，原本烧掉。\n你从不读自己抄的东西。今天，你翻开了。",
             "The scriptorium of St Vorne's, the mid-hive cathedral. Eleven years copying scripture; the ink on your fingers will never wash out.\nToday a nameless old book arrives, its cover warm. The deacon's order: copy it for the archive, burn the original.\nYou never read what you copy. Today, you open it."),
