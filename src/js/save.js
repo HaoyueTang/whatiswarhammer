@@ -98,7 +98,7 @@
     if (typeof rec.schema !== "number" || typeof rec.faction !== "string" || typeof rec.nodeId !== "string") return {ok: false, error: "err_schema"};
     if (rec.schema > (WH.SAVE_SCHEMA || 1)) return {ok: false, error: "err_newer"};
     try { rec = migrate(JSON.parse(JSON.stringify(rec))); } catch (e) { return {ok: false, error: "err_schema"}; }
-    var f = WH.factions && WH.factions[rec.faction];
+    var f = WH.faction ? WH.faction(rec.faction) : (WH.factions && WH.factions[rec.faction]);      // SPEC §37: also the universal route
     if (!f) return {ok: false, error: "err_faction", arg: rec.faction};
     /* SPEC §32.4: a node id that no longer exists is NOT an error any more — WH.Game.fromRecord moves the run to the start of the saved chapter
      * (stats / flags kept) and the UI shows a one-line notice. Unknown factions are still rejected. */

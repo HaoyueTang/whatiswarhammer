@@ -112,7 +112,9 @@
             "Thessa Null. Imperial charts call it dead. No wind, no moss, not even bacteria.\nYet the dunes lie in neat rows, as if someone sweeps them daily.\nYou are the dig's youngest archivist, with a sketchbook and a lamp."),
     alt: [
       {if: {flag: "born_shared"}, text: L("你在素描簿上画下第一页：登陆坪外的沙丘排得整整齐齐，像有人每天来扫。\n这颗星没有风，没有苔藓，连细菌都没有。\n登陆艇轰鸣着升空，你提着教授给的灯，站在营地边上。",
-        "On the first page of the sketchbook you draw the dunes beyond the pad, lying in neat rows as if someone sweeps them daily.\nThis world has no wind, no moss, not even bacteria.\nThe lander roars back to the sky. You stand at the camp's edge with the Professor's lamp.")}
+        "On the first page of the sketchbook you draw the dunes beyond the pad, lying in neat rows as if someone sweeps them daily.\nThis world has no wind, no moss, not even bacteria.\nThe lander roars back to the sky. You stand at the camp's edge with the Professor's lamp.")},
+      {if: {flag: "born_universal"}, text: L("航行几周，你在素描簿上画下第一页：登陆坪外的沙丘排得整整齐齐，像有人每天来扫。\n这颗星没有风，没有苔藓，连细菌都没有。\n登陆艇轰鸣着升空，你提着玛罗教授给的灯，站在营地边上。",
+        "After weeks in transit, you draw the first page of the sketchbook: the dunes beyond the pad, lying in neat rows as if someone sweeps them daily.\nThis world has no wind, no moss, not even bacteria.\nThe lander roars back to the sky. You stand at the camp's edge with the lamp Professor Marrow gave you.")}
     ],
     codex: ["place_thessa_null", "imp_mechanicus"],
     choices: [
@@ -221,7 +223,9 @@
             "Your shackle number is 4471. The governor of Carcharos sold a whole hold of convicts to the dig: ten years' digging, sentence wiped.\nThessa Null has no wind. The overseer says that's good; the pits won't fill back in.\nYour first spadeful hits metal."),
     alt: [
       {if: {flag: "born_shared"}, text: L("脚镣上的编号是4471，原主人昨晚死在货舱里。总督按人头卖犯人：挖满十年，刑期勾销。这刑期现在归你了。\n监工说这颗星没有风，坑不会被填回去。\n第一铲下去，沙子底下是金属。",
-        "The number on your shackle is 4471; its owner died in the hold last night. The governor sells convicts by the head: ten years' digging, sentence wiped. The sentence is yours now.\nThe overseer says this world has no wind; the pits won't fill back in.\nYour first spadeful hits metal.")}
+        "The number on your shackle is 4471; its owner died in the hold last night. The governor sells convicts by the head: ten years' digging, sentence wiped. The sentence is yours now.\nThe overseer says this world has no wind; the pits won't fill back in.\nYour first spadeful hits metal.")},
+      {if: {flag: "born_universal"}, text: L("几个月舱工，你欠的铺位钱比工钱多，回程不载欠债人。卡尔中士在坡道点犯人，少一个：毯子底下的死人。死人的4471号脚镣扣上你的脚踝：挖满十年，刑期勾销。\n第一铲下去，沙子底下是金属。",
+        "Months as a hold-hand, and you owe more for your bunk than you earned; the lander takes no debtors back. At the ramp Sergeant Kaal counts the convicts and comes up one short: a dead man under a blanket. His shackle, 4471, locks onto your ankle: ten years' digging, sentence wiped.\nYour first spadeful hits metal.")}
     ],
     codex: ["place_thessa_null", "place_carcharos"],
     choices: [
@@ -236,6 +240,9 @@
   N.nec_o_convict_2 = {chapter: 1, scene: "dig_site", speaker: KAAL, time: {h: 2},
     text: L("卡尔中士蹲下来，用枪托敲了敲那块黑金属。声音很闷，像敲在棺材上。\n“教授要这东西，你们挖，谁也别碰。”他看了你一眼，“碰了的，我就当没看见你。”",
             "Sergeant Kaal crouches and raps the black metal with his rifle butt. A dull sound, like knocking on a coffin.\n“The Professor wants this. You dig. Nobody touches.” He glances at you. “Anyone who does, I never saw.”"),
+    alt: [
+      {if: {flag: "born_universal"}, add: L("那个咳个不停的老犯人叫霍利斯，和你同船来的。", "The old convict who coughs and coughs is called Hollis; he came on your ship.")}
+    ],
     codex: ["nec_living_metal"],
     choices: [
       C("把水分给咳嗽的老霍利斯", "Share your water with coughing Old Hollis", "nec_o_convict_3", X({sanity: 5, hp: -5, set: {kaalTrust: true, hollisFriend: true}},
@@ -284,7 +291,9 @@
             "A data-cable runs from behind your ear to Magos Vektrix-9's belt.\nYou are his indentured lexmechanic, turning his thoughts into documents. A thirty-year contract; twenty-nine to go.\n“Record,” he says. “Today, we discover a god.”"),
     alt: [
       {if: {flag: "born_shared"}, text: L("贤者的数据线插进你耳后的旧插口，接上死者没用完的合同：三十年，还剩二十九年。\n从此你是他的契约书记，把他的念头写成文件。\n“记录，”他说，“今天，我们发现一位神。”",
-        "The magos's data-cable seats in the old socket behind your ear, and a dead man's unfinished contract passes to you: thirty years, twenty-nine to go.\nYou are his indentured lexmechanic now, turning his thoughts into documents.\n“Record,” he says. “Today, we discover a god.”")}
+        "The magos's data-cable seats in the old socket behind your ear, and a dead man's unfinished contract passes to you: thirty years, twenty-nine to go.\nYou are his indentured lexmechanic now, turning his thoughts into documents.\n“Record,” he says. “Today, we discover a god.”")},
+      {if: {flag: "born_universal"}, text: L("神教的船飞了几周。维克崔斯-9贤者把数据线插进你耳后赛伦家装的旧插口，接上死书记没用完的合同：三十年，还剩二十九年。\n你成了他的契约书记。\n“记录，”他说，“今天，我们发现一位神。”",
+        "The Cult's ship flew for weeks. Magos Vektrix-9 seats his data-cable in the old socket House Serrin had fitted behind your ear, and a dead scribe's unfinished contract passes to you: thirty years, twenty-nine to go.\nYou are his indentured lexmechanic now.\n“Record,” he says. “Today, we discover a god.”")}
     ],
     codex: ["place_thessa_null", "imp_mechanicus"],
     choices: [

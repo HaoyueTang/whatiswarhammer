@@ -511,8 +511,8 @@
 
     /* Chaos */
     place_carcharos: P("imperium", "chaos", "hive_spire", L("卡尔卡罗斯", "Carcharos"),
-      L("你出生的巢都世界。上巢住着贵族，下巢住着垃圾，中间住着交税的人。",
-        "The hive world of your birth. Nobles live up top, refuse lives at the bottom, taxpayers in between."),
+      L("沃恩巢都所在的世界。上巢住着贵族，下巢住着垃圾，中间住着交税的人。",
+        "The hive world of Vorne Hive. Nobles live up top, refuse lives at the bottom, taxpayers in between."),
       L("卡尔卡罗斯的沃恩巢都高达数公里，阶层按楼层划分：越往上空气越干净，越往下人越不值钱。诗班的起义让中巢燃烧了六天，直到星际战士从天而降。后来，黑色舰队来了。",
         "Hive Vorne on Carcharos rises kilometres high, its classes divided by floor: the higher you live, the cleaner the air; the lower, the cheaper the life. The Choir's uprising burned the mid-hive for six days, until Space Marines fell from the sky. Then the black fleet came."),
       A(["卡尔卡罗斯", "沃恩巢都"], ["Carcharos", "Hive Vorne"])),
@@ -561,8 +561,8 @@
 
     /* T'au */
     place_dalnor: P("tau", "tau", "tau_city", L("达尔诺尔（新卡尔德）", "Dal'nor (New Calder)"),
-      L("你的家乡，前帝国殖民地。帝国的船不再来后，它在大义的旗下有了新名字。",
-        "Your home, a former Imperial colony. When the Imperial ships stopped coming, it took a new name under the Greater Good."),
+      L("前帝国殖民地。帝国的船不再来后，它在大义的旗下有了新名字。",
+        "A former Imperial colony. When the Imperial ships stopped coming, it took a new name under the Greater Good."),
       L("大裂隙切断了新卡尔德与帝国的联系。六年无人问津之后，钛帝国的白色舰队到来，总督签字加入了大义。人类在这里有了净水、准时的工钱，也有了永远排在第三批的位置。",
         "The Great Rift cut New Calder off from the Imperium. After six years of silence the T'au white fleet arrived and the governor signed on to the Greater Good. Humans here gained clean water and punctual wages—and a permanent place in the third wave."),
       A(["达尔诺尔", "新卡尔德"], ["Dal'nor", "New Calder"])),

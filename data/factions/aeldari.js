@@ -165,8 +165,8 @@
     ]};
 
   N.eld_106 = {chapter: 1, scene: "jungle", speaker: SYLVAEN, time: {h: 1},
-    text: L("斗篷人就坐在山脊背面的白石间，像在等你。他的脸太窄，耳朵太尖，眼睛里没有一点温度。\n“回家去，猿人。”他礼貌得过分，“今晚握紧你妹妹的手。”\n他的长枪比他还高。",
-            "The cloaked one sits among the white stones just past the ridge, as if waiting. His face is too narrow, his ears too sharp, his eyes without warmth.\n“Go home, mon-keigh.” He is excessively polite. “Tonight, hold your sister's hand.”\nHis long rifle is taller than he is."),
+    text: L("斗篷人就坐在山脊背面的白石间，像在等你。他的脸太窄，耳朵太尖，眼睛里没有一点温度。\n“回家去，猿人。”他礼貌得过分，“我是游侠西尔凡。今晚握紧你妹妹的手。”\n他的长枪比他还高。",
+            "The cloaked one sits among the white stones just past the ridge, as if waiting. His face is too narrow, his ears too sharp, his eyes without warmth.\n“Go home, mon-keigh.” He is excessively polite. “I am Sylvaen, a Ranger. Tonight, hold your sister's hand.”\nHis long rifle is taller than he is."),
     codex: ["eld_rangers", "eld_monkeigh"],
     choices: [
       C("“你是谁？为什么这么说？”", "“Who are you? Why say that?”", "eld_107",
@@ -217,7 +217,10 @@
             "In the supply ship's cargo hold, seasonal hands heading home and a few crew pass a flask around. You huddle among crates of farm tools.\nFor ten years you've dreamed one dream: a white-robed woman, stones circling her head. Most people think you mad.\nNext stop: Valda."),
     alt: [AT(F("born_shared"),
              "你擦掉鼻子底下的一点血。酒壶在货舱里又传了一圈，你摇摇头。\n那个白袍女人还站在你眼皮后面。说出来，他们只会当你是疯子；十年了，你早习惯了。\n舱壁的灯转红：准备着陆。",
-             "You wipe a little blood from under your nose. The flask makes another round of the cargo hold; you shake your head.\nThe white-robed woman still stands behind your eyelids. Say it aloud and they'll call you mad. Ten years; you're used to it.\nThe bulkhead lamp turns red: prepare for landing.")],
+             "You wipe a little blood from under your nose. The flask makes another round of the cargo hold; you shake your head.\nThe white-robed woman still stands behind your eyelids. Say it aloud and they'll call you mad. Ten years; you're used to it.\nThe bulkhead lamp turns red: prepare for landing."),
+          AT(F("born_universal"),
+             "你把攒下的钱全给了船员，换来货舱一角，和回乡的季节工挤了几周。\n十年同一个梦：白袍女人，石头绕着她的头转。你擦掉鼻下的血；说出来，他们只当你是疯子。\n舱壁灯转红：着陆。",
+             "You gave the crew every coin you had for a corner of the cargo hold, and for weeks you've been wedged in among seasonal hands going home.\nTen years of the same dream: a white-robed woman, stones circling her head. You wipe blood from under your nose; say it aloud and they'll call you mad.\nThe bulkhead lamp turns red: landing.")],
     codex: ["place_valda"],
     choices: [
       C("把梦讲给船员听", "Tell the crew your dream", "eld_o_pilgrim_2",
@@ -235,7 +238,8 @@
       C("在谷仓住下，帮她家干活", "Stay in the barn and help with chores", "eld_o_pilgrim_4",
         E({hp: 5, sanity: 5}, "两天里你学会了捆麦子。妮尔每晚都来听你讲梦，听到一半就睡着。",
           "Over two days you learn to bind sheaves. Every night Nell comes to hear your dream and falls asleep halfway.")),
-      C("去田边的老石阵过夜", "Spend the night at the old stones", "eld_o_pilgrim_3", {result: L("你枕着包袱躺下。包袱里有在圣地阿尔德林求来的圣徽，它从没让你少做一个梦。", "You lie down with your bundle for a pillow. In it is a holy medal from the shrine world Aldrin. It has never spared you a single dream.")})
+      C("去田边的老石阵过夜", "Spend the night at the old stones", "eld_o_pilgrim_3", {result: L("你枕着包袱躺下。包袱里有在圣地阿尔德林求来的圣徽，它从没让你少做一个梦。", "You lie down with your bundle for a pillow. In it is a holy medal from the shrine world Aldrin. It has never spared you a single dream."),
+        resultAlt: [RA(F("born_universal"), "你枕着包袱躺下。包袱里有一枚旧圣徽，它从没让你少做一个梦。", "You lie down with your bundle for a pillow. In it is an old holy medal. It has never spared you a single dream.")]})
     ]};
 
   N.eld_o_pilgrim_3 = {chapter: 1, scene: "ruins", speaker: S("omen_farseer", "梦", "Dream"), time: {h: 9},
@@ -288,7 +292,10 @@
             "In the barracks Third Company crowds round an ammo crate playing cards; a veteran on the next bunk is boasting. The worst enemy any of you has faced is grain rats.\nEdda slaps down her cards. “Tower's been silent three days. Lieutenant says it's a small fault.”\nShe lowers her voice. “A small fault that needs two armed troopers?”"),
     alt: [AT(F("born_shared"),
              "下午你领了军服，被塞进第三连营房。弹药箱边在打牌，邻铺的老兵吹牛：这辈子最大的敌人是偷粮的老鼠。\n女兵埃达给你也发了一手：“塔三天没出声，中尉说是小故障。小故障要派两个人带枪去看？”",
-             "By afternoon you've drawn a uniform and been pushed into Third Company's barracks. Cards on an ammo crate; the veteran on the next bunk boasts that his worst enemy ever was grain rats.\nA trooper named Edda deals you in. “Tower's been silent three days. Lieutenant says small fault. A small fault that needs two armed troopers?”")],
+             "By afternoon you've drawn a uniform and been pushed into Third Company's barracks. Cards on an ammo crate; the veteran on the next bunk boasts that his worst enemy ever was grain rats.\nA trooper named Edda deals you in. “Tower's been silent three days. Lieutenant says small fault. A small fault that needs two armed troopers?”"),
+          AT(F("born_universal"),
+             "几周后补给船落地。当天你领了军服，塞进第三连营房。弹药箱边打牌，老兵吹牛：最大的敌人是偷粮的老鼠。\n女兵埃达给你发了一手：“塔三天没出声，中尉说是小故障。小故障要派两个人带枪去看？”",
+             "Weeks later the supply ship touches down. That day you draw a uniform and are pushed into Third Company's barracks. Cards on an ammo crate; a veteran boasts his worst enemy ever was grain rats.\nA trooper named Edda deals you in. “Tower's been silent three days. Lieutenant says small fault. A small fault that needs two armed troopers?”")],
     codex: ["place_valda", "imp_guard"],
     choices: [
       C("主动请缨去查看", "Volunteer to go check", "eld_o_trooper_2",
@@ -353,7 +360,7 @@
   N.eld_o_trooper_5 = {chapter: 1, scene: "burning_city", speaker: null, time: {h: 2},
     text: L("你们驻扎时借住的那户农家着了火。你冲进去，只找到了小女儿妮尔，缩在水缸后面。\n她认得你，你给她削过木头小兵。\n她没哭，只问：“你的枪呢？”",
             "The farmhouse where you were billeted is on fire. You charge in and find only the little daughter, Nell, curled behind the water barrel.\nShe knows you. You once whittled her a wooden soldier.\nShe doesn't cry. She only asks, “Where's your gun?”"),
-    alt: [AT(F("born_shared"), "连队这两天借住的那户农家着了火。你冲进去，只找到了小女儿妮尔，缩在水缸后面。\n她认得你：昨天下午你给她削过一个木头小兵。\n她没哭，只问：“你的枪呢？”",
+    alt: [AT(ANYF("born_shared", "born_universal"), "连队这两天借住的那户农家着了火。你冲进去，只找到了小女儿妮尔，缩在水缸后面。\n她认得你：昨天下午你给她削过一个木头小兵。\n她没哭，只问：“你的枪呢？”",
              "The farmhouse where the company has been billeted these two days is on fire. You charge in and find only the little daughter, Nell, curled behind the water barrel.\nShe knows you: yesterday afternoon you whittled her a wooden soldier.\nShe doesn't cry. She only asks, “Where's your gun?”"),
           A(F("wronged_edda"), "你一路跑到这里，身后再没传来埃达的声音。", "You ran all the way here. No more of Edda's voice came from behind you."),
           A(NF("wronged_edda"), "埃达把你拖到水渠边，塞给你她的手枪，就回路口收拢剩下的人了。", "Edda dragged you to the ditch, pressed her pistol on you, and went back to gather the others at the crossroads.")],
@@ -508,8 +515,8 @@
     ]};
 
   N.eld_203 = {chapter: 2, scene: "ruins", speaker: TAETHRA, time: {h: 2},
-    text: L("黄昏，白石环中间的空气裂开了，像水面被手指划开。\n几个戴高盔的瘦长身影走出光里，最后一位身披长袍，几颗符文石绕着她缓缓旋转。\n她看了你很久，像在读一本只有她懂的书。“就是这一根线。”",
-            "At dusk the air within the ring of white stones splits like water parted by a finger.\nTall, slender figures in high helms step out of the light. The last wears long robes; rune-stones circle her slowly.\nShe studies you a long time, like a book only she can read. “This is the thread.”"),
+    text: L("黄昏，白石环中间的空气裂开了。\n几个戴高盔的瘦长身影走出光里，最后一位身披长袍，几颗符文石绕着她缓缓旋转。\n她看了你很久，像在读一本只有她懂的书。“我是先知塔艾丝拉。就是这一根线。”",
+            "At dusk the air within the ring of white stones splits.\nTall, slender figures in high helms step out of the light. The last wears long robes; rune-stones circle her slowly.\nShe studies you a long time, like a book only she can read. “I am Farseer Taethra. This is the thread.”"),
     codex: ["eld_farseer", "eld_aeldari"],
     choices: [
       C("“你们是谁？”", "“Who are you?”", "eld_207",
@@ -583,8 +590,10 @@
         E({sanity: 5, set: {mirethHand: true}}, "她的手很凉，很稳。先知瞥了你们一眼，什么也没说。",
           "Her hand is cool and steady. The Farseer glances at you both and says nothing.")),
       C("最后看一眼瓦尔达，再走", "Look at Valda one last time, then go", "eld_211",
-        E({sanity: -5, renown: 3, set: {lastLook: true}}, "绿光一片片扫过你长大的地方。你把它记住了，每一块田。",
-          "Green light sweeps the land below, field by field. You memorise every one.")),
+        M(E({sanity: -5, renown: 3, set: {lastLook: true}}, "绿光一片片扫过你长大的地方。你把它记住了，每一块田。",
+          "Green light sweeps the land below, field by field. You memorise every one."),
+          {resultAlt: [RA(NF("origin_agri"), "绿光一片片扫过底下的麦田。你把它记住了，每一块田。",
+            "Green light sweeps the land below, field by field. You memorise every one.")]})),
       C("留在瓦尔达", "Stay on Valda", "eld_210n",
         RS("年轻的守护者收回了手。她没再劝。", "The young Guardian lowers her hand. She doesn't ask again."))
     ]};
@@ -734,8 +743,8 @@
     ]};
 
   N.eld_308s = {chapter: 3, scene: "webway", speaker: SYLVAEN, time: {h: 2},
-    text: L("石头在你掌心亮起来，像一盏小灯。\n没过多久，一个披斗篷的身影从光里走出来，叹了口气。是山脊上那个人。\n“它本来就是网道的碎片，”他看着石头，“走吧，猿人。别回应那个声音。”",
-            "The stone kindles in your palm like a small lamp.\nBefore long a cloaked figure steps out of the light and sighs. The man from the ridge.\n“It was a shard of the webway all along,” he says, eyeing the stone. “Come, mon-keigh. Don't answer that voice.”"),
+    text: L("石头在你掌心亮起来，像一盏小灯。\n没过多久，一个披斗篷的身影从光里走出来，叹了口气。是山脊上那个游侠西尔凡。\n“它本来就是网道的碎片，”他看着石头，“走吧，猿人。别回应那个声音。”",
+            "The stone kindles in your palm like a small lamp.\nBefore long a cloaked figure steps out of the light and sighs. Sylvaen, the Ranger from the ridge.\n“It was a shard of the webway all along,” he says, eyeing the stone. “Come, mon-keigh. Don't answer that voice.”"),
     effects: {renown: 5, set: {sylvaenWebway: true}},
     choices: [
       C("跟着他走", "Follow him", "eld_307",
@@ -743,8 +752,8 @@
     ]};
 
   N.eld_309 = {chapter: 3, scene: "webway", speaker: VHESSRA, time: {h: 2},
-    text: L("一个人从暗处走出来，和米瑞丝很像，却瘦得像一把刀，盔甲上挂满钩子。\n“一只走丢的猿人。”她笑得很甜，“网道真慷慨。科摩拉的市场正缺新鲜货。”\n她身后的影子里，还有好几双眼睛。",
-            "Someone steps from the dark. She looks like Mireth, but lean as a blade, her armour hung with hooks.\n“A lost mon-keigh.” Her smile is sweet. “How generous the webway is. Commorragh's markets are short of fresh stock.”\nIn the shadows behind her, more eyes."),
+    text: L("一个女人从暗处走出，和米瑞丝很像，却瘦得像一把刀，甲上挂满钩子。\n“一只走丢的猿人。”她笑得很甜，“叫我维丝拉。网道真慷慨。科摩拉的市场正缺新鲜货。”\n她身后的影子里，还有好几双眼睛。",
+            "A woman steps from the dark. She looks like Mireth, but lean as a blade, her armour hung with hooks.\n“A lost mon-keigh.” Her smile is sweet. “Call me Vhessra. How generous the webway is. Commorragh's markets are short of fresh stock.”\nIn the shadows behind her, more eyes."),
     effects: {sanity: -5, set: {metVhessra: true}},
     codex: ["eld_drukhari", "place_commorragh"],
     choices: [

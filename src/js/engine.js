@@ -300,7 +300,7 @@
     opts = opts || {};
     this.data = opts.data || WH;
     this.rng = opts.rng || Math.random;
-    this.faction = this.data.factions[factionId];
+    this.faction = (this.data.faction ? this.data.faction(factionId) : this.data.factions[factionId]);      // SPEC §37: also the universal route
     if (!this.faction) throw new Error("Unknown faction: " + factionId);
     this.state = null;
     /* SPEC §20: rumours draw from their own stream (derived from the main seed) so turning them on/off never changes
@@ -390,7 +390,9 @@
   Game.prototype._applyEffects = function (eff, into) {
     var d = {};
     if (!eff) return d;
-    if (eff.origin) this._assignOrigin(eff.origin);                  // SPEC §35: before any stat delta of the same effect
+    var viaDoor = false;
+    if (eff.faction) viaDoor = this._switchFaction(eff.faction);       // SPEC §37: the door of the universal birth; before the origin
+    if (eff.origin) this._assignOrigin(eff.origin, viaDoor);         // SPEC §35: before any stat delta of the same effect
     var st = this.state.stats;
     for (var i = 0; i < STATS.length; i++) {
       var k = STATS[i];
@@ -410,7 +412,7 @@
   /* SPEC §35: the fork of a shared birth point assigns the origin — once, and only while the run has none. The run becomes
    * exactly what g.start(originId) would have made (caps, start stats, origin flags) plus the flag born_shared. Not part of the
    * visible deltas (the consequence panel shows the choice, the HUD shows the new caps). */
-  Game.prototype._assignOrigin = function (id) {
+  Game.prototype._assignOrigin = function (id, universal) {
     var st = this.state, o = originById(this.faction, id);
     if (!o || (st.origin !== null && st.origin !== undefined)) return false;
     var ss = o.stats || {}, mx = capsOf(o);
@@ -418,9 +420,21 @@
     st.stats = {hp: ss.hp !== undefined ? clamp(ss.hp, 0, mx.hp) : mx.hp, sanity: ss.sanity !== undefined ? clamp(ss.sanity, 0, mx.sanity) : mx.sanity,
                 corruption: ss.corruption || 0, renown: ss.renown || 0};
     if (o.set) for (var k in o.set) st.flags[k] = o.set[k];
-    st.flags.born_shared = true;
+    st.flags[universal ? "born_universal" : "born_shared"] = true;   // SPEC §37: the two flags are never set together
     return true;
   };
+
+  /* SPEC §37: only from the universal birth route into a registered faction. SPEC §37.11: the prologue is undated (the universal route has
+   * `undated: true`, no clock is shown), and the clock starts at the target faction's own startDate when the door is taken. */
+  Game.prototype._switchFaction = function (id) {
+    var u = this.data.universal, f = this.data.factions[id];
+    if (!u || this.faction !== u || !f) return false;
+    this.faction = f; this.state.faction = f.id;
+    this.state.hours = startHours(f);
+    return true;
+  };
+  /* false while the run is still in the undated prologue (SPEC §37.11): UIs show a label instead of a date */
+  Game.prototype.dated = function () { return !(this.faction && this.faction.undated); };
 
   /* SPEC §19: per-route multiplier for one god (positive deltas only), default 1 */
   Game.prototype.taintMod = function (god) {
@@ -507,7 +521,7 @@
   /* {id, scene, chapter} of a node id for the from* conditions (null for none / unknown) */
   Game.prototype._prevInfo = function (id) {
     if (!id) return null;
-    var n = this.faction.nodes && this.faction.nodes[id];
+    var n = (this.faction.nodes && this.faction.nodes[id]) || (this.data.universal && this.data.universal.nodes && this.data.universal.nodes[id]);      // SPEC §37: the door node is universal
     return n ? {id: id, scene: n.scene || null, chapter: typeof n.chapter === "number" ? n.chapter : null} : {id: id, scene: null, chapter: null};
   };
   /* id of the node played before the current one (state.history; tolerates a history whose last entry is not the current node) */
@@ -814,6 +828,7 @@
       return this._enter(this.deathNodeId(st.deathPending), step);
     }
     if (this.rewindEnabled) this._pushSnapshot();                             // SPEC §30: state + RNG before the choice
+    var fid0 = this.faction.id;
     var c = v.choice, gr = v.grudge || null, resAlt = this._resultAlt(c);     // SPEC §32.2: judged before the choice's effects
     if (gr) step.grudge = {npc: gr.npc, note: gr.note};                       // SPEC §28
     step.choiceDeltas = this._applyEffects(gr ? mergeEffects(c.effects, gr.effects) : c.effects, step.deltas);
@@ -832,6 +847,7 @@
       target = ok ? c.roll.success : c.roll.fail;
     }
     step = this._goTo(target, step);
+    if (this.faction.id !== fid0) step.factionChanged = {from: fid0, to: this.faction.id};      // SPEC §37
     step.consequence = consequenceOf(c, step, false, resAlt);
     return step;
   };
@@ -857,6 +873,7 @@
     st.playMs = cur.playMs;
     for (var i = 0; i < cur.codex.length; i++) if (st.codex.indexOf(cur.codex[i]) < 0) st.codex.push(cur.codex[i]);
     this.state = st;
+    this.faction = (this.data.faction ? this.data.faction(st.faction) : this.data.factions[st.faction]) || this.faction;       // SPEC §37: rewinding across the door
     rngRestore(this.rng, snap.rng); rngRestore(this.rumorRng, snap.rumorRng); rngRestore(this.echoRng, snap.echoRng);
     this.rewindCount++;
     return true;
@@ -1052,7 +1069,7 @@
     var g = new Game(rec.faction, opts);
     var st = g.freshState();
     st.nodeId = rec.nodeId;
-    st.origin = (rec.origin === null && hasBirth(g.faction) && /^[a-z]+_b\d\d$/.test(String(rec.nodeId || ""))) ? null                       // SPEC §35: saved before the fork of the shared birth point
+    st.origin = (rec.origin === null && hasBirth(g.faction) && (g.faction === g.data.universal || /^[a-z]+_b\d\d$/.test(String(rec.nodeId || "")))) ? null                       // SPEC §35: saved before the fork of the shared birth point
               : (findOrigin(g.faction, rec.origin) ? findOrigin(g.faction, rec.origin).id : null);
     st.runId = rec.runId || ("legacy-" + rec.faction + "-" + (rec.savedAt || ""));
     st.chapter = rec.chapter || 1;

@@ -252,6 +252,8 @@
   var FACTION_ORDER = ["imperium", "chaos", "tau", "aeldari", "necrons", "orks", "gsc", "mechanicus"];   // SPEC §26
   var FACTION_COLOR = {imperium: "#c9a227", chaos: "#b0304a", tau: "#d08a3a", aeldari: "#5fb3a1", necrons: "#4fd16b",
                        orks: "#6aa84f", gsc: "#9b59b6", mechanicus: "#c0392b"};
+  /* SPEC §37.11: the universal prologue has no date */
+  function dateText(g) { return g.dated() ? WH.fmtDate(g.date()) : t("prologue"); }
   function fcolor(f) { return (f && (f.color || FACTION_COLOR[f.id])) || "#c9a227"; }
   var RACES = ["imperium", "chaos", "tau", "aeldari", "necrons", "orks", "tyranids", "other"];
   var RACE_COLOR = {imperium: "#d4a62a", chaos: "#c4283c", tau: "#c98b3c", aeldari: "#5fb3a1", necrons: "#4fd16b",
@@ -410,7 +412,7 @@
   function endingArt(factionId, nodeId) {
     var a = WH.scenes["end_" + nodeId];
     if (a && a.src) return "end_" + nodeId;
-    var f = WH.factions[factionId], n = f && f.nodes && f.nodes[nodeId];
+    var f = WH.faction(factionId), n = f && f.nodes && f.nodes[nodeId];
     return (n && n.scene) || "void";
   }
   /* A fixed 16:9 box (so nothing jumps while the image decodes) framed in the kind colour. Unlocked: the ending picture, falling back
@@ -418,7 +420,7 @@
    * broken-image icon and never the slime / "ph-scene" placeholder. size "sm" = endings-grid thumbnail. */
   function endingPic(factionId, nodeId, kind, title, size) {
     var wrap = h("div", {class: "end-pic " + kind + (size ? " " + size : ""), "data-ending": nodeId});
-    var f = WH.factions[factionId], n = f && f.nodes && f.nodes[nodeId];
+    var f = WH.faction(factionId), n = f && f.nodes && f.nodes[nodeId];
     var alt = t("end_art_alt", {x: title || ""});
     var tried = {};
     (function put(key) {
@@ -492,7 +494,7 @@
     settings: null, game: null, screen: "title", busy: false, typer: null, evTyper: null,
     fxOn: true, reduced: false, modals: [], eventOpen: false, cardDone: null, lastTick: 0,
     sceneKey: null, actorKeys: {left: null, right: null}, whisperTimer: null, seed: null,
-    sel: {faction: null}, keepSel: false,
+    sel: {faction: null, mode: null}, keepSel: false,
     loreQueue: [], loreKnown: {}, lore: null, conseq: null,
     cx: {race: "all", type: "all", q: "", sort: "disc", placeRace: "all"}, cxNew: {},
     accent: null, debug: /[?&]debug=1(&|$)/.test(location.search), eggForce: null, eggForcedShown: {}, jokeTimer: null
@@ -594,7 +596,7 @@
     UI.screen = name;
     if (name !== "game") { stopWhispers(); UI.gather = null; drawGatherTag(); }
     if (name === "title") renderTitle();
-    if (name === "select") { if (!UI.keepSel) UI.sel.faction = null; UI.keepSel = false; renderSelect(); }
+    if (name === "select") { if (!UI.keepSel) { UI.sel.faction = null; UI.sel.mode = null; } UI.keepSel = false; renderSelect(); }
     if (name === "title" || name === "select") mood("title");
     if (name === "game") requestAnimationFrame(updateDlgH);
     window.scrollTo(0, 0);
@@ -801,7 +803,26 @@
   function renderSelect() {
     var f = UI.sel.faction && WH.factions[UI.sel.faction];
     if (f && WH.Game.origins(f).length > 1 && !usesBirth(f)) renderOrigins(f);
+    else if (hasUniversal() && UI.sel.mode !== "direct") { UI.sel.faction = null; renderStart(); }     // SPEC §37.8: the two big options come first
     else { UI.sel.faction = null; renderRaces(); }
+  }
+  /* SPEC §37: is the universal birth route (choices decide the faction) available? */
+  function hasUniversal() { var u = WH.universal; return !!(u && u.nodes && u.startNode && WH.Game.hasBirth(u)); }
+  /* the opening screen: ① 由选项决定势力 (main, recommended) ② 预选势力 (the faction cards) */
+  function renderStart() {
+    var u = WH.universal, n = factionList().length, wrap = selectShell(t("start_how"), null, null);
+    wrap.classList.add("start-wrap");
+    var main = h("button", {class: "btn px start-opt main", type: "button", "data-start": "universal", "data-universal": u.id, "data-sfx": "start",
+        "aria-label": t("universal_btn") + " (" + t("start_recommended") + "). " + t("universal_desc") + " " + t("universal_note", {n: n}),
+        onclick: function () { UI.sel.faction = null; startGame(u.id, WH.Game.BIRTH); }},
+      h("span", {class: "so-badge"}, t("start_recommended")),
+      h("div", {class: "portrait"}, art("sprite", u.playerSprite, null, fcolor(u))),
+      h("b", null, "▶ " + t("universal_btn")), h("span", {class: "so-desc"}, t("universal_desc")), h("small", null, t("universal_note", {n: n})));
+    var alt = h("button", {class: "btn px start-opt", type: "button", "data-start": "direct", "data-sfx": "select",
+        "aria-label": t("direct_btn") + ". " + t("direct_desc", {n: n}), onclick: function () { UI.sel.mode = "direct"; renderRaces(); }},
+      h("b", null, t("direct_btn")), h("span", {class: "so-desc"}, t("direct_desc", {n: n})));
+    wrap.appendChild(h("div", {class: "start-opts"}, main, alt));
+    setTimeout(function () { if (UI.screen === "select" && !UI.modals.length) main.focus({preventScroll: true}); }, 0);
   }
   function pickRace(f) {
     var os = WH.Game.origins(f);
@@ -810,12 +831,12 @@
     UI.sel.faction = f.id;
     renderSelect();
   }
-  function selectShell(title, sub, backFn) {
+  function selectShell(title, sub, backFn, backLabel) {
     var s = clear($("scr-select"));
     s.appendChild(h("div", {class: "bg"}, art("scene", "title")));
     s.appendChild(h("div", {class: "corner corner-left"},
       h("button", {class: "btn small px home-btn", type: "button", onclick: function () { show("title"); }}, "⌂ " + t("home")),
-      backFn ? h("button", {class: "btn small px back-race", type: "button", onclick: backFn}, "◂ " + t("back_race")) : null));
+      backFn ? h("button", {class: "btn small px back-race", type: "button", onclick: backFn}, "◂ " + (backLabel || t("back_race"))) : null));
     s.appendChild(h("div", {class: "corner"}, langButton()));
     var wrap = h("div", {class: "select-wrap"}, h("h2", null, title), sub ? h("div", {class: "select-sub"}, sub) : null);
     s.appendChild(wrap);
@@ -824,7 +845,7 @@
 
   function renderRaces() {
     var list = factionList();
-    var wrap = selectShell(t("choose_race"), null, null);
+    var wrap = selectShell(t("choose_race"), null, hasUniversal() ? function () { UI.sel.mode = null; UI.sel.faction = null; renderSelect(); } : null, t("back_start"));
     var big = list.length >= 6;                            // SPEC §26: 6+ races → compact cards in a grid (2 rows)
     var cards = h("div", {class: "cards race-cards" + (list.length >= 4 ? " many n" + list.length : "") + (big ? " grid" : ""), role: "list",
       vars: big ? {"--cols": Math.min(5, Math.ceil(list.length / 2))} : null});
@@ -940,6 +961,17 @@
     UI.lastTick = performance.now();
   }
 
+  /* SPEC §37: the run can change faction mid-way (the door of the universal birth, or a rewind across it) — re-theme the screen */
+  function syncFactionTheme(g) {
+    var f = g.faction, scr = $("scr-game");
+    if (!scr || scr.getAttribute("data-faction") === f.id) return;
+    UI.accent = fcolor(f);
+    $("stage").style.setProperty("--accent", UI.accent);
+    scr.setAttribute("data-faction", f.id);
+    buildStats();
+    buildTools();
+  }
+
   function buildTools() {
     var tools = clear($("tools"));
     var b = function (icon, label, fn, aria) {
@@ -1052,6 +1084,7 @@
   function renderHud(skipDate) {
     var g = UI.game;
     if (!g) return;
+    syncFactionTheme(g);
     updateRewindBtn();
     var view = UI.conseq && UI.conseq.view;          // during a consequence beat: stats before the next node's own effects
     var s = view ? view.stats : g.state.stats;
@@ -1068,7 +1101,7 @@
       var danger = (k === "hp" || k === "sanity") ? v < 30 : (k === "corruption" ? v > 60 : false);
       $("stat-" + k).classList.toggle("low", danger);
     });
-    if (!skipDate) $("date").textContent = WH.fmtDate(g.date());
+    if (!skipDate) $("date").textContent = dateText(g);
     $("playtime").textContent = "⏱ " + WH.fmtPlay(g.state.playMs);
     var ch = view ? view.chapter : g.state.chapter, ct = g.faction.chapters && g.faction.chapters[ch];
     var plate = clear($("chapter-plate"));
@@ -1466,7 +1499,7 @@
   function autosave(step) {
     var g = UI.game;
     if (g.state.ended) { WH.Save.remove("auto"); return; }
-    if (step.chapterChanged || g.state.visits % 5 === 0) WH.Save.write("auto", g.toRecord({lang: WH.lang}));
+    if (step.chapterChanged || step.factionChanged || g.state.visits % 5 === 0) WH.Save.write("auto", g.toRecord({lang: WH.lang}));      // SPEC §37: the door of the universal birth is a commit
   }
 
   /* ---------- FX ---------- */
@@ -1542,13 +1575,13 @@
 
   function timeSkip(tm) {
     var tk = $("ticker"), dateEl = $("date"), g = UI.game, sd = g.faction.startDate;
-    var final = function () { dateEl.classList.remove("warping"); dateEl.textContent = WH.fmtDate(g.date()); };
+    var final = function () { dateEl.classList.remove("warping"); dateEl.textContent = dateText(g); };
     tk.className = "ticker px" + (tm.warp ? " warp" : "");
     tk.textContent = tm.warp ? "⌛ " + t("time_warp") + " · ???" : "⌛ " + timeLabel(tm);
     void tk.offsetWidth; tk.classList.add("show");
     clearTimeout(tk._t); tk._t = setTimeout(function () { tk.classList.remove("show"); }, 2000);
     cancelAnimationFrame(UI.dateAnim);
-    if (!UI.fxOn) { final(); return; }
+    if (!UI.fxOn || !g.dated()) { final(); return; }
     var roll = function () {
       var t0 = performance.now(), dur = 950;
       var frame = function (now) {
@@ -1630,7 +1663,7 @@
         h("div", {class: "rule"}),
         h("div", {class: "t"}, L(title) || "· · ·"),
         h("div", {class: "rule"}),
-        h("div", {class: "f"}, L(f.name) + " · " + WH.fmtDate(UI.game.date())));
+        h("div", {class: "f"}, L(f.name) + " · " + dateText(UI.game)));
       if (!UI.fxOn) el.style.animation = "none";
       $("overlay-root").appendChild(el);
       UI.cardDone = finish;
@@ -2140,7 +2173,7 @@
     var badge = opts.badge ? h("span", {class: "rbadge", vars: {"--rc": rc, "--rc-ink": inkOn(rc)}}, badgeText(id)) : null;
     if (!unlocked) return h("div", {class: "centry locked", "data-id": id, vars: {"--rc": rc}}, pic,
       h("div", null, h("div", {class: "nm"}, t("codex_locked")), opts.badge ? h("div", {class: "bd"}, badge) : null, h("div", {class: "tx"}, "……")));
-    var fac = !opts.badge && c.faction && WH.factions[c.faction] ? L(WH.factions[c.faction].name) : "";
+    var fac = !opts.badge && c.faction && WH.faction(c.faction) ? L(WH.faction(c.faction).name) : "";
     return h("div", {class: "centry" + (opts.isNew ? " is-new" : ""), "data-id": id, vars: {"--rc": rc}}, pic, h("div", {class: "cbody"},
       h("div", {class: "chead"}, h("span", {class: "nm"}, L(c.name)), fac ? h("span", {class: "fa"}, fac) : null,
         opts.isNew ? h("span", {class: "new-badge"}, t("cx_new")) : null),
@@ -2182,7 +2215,10 @@
     s.style.setProperty("--accent", fcolor(f));
     s.appendChild(h("div", {class: "bg"}, art("scene", node.scene || "void")));
     s.appendChild(h("div", {class: "corner"}, soundButton(), musicButton(), langButton()));
-    var again = h("button", {class: "btn primary px", type: "button", onclick: function () { startGame(f.id, usesBirth(f) ? WH.Game.BIRTH : g.state.origin); }}, "↻ " + t("again"));
+    var again = h("button", {class: "btn primary px", type: "button", onclick: function () {
+      if (WH.universal && g.state.flags && g.state.flags.born_universal) startGame(WH.universal.id, WH.Game.BIRTH);      // SPEC §37: a run that came through the universal birth starts there again
+      else startGame(f.id, usesBirth(f) ? WH.Game.BIRTH : g.state.origin);
+    }}, "↻ " + t("again"));
     var back = UI.settings.rewind === true && g.canRewind() ?              // SPEC §30
       h("button", {class: "btn px rewind-end", type: "button", id: "rewind-end", "aria-keyshortcuts": "Z", title: t("rewind_end") + " (Z)", onclick: function () { rewindStep(); }}, "\u21B6 " + t("rewind_end")) : null;
     s.appendChild(h("div", {class: "ending-wrap"},
@@ -2532,7 +2568,7 @@
       h("div", null, h("div", {class: "k"}, t("common_cause")), h("div", {class: "v"}, common ? L(common.label) + " " + t("times", {n: common.count}) : "—"))));
     if (!runs.length) body.appendChild(h("p", {class: "empty-msg"}, t("no_runs")));
     runs.forEach(function (r) {
-      var f = WH.factions[r.faction], color = (f && fcolor(f)) || r.color || FACTION_COLOR[r.faction] || "#c9a227";
+      var f = WH.faction(r.faction), color = (f && fcolor(f)) || r.color || FACTION_COLOR[r.faction] || "#c9a227";
       var gods = (r.gods || []).length ? h("span", {class: "run-gods"}, r.gods.map(function (gd) {
         var el = art("sprite", "sigil_" + gd, "sig", "#8a4fd0"); if (el && el.setAttribute) el.setAttribute("title", godName(gd)); return el; })) : "—";
       var cell = function (k, v) { return h("div", null, h("div", {class: "k"}, k), h("div", {class: "v"}, v)); };
@@ -2597,10 +2633,10 @@
     var canClick = mode === "save" ? (s !== "auto" && UI.game && !UI.game.state.ended) : !!rec;
     var kids = [h("div", {class: "sh"}, h("span", null, slotLabel(s)), rec ? h("span", null, fmtSavedAt(rec.savedAt)) : null)];
     if (rec) {
-      var f = WH.factions[rec.faction], ct = f.chapters && f.chapters[rec.chapter];
+      var f = WH.faction(rec.faction), ct = f.chapters && f.chapters[rec.chapter];
       kids.push(h("div", {class: "fac", style: "color:" + fcolor(f)}, L(f.name) + " · " + originLabel(f, rec.origin)));
       kids.push(h("div", {class: "ln"}, t("chapter_n", {n: WH.chapterNum(rec.chapter || 1)}) + (ct ? " · " + L(ct) : "")));
-      kids.push(h("div", {class: "ln dim"}, WH.fmtDate(WH.Rules.dateParts(rec.hours, f.startDate)) + "   ⏱ " + WH.fmtPlay(rec.playMs)));
+      kids.push(h("div", {class: "ln dim"}, (f.undated ? t("prologue") : WH.fmtDate(WH.Rules.dateParts(rec.hours, f.startDate))) + "   ⏱ " + WH.fmtPlay(rec.playMs)));
     } else kids.push(h("div", {class: "emp"}, entry.raw ? "⚠ " + t("err_schema") : t("empty")));
     var card = h("button", {class: "slot px", type: "button", disabled: !canClick,
       "aria-label": slotLabel(s) + (rec ? "" : " — " + t("empty")),
@@ -2982,6 +3018,7 @@
     if (k === "Escape") {
       if (UI.modals.length) { e.preventDefault(); closeTop(); }
       else if (UI.screen === "select" && UI.sel.faction) { e.preventDefault(); UI.sel.faction = null; renderSelect(); }
+      else if (UI.screen === "select" && UI.sel.mode === "direct" && hasUniversal()) { e.preventDefault(); UI.sel.mode = null; renderSelect(); }
       return;
     }
     if (UI.modals.length || e.ctrlKey || e.metaKey || e.altKey) return;

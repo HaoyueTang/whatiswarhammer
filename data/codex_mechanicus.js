@@ -156,8 +156,8 @@
 
     /* ---------------- places ---------------- */
     place_gravex: P("imperium", "forge_floor", "omen_omnissiah", L("格拉维克斯铸造世界", "Forge World Gravex"),
-      L("阿尔科萨星区唯一的铸造世界。天空是红色的，雨里有铁。你的家。",
-        "The Arcosa Sector's only forge world. The sky is red and the rain tastes of iron. Your home."),
+      L("阿尔科萨星区唯一的铸造世界。天空是红色的，雨里有铁。很多人生在这里，死在这里。",
+        "The Arcosa Sector's only forge world. The sky is red and the rain tastes of iron. Many are born here, and die here."),
       L("整颗星球的地表都铺满了熔炉和制造厂，百万杂役为它添火。它给奥雷克斯二号的团造激光枪，也资助过忒萨零号的考察队。大裂隙之后，火星的声音时有时无，格拉维克斯只能自己祈祷。",
         "Furnaces and manufactorums pave the whole surface; a million menials feed them. It makes lasguns for Aurex Secundus's regiments and once sponsored the dig on Thessa Null. Since the Great Rift, the voice of Mars comes and goes, and Gravex must pray on its own."),
       A(["格拉维克斯", "铸造世界"], ["Gravex", "forge world"])),

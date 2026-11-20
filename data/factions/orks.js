@@ -92,7 +92,9 @@
             "Iskaron, ship-breaking world of the Arcosa Sector. You trade copper wire and valves among the bones of dead ships. Not a bad life.\nThen the sky turns green. Huge rocks with engines slam into the docks.\nThe rocks are laughing."),
     alt: [
       {if: {flag: "born_shared"}, text: L("你守着船骨之间的那个摊子：铜线、阀门、一箱伺服马达。\n半夜，绿光铺满了整个天空。一块块装着引擎的大石头砸进船坞。\n石头里传出笑声。",
-        "You keep the stall among the bones of dead ships: copper wire, valves, a crate of servo-motors.\nAt midnight the green fills the whole sky. Huge rocks with engines slam into the docks.\nThe rocks are laughing.")}
+        "You keep the stall among the bones of dead ships: copper wire, valves, a crate of servo-motors.\nAt midnight the green fills the whole sky. Huge rocks with engines slam into the docks.\nThe rocks are laughing.")},
+      {if: {flag: "born_universal"}, text: L("队长的条子让伊斯卡隆船骨市场的老摊主收下了你。几个月后，那个摊子归了你：铜线、阀门、一箱伺服马达。日子不坏。\n那天，天空变绿了。一块块装着引擎的大石头砸进船坞。\n石头里传出笑声。",
+        "The boss's note got the old stallholder in Iskaron's ship-bone market to take you on. Within months the stall was yours: copper wire, valves, a crate of servo-motors. Not a bad life.\nThen the sky turns green. Huge rocks with engines slam into the docks.\nThe rocks are laughing.")}
     ],
     codex: ["place_iskaron", "place_arcosa", "xenos_ork"],
     choices: [
@@ -210,7 +212,9 @@
             "You're an Astra Militarum trooper posted to Iskaron's docks. Sergeant Voss chews tobacco and watches the green on the horizon.\n“Orks,” he says. “Don't think about winning. Think about taking a few with you.”\nThe first rock with engines lands three kilometres off."),
     alt: [
       {if: {flag: "born_shared"}, text: L("手印还没干，你已穿上旧大衣，蹲进船坞边的壕沟。沃斯中士嚼着烟草，看着天边那片绿。\n“兽人，”他说，“别想着赢。想着多拉几个垫背的。”\n第一块带引擎的石头落在三公里外。",
-        "Your thumbprint isn't dry, and you're already in an old greatcoat, crouched in the trench by the docks. Sergeant Voss chews tobacco and watches the green on the horizon.\n“Orks,” he says. “Don't think about winning. Think about taking a few with you.”\nThe first rock with engines lands three kilometres off.")}
+        "Your thumbprint isn't dry, and you're already in an old greatcoat, crouched in the trench by the docks. Sergeant Voss chews tobacco and watches the green on the horizon.\n“Orks,” he says. “Don't think about winning. Think about taking a few with you.”\nThe first rock with engines lands three kilometres off.")},
+      {if: {flag: "born_universal"}, text: L("你随奥雷克斯连队来伊斯卡隆守船坞闸口，几个月，只守个门。排里的沃斯中士嚼着烟草，看着天边那片绿。\n“兽人，”他说，“别想着赢。想着多拉几个垫背的。”\n第一块带引擎的石头落在三公里外。",
+        "You came with Aurex's company to guard Iskaron's dock gate, months ago. Just a gate, they said. Your platoon's Sergeant Voss chews tobacco and watches the green on the horizon.\n“Orks,” he says. “Don't think about winning. Think about taking a few with you.”\nThe first rock with engines lands three kilometres off.")}
     ],
     codex: ["imp_guard", "place_iskaron"],
     choices: [
@@ -262,11 +266,11 @@
     ]};
 
   N.ork_o_guard_4 = {chapter: 1, scene: "ork_fort", speaker: WAZ, time: {h: 5},
-    text: L("开坑前，一个挂满扳手的兽人挤了过来，拎起你的电池包闻了闻。\n“这个人仔认得发光枪的电池，”他对头目说，“换给俺。俺给你一把会喷火的。”\n讨价还价持续了一拳。",
-            "Before the pit opens, an ork hung with spanners shoulders through and sniffs your power pack.\n“Dis 'umie knows shiny-gun batteries,” he tells the nob. “Swap me. I'll give ya one dat burns.”\nThe haggling lasts one punch."),
+    text: L("开坑前，挂满扳手的机械佬瓦兹格布挤了过来，拎起你的电池包闻了闻。\n“这个人仔认得发光枪的电池，”他对头目说，“换给俺。俺给你一把会喷火的。”\n讨价还价持续了一拳。",
+            "Before the pit opens, Wazgob da Mek, hung with spanners, shoulders through and sniffs your power pack.\n“Dis 'umie knows shiny-gun batteries,” he tells the nob. “Swap me. I'll give ya one dat burns.”\nThe haggling lasts one punch."),
     alt: [
-      {if: {notFlag: "packs"}, text: L("开坑前，一个挂满扳手的兽人挤过来，从你胸前口袋里掏出那封信，对着光看。\n“这个人仔会写人仔的字，”他对头目说，“换给俺。俺给你一把会喷火的。”\n讨价还价持续了一拳。",
-        "Before the pit opens, an ork hung with spanners shoulders through, fishes the letter from your breast pocket and holds it to the light.\n“Dis 'umie does 'umie scribblin',” he tells the nob. “Swap me. I'll give ya one dat burns.”\nThe haggling lasts one punch.")}
+      {if: {notFlag: "packs"}, text: L("开坑前，挂满扳手的机械佬瓦兹格布挤过来，从你胸前口袋里掏出那封信，对着光看。\n“这个人仔会写人仔的字，”他对头目说，“换给俺。俺给你一把会喷火的。”\n讨价还价持续了一拳。",
+        "Before the pit opens, Wazgob da Mek, hung with spanners, shoulders through, fishes the letter from your breast pocket and holds it to the light.\n“Dis 'umie does 'umie scribblin',” he tells the nob. “Swap me. I'll give ya one dat burns.”\nThe haggling lasts one punch.")}
     ],
     choices: [
       C("告诉他电池怎么充电", "Tell him how to recharge a pack", "ork_106", X({renown: 5, set: {batteryUmie: true}},
@@ -305,11 +309,11 @@
     ]};
 
   N.ork_o_ganger_2 = {chapter: 1, scene: "hive_spire", speaker: REDGOB, foe: "ork", time: {h: 1},
-    text: L("总督塔里已经有人了：一伙兽人正在拆金框画、撬门把手，往一艘破船上搬。\n领头的戴着一顶插羽毛的帽子。看见你们，他没开枪。\n“人仔！”他说，“你们认得哪些值钱？”",
-            "Someone beat you to the governor's tower: a band of orks prying off gilt frames and door handles, hauling them to a battered ship.\nTheir leader wears a feathered hat. Seeing you, he doesn't shoot.\n“'Umies!” he says. “You know wot's worf teef?”"),
+    text: L("总督塔里已经有人了：一伙兽人正在拆金框画、撬门把手，往一艘破船上搬。\n领头的戴着一顶插羽毛的帽子，自称红戈布船长。看见你们，他没开枪。\n“人仔！”他说，“你们认得哪些值钱？”",
+            "Someone beat you to the governor's tower: a band of orks prying off gilt frames and door handles, hauling them to a battered ship.\nTheir leader wears a feathered hat and calls himself Kaptin Redgob. Seeing you, he doesn't shoot.\n“'Umies!” he says. “You know wot's worf teef?”"),
     alt: [
-      {if: {flag: "sawGangTaken"}, text: L("总督塔里，一伙兽人正在拆金框画、撬门把手，往一艘破船上搬。锈牙帮的人蹲在墙角发抖。\n羽毛帽把你拎到画框前，没开枪。\n“人仔！”他说，“你们认得哪些值钱？”",
-        "In the governor's tower a band of orks pry off gilt frames and door handles, hauling them to a battered ship. The Rustfangs shiver in a corner.\nFeather-hat sets you in front of a frame. He doesn't shoot.\n“'Umies!” he says. “You know wot's worf teef?”")}
+      {if: {flag: "sawGangTaken"}, text: L("总督塔里，一伙兽人正在拆金框画、撬门把手，往一艘破船上搬。锈牙帮的人蹲在墙角发抖。\n红戈布船长，那顶羽毛帽，把你拎到画框前，没开枪。\n“人仔！”他说，“你们认得哪些值钱？”",
+        "In the governor's tower a band of orks pry off gilt frames and door handles, hauling them to a battered ship. The Rustfangs shiver in a corner.\nKaptin Redgob, the feather-hat, sets you in front of a frame. He doesn't shoot.\n“'Umies!” he says. “You know wot's worf teef?”")}
     ],
     codex: ["ork_freebooterz"],
     choices: [
@@ -1353,8 +1357,8 @@
     ]};
 
   N.ork_705 = {chapter: 7, scene: "ork_fort", speaker: MARINE, time: {h: 1},
-    text: L("大门开了。蓝甲巨人涌进堡垒，像潮水冲进沙堡。\n其中一个停在你面前，头盔的目镜冷冷发光。\n“你是谁？”他的声音很平静，“你身上有异形的气味。”",
-            "The gate opens. Blue giants pour into the fort like a tide into a sandcastle.\nOne stops before you, helmet lenses glowing cold.\n“Who are you?” His voice is calm. “You smell of xenos.”"),
+    text: L("大门开了。蓝甲巨人涌进堡垒，像潮水冲进沙堡。\n其中一个老兵停在你面前，头盔上一道旧疤，目镜冷冷发光。\n“你是谁？”他的声音很平静，“你身上有异形的气味。”",
+            "The gate opens. Blue giants pour into the fort like a tide into a sandcastle.\nOne veteran stops before you, an old scar across his helmet, lenses glowing cold.\n“Who are you?” His voice is calm. “You smell of xenos.”"),
     alt: [
       {if: {flag: "moreBitz"}, add: L("你半条胳膊都是绿的，根本藏不住。", "Half your arm is green. There's no hiding it.")}
     ],
