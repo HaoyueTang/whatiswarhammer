@@ -813,11 +813,11 @@
     var u = WH.universal, n = factionList().length, wrap = selectShell(t("start_how"), null, null);
     wrap.classList.add("start-wrap");
     var main = h("button", {class: "btn px start-opt main", type: "button", "data-start": "universal", "data-universal": u.id, "data-sfx": "start",
-        "aria-label": t("universal_btn") + " (" + t("start_recommended") + "). " + t("universal_desc") + " " + t("universal_note"),
+        "aria-label": t("universal_btn") + " (" + t("start_recommended") + "). " + t("universal_desc") + " " + t("universal_note", {n: n}),
         onclick: function () { UI.sel.faction = null; startGame(u.id, WH.Game.BIRTH); }},
       h("span", {class: "so-badge"}, t("start_recommended")),
       h("div", {class: "portrait"}, art("sprite", u.playerSprite, null, fcolor(u))),
-      h("b", null, "▶ " + t("universal_btn")), h("span", {class: "so-desc"}, t("universal_desc")), h("small", null, t("universal_note")));
+      h("b", null, "▶ " + t("universal_btn")), h("span", {class: "so-desc"}, t("universal_desc")), h("small", null, t("universal_note", {n: n})));
     var alt = h("button", {class: "btn px start-opt", type: "button", "data-start": "direct", "data-sfx": "select",
         "aria-label": t("direct_btn") + ". " + t("direct_desc", {n: n}), onclick: function () { UI.sel.mode = "direct"; renderRaces(); }},
       h("b", null, t("direct_btn")), h("span", {class: "so-desc"}, t("direct_desc", {n: n})));

@@ -2,8 +2,10 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
-## [Unreleased] — 0.6.0 prototype (universal birth, SPEC §37)
-### Added — "Let my choices decide" (prototype: Imperium / Chaos / T'au)
+## [Unreleased] — 0.6.0 (universal birth, SPEC §37)
+### Added — "Let my choices decide" (all 8 factions)
+- **v2 (SPEC §37.12): all 8 factions are reachable — 20 doors / 20 origins** (low 8, mid 6, up 6). The prologue grew from 12 to 26 nodes (a run passes 8–10): in each class you choose *whom you meet and what you learn* — carry the Levy-Priest's roll, sit with the one-legged veteran or go down to the dock bar; fetch tape at the depot where a Valda supply ship loads, help the salvage crew; open the ledger's red page, go down to the waiting scholar — and those choices open the extra doors (orks, aeldari, necrons, mechanicus, genestealer cult). Doors you did not earn are hidden. Four origins tied to a home world from birth stay in 预选势力 (aeldari/agri, gsc/warden, gsc/kin, orks/ganger). 11 new entry texts + small newcomer fixes in the five faction files; codex Gravex no longer says "your home".
+### Earlier in 0.6.0 (the 3-faction prototype)
 - **Opening screen with two big options** (SPEC §37.8): after 开始新游戏 you choose how to begin — **由选项决定势力 / Let my choices decide** (recommended, the main way in) or **预选势力 / Pick a faction first** (the faction cards, as before; ◂ 开局方式 / Esc goes back).
 - The first option: one shared birth on Aurex Secundus → your family class (low / mid / up) → a short strand → a **door** with 3 ways out; the door decides the **faction** (and origin) you continue in. 3 classes × 3 factions = 9 doors, each landing on an existing origin opening (which gets a `born_universal` text so it reads right after the door). The faction cards and the §35 per-route birth stay as they are.
 - Engine: `effects.faction` switches the run's faction mid-way (`WH.universal` route outside `WH.factions`, `WH.faction(id)`, flag `born_universal`, `step.factionChanged`); rewind across the door, save/continue before and after the door, the faction theme / HUD repaint, autosave at the door; saves list shows 「出身未定」 before the door.
@@ -13,7 +15,7 @@ Format follows Keep a Changelog; versions follow SemVer.
 - **Rule: a new character needs an introduction** (SPEC §37.9). 8 first appearances that had only a name tag now say who the person is: Sylvaen, Farseer Taethra, Vhessra (Aeldari), Ixaril (Chaos), Wazgob da Mek, Kaptin Redgob, the Scarred Veteran (Orks).
 ### Tools
 - `tools/dev/intro_audit.js` (new-character audit; universal route = validator ERROR, other routes = WARN). Smoke helpers `to_direct` / `open_picker`.
-- Validator `checkUniversal` + `universalSelfTest` (9 doors × 10 runs: right faction/origin/caps/flags, rewind across the door, save round trips, play to an ending); `playthrough.js arcosa`; `smoke_test.py --only-universal --real`.
+- Validator `checkUniversal` (roads / sub-doors / flag-state enumeration / matrix `UNI_MATRIX` / date + time-of-day rules) + `universalSelfTest` (20 doors × 10 runs: right faction/origin/caps/flags, rewind across the door, save round trips, play to an ending); `playthrough.js arcosa`; `smoke_test.py --only-universal --real`.
 
 ## [0.5.1] — 2026-11-17 (settings tabs, SPEC §36)
 ### Changed — Settings is easier to scan

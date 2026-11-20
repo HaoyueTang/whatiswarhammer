@@ -3078,8 +3078,8 @@ def run_real_universal(p):
             out.push({key: k2, cls, node: s.id, path: s.pos.concat(my), door: s.id, doorIdx: my, fid: F.id, oid: o.id, start: o.startNode, hp: o.max.hp, year: F.startDate.year, label: F.renownLabel[WH.lang] || F.renownLabel.zh, entry: alt ? alt.text : null}); }
           else if (c.next && N[c.next]) { const k = key(c.next, fl); if (!seen.has(k)) { seen.add(k); q.push({id: c.next, fl, pos: s.pos.concat(my)}); } } }); }
       return out; }""")
-    check("universal: every door reachable through the real choice graph is listed", len(doors) >= 9, str(len(doors)))
-    check("universal: all 8 factions have a door", len({d["fid"] for d in doors}) == page.evaluate("() => Object.keys(WH.factions).length") or True, str(sorted({d["fid"] for d in doors})))
+    check("universal: SPEC §37.12 — 20 doors reachable through the real choice graph", len(doors) == 20, str(len(doors)))
+    check("universal: all 8 factions have a door", {d["fid"] for d in doors} == set(page.evaluate("() => Object.keys(WH.factions)")), str(sorted({d["fid"] for d in doors})))
 
     def to_select():
         page.reload(); page.wait_for_selector("#scr-title .title-main")
@@ -3143,6 +3143,22 @@ def run_real_universal(p):
     b2.close()
 
     first_mid = next((x for x in doors if x["cls"] == "mid"), None)
+    # --- SPEC §37.12: a road shows only the doors the prologue choices opened (gated doors are hidden, not greyed)
+    def click_data(i):
+        finish_text(page); page.locator('#choices button[data-i="%d"]' % i).click(); page.wait_for_timeout(60); pass_conseq(page); wait_idle(page)
+    prefix = {"low": 0, "mid": 1, "up": 2}
+    plans = {  # class → (choice indices with no gate flag, expected road buttons, indices opening every gate, expected) — the brief's §7.3 path table
+        "low": ([0, 0, 0], 2, [1, 0, 1, 0], 4),    # low_1:0 low_2:0 low_2v:0 → u_low_3  ·  low_1:1 low_1m:0 low_2:1 low_2d:0 → u_low_3
+        "mid": ([0, 0], 2, [1, 0, 1, 0], 3),       # mid_1:0 mid_2:0 → u_mid_door  ·  mid_1:1 mid_2v:0 mid_2:1 mid_2s:0
+        "up":  ([0, 0], 2, [1, 0, 1, 0], 3)}       # up_1:0 up_2:0 → u_up_door  ·  up_1:1 up_1c:0 up_2:1 up_2m:0
+    for cls, (plain, n_plain, full, n_full) in plans.items():
+        for steps, want, what in ((plain, n_plain, "no gate flag"), (full, n_full, "every gate open")):
+            start_universal(); click_choice(page, idx=0); click_choice(page, idx=0)              # u_b01, u_b02
+            click_data(prefix[cls])                                                               # u_b03 → class
+            for i in steps: click_data(i)
+            road = page.evaluate("() => WH.UI.game.state.nodeId")
+            shown = page.locator("#choices button:not([disabled])").count(); greyed = page.locator("#choices button[disabled]").count()
+            check(f"universal {cls} road {road} ({what}): shows {want} choices, none greyed", shown == want and greyed == 0, f"{shown} shown / {greyed} greyed")
     # --- every door through the real UI
     for d in doors:
         tag = f"{d['cls']}→{d['fid']}/{d['oid']}"

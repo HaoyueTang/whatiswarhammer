@@ -2012,6 +2012,14 @@ function birthSelfTest(f, seed, nRuns) {
 }
 /* ---------- SPEC §37 universal birth route: static checks + self-test (start at the birth, choose a class, walk the road(s) to a door, play on) ---------- */
 const UNI_CLASSES = ["low", "mid", "up"];
+const UNI_ALL_FACTIONS = true;   // SPEC §37.8: every faction must have a door
+/* SPEC §37.12: the intended class × faction/origin matrix (the design record, UNIVERSAL_V2_BRIEF §2). Any difference is an ERROR — change the doors and this list together. */
+const UNI_MATRIX = [
+  "low:imperium/hive", "low:chaos/deserter", "low:tau/pow", "low:orks/guard", "low:necrons/convict", "low:mechanicus/menial", "low:mechanicus/conscript", "low:gsc/miner",
+  "mid:imperium/agri", "mid:chaos/scavenger", "mid:tau/colonist", "mid:orks/scrap", "mid:aeldari/trooper", "mid:aeldari/pilgrim",
+  "up:imperium/noble", "up:chaos/scribe", "up:tau/trader", "up:necrons/archivist", "up:necrons/lexmech", "up:mechanicus/savant"];
+const UNI_DATE_RE = /M4\d|\b\d{3}\b|\d+\.M|第\s*[\d一二三四五六七八九十]+\s*日/;       // no year / date in prologue text or in born_universal alts
+const UNI_TIMEOFDAY_RE = /今晚|半夜|夜班|下午|傍晚|tonight|midnight|afternoon|evening/i;  // a door restarts the clock at 06:00: new entry alts name no time of day
 const uniClassOf = (c) => { const k = Object.keys((c.effects && c.effects.set) || {}).find((x) => /^class_(low|mid|up)$/.test(x)); return k ? k.slice(6) : null; };
 function uniLayout(u) {                       // { fork, birth: [ids], forkClass } from the graph alone (the part before the class fork)
   const nodes = u.nodes || {};
@@ -2096,7 +2104,8 @@ function checkUniversal(u) {
   for (const s of ex.states.values()) {
     if (!s.cls) continue;
     const n = nodes[s.id], r = ex.reach(s.key);
-    if (r.size < 3) err(`${w}: at ${s.id} (class ${s.cls}, flags ${[...ex.relevant].filter((k) => s.flags[k]).join("+") || "-"}) only ${r.size} destination(s) are still reachable (SPEC §37.8: ≥ 3)`);
+    const sub = (n.choices || []).length > 0 && (n.choices || []).every((c) => c.effects && c.effects.faction);      // a sub-door node (only doors): ≥ 2 doors; everywhere before it: ≥ 3 destinations (SPEC §37.8 / §37.12)
+    if (r.size < (sub ? 2 : 3)) err(`${w}: at ${s.id} (class ${s.cls}, flags ${[...ex.relevant].filter((k) => s.flags[k]).join("+") || "-"}) only ${r.size} destination(s) are still reachable (SPEC §37.8: ≥ ${sub ? 2 : 3})`);
     const succs = ex.succ.get(s.key); if (!succs.states.length && !succs.doors.length) err(`${w}: ${s.id} has no open choice with flags ${[...ex.relevant].filter((k) => s.flags[k]).join("+") || "-"} (dead end)`);
   }
   const perClass = {}; for (const d of ex.doors.values()) (perClass[d.cls] = perClass[d.cls] || new Set()).add(d.fid);
@@ -2114,9 +2123,69 @@ function checkUniversal(u) {
   for (const id of ids) {                                                          // SPEC §37.11: no year / date in any prologue text (it belongs to no year)
     const n = nodes[id], texts = [];
     const push = (o) => { if (o) for (const k of ["zh", "en"]) if (o[k]) texts.push(String(o[k])); };
-    push(n.text); for (const a of n.alt || []) { push(a.text); push(a.add); } for (const c of n.choices || []) { push(c.text); push(c.result); }
-    for (const s of texts) if (/\d{1,3}\.M\d{2}|\bM4\d\b|\d{3}\s*年|\b[0-9]{3}\b\s*(?:of the|M\d)/i.test(s)) err(`${w}.${id}: text names a year/date ("${s.slice(0, 30)}…") — the prologue is undated (SPEC §37.11)`);
+    push(n.text); for (const a of n.alt || []) { push(a.text); push(a.add); } for (const c of n.choices || []) { push(c.text); push(c.result); for (const ra of c.resultAlt || []) { push(ra.text); push(ra.add); } }
+    for (const s of texts) if (UNI_DATE_RE.test(s)) err(`${w}.${id}: text names a year/date/number ("${s.slice(0, 30)}…") — the prologue is undated (SPEC §37.11)`);
     if (n.time) err(`${w}.${id}: prologue nodes carry no time (SPEC §37.11)`);
+  }
+  // ---- SPEC §37.12: flags, gates, roads and sub-doors
+  {
+    const setBy = {}, readBy = {};                                                   // flag → [node ids]
+    for (const id of ids) {
+      const n = nodes[id];
+      for (const c of n.choices || []) {
+        for (const f of Object.keys((c.effects && c.effects.set) || {})) (setBy[f] = setBy[f] || []).push(id);
+        for (const x of [].concat(c.require || [])) if (x && (x.flag || x.notFlag)) (readBy[x.flag || x.notFlag] = readBy[x.flag || x.notFlag] || []).push(id);
+        for (const ra of c.resultAlt || []) for (const f of SL.condFlags(ra.if)) (readBy[f] = readBy[f] || []).push(id);
+      }
+      for (const a of n.alt || []) for (const f of SL.condFlags(a.if)) (readBy[f] = readBy[f] || []).push(id);
+    }
+    for (const f of Object.keys(setBy)) {
+      if (!/^(class_(low|mid|up)|u_[a-z0-9_]+)$/.test(f)) err(`${w}: flag "${f}" set in the prologue — only class_* and u_* flags are allowed (SPEC §37.12)`);
+      if (/^u_/.test(f) && f !== "u_door" && !readBy[f]) err(`${w}: flag "${f}" is set (${setBy[f][0]}) but never read in the prologue`);
+    }
+    for (const id of ids) {
+      const cs = nodes[id].choices || []; let sawGate = false;
+      cs.forEach((c, i) => {
+        if (c.require) {
+          if (c.hideIfLocked !== true) err(`${w}.${id}.choice${i + 1}: a gated choice must carry hideIfLocked:true (SPEC §37.12)`);
+          sawGate = true;
+        } else if (sawGate) warn(`${w}.${id}.choice${i + 1}: an ungated choice follows a gated one (keep gated choices last, SPEC §37.12)`);
+      });
+    }
+    // roads & sub-doors: a ROAD holds a door and may lead on to SUB nodes that hold only doors; every state shows ≥ 2 choices there
+    const isDoorC = (c) => !!(c.effects && c.effects.faction);
+    const holdsDoor = (id) => (nodes[id].choices || []).some(isDoorC);
+    const onlyDoors = (id) => (nodes[id].choices || []).length > 0 && (nodes[id].choices || []).every(isDoorC);
+    for (const id of ids) {
+      if (!holdsDoor(id)) continue;
+      for (const c of nodes[id].choices || []) if (!isDoorC(c) && c.next && nodes[c.next] && !onlyDoors(c.next)) err(`${w}.${id}: leads on to ${c.next}, which is neither a door nor a node that holds only doors — doors sit at most 2 levels deep (SPEC §37.12)`);
+    }
+    const roads = {};
+    for (const k of UNI_CLASSES) {
+      const rs = [...new Set([...ex.states.values()].filter((st) => st.cls === k && holdsDoor(st.id) && !onlyDoors(st.id)).map((st) => st.id))];
+      roads[k] = rs;
+      if (rs.length !== 1) err(`${w}: class ${k} must have exactly one road node (a node with a door and further choices); found ${rs.length ? rs.join(", ") : "none"} (SPEC §37.12)`);
+    }
+    for (const st of ex.states.values()) {
+      if (!st.cls || !holdsDoor(st.id)) continue;
+      const open = (nodes[st.id].choices || []).filter((c) => WH.Rules.requireOK(c.require, {flags: st.flags, stats: {}, taint: {}})).length;
+      if (open < 2) err(`${w}: ${st.id} shows only ${open} choice with flags ${[...ex.relevant].filter((x) => st.flags[x]).join("+") || "-"} (a road / sub-door needs ≥ 2, SPEC §37.12)`);
+    }
+    // the intended matrix
+    const got = [...ex.doors.values()].map((d) => `${d.cls}:${d.fid}/${d.oid}`).sort(), want = UNI_MATRIX.slice().sort();
+    for (const g of got) if (!want.includes(g)) err(`${w}: door ${g} is not in the matrix (SPEC §37.12) — update the matrix and the SPEC together`);
+    for (const x of want) if (!got.includes(x)) err(`${w}: matrix door ${x} is missing (SPEC §37.12)`);
+    // the entry alts: no year/date, and no time of day (the clock restarts at 06:00)
+    for (const d of ex.doors.values()) {
+      const F = WH.factions[d.fid], o = F && WH.Game.origins(F).find((x) => x.id === d.oid), en = o && F.nodes[o.startNode];
+      for (const a of (en && en.alt) || []) {
+        if (!JSON.stringify(a.if || {}).includes('"born_universal"')) continue;
+        for (const piece of [a.text, a.add]) if (piece) for (const k of ["zh", "en"]) if (piece[k]) {
+          if (UNI_DATE_RE.test(piece[k])) err(`${d.fid}/${o.startNode}: born_universal alt names a year/date/number ("${String(piece[k]).slice(0, 30)}…") — undated prologue (SPEC §37.11)`);
+          else if (UNI_TIMEOFDAY_RE.test(piece[k]) && o.startNode !== "imp_o_noble_1") warn(`${d.fid}/${o.startNode}: born_universal alt names a time of day — the clock restarts at 06:00 at the door (SPEC §37.11)`);
+        }
+      }
+    }
   }
   // every universal node
   const reach = new Set(), q = [u.birthNode];
@@ -2154,7 +2223,6 @@ function checkUniversal(u) {
   const byCls = (k) => [...new Set([...ex.states.values()].filter((s) => s.cls === k).map((s) => s.id))];
   note(`universal ${u.id}: ${ids.length} nodes · birth ${lay.birth.join(" ")} · ${UNI_CLASSES.map((k) => k + " " + byCls(k).length + " nodes → " + [...(perClass[k] || [])].length + " factions").join(" · ")} · ${ex.doors.size} doors`);
 }
-const UNI_ALL_FACTIONS = false;   // SPEC §37.8: flipped to true when all 8 factions have doors
 function universalSelfTest(u, seed, perDoor) {
   const out = {runs: 0, doors: {}, problems: [], rewinds: 0, roundTrips: 0, finished: 0};
   const lay = uniLayout(u), ex = uniExplore(u);
@@ -2182,8 +2250,9 @@ function universalSelfTest(u, seed, perDoor) {
         let a;
         const atDoor = !through && pi === doorIdx;
         if (!through) {
-          a = d.path[pi++];
-          if (!cs[a] || cs[a].locked) { P(`${key}: wanted choice ${a} at ${id} is missing/locked`); break; }
+          const wantIdx = d.path[pi++];
+          a = cs.findIndex((v) => v.index === wantIdx);                         // d.path holds data indices; g.choose() takes the position in the visible list (hidden gated choices shift it)
+          if (a < 0 || cs[a].locked) { P(`${key}: wanted choice ${wantIdx} at ${id} is missing/locked`); break; }
           if (g.faction.id === u.id && (JSON.stringify(g.state.stats) !== s0 || JSON.stringify(g.state.max) !== m0)) { P(`${key}: stats/caps changed before the door at ${id}`); break; }
         } else a = open[Math.floor(drv() * open.length)][1];
         const before = atDoor ? strip(g.state) : null;

@@ -92,7 +92,9 @@
             "Iskaron, ship-breaking world of the Arcosa Sector. You trade copper wire and valves among the bones of dead ships. Not a bad life.\nThen the sky turns green. Huge rocks with engines slam into the docks.\nThe rocks are laughing."),
     alt: [
       {if: {flag: "born_shared"}, text: L("你守着船骨之间的那个摊子：铜线、阀门、一箱伺服马达。\n半夜，绿光铺满了整个天空。一块块装着引擎的大石头砸进船坞。\n石头里传出笑声。",
-        "You keep the stall among the bones of dead ships: copper wire, valves, a crate of servo-motors.\nAt midnight the green fills the whole sky. Huge rocks with engines slam into the docks.\nThe rocks are laughing.")}
+        "You keep the stall among the bones of dead ships: copper wire, valves, a crate of servo-motors.\nAt midnight the green fills the whole sky. Huge rocks with engines slam into the docks.\nThe rocks are laughing.")},
+      {if: {flag: "born_universal"}, text: L("队长的条子让伊斯卡隆船骨市场的老摊主收下了你。几个月后，那个摊子归了你：铜线、阀门、一箱伺服马达。日子不坏。\n那天，天空变绿了。一块块装着引擎的大石头砸进船坞。\n石头里传出笑声。",
+        "The boss's note got the old stallholder in Iskaron's ship-bone market to take you on. Within months the stall was yours: copper wire, valves, a crate of servo-motors. Not a bad life.\nThen the sky turns green. Huge rocks with engines slam into the docks.\nThe rocks are laughing.")}
     ],
     codex: ["place_iskaron", "place_arcosa", "xenos_ork"],
     choices: [
@@ -210,7 +212,9 @@
             "You're an Astra Militarum trooper posted to Iskaron's docks. Sergeant Voss chews tobacco and watches the green on the horizon.\n“Orks,” he says. “Don't think about winning. Think about taking a few with you.”\nThe first rock with engines lands three kilometres off."),
     alt: [
       {if: {flag: "born_shared"}, text: L("手印还没干，你已穿上旧大衣，蹲进船坞边的壕沟。沃斯中士嚼着烟草，看着天边那片绿。\n“兽人，”他说，“别想着赢。想着多拉几个垫背的。”\n第一块带引擎的石头落在三公里外。",
-        "Your thumbprint isn't dry, and you're already in an old greatcoat, crouched in the trench by the docks. Sergeant Voss chews tobacco and watches the green on the horizon.\n“Orks,” he says. “Don't think about winning. Think about taking a few with you.”\nThe first rock with engines lands three kilometres off.")}
+        "Your thumbprint isn't dry, and you're already in an old greatcoat, crouched in the trench by the docks. Sergeant Voss chews tobacco and watches the green on the horizon.\n“Orks,” he says. “Don't think about winning. Think about taking a few with you.”\nThe first rock with engines lands three kilometres off.")},
+      {if: {flag: "born_universal"}, text: L("你随奥雷克斯连队来伊斯卡隆守船坞闸口，几个月，只守个门。排里的沃斯中士嚼着烟草，看着天边那片绿。\n“兽人，”他说，“别想着赢。想着多拉几个垫背的。”\n第一块带引擎的石头落在三公里外。",
+        "You came with Aurex's company to guard Iskaron's dock gate, months ago. Just a gate, they said. Your platoon's Sergeant Voss chews tobacco and watches the green on the horizon.\n“Orks,” he says. “Don't think about winning. Think about taking a few with you.”\nThe first rock with engines lands three kilometres off.")}
     ],
     codex: ["imp_guard", "place_iskaron"],
     choices: [

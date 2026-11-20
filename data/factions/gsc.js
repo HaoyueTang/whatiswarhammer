@@ -94,7 +94,10 @@
   /* ============ Chapter 1 · Shaft Nine ============ */
   N.gsc_101 = {chapter: 1, scene: "mine_shaft", speaker: null,
     alt: [ALT(F("born_shared"), "当天夜班，地下两千米。工牌还硌着你的手心。\n一班十四个小时，挖出来的矿石装上升降机，再装上矿船，运去奥雷克斯二号的工厂。\n没人在井口等你下班。你的灯，是你唯一的朋友。",
-            "Night shift that same day, two thousand metres down. The tally token still digs into your palm.\nFourteen-hour shifts. The ore goes up the lift, onto the haulers, off to the manufactoria of Aurex Secundus.\nNobody waits for you at the pithead. Your lamp is your only friend.")],
+            "Night shift that same day, two thousand metres down. The tally token still digs into your palm.\nFourteen-hour shifts. The ore goes up the lift, onto the haulers, off to the manufactoria of Aurex Secundus.\nNobody waits for you at the pithead. Your lamp is your only friend."),
+          ALT(F("born_universal"), "几周后，“忍耐号”把你卸在凯辛三号。甘特工头发了工牌：第一个班，地下两千米。\n矿石上升降机，再上矿船，运回奥雷克斯二号的工厂。\n这颗星上，没人在井口等你下班。你的灯，是你唯一的朋友。",
+              "Weeks later the Endurance sets you down on Kessin Tertius. Foreman Gant hands you a tally token: your first shift, two thousand metres down.\nThe ore goes up the lift, onto the haulers, and back to the manufactoria of Aurex Secundus.\nOn this world nobody waits for you at the pithead. Your lamp is your only friend."),
+          ADD(F("born_universal"), "同班组的提奥朝你点头：他走浅巷道，问你跟不跟。", "Teo, of your crew, nods at you: he works the shallow gallery. Coming?")],
     text: L("凯辛三号，九号矿井，地下两千米。\n一班十四个小时，挖出来的矿石装上升降机，再装上矿船，运去奥雷克斯二号的工厂。\n你没有家人。你的灯，是你唯一的朋友。",
             "Kessin Tertius. Shaft Nine, two thousand metres down.\nFourteen-hour shifts. The ore goes up the lift, onto the haulers, off to the manufactoria of Aurex Secundus.\nYou have no family. Your lamp is your only friend."),
     codex: ["place_kessin", "place_shaft_nine"],
@@ -1800,7 +1803,8 @@
 
   N.gsc_end_seed = {chapter: 8, scene: "underhive", speaker: null, time: {y: 5},
     jump: L("五年后，另一颗星的下巢", "Five years on, the underhive of another world"),
-    alt: [ADD(F("blessed"), "你脖子上那个小小的印记，一直没有消。", "The tiny mark on your neck never fades.")],
+    alt: [ADD(F("blessed"), "你脖子上那个小小的印记，一直没有消。", "The tiny mark on your neck never fades."),
+          ADD(F("born_universal"), "又是这条船，这座巢都：你就是从这里出发去凯辛的。", "The same ship, the same hive: this is where you set out for Kessin.")],
     text: L("“忍耐号”到了奥雷克斯二号。你在下巢找了份活，过得很安静。\n五年后，下巢有一户新的人家，星期天总多做一份饭，墙上挂着一幅四只手的帝皇像。\n孩子们都长着同一双淡紫色的眼睛。",
             "The Endurance reaches Aurex Secundus. You find work in the underhive and live quietly.\nFive years later a new underhive family always cooks one extra plate on Sundays, and a four-armed Emperor hangs on their wall.\nThe children all share the same pale violet eyes."),
     codex: ["place_aurex"],
