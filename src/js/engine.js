@@ -424,13 +424,17 @@
     return true;
   };
 
-  /* SPEC §37: only from the universal birth route into a registered faction; the clock is shared (same startDate), nothing else changes here */
+  /* SPEC §37: only from the universal birth route into a registered faction. SPEC §37.11: the prologue is undated (the universal route has
+   * `undated: true`, no clock is shown), and the clock starts at the target faction's own startDate when the door is taken. */
   Game.prototype._switchFaction = function (id) {
     var u = this.data.universal, f = this.data.factions[id];
     if (!u || this.faction !== u || !f) return false;
     this.faction = f; this.state.faction = f.id;
+    this.state.hours = startHours(f);
     return true;
   };
+  /* false while the run is still in the undated prologue (SPEC §37.11): UIs show a label instead of a date */
+  Game.prototype.dated = function () { return !(this.faction && this.faction.undated); };
 
   /* SPEC §19: per-route multiplier for one god (positive deltas only), default 1 */
   Game.prototype.taintMod = function (god) {

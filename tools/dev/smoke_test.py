@@ -3070,7 +3070,7 @@ def run_real_universal(p):
         while (q.length) { const id = q.shift(); if (seen.has(id) || !N[id]) continue; seen.add(id);
           const ch = N[id].choices || [];
           if (ch.some(c => c.effects && c.effects.faction)) { ch.forEach((c, di) => { const F = WH.factions[c.effects.faction], o = WH.Game.origins(F).find(x => x.id === c.effects.origin);
-            out.push({cls: k, fork, forkIdx: fi, door: id, doorIdx: di, fid: F.id, oid: o.id, start: o.startNode, hp: o.max.hp, label: F.renownLabel[WH.lang] || F.renownLabel.zh,
+            out.push({cls: k, fork, forkIdx: fi, door: id, doorIdx: di, fid: F.id, oid: o.id, start: o.startNode, hp: o.max.hp, year: F.startDate.year, label: F.renownLabel[WH.lang] || F.renownLabel.zh,
               entry: ((WH.factions[F.id].nodes[o.startNode].alt || []).find(a => JSON.stringify(a.if || {}).includes('born_universal')) || {text: null}).text}); }); }
           else ch.forEach(c => c.next && q.push(c.next)); } });
       return out; }""")
@@ -3100,11 +3100,13 @@ def run_real_universal(p):
         info = page.evaluate("""() => { const g = WH.UI.game, hud = document.querySelector('#stats'); let t = g.nodeText(); t = typeof t === 'string' ? t : (t[WH.lang] || t.zh);
           return {fid: g.faction.id, sfid: g.state.faction, theme: document.querySelector('#scr-game').getAttribute('data-faction'), o: g.state.origin, node: g.state.nodeId,
                   born: !!g.state.flags.born_universal, shared: !!g.state.flags.born_shared, maxhp: g.state.max.hp, hud: hud.innerText,
-                  renown: (document.querySelector('#stat-renown') || {getAttribute: () => ''}).getAttribute('aria-label') || '', text: t}; }""")
+                  renown: (document.querySelector('#stat-renown') || {getAttribute: () => ''}).getAttribute('aria-label') || '', text: t,
+                  date: document.querySelector('#date').innerText, hours: g.state.hours}; }""")
         ok = (info["fid"] == d["fid"] and info["sfid"] == d["fid"] and info["theme"] == d["fid"] and info["o"] == d["oid"] and info["node"] == d["start"]
               and info["born"] and not info["shared"])
         check(f"universal {tag}: the door lands in {d['fid']}/{d['oid']} at {d['start']} (theme, state, flags)", ok, str(info)[:260])
         check(f"universal {tag}: HUD shows the origin's hp cap {d['hp']} and the {d['fid']} stat label", str(d["hp"]) in info["hud"] and d["label"] in info["renown"], f"{info['renown']} | {info['hud'][:60]}")
+        check(f"universal {tag}: SPEC §37.11 the clock starts at the faction's own date ({d['year']}.M42, day 1 06:00)", f"{d['year']}.M42" in info["date"] and info["hours"] == 6, f"{info['date']} h={info['hours']}")
         check(f"universal {tag}: the entry node reads the born_universal text", bool(d["entry"]) and (d["entry"] if isinstance(d["entry"], str) else d["entry"].get("zh", "")) in info["text"], info["text"][:80])
 
     # --- SPEC §37.8: the opening screen — two big options, the universal one is the main one
@@ -3143,6 +3145,7 @@ def run_real_universal(p):
         start_universal()
         info0 = page.evaluate("() => ({f: WH.UI.game.faction.id, n: WH.UI.game.state.nodeId, o: WH.UI.game.state.origin, theme: document.querySelector('#scr-game').getAttribute('data-faction')})")
         if d is doors[0]:
+            check("§37.11: the prologue shows no date (「序章」), save slot says so too", page.locator("#date").inner_text().strip() == "序章" and page.evaluate("() => WH.UI.game.dated()") is False, page.locator("#date").inner_text())
             check("universal: the button starts the universal route at its birth node, origin undecided", info0["f"] == page.evaluate("() => WH.universal.id") and info0["n"] == page.evaluate("() => WH.universal.birthNode") and info0["o"] is None, str(info0))
         if not walk_to(d["door"], d):
             check(f"universal {tag}: reach the door node", False, page.evaluate("() => WH.UI.game.state.nodeId")); continue

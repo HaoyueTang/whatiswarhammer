@@ -252,6 +252,8 @@
   var FACTION_ORDER = ["imperium", "chaos", "tau", "aeldari", "necrons", "orks", "gsc", "mechanicus"];   // SPEC §26
   var FACTION_COLOR = {imperium: "#c9a227", chaos: "#b0304a", tau: "#d08a3a", aeldari: "#5fb3a1", necrons: "#4fd16b",
                        orks: "#6aa84f", gsc: "#9b59b6", mechanicus: "#c0392b"};
+  /* SPEC §37.11: the universal prologue has no date */
+  function dateText(g) { return g.dated() ? WH.fmtDate(g.date()) : t("prologue"); }
   function fcolor(f) { return (f && (f.color || FACTION_COLOR[f.id])) || "#c9a227"; }
   var RACES = ["imperium", "chaos", "tau", "aeldari", "necrons", "orks", "tyranids", "other"];
   var RACE_COLOR = {imperium: "#d4a62a", chaos: "#c4283c", tau: "#c98b3c", aeldari: "#5fb3a1", necrons: "#4fd16b",
@@ -1099,7 +1101,7 @@
       var danger = (k === "hp" || k === "sanity") ? v < 30 : (k === "corruption" ? v > 60 : false);
       $("stat-" + k).classList.toggle("low", danger);
     });
-    if (!skipDate) $("date").textContent = WH.fmtDate(g.date());
+    if (!skipDate) $("date").textContent = dateText(g);
     $("playtime").textContent = "⏱ " + WH.fmtPlay(g.state.playMs);
     var ch = view ? view.chapter : g.state.chapter, ct = g.faction.chapters && g.faction.chapters[ch];
     var plate = clear($("chapter-plate"));
@@ -1573,13 +1575,13 @@
 
   function timeSkip(tm) {
     var tk = $("ticker"), dateEl = $("date"), g = UI.game, sd = g.faction.startDate;
-    var final = function () { dateEl.classList.remove("warping"); dateEl.textContent = WH.fmtDate(g.date()); };
+    var final = function () { dateEl.classList.remove("warping"); dateEl.textContent = dateText(g); };
     tk.className = "ticker px" + (tm.warp ? " warp" : "");
     tk.textContent = tm.warp ? "⌛ " + t("time_warp") + " · ???" : "⌛ " + timeLabel(tm);
     void tk.offsetWidth; tk.classList.add("show");
     clearTimeout(tk._t); tk._t = setTimeout(function () { tk.classList.remove("show"); }, 2000);
     cancelAnimationFrame(UI.dateAnim);
-    if (!UI.fxOn) { final(); return; }
+    if (!UI.fxOn || !g.dated()) { final(); return; }
     var roll = function () {
       var t0 = performance.now(), dur = 950;
       var frame = function (now) {
@@ -1661,7 +1663,7 @@
         h("div", {class: "rule"}),
         h("div", {class: "t"}, L(title) || "· · ·"),
         h("div", {class: "rule"}),
-        h("div", {class: "f"}, L(f.name) + " · " + WH.fmtDate(UI.game.date())));
+        h("div", {class: "f"}, L(f.name) + " · " + dateText(UI.game)));
       if (!UI.fxOn) el.style.animation = "none";
       $("overlay-root").appendChild(el);
       UI.cardDone = finish;
@@ -2634,7 +2636,7 @@
       var f = WH.faction(rec.faction), ct = f.chapters && f.chapters[rec.chapter];
       kids.push(h("div", {class: "fac", style: "color:" + fcolor(f)}, L(f.name) + " · " + originLabel(f, rec.origin)));
       kids.push(h("div", {class: "ln"}, t("chapter_n", {n: WH.chapterNum(rec.chapter || 1)}) + (ct ? " · " + L(ct) : "")));
-      kids.push(h("div", {class: "ln dim"}, WH.fmtDate(WH.Rules.dateParts(rec.hours, f.startDate)) + "   ⏱ " + WH.fmtPlay(rec.playMs)));
+      kids.push(h("div", {class: "ln dim"}, (f.undated ? t("prologue") : WH.fmtDate(WH.Rules.dateParts(rec.hours, f.startDate))) + "   ⏱ " + WH.fmtPlay(rec.playMs)));
     } else kids.push(h("div", {class: "emp"}, entry.raw ? "⚠ " + t("err_schema") : t("empty")));
     var card = h("button", {class: "slot px", type: "button", disabled: !canClick,
       "aria-label": slotLabel(s) + (rec ? "" : " — " + t("empty")),

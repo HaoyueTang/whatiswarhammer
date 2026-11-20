@@ -127,7 +127,8 @@
     color: "#b8a77a",
     startNode: "u_b01",
     birthNode: "u_b01",
-    startDate: {year: 111, mill: 42},
+    startDate: {year: 111, mill: 42},     // never shown: `undated` (SPEC §37.11) — the clock starts at the target faction's own startDate at the door
+    undated: true,
     startStats: {hp: 100, sanity: 100, corruption: 0, renown: 10},
     renownLabel: L("名声", "Standing"),
     renownIcon: "icon_favor",
