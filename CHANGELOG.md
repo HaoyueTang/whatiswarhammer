@@ -2,7 +2,7 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
-## [Unreleased] — 0.6.0 (universal birth, SPEC §37)
+## [0.6.0] — 2026-11-20 (universal birth, SPEC §37)
 ### Added — "Let my choices decide" (all 8 factions)
 - **v2 (SPEC §37.12): all 8 factions are reachable — 20 doors / 20 origins** (low 8, mid 6, up 6). The prologue grew from 12 to 26 nodes (a run passes 8–10): in each class you choose *whom you meet and what you learn* — carry the Levy-Priest's roll, sit with the one-legged veteran or go down to the dock bar; fetch tape at the depot where a Valda supply ship loads, help the salvage crew; open the ledger's red page, go down to the waiting scholar — and those choices open the extra doors (orks, aeldari, necrons, mechanicus, genestealer cult). Doors you did not earn are hidden. Four origins tied to a home world from birth stay in 预选势力 (aeldari/agri, gsc/warden, gsc/kin, orks/ganger). 11 new entry texts + small newcomer fixes in the five faction files; codex Gravex no longer says "your home".
 ### Earlier in 0.6.0 (the 3-faction prototype)
