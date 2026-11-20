@@ -298,8 +298,8 @@
     ]};
 
   N.cha_o_scribe_4a = {chapter: 1, scene: "cult_shrine", speaker: IXARIL, time: {h: 5},
-    text: L("歌声领你到废弃的礼拜堂。门缝里，灰袍老人在和一个披羽毛斗篷的人说话，那人的影子多出三条胳膊。\n他转过头，像早知道你会来：“抄书的？我们正缺个识字的。”\n你逃了。次日，你带蒂卡回来。",
-            "The song leads you to an abandoned chapel. Through the door, a grey-robed old man talks with a man in a feathered cloak.\nThe cloaked man's shadow has three more arms than he does. He turns as if he expected you. “A scribe? Good. We need someone who can read.”\nYou flee to the shack. Next day, you come back with Tikka."),
+    text: L("歌声领你到废弃的礼拜堂。门缝里，灰袍老人在和一个披羽毛斗篷的人说话，称他伊克萨里尔。那人的影子多出三条胳膊。\n他转过头：“抄书的？我们正缺个识字的。”\n你逃了。次日，你带蒂卡回来。",
+            "The song leads you to an abandoned chapel. Through the door, a grey-robed old man talks with a man in a feathered cloak, calling him Ixaril.\nThe shadow has three more arms than he does. He turns. “A scribe? Good. We need someone who can read.”\nYou flee to the shack. Next day, you come back with Tikka."),
     effects: {sanity: -5, set: {metIxaril: true}},
     codex: ["chaos_sorcerer"],
     choices: [

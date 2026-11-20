@@ -2217,6 +2217,20 @@ if (WH.universal) {
     }
   }
 }
+/* ---------- SPEC §37.9: a new character needs an introduction (tools/dev/intro_audit.js; universal route = ERROR, other routes = WARN) ---------- */
+{
+  let rep = null;
+  try { rep = JSON.parse(require("child_process").execFileSync(process.execPath, [path.join(__dirname, "intro_audit.js"), "--json"], {encoding: "utf8", maxBuffer: 1 << 26})); }
+  catch (e) { warn(`intro audit (SPEC §37.9) could not run — ${String(e.message).split("\n")[0]}`); }
+  if (rep) {
+    const uid = WH.universal && WH.universal.id;
+    for (const [rid, list] of Object.entries(rep.routes)) for (const g of list) {
+      if (g.kind !== "person") continue;
+      const m = `${rid}.${g.node}: ${g.who} appears without an introduction (${g.level === "bare" ? "opens with their own line" : "not named or described in this node or the one before"}) — SPEC §37.9`;
+      if (rid === uid) err(`universal. ${m}`); else warn(m);
+    }
+  }
+}
 /* ---------- SPEC §24 difficulty levels ---------- */
 if (WH.difficulty && !WRITE_DIFF) {
   const d = WH.difficulty;

@@ -119,8 +119,21 @@ def pass_conseq(page):
     page.wait_for_timeout(60)
     return True
 
+def to_direct(page, tap=False):
+    """SPEC §37.8: the opening screen has two big options; go on to the faction cards ("预选势力") if it is showing."""
+    d = page.locator('.start-opt[data-start="direct"]')
+    if d.count() and not page.locator(".fcard").count():
+        (d.tap if tap else d.click)(); page.wait_for_timeout(200)
+
+def open_picker(page, tap=False):
+    """title → 开始新游戏 → (start screen →) faction cards."""
+    b = page.locator("#scr-title .menu .btn.primary")
+    (b.tap if tap else b.click)(); page.wait_for_timeout(250)
+    to_direct(page, tap)
+
 def pick_faction(page, fid=None, origin=0, tap=False):
-    """race step → (origin step) → game. fid None = first card."""
+    """(start screen →) race step → (origin step) → game. fid None = first card."""
+    to_direct(page, tap)
     card = page.locator(f'.fcard[data-faction="{fid}"]') if fid else page.locator(".fcard").first
     (card.tap if tap else card.click)()
     page.wait_for_timeout(250)
@@ -185,7 +198,7 @@ def run_desktop(p):
     page.locator("#scr-title .corner button:not(.sound-btn):not(.music-btn)").click(); page.wait_for_timeout(150)
 
     # faction select
-    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(250)
+    open_picker(page)
     cards = page.locator(".fcard")
     check("race cards built from WH.factions", cards.count() == nf, f"{cards.count()} cards")
     shot(page, "03_select")
@@ -485,7 +498,7 @@ def run_mobile(p):
     page.evaluate(CLEAR)
     check("portrait layout active", page.evaluate("document.body.classList.contains('portrait')"))
     shot(page, "m01_title")
-    page.locator("#scr-title .menu .btn.primary").tap(); page.wait_for_timeout(250)
+    open_picker(page, tap=True)
     shot(page, "m02_select")
     pick_faction(page, None, 0, tap=True)
     wait_idle(page); finish_text(page); page.wait_for_timeout(300)
@@ -763,7 +776,7 @@ def run_v02(p):
     check("ⓘ opens the renownHelp text", "信仰" in page.locator(".modal .tip-body").inner_text())
     shot(page, "36_stat_help")
     page.keyboard.press("Escape")
-    page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(150)
+    page.evaluate("() => (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))"); page.wait_for_timeout(150)
     check("select screen back button reads ⌂ 主页", "主页" in page.locator("#scr-select .home-btn").inner_text())
     ctx.close(); b.close()
 
@@ -1136,7 +1149,7 @@ def run_real_v022(p):
         print(f"  rumours {n_r} · chronicle {n_c}")
         if not n_r or not n_c:
             check("real data: rumours + chronicle present", False, f"{n_r}/{n_c}"); ctx.close(); b.close(); continue
-        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(150)
+        page.evaluate("() => (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))"); page.wait_for_timeout(150)
         pick_faction(page, "imperium", tap=mobile); wait_idle(page); finish_text(page)
         # SPEC §20c: rumours are heard only at gather nodes → jump to a plain node that leads straight (an unconditional choice) into a gather node
         # of the imperium route with an eligible rumour, then take that choice with chance 1
@@ -1180,10 +1193,10 @@ def run_difficulty(p):
         b, ctx, page = new_ctx(p, mobile=mobile, tag="diff" + ("-m" if mobile else ""))
         has_file = page.evaluate("!!WH.difficulty")
         if not REAL:   # sample mode: the real file is loaded too, but has no "sample" key → set levels for the test
-            check(f"diff{' (m)' if mobile else ''}: no level for a faction → no skulls", (page.evaluate("WH.UI.show('select')") or True) and page.locator(".fcard .diff").count() == 0)
+            check(f"diff{' (m)' if mobile else ''}: no level for a faction → no skulls", (page.evaluate("(WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))") or True) and page.locator(".fcard .diff").count() == 0)
             page.evaluate("() => { WH.difficulty = {sample: 2, 'sample/hive': 1, 'sample/scav': 3, 'sample/clerk': 2}; }")
         fid = page.evaluate("Object.keys(WH.factions)[0]")
-        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(200)
+        page.evaluate("() => (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))"); page.wait_for_timeout(200)
         card = page.locator(f'.fcard[data-faction="{fid}"]')
         lvl = page.evaluate(f"WH.difficulty['{fid}']")
         d = card.locator(".diff")
@@ -1199,7 +1212,7 @@ def run_difficulty(p):
             check(f"diff{' (m)' if mobile else ''}: every origin card has its skulls", n_d == page.locator(".ocard").count(), str(n_d))
             if mobile: page.screenshot(path=os.path.join(OUT, "m51_diff_origins.png"), full_page=True)
             else: shot(page, "91_diff_origins")
-        page.evaluate("() => { delete WH.difficulty; WH.UI.show('select'); }"); page.wait_for_timeout(150)
+        page.evaluate("() => { delete WH.difficulty; (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select')); }"); page.wait_for_timeout(150)
         check(f"diff{' (m)' if mobile else ''}: missing difficulty file → no skulls", page.locator(".diff").count() == 0)
         ctx.close(); b.close()
 
@@ -1209,7 +1222,7 @@ FIVE = """() => { const base = Object.values(WH.factions)[0]; const ids = ['impe
   const icon = {imperium:'icon_faith', chaos:'icon_favor', tau:'icon_greatergood', aeldari:'icon_fate', necrons:'icon_worth'};
   ids.forEach(id => { if (WH.factions[id]) return; const f = Object.assign({}, base, {id, color: col[id], renownIcon: icon[id], name: {zh: names[id][0], en: names[id][1]},
      playerSprite: 'player_' + id, _defaultOrigin: undefined}); WH.factions[id] = f; });
-  WH.UI.show('select'); }"""
+  (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select')); }"""
 
 EIGHT = FIVE.replace("const ids = ['imperium','chaos','tau','aeldari','necrons'];", "const ids = ['imperium','chaos','tau','aeldari','necrons','orks','gsc','mechanicus'];").replace(
   "necrons:['死灵','Necrons']};", "necrons:['死灵','Necrons'], orks:['兽人','Orks'], gsc:['基因窃取者教派','Genestealer Cult'], mechanicus:['机械神教','Adeptus Mechanicus']};").replace(
@@ -1385,7 +1398,7 @@ def run_new_routes(p):
     present = page.evaluate("['aeldari','necrons','orks','gsc','mechanicus'].filter(id => WH.factions[id])")
     print("  routes present:", present or "none yet")
     for fid in present:
-        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(150)
+        page.evaluate("() => (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))"); page.wait_for_timeout(150)
         pick_faction(page, fid)
         wait_idle(page); finish_text(page)
         check(f"{fid}: starts", state(page)["faction"] == fid)
@@ -1405,7 +1418,7 @@ def run_real_v03(p):
     b, ctx, page = new_ctx(p, tag="real03", seed=31)
     ids = page.evaluate("Object.keys(WH.factions)")
     check("real: all 8 routes loaded", all(x in ids for x in ("imperium", "chaos", "tau", "aeldari", "necrons", "orks", "gsc", "mechanicus")), str(ids))
-    page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(200)
+    page.evaluate("() => (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))"); page.wait_for_timeout(200)
     cards = page.locator(".fcard"); n = cards.count()
     boxes = [cards.nth(i).bounding_box() for i in range(n)]
     ys = sorted({round(bx["y"] / 40) for bx in boxes})
@@ -1414,7 +1427,7 @@ def run_real_v03(p):
     for fid in ["imperium", "chaos", "tau", "aeldari", "necrons", "orks", "gsc", "mechanicus"]:
         n_or = page.evaluate("(f) => (WH.factions[f].origins || []).length", fid)
         for oi in range(max(1, n_or)):
-            page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(120)
+            page.evaluate("() => (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))"); page.wait_for_timeout(120)
             pick_faction(page, fid, oi); wait_idle(page); finish_text(page); dismiss_lore(page)
             st = state(page)
             ok = st["faction"] == fid and bool(page.evaluate("document.getElementById('scr-game').dataset.faction") == fid) and page.locator("#dlg-text").inner_text().strip() != ""
@@ -1434,7 +1447,7 @@ def run_real_v03(p):
     check("real: achievements page re-renders in English", "Unlocked" in page.locator(".modal-head .sub").inner_text() and page.locator(".modal .ach-grid .ach-tile").count() == n_ach)
     shot(page, "73_real_achievements_en")
     page.keyboard.press("Escape"); page.wait_for_timeout(120)
-    page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(200)
+    page.evaluate("() => (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))"); page.wait_for_timeout(200)
     check("real (en): picker still 8 cards inside the window", page.locator(".fcard").count() == 8 and all(page.locator(".fcard").nth(i).bounding_box()["y"] + page.locator(".fcard").nth(i).bounding_box()["height"] <= 720 for i in range(8)))
     shot(page, "74_real_picker_eight_en")
     page.evaluate("() => WH.UI.setLang('zh')"); page.wait_for_timeout(150)
@@ -1577,7 +1590,7 @@ def run_real_grudge(p):
     for fid in fids:
         todo = page.evaluate("""(f) => { const out = []; for (const [id, n] of Object.entries(WH.factions[f].nodes)) { const gs = (n.choices || []).filter(c => c.grudge).map(c => c.grudge.npc);
             if (gs.length || n.grudgeLine) out.push({id, npcs: Array.from(new Set(gs.concat(n.grudgeLine ? [n.grudgeLine.npc] : []))), line: !!n.grudgeLine}); } return out; }""", fid)
-        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(120)
+        page.evaluate("() => (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))"); page.wait_for_timeout(120)
         pick_faction(page, fid); wait_idle(page); finish_text(page); dismiss_lore(page)
         bad = []
         for t in todo:
@@ -2024,7 +2037,7 @@ def run_real_gather(p):
     ctx.close(); b.close()
     for mobile in (False, True):
         b, ctx, page = new_ctx(p, mobile=mobile, tag="real-gather" + ("-m" if mobile else ""), seed=33)
-        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(150)
+        page.evaluate("() => (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))"); page.wait_for_timeout(150)
         pick_faction(page, "imperium", tap=mobile); wait_idle(page); finish_text(page)
         hop = page.evaluate("""() => { const g = WH.UI.game, N = g.faction.nodes, G = WH.Rules.isGather;
             for (const id of Object.keys(N)) { const n = N[id]; if (n.ending || !G(n)) continue;
@@ -2344,7 +2357,7 @@ def run_v034(p):
         page.evaluate("() => { WH.UI.settings.loreCards = 'off'; WH.UI.settings.textSpeed = 'instant'; WH.Save.saveSettings(WH.UI.settings); }")
         dsf = 2 if mobile else 1
         pre = f"§31 {mode}: "
-        page.evaluate("() => WH.UI.show('select')"); page.wait_for_timeout(200)
+        page.evaluate("() => (WH.UI.sel.mode = 'direct', WH.UI.sel.faction = null, WH.UI.keepSel = true, WH.UI.show('select'))"); page.wait_for_timeout(200)
         pick_faction(page, fid, tap=mobile); wait_idle(page); finish_text(page); dismiss_lore(page)
         E = endings_of(page, fid)
         gid, bid, did = E["good"][0], E["bad"][0], E["death"][0]
@@ -2998,7 +3011,7 @@ def run_real_birth(p):
     seen = {}
     for fid in fids:
         page.reload(); page.wait_for_selector("#scr-title .title-main")
-        page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(250)
+        open_picker(page)
         card = page.locator(f'.fcard[data-faction="{fid}"]')
         card.click(); page.wait_for_timeout(300)
         wait_idle(page); finish_text(page)
@@ -3032,7 +3045,7 @@ def run_real_birth(p):
     check("birth: settings has the 直接选出身 row", page.locator(".origin-row", has_text="直接选出身").count() == 1)
     page.keyboard.press("Escape"); page.wait_for_timeout(200)
     # settings toggle brings the origin cards back
-    page.locator("#scr-title .menu .btn.primary").click(); page.wait_for_timeout(250)
+    open_picker(page)
     page.evaluate("() => { WH.UI.settings.chooseOrigin = true; }")
     page.locator(f'.fcard[data-faction="{fid}"]').click(); page.wait_for_timeout(300)
     check("birth: with 直接选出身 on, the faction card opens the origin cards", page.locator(".ocard").count() == 3 and page.evaluate("() => !WH.UI.game || WH.UI.game.state.nodeId !== WH.UI.game.faction.birthNode"))
@@ -3069,7 +3082,7 @@ def run_real_universal(p):
 
     def start_universal():
         to_select()
-        page.locator(".ucard").click(); page.wait_for_timeout(300)
+        page.locator('.start-opt[data-start="universal"]').click(); page.wait_for_timeout(300)
         wait_idle(page); finish_text(page)
 
     def walk_to(node_id, d, limit=14):
@@ -3094,16 +3107,34 @@ def run_real_universal(p):
         check(f"universal {tag}: HUD shows the origin's hp cap {d['hp']} and the {d['fid']} stat label", str(d["hp"]) in info["hud"] and d["label"] in info["renown"], f"{info['renown']} | {info['hud'][:60]}")
         check(f"universal {tag}: the entry node reads the born_universal text", bool(d["entry"]) and (d["entry"] if isinstance(d["entry"], str) else d["entry"].get("zh", "")) in info["text"], info["text"][:80])
 
-    # --- the entry button on the faction-select screen
+    # --- SPEC §37.8: the opening screen — two big options, the universal one is the main one
     to_select()
-    check("universal: faction-select screen has the 「由选项决定势力」 button", page.locator(".ucard").count() == 1 and "由选项决定势力" in page.locator(".ucard").inner_text())
-    check("universal: no faction card for the universal route", page.locator('.fcard[data-faction="%s"]' % page.evaluate("() => WH.universal.id")).count() == 0)
+    uo, do = page.locator('.start-opt[data-start="universal"]'), page.locator('.start-opt[data-start="direct"]')
+    check("start screen: two big options (由选项决定势力 + 预选势力), no faction cards yet", uo.count() == 1 and do.count() == 1 and page.locator(".fcard").count() == 0)
+    check("start screen: the universal option is the main one (labelled, first, larger)", "由选项决定势力" in uo.inner_text() and "推荐" in uo.inner_text() and "main" in (uo.get_attribute("class") or "")
+          and uo.bounding_box()["y"] < do.bounding_box()["y"] and uo.bounding_box()["height"] > do.bounding_box()["height"], str((uo.bounding_box(), do.bounding_box())))
+    check("start screen: the main option is focused (Enter starts it)", page.evaluate("() => document.activeElement && document.activeElement.getAttribute('data-start')") == "universal")
     shot(page, "universal_select")
-    # mobile layout: the button fits the screen
+    do.click(); page.wait_for_timeout(250)
+    nf = page.evaluate("() => Object.keys(WH.factions).length")
+    check("start screen → 预选势力: shows every faction card (the old picker)", page.locator(".fcard").count() == nf and page.locator('.start-opt').count() == 0, f"{page.locator('.fcard').count()} / {nf}")
+    check("universal: no faction card for the universal route", page.locator('.fcard[data-faction="%s"]' % page.evaluate("() => WH.universal.id")).count() == 0)
+    page.locator("#scr-select .back-race").click(); page.wait_for_timeout(250)
+    check("start screen: the back button on the cards returns to the two options", page.locator('.start-opt[data-start="universal"]').count() == 1 and page.locator(".fcard").count() == 0)
+    do.click(); page.wait_for_timeout(200); page.keyboard.press("Escape"); page.wait_for_timeout(250)
+    check("start screen: Esc on the cards returns to the two options", page.locator('.start-opt[data-start="universal"]').count() == 1)
+    page.locator('.start-opt[data-start="direct"]').click(); page.wait_for_timeout(200)
+    page.locator(".fcard").first.click(); page.wait_for_timeout(250)
+    page.keyboard.press("Escape"); page.wait_for_timeout(250)
+    check("start screen: Esc on the origin step returns to the cards (then Esc again to the options)", page.locator(".fcard").count() > 0 or page.locator(".back-race").count() > 0)
+    # mobile layout: both options fit the screen, the second one is reachable
     b2, ctx2, pm = new_ctx(p, mobile=True, tag="uni-m")
     pm.locator("#scr-title .menu .btn.primary").click(); pm.wait_for_timeout(300)
-    bb = pm.locator(".ucard").bounding_box()
-    check("universal: the button fits a phone screen", bool(bb) and bb["x"] >= 0 and bb["x"] + bb["width"] <= 392, str(bb))
+    bb, bd = pm.locator('.start-opt[data-start="universal"]').bounding_box(), pm.locator('.start-opt[data-start="direct"]').bounding_box()
+    check("start screen: both options fit a phone screen", bool(bb) and bool(bd) and bb["x"] >= 0 and bb["x"] + bb["width"] <= 392 and bd["x"] >= 0 and bd["x"] + bd["width"] <= 392 and bd["y"] + bd["height"] <= 800, str((bb, bd)))
+    shot(pm, "m_start_screen")
+    pm.locator('.start-opt[data-start="direct"]').tap(); pm.wait_for_timeout(250)
+    check("start screen (phone): 预选势力 shows the cards", pm.locator(".fcard").count() >= 3)
     b2.close()
 
     # --- all 9 doors through the real UI

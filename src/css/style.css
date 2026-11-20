@@ -116,14 +116,22 @@ html[lang=en] .title-main { font-size: 54px; letter-spacing: .03em; }
 .select-wrap h2 { font-family: var(--font-title); font-size: 28px; letter-spacing: .2em; margin: 4px 0 16px; color: var(--brass-hi); text-shadow: 2px 2px 0 #000; }
 .cards { display: flex; gap: 22px; justify-content: center; align-items: stretch; flex: 0 1 400px; min-height: 0; width: 100%; margin: auto 0; }
 .select-wrap h2 + .cards { margin-top: 0; }
-.ucard { display: flex; flex-flow: row wrap; align-items: baseline; justify-content: center; gap: 2px 12px; flex: 0 0 auto; max-width: 780px; margin: 8px auto 4px; padding: 7px 20px 8px; text-align: center; line-height: 1.25; }
-.ucard b { font-family: var(--font-title); font-size: 16px; letter-spacing: .12em; color: var(--brass-hi); }
-.ucard small { font-size: 12px; color: var(--ink-dim); }
-/* with the "decided by choices" button the page is a little fuller: tighten the vertical gaps so the grid + button fit 1280x720 in both languages */
-.select-wrap.has-u { padding-top: 12px; padding-bottom: 10px; }
-.select-wrap.has-u h2 { margin: 0 0 8px; font-size: 26px; }
-.select-wrap.has-u .cards.many { gap: 6px 8px; }
-.select-wrap.has-u .ucard { margin: 6px auto 2px; }
+/* SPEC §37.8: the opening screen with two big options (main = choices decide the faction, second = pick a faction first) */
+.start-opts { display: flex; flex-direction: column; align-items: center; gap: 18px; margin: auto 0; width: 100%; }
+.start-opt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; width: min(640px, 100%); padding: 16px 28px 18px; text-align: center; line-height: 1.45; cursor: pointer; }
+.start-opt b { font-family: var(--font-title); font-size: 20px; letter-spacing: .14em; color: var(--ink); }
+.start-opt .so-desc { font-size: 14px; color: var(--ink); max-width: 520px; }
+.start-opt small { font-size: 12px; color: var(--ink-dim); }
+.start-opt.main { width: min(780px, 100%); padding: 20px 32px 22px; background: linear-gradient(180deg, color-mix(in srgb, var(--brass) 22%, var(--panel)), var(--panel) 60%); }
+.start-opt.main b { font-size: 28px; color: var(--brass-hi); text-shadow: 2px 2px 0 #000; }
+.start-opt.main .so-desc { font-size: 15px; }
+.start-opt .portrait { height: 110px; width: 100%; display: flex; align-items: flex-end; justify-content: center; --ss: 2.5; }
+.start-opt .portrait .sprite { animation: bob 1.6s steps(2) infinite; }
+.so-badge { position: absolute; top: 10px; right: 12px; padding: 2px 10px; font-size: 11px; letter-spacing: .14em; background: var(--brass-hi); color: #1a140a; }
+.fx-off .start-opt .portrait .sprite { animation: none; }
+body.portrait .start-opts { margin: 8px 0 0; }
+body.portrait .start-opt .portrait { height: 90px; --ss: 2; }
+body.portrait .start-opt.main b { font-size: 22px; }
 .fcard { --bc: var(--accent-lo); flex: 0 1 270px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; border: 0;
   padding: 0 0 14px; margin: calc(2 * var(--pb)); background: linear-gradient(180deg, var(--accent-lo) 0 64px, var(--panel) 64px); transition: transform .12s steps(3); }
 .fcard:hover, .fcard:focus-visible { --bc: var(--accent); transform: translateY(-4px); outline: none; }

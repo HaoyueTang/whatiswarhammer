@@ -165,8 +165,8 @@
     ]};
 
   N.eld_106 = {chapter: 1, scene: "jungle", speaker: SYLVAEN, time: {h: 1},
-    text: L("斗篷人就坐在山脊背面的白石间，像在等你。他的脸太窄，耳朵太尖，眼睛里没有一点温度。\n“回家去，猿人。”他礼貌得过分，“今晚握紧你妹妹的手。”\n他的长枪比他还高。",
-            "The cloaked one sits among the white stones just past the ridge, as if waiting. His face is too narrow, his ears too sharp, his eyes without warmth.\n“Go home, mon-keigh.” He is excessively polite. “Tonight, hold your sister's hand.”\nHis long rifle is taller than he is."),
+    text: L("斗篷人就坐在山脊背面的白石间，像在等你。他的脸太窄，耳朵太尖，眼睛里没有一点温度。\n“回家去，猿人。”他礼貌得过分，“我是游侠西尔凡。今晚握紧你妹妹的手。”\n他的长枪比他还高。",
+            "The cloaked one sits among the white stones just past the ridge, as if waiting. His face is too narrow, his ears too sharp, his eyes without warmth.\n“Go home, mon-keigh.” He is excessively polite. “I am Sylvaen, a Ranger. Tonight, hold your sister's hand.”\nHis long rifle is taller than he is."),
     codex: ["eld_rangers", "eld_monkeigh"],
     choices: [
       C("“你是谁？为什么这么说？”", "“Who are you? Why say that?”", "eld_107",
@@ -508,8 +508,8 @@
     ]};
 
   N.eld_203 = {chapter: 2, scene: "ruins", speaker: TAETHRA, time: {h: 2},
-    text: L("黄昏，白石环中间的空气裂开了，像水面被手指划开。\n几个戴高盔的瘦长身影走出光里，最后一位身披长袍，几颗符文石绕着她缓缓旋转。\n她看了你很久，像在读一本只有她懂的书。“就是这一根线。”",
-            "At dusk the air within the ring of white stones splits like water parted by a finger.\nTall, slender figures in high helms step out of the light. The last wears long robes; rune-stones circle her slowly.\nShe studies you a long time, like a book only she can read. “This is the thread.”"),
+    text: L("黄昏，白石环中间的空气裂开了。\n几个戴高盔的瘦长身影走出光里，最后一位身披长袍，几颗符文石绕着她缓缓旋转。\n她看了你很久，像在读一本只有她懂的书。“我是先知塔艾丝拉。就是这一根线。”",
+            "At dusk the air within the ring of white stones splits.\nTall, slender figures in high helms step out of the light. The last wears long robes; rune-stones circle her slowly.\nShe studies you a long time, like a book only she can read. “I am Farseer Taethra. This is the thread.”"),
     codex: ["eld_farseer", "eld_aeldari"],
     choices: [
       C("“你们是谁？”", "“Who are you?”", "eld_207",
@@ -734,8 +734,8 @@
     ]};
 
   N.eld_308s = {chapter: 3, scene: "webway", speaker: SYLVAEN, time: {h: 2},
-    text: L("石头在你掌心亮起来，像一盏小灯。\n没过多久，一个披斗篷的身影从光里走出来，叹了口气。是山脊上那个人。\n“它本来就是网道的碎片，”他看着石头，“走吧，猿人。别回应那个声音。”",
-            "The stone kindles in your palm like a small lamp.\nBefore long a cloaked figure steps out of the light and sighs. The man from the ridge.\n“It was a shard of the webway all along,” he says, eyeing the stone. “Come, mon-keigh. Don't answer that voice.”"),
+    text: L("石头在你掌心亮起来，像一盏小灯。\n没过多久，一个披斗篷的身影从光里走出来，叹了口气。是山脊上那个游侠西尔凡。\n“它本来就是网道的碎片，”他看着石头，“走吧，猿人。别回应那个声音。”",
+            "The stone kindles in your palm like a small lamp.\nBefore long a cloaked figure steps out of the light and sighs. Sylvaen, the Ranger from the ridge.\n“It was a shard of the webway all along,” he says, eyeing the stone. “Come, mon-keigh. Don't answer that voice.”"),
     effects: {renown: 5, set: {sylvaenWebway: true}},
     choices: [
       C("跟着他走", "Follow him", "eld_307",
@@ -743,8 +743,8 @@
     ]};
 
   N.eld_309 = {chapter: 3, scene: "webway", speaker: VHESSRA, time: {h: 2},
-    text: L("一个人从暗处走出来，和米瑞丝很像，却瘦得像一把刀，盔甲上挂满钩子。\n“一只走丢的猿人。”她笑得很甜，“网道真慷慨。科摩拉的市场正缺新鲜货。”\n她身后的影子里，还有好几双眼睛。",
-            "Someone steps from the dark. She looks like Mireth, but lean as a blade, her armour hung with hooks.\n“A lost mon-keigh.” Her smile is sweet. “How generous the webway is. Commorragh's markets are short of fresh stock.”\nIn the shadows behind her, more eyes."),
+    text: L("一个女人从暗处走出，和米瑞丝很像，却瘦得像一把刀，甲上挂满钩子。\n“一只走丢的猿人。”她笑得很甜，“叫我维丝拉。网道真慷慨。科摩拉的市场正缺新鲜货。”\n她身后的影子里，还有好几双眼睛。",
+            "A woman steps from the dark. She looks like Mireth, but lean as a blade, her armour hung with hooks.\n“A lost mon-keigh.” Her smile is sweet. “Call me Vhessra. How generous the webway is. Commorragh's markets are short of fresh stock.”\nIn the shadows behind her, more eyes."),
     effects: {sanity: -5, set: {metVhessra: true}},
     codex: ["eld_drukhari", "place_commorragh"],
     choices: [

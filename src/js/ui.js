@@ -492,7 +492,7 @@
     settings: null, game: null, screen: "title", busy: false, typer: null, evTyper: null,
     fxOn: true, reduced: false, modals: [], eventOpen: false, cardDone: null, lastTick: 0,
     sceneKey: null, actorKeys: {left: null, right: null}, whisperTimer: null, seed: null,
-    sel: {faction: null}, keepSel: false,
+    sel: {faction: null, mode: null}, keepSel: false,
     loreQueue: [], loreKnown: {}, lore: null, conseq: null,
     cx: {race: "all", type: "all", q: "", sort: "disc", placeRace: "all"}, cxNew: {},
     accent: null, debug: /[?&]debug=1(&|$)/.test(location.search), eggForce: null, eggForcedShown: {}, jokeTimer: null
@@ -594,7 +594,7 @@
     UI.screen = name;
     if (name !== "game") { stopWhispers(); UI.gather = null; drawGatherTag(); }
     if (name === "title") renderTitle();
-    if (name === "select") { if (!UI.keepSel) UI.sel.faction = null; UI.keepSel = false; renderSelect(); }
+    if (name === "select") { if (!UI.keepSel) { UI.sel.faction = null; UI.sel.mode = null; } UI.keepSel = false; renderSelect(); }
     if (name === "title" || name === "select") mood("title");
     if (name === "game") requestAnimationFrame(updateDlgH);
     window.scrollTo(0, 0);
@@ -801,7 +801,26 @@
   function renderSelect() {
     var f = UI.sel.faction && WH.factions[UI.sel.faction];
     if (f && WH.Game.origins(f).length > 1 && !usesBirth(f)) renderOrigins(f);
+    else if (hasUniversal() && UI.sel.mode !== "direct") { UI.sel.faction = null; renderStart(); }     // SPEC §37.8: the two big options come first
     else { UI.sel.faction = null; renderRaces(); }
+  }
+  /* SPEC §37: is the universal birth route (choices decide the faction) available? */
+  function hasUniversal() { var u = WH.universal; return !!(u && u.nodes && u.startNode && WH.Game.hasBirth(u)); }
+  /* the opening screen: ① 由选项决定势力 (main, recommended) ② 预选势力 (the faction cards) */
+  function renderStart() {
+    var u = WH.universal, n = factionList().length, wrap = selectShell(t("start_how"), null, null);
+    wrap.classList.add("start-wrap");
+    var main = h("button", {class: "btn px start-opt main", type: "button", "data-start": "universal", "data-universal": u.id, "data-sfx": "start",
+        "aria-label": t("universal_btn") + " (" + t("start_recommended") + "). " + t("universal_desc") + " " + t("universal_note"),
+        onclick: function () { UI.sel.faction = null; startGame(u.id, WH.Game.BIRTH); }},
+      h("span", {class: "so-badge"}, t("start_recommended")),
+      h("div", {class: "portrait"}, art("sprite", u.playerSprite, null, fcolor(u))),
+      h("b", null, "▶ " + t("universal_btn")), h("span", {class: "so-desc"}, t("universal_desc")), h("small", null, t("universal_note")));
+    var alt = h("button", {class: "btn px start-opt", type: "button", "data-start": "direct", "data-sfx": "select",
+        "aria-label": t("direct_btn") + ". " + t("direct_desc", {n: n}), onclick: function () { UI.sel.mode = "direct"; renderRaces(); }},
+      h("b", null, t("direct_btn")), h("span", {class: "so-desc"}, t("direct_desc", {n: n})));
+    wrap.appendChild(h("div", {class: "start-opts"}, main, alt));
+    setTimeout(function () { if (UI.screen === "select" && !UI.modals.length) main.focus({preventScroll: true}); }, 0);
   }
   function pickRace(f) {
     var os = WH.Game.origins(f);
@@ -810,12 +829,12 @@
     UI.sel.faction = f.id;
     renderSelect();
   }
-  function selectShell(title, sub, backFn) {
+  function selectShell(title, sub, backFn, backLabel) {
     var s = clear($("scr-select"));
     s.appendChild(h("div", {class: "bg"}, art("scene", "title")));
     s.appendChild(h("div", {class: "corner corner-left"},
       h("button", {class: "btn small px home-btn", type: "button", onclick: function () { show("title"); }}, "⌂ " + t("home")),
-      backFn ? h("button", {class: "btn small px back-race", type: "button", onclick: backFn}, "◂ " + t("back_race")) : null));
+      backFn ? h("button", {class: "btn small px back-race", type: "button", onclick: backFn}, "◂ " + (backLabel || t("back_race"))) : null));
     s.appendChild(h("div", {class: "corner"}, langButton()));
     var wrap = h("div", {class: "select-wrap"}, h("h2", null, title), sub ? h("div", {class: "select-sub"}, sub) : null);
     s.appendChild(wrap);
@@ -824,7 +843,7 @@
 
   function renderRaces() {
     var list = factionList();
-    var wrap = selectShell(t("choose_race"), null, null);
+    var wrap = selectShell(t("choose_race"), null, hasUniversal() ? function () { UI.sel.mode = null; UI.sel.faction = null; renderSelect(); } : null, t("back_start"));
     var big = list.length >= 6;                            // SPEC §26: 6+ races → compact cards in a grid (2 rows)
     var cards = h("div", {class: "cards race-cards" + (list.length >= 4 ? " many n" + list.length : "") + (big ? " grid" : ""), role: "list",
       vars: big ? {"--cols": Math.min(5, Math.ceil(list.length / 2))} : null});
@@ -844,14 +863,6 @@
     });
     if (!list.length) cards.appendChild(h("div", {class: "empty-msg"}, h("p", null, t("no_factions")), h("p", null, h("small", null, t("no_factions_hint")))));
     wrap.appendChild(cards);
-    /* SPEC §37: the second way in — one universal birth, the choices decide the faction (prototype) */
-    var u = WH.universal;
-    if (u && u.nodes && u.startNode && WH.Game.hasBirth(u)) {
-      wrap.classList.add("has-u");
-      wrap.appendChild(h("button", {class: "btn px ucard", type: "button", "data-universal": u.id, "data-sfx": "select",
-        "aria-label": t("universal_btn") + ". " + t("universal_sub"), onclick: function () { UI.sel.faction = null; startGame(u.id, WH.Game.BIRTH); }},
-        h("b", null, "▶ " + t("universal_btn")), h("small", null, t("universal_sub"))));
-    }
     var first = cards.querySelector("button");
     if (first) setTimeout(function () { if (!UI.modals.length) first.focus({preventScroll: true}); }, 0);
   }
@@ -3005,6 +3016,7 @@
     if (k === "Escape") {
       if (UI.modals.length) { e.preventDefault(); closeTop(); }
       else if (UI.screen === "select" && UI.sel.faction) { e.preventDefault(); UI.sel.faction = null; renderSelect(); }
+      else if (UI.screen === "select" && UI.sel.mode === "direct" && hasUniversal()) { e.preventDefault(); UI.sel.mode = null; renderSelect(); }
       return;
     }
     if (UI.modals.length || e.ctrlKey || e.metaKey || e.altKey) return;
