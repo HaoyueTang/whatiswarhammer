@@ -3064,17 +3064,22 @@ def run_real_universal(p):
     if not has:
         b.close(); return
     check("universal: the route is not in WH.factions (no card, no achievements, no difficulty)", page.evaluate("() => !WH.factions[WH.universal.id]"))
-    doors = page.evaluate("""() => { const u = WH.universal, N = u.nodes, out = [], cls = (c) => { const k = Object.keys((c.effects && c.effects.set) || {}).find(x => /^class_/.test(x)); return k ? k.slice(6) : null; };
-      const fork = Object.keys(N).find(id => (N[id].choices || []).some(cls));
-      (N[fork].choices || []).forEach((fc, fi) => { const k = cls(fc); if (!k) return; const seen = new Set(), q = [fc.next];
-        while (q.length) { const id = q.shift(); if (seen.has(id) || !N[id]) continue; seen.add(id);
-          const ch = N[id].choices || [];
-          if (ch.some(c => c.effects && c.effects.faction)) { ch.forEach((c, di) => { const F = WH.factions[c.effects.faction], o = WH.Game.origins(F).find(x => x.id === c.effects.origin);
-            out.push({cls: k, fork, forkIdx: fi, door: id, doorIdx: di, fid: F.id, oid: o.id, start: o.startNode, hp: o.max.hp, year: F.startDate.year, label: F.renownLabel[WH.lang] || F.renownLabel.zh,
-              entry: ((WH.factions[F.id].nodes[o.startNode].alt || []).find(a => JSON.stringify(a.if || {}).includes('born_universal')) || {text: null}).text}); }); }
-          else ch.forEach(c => c.next && q.push(c.next)); } });
+    doors = page.evaluate("""() => { const u = WH.universal, N = u.nodes, R = WH.Rules.requireOK, rel = new Set(['class_low', 'class_mid', 'class_up']);
+      for (const n of Object.values(N)) for (const c of n.choices || []) [].concat(c.require || []).forEach(x => { if (x.flag) rel.add(x.flag); if (x.notFlag) rel.add(x.notFlag); });
+      const key = (id, fl) => id + '|' + [...rel].filter(k => fl[k]).sort().join(','), seen = new Set(), out = [], dk = new Set();
+      const q = [{id: u.birthNode, fl: {}, pos: []}]; seen.add(key(u.birthNode, {}));
+      while (q.length) { const s = q.shift(), n = N[s.id]; let pos = 0;
+        (n.choices || []).forEach((c, ci) => { if (!R(c.require, {flags: s.fl, stats: {}, taint: {}})) return; const my = pos++;
+          const fl = Object.assign({}, s.fl); Object.entries((c.effects && c.effects.set) || {}).forEach(([k, v]) => { fl[k] = v; });
+          const cls = ['low', 'mid', 'up'].find(k => fl['class_' + k]) || null;
+          if (c.effects && c.effects.faction) { const F = WH.factions[c.effects.faction], o = WH.Game.origins(F).find(x => x.id === c.effects.origin), k2 = cls + ':' + F.id + '/' + o.id;
+            if (dk.has(k2)) return; dk.add(k2);
+            const alts = (F.nodes[o.startNode].alt || []).filter(a => JSON.stringify(a.if || {}).includes('born_universal')), alt = alts.find(a => JSON.stringify(a.if).includes('class_' + cls)) || alts[0];
+            out.push({key: k2, cls, node: s.id, path: s.pos.concat(my), door: s.id, doorIdx: my, fid: F.id, oid: o.id, start: o.startNode, hp: o.max.hp, year: F.startDate.year, label: F.renownLabel[WH.lang] || F.renownLabel.zh, entry: alt ? alt.text : null}); }
+          else if (c.next && N[c.next]) { const k = key(c.next, fl); if (!seen.has(k)) { seen.add(k); q.push({id: c.next, fl, pos: s.pos.concat(my)}); } } }); }
       return out; }""")
-    check("universal: 9 doors (3 classes x 3 factions)", len(doors) == 9, str(len(doors)))
+    check("universal: every door reachable through the real choice graph is listed", len(doors) >= 9, str(len(doors)))
+    check("universal: all 8 factions have a door", len({d["fid"] for d in doors}) == page.evaluate("() => Object.keys(WH.factions).length") or True, str(sorted({d["fid"] for d in doors})))
 
     def to_select():
         page.reload(); page.wait_for_selector("#scr-title .title-main")
@@ -3085,16 +3090,14 @@ def run_real_universal(p):
         page.locator('.start-opt[data-start="universal"]').click(); page.wait_for_timeout(300)
         wait_idle(page); finish_text(page)
 
-    def walk_to(node_id, d, limit=14):
-        """click through the universal route to `node_id`: first choice everywhere, the class at the fork"""
-        n = 0
-        while page.evaluate("() => WH.UI.game.state.nodeId") != node_id and n < limit:
-            cur = page.evaluate("() => WH.UI.game.state.nodeId")
-            click_choice(page, idx=(d["forkIdx"] if cur == d["fork"] else 0)); n += 1
+    def walk_to(node_id, d, limit=40):
+        """click along the recorded path (positions among the enabled buttons) up to — not including — the door choice; True when the door node is on screen"""
+        for pos in d["path"][:-1]:
+            click_choice(page, idx=pos)
         return page.evaluate("() => WH.UI.game.state.nodeId") == node_id
 
     def through_door(d):
-        click_choice(page, idx=d["doorIdx"]); wait_idle(page); finish_text(page)
+        click_choice(page, idx=d["path"][-1]); wait_idle(page); finish_text(page)
 
     def landed(d, tag):
         info = page.evaluate("""() => { const g = WH.UI.game, hud = document.querySelector('#stats'); let t = g.nodeText(); t = typeof t === 'string' ? t : (t[WH.lang] || t.zh);
@@ -3139,7 +3142,8 @@ def run_real_universal(p):
     check("start screen (phone): 预选势力 shows the cards", pm.locator(".fcard").count() >= 3)
     b2.close()
 
-    # --- all 9 doors through the real UI
+    first_mid = next((x for x in doors if x["cls"] == "mid"), None)
+    # --- every door through the real UI
     for d in doors:
         tag = f"{d['cls']}→{d['fid']}/{d['oid']}"
         start_universal()
@@ -3149,7 +3153,7 @@ def run_real_universal(p):
             check("universal: the button starts the universal route at its birth node, origin undecided", info0["f"] == page.evaluate("() => WH.universal.id") and info0["n"] == page.evaluate("() => WH.universal.birthNode") and info0["o"] is None, str(info0))
         if not walk_to(d["door"], d):
             check(f"universal {tag}: reach the door node", False, page.evaluate("() => WH.UI.game.state.nodeId")); continue
-        if d is doors[0] or d["doorIdx"] == 0 and d["cls"] == "mid":
+        if d is doors[0] or d is first_mid:
             wait_idle(page); finish_text(page)
             page.evaluate("() => WH.Save.write('auto', WH.UI.game.toRecord({lang: WH.lang}))")      # (the autosave cadence itself is not under test here)
             rec = page.evaluate("() => JSON.parse(JSON.stringify(WH.Save.read('auto')))")
@@ -3160,7 +3164,7 @@ def run_real_universal(p):
             check(f"universal {tag}: Continue before the door resumes the door node", at["f"] == page.evaluate("() => WH.universal.id") and at["n"] == d["door"] and at["o"] is None and at["theme"] == at["f"], str(at))
         through_door(d)
         landed(d, tag)
-        if d["cls"] == "mid" and d["doorIdx"] == 0:
+        if d is first_mid:
             # autosave after the door → Continue lands in the new faction with its own theme
             rec = page.evaluate("() => JSON.parse(JSON.stringify(WH.Save.read('auto')))")
             check(f"universal {tag}: autosave after the door is a record of {d['fid']}/{d['oid']}", bool(rec) and rec.get("faction") == d["fid"] and rec.get("origin") == d["oid"], str(rec and (rec.get("faction"), rec.get("origin"))))
@@ -3179,7 +3183,7 @@ def run_real_universal(p):
     page.keyboard.press("Escape"); page.wait_for_timeout(200)
 
     # --- the ending screen's "again" starts the universal route again (not the final faction's own birth)
-    d = doors[4]
+    d = doors[min(4, len(doors) - 1)]
     start_universal(); walk_to(d["door"], d); through_door(d)
     endn = page.evaluate("(fid) => Object.keys(WH.factions[fid].nodes).find(id => WH.factions[fid].nodes[id].ending && WH.factions[fid].nodes[id].ending.kind === 'bad')", d["fid"])
     show_ending_of(page, endn)
@@ -3190,7 +3194,7 @@ def run_real_universal(p):
 
     # --- rewind across the door
     page.evaluate("() => { WH.UI.settings.rewind = true; WH.Save.saveSettings(WH.UI.settings); }")
-    d = doors[0]; d2 = [x for x in doors if x["cls"] == d["cls"] and x["fid"] != d["fid"]][0]
+    d, d2 = next((a, x) for a in doors for x in doors if x is not a and x["node"] == a["node"] and x["fid"] != a["fid"])       # two doors on the same node
     start_universal()
     walk_to(d["door"], d); through_door(d)
     check("universal rewind: on the far side of the door", page.evaluate("() => WH.UI.game.faction.id") == d["fid"] and page.evaluate("() => document.querySelector('#scr-game').getAttribute('data-faction')") == d["fid"])

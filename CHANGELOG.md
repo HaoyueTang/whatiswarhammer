@@ -7,6 +7,8 @@ Format follows Keep a Changelog; versions follow SemVer.
 - **Opening screen with two big options** (SPEC §37.8): after 开始新游戏 you choose how to begin — **由选项决定势力 / Let my choices decide** (recommended, the main way in) or **预选势力 / Pick a faction first** (the faction cards, as before; ◂ 开局方式 / Esc goes back).
 - The first option: one shared birth on Aurex Secundus → your family class (low / mid / up) → a short strand → a **door** with 3 ways out; the door decides the **faction** (and origin) you continue in. 3 classes × 3 factions = 9 doors, each landing on an existing origin opening (which gets a `born_universal` text so it reads right after the door). The faction cards and the §35 per-route birth stay as they are.
 - Engine: `effects.faction` switches the run's faction mid-way (`WH.universal` route outside `WH.factions`, `WH.faction(id)`, flag `born_universal`, `step.factionChanged`); rewind across the door, save/continue before and after the door, the faction theme / HUD repaint, autosave at the door; saves list shows 「出身未定」 before the door.
+### Changed
+- The prologue is undated (「序章」 in place of the date); when you take a door the clock starts at the target faction's own start date, so door texts such as "half a year later" no longer contradict a clock that did not move (SPEC §37.11).
 ### Story
 - **Rule: a new character needs an introduction** (SPEC §37.9). 8 first appearances that had only a name tag now say who the person is: Sylvaen, Farseer Taethra, Vhessra (Aeldari), Ixaril (Chaos), Wazgob da Mek, Kaptin Redgob, the Scarred Veteran (Orks).
 ### Tools
