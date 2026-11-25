@@ -138,8 +138,8 @@
     alt: [ADD(F("savedTeo"), "提奥躺在你旁边的担架上，手还攥着你的手腕。", "Teo lies on the stretcher beside you, still gripping your wrist."),
           ADD(F("knocked"), "领头的是提奥：“听见管子响，我们从浅巷道一路挖过来的。”", "Teo leads them. “Heard the pipe. We dug across from the shallow gallery.”"),
           ADD(F("waitedDark"), "他们挖了一整夜，从头到尾没有一个人点灯。", "They dig all night, and not one of them lights a lamp.")],
-    text: L("不知过了多久，石头被一块块搬开。\n是霍林家的表兄弟们，戴着兜帽，脸色苍白，抬起横梁像抬木板。\n其中一个朝你伸出手。那只手，比人的手长了一截。",
-            "After who knows how long, the stones are lifted away one by one.\nThe Hollin cousins: hooded, pale, lifting beams like planks.\nOne reaches a hand down to you. The hand is a little too long."),
+    text: L("不知过了多久，石头被一块块搬开。\n是矿上人称“霍林家表兄弟”的那伙人，戴着兜帽，脸色苍白，抬起横梁像抬木板。\n其中一个朝你伸出手。那只手，比人的手长了一截。",
+            "After who knows how long, the stones are lifted away one by one.\nThe ones the mine calls the Hollin cousins: hooded, pale, lifting beams like planks.\nOne reaches a hand down to you. The hand is a little too long."),
     effects: {hp: -5},
     choices: [
       C("握住那只手", "Take the hand", "gsc_105", X({renown: 5, set: {tookHand: true}},

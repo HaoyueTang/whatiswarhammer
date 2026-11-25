@@ -68,8 +68,8 @@
     alt: [
       {if: {flag: "born_shared"}, text: L("天亮了。垃圾瀑布一夜只落下冷水。你空着手走回窝棚，已经三天没吃东西了。\n蒂卡蹲在门口等你，昨夜那支调子她也听见了。她说，今天瀑布会下“好货”。",
         "Dawn. All night the garbage falls dropped nothing but cold water. You trudge back to the shack empty-handed; three days now without food.\nTikka is crouched at the door. She heard the tune last night too. Today, she swears, the falls will drop “good stuff.”")},
-      {if: {flag: "born_universal"}, text: L("污池：上巢扔下来的东西，掉到这里都成了宝贝。拾荒队卖光了废铁就散了伙，你在卡尔卡罗斯熬了半年。\n你三天没吃东西了。蒂卡说，今天垃圾瀑布会下“好货”。",
-        "The Sump: whatever the spire throws away becomes treasure down here. The salvage crew sold its scrap and broke up, and you've scraped by on Carcharos for half a year.\nYou haven't eaten in three days. Tikka swears the garbage falls will drop “good stuff” today.")}
+      {if: {flag: "born_universal"}, text: L("污池：上巢扔下来的东西，掉到这里都成了宝贝。拾荒队卖光了废铁就散了伙，你在卡尔卡罗斯熬了半年。\n你三天没吃东西了。同窝棚的女孩蒂卡说，今天垃圾瀑布会下“好货”。",
+        "The Sump: whatever the spire throws away becomes treasure down here. The salvage crew sold its scrap and broke up, and you've scraped by on Carcharos for half a year.\nYou haven't eaten in three days. Tikka, the girl who shares your shack, swears the garbage falls will drop “good stuff” today.")}
     ],
     text: L("污池。上巢扔下来的东西，掉到这里都成了宝贝：半截电线，一只鞋，一颗还会眨的义眼。\n你三天没吃东西了。蒂卡说，今天垃圾瀑布会下“好货”。",
             "The Sump. Anything the spire throws away is treasure down here: half a cable, one shoe, a bionic eye that still blinks.\nYou haven't eaten in three days. Tikka swears the garbage falls will drop “good stuff” today."),
@@ -192,8 +192,8 @@
         "By dawn half the lasgun money has gone on debts, and the uniform is ash in the dealer's brazier. Only the boots are left; you couldn't part with them.\nThree weeks since you ran from the regiment. The commissar must still be looking. Down here nobody asks where you're from. Only what you've got left to trade.")},
       {if: {flag: "born_shared"}, text: L("你压着兜帽回到窝棚，一夜没合眼。三周前你逃出了团，政委一定还在找你。\n激光枪早卖了，军装早烧了，只剩一双军靴舍不得扔。在污池，没人问你从哪来，只问你有什么能换。",
         "You keep your hood down all the way to your shack and don't sleep. Three weeks since you ran from the regiment; the commissar must still be looking.\nThe lasgun's long sold, the uniform long burned; only the boots remain. Down here nobody asks where you're from. Only what you've got to trade.")},
-      {if: {flag: "born_universal"}, text: L("污池。运兵船从奥雷克斯开到卡尔卡罗斯，三周前，你夜里翻了转运港的闸。激光枪卖了，军装烧了，只剩一双军靴舍不得扔。\n团里的政委一定还在找你。在这里，没人问你从哪来，只问你有什么能换。",
-        "The Sump. The troopship ran from Aurex to Carcharos, and three weeks ago you climbed the transit-port gate in the night. The lasgun's sold, the uniform's burned; only the boots remain, too good to throw away.\nThe regiment's commissar must still be looking. Down here nobody asks where you're from. Only what you've got to trade.")}
+      {if: {flag: "born_universal"}, text: L("污池。三周前，奥雷克斯来的运兵船停靠卡尔卡罗斯，你夜里翻了转运港的闸。激光枪卖了，军装烧了，只剩一双军靴舍不得扔。\n团里的政委一定还在找你。在这里，没人问你从哪来，只问你有什么能换。",
+        "The Sump. Three weeks ago the troopship from Aurex put in at Carcharos, and you climbed the transit-port gate in the night. The lasgun's sold, the uniform's burned; only the boots remain, too good to throw away.\nThe regiment's commissar must still be looking. Down here nobody asks where you're from. Only what you've got to trade.")}
     ],
     text: L("污池。三周前你还是星界军。激光枪卖了，军装烧了，只剩一双军靴舍不得扔。\n团里的政委一定还在找你。\n在这里，没人问你从哪来，只问你有什么能换。",
             "The Sump. Three weeks ago you were Astra Militarum. The lasgun's sold, the uniform's burned; only the boots remain, too good to throw away.\nThe regiment's commissar must still be looking.\nDown here nobody asks where you're from. Only what you've got to trade."),

@@ -9,6 +9,10 @@
  * Every speaker of a sub-door node is named in that node's own base text (SPEC §37.9; the intro audit is flag-blind).
  * Helpers as in the faction files. Node ids u_*, all chapter 1. Choice order (= data index) is fixed by brief §3.4 / §7.3; note that the engine's
  * g.choose(i) and the UI's data-i take the position in the VISIBLE list (hideIfLocked choices are omitted), g.choices()[k].index is the data index.
+ * Identity (2026-11-25): three axes are fixed by acts in scenes, never by a menu. FAITH at u_b04 (shared birth: u_faith_creed/machine/kin/none),
+ * PROFESSION at u_<class>_job (u_job_forge/dock/runner · farm/clerk/hauler · scribe/heir/cadet), ALLEGIANCE at u_<class>_side (u_side_order/under/out).
+ * None of them gates a door (engine `require` has no OR); they are read by FAITH_ADDS (job nodes), job adds (side nodes) and resultAlt on doors.
+ * u_b04, u_low_job and u_low_side can precede the GSC door, so they stay timeless too.
  * Text written (text role): each door is a DEPARTURE; the entry node of the chosen origin carries a `born_universal` alt that bridges place/time.
  */
 (function () {
@@ -48,6 +52,14 @@
   var MARROW  = S("dig_leader", "玛罗教授", "Professor Marrow");
   var CULT    = S("tech_priest", "神教收债人", "Cult Debt-Collector");
 
+  /* who you became at the door of u_b04 (faith), shown once in each class's work scene; exactly one fires */
+  var FAITH_ADDS = [
+    ADD("u_faith_creed", "你膝盖上还沾着巷口的灰。", "The alley's dust is still on your knees."),
+    ADD("u_faith_machine", "你拇指上的圣油还没擦掉。", "The shrine's oil is still on your thumb."),
+    ADD("u_faith_kin", "那个弯指的手势，你的手还记得。", "Your hand still remembers the curled-finger sign."),
+    ADD("u_faith_none", "你谁也没拜，心里反倒清净。", "You bowed to nothing, and your head is the clearer for it.")
+  ];
+
   /* ============ Birth · the day before Tithe Day, one siren for the whole city ============ */
   N.u_b01 = {chapter: 1, scene: "hive_hab", speaker: null,
     text: L("什一税日的前一天，黎明。警报从排污井一路响到尖塔顶，整座奥雷克斯二号睁开眼：尖塔的灯，工厂的烟，灰原上穹顶农庄的微光。",
@@ -57,7 +69,17 @@
   N.u_b02 = {chapter: 1, scene: "hive_hab", speaker: VOX,
     text: L("广播伺服用同一个声调念总督府的谕令：“新兵团须在税日前补齐。下层出人，灰原补粮，尖塔清债。”\n门，一扇接一扇关上了。",
             "A vox-servitor reads the governor's decree in one flat tone. “The new regiment is to be filled before Tithe Day. The lower hive gives people, the ash plains give grain, the spire clears its debts.”\nDoors close, one after another."),
-    choices: [C("把话听完", "Hear it to the end", "u_b03")]};
+    choices: [C("把话听完", "Hear it to the end", "u_b04")]};
+
+  N.u_b04 = {chapter: 1, scene: "hive_hab", speaker: null,
+    text: L("广播还在念。你从门口望出去：教会的游行队伍抬着圣像挤过巷口；对面墙上的齿轮神龛，圣油还没干；阴影里，一个光头矿工朝你弯了弯三根手指。",
+            "The broadcast drones on. From the doorway you see a Church procession carrying its icon through the alley mouth; the cog-shrine in the wall opposite, its sacred oil still wet; and in the shadow a bald miner, who curls three fingers at you in a sign."),
+    choices: [
+      C("跪下，等圣像过去", "Kneel until the icon has passed", "u_b03", {effects: {set: {u_faith_creed: true}}, result: L("石板很凉。执事的香炉从你头顶晃过去，没有停。", "The flagstones are cold. The deacon's censer swings over your head and does not stop.")}),
+      C("用拇指蘸一点神龛的圣油", "Touch your thumb to the shrine's oil", "u_b03", {effects: {set: {u_faith_machine: true}}, result: L("油是温的。你把它抹在门轴上，门不响了。", "The oil is warm. You wipe it on the door hinge, and the hinge stops squealing.")}),
+      C("悄悄回他那个手势", "Quietly return the sign", "u_b03", {effects: {set: {u_faith_kin: true}}, result: L("矿工点了点头，像认出一个亲戚，转身没入人群。", "The miner nods as if he has recognised a relative, and is gone into the crowd.")}),
+      C("关上门，谁也不理", "Shut the door on all of them", "u_b03", {effects: {set: {u_faith_none: true}}, result: L("圣像、齿轮、手势，都关在了门外。屋里只剩广播。", "Icon, cog and sign all stay outside. Only the broadcast is left in the room.")})
+    ]};
 
   N.u_b03 = {chapter: 1, scene: "hive_hab", speaker: null,
     text: L("你已到了能被点名的年纪。广播念完，家里没人再瞒你什么：总督府要的那一份，各层不同，各家心里有数。\n你家是……",
@@ -75,14 +97,24 @@
     text: L("第六工厂的班前点名。格鲁斯克监工把明天的班表撕了重写：“名单念到谁，我就少一个人，配额照旧。今天，加班。”\n他身后，一个红袍的征调神甫在替铸造世界清点人手。没人抱怨。",
             "Pre-shift roll call at Manufactorum Six. Overseer Grusk tears up tomorrow's shift sheet and writes a new one. “Whoever the list names, I lose a hand and the quota stays the same. Overtime today.”\nBehind him a red-robed Levy-Priest counts hands for the forge world. Nobody complains."),
     choices: [
-      C("低头加班，直到收工", "Keep your head down and work the overtime", "u_low_2", {effects: {set: {u_low_grusk: true}}}),
+      C("低头加班，直到收工", "Keep your head down and work the overtime", "u_low_job", {effects: {set: {u_low_grusk: true}}}),
       C("替神甫把名册送到厂门口", "Carry the priest's roll to the factory gate", "u_low_1m", {effects: {set: {u_low_forge: true}}})
     ]};
 
   N.u_low_1m = {chapter: 1, scene: "manufactorum", speaker: LEVY,
     text: L("厂门口，征调神甫接过名册，捏了捏你的手腕，像在试一柄工具。“格拉维克斯的枪运来，人换回去。第六工厂欠第七熔炉一批人手，自愿者先走。到港分两队：熔炉工牌，或护教军的签筒。”",
             "At the factory gate the Levy-Priest takes the roll and squeezes your wrist, the way you test the grip of a tool. “Gravex's guns come here; hands go back. Manufactorum Six owes the Seventh Furnace a batch of hands, and volunteers sail first. On landing there are two lines: furnace tags, or the Skitarii lot-drum.”"),
-    choices: [C("收工，回居住块", "Clock off and head back to the hab-block", "u_low_2")]};
+    choices: [C("收工，回居住块", "Clock off and head back to the hab-block", "u_low_job")]};
+
+  N.u_low_job = {chapter: 1, scene: "manufactorum", speaker: null,
+    text: L("收工的铃响了。格鲁斯克在发下一季的炉前工牌；货梯口，码头帮的把头拿粉笔往人袖子上划记号；楼梯下，一个帮派小子在找腿快的人，替他跑数字。",
+            "The end-of-shift bell rings. Grusk is handing out next season's furnace tags; at the cargo lift a dock-gang boss chalks a mark on sleeves; under the stairs a ganger's boy wants someone quick on their feet to run numbers for him."),
+    alt: FAITH_ADDS,
+    choices: [
+      C("领一块炉前工牌", "Take a furnace tag", "u_low_2", {effects: {set: {u_job_forge: true}}, result: L("工牌还带着上一个人的汗。从今天起，你是炉前工。", "The tag still carries the last man's sweat. From today you are a furnace hand.")}),
+      C("伸出袖子，让把头划一道", "Hold out your sleeve for the chalk", "u_low_2", {effects: {set: {u_job_dock: true}}, result: L("粉笔一道，白得刺眼。从今天起，你是码头帮的人。", "One chalk stroke, glaring white. From today you belong to the dock gang.")}),
+      C("替帮派小子跑数字", "Run numbers for the ganger's boy", "u_low_2", {effects: {set: {u_job_runner: true}}, result: L("他往你手心写了一串数。记住，送到，别问是谁的。", "He writes a string of numbers on your palm. Remember them, deliver them, never ask whose.")})
+    ]};
 
   N.u_low_2 = {chapter: 1, scene: "hive_hab", speaker: RECRUIT,
     text: L("收工回到居住块，楼梯间摆起了征兵桌。中士拍着桌上的钱袋：“自愿的，自己挑团，赏钱当场发。等抽签的——总督府塞哪算哪。”\n桌前的凳子空着。",
@@ -95,17 +127,31 @@
   N.u_low_2v = {chapter: 1, scene: "hive_hab", speaker: VETERAN,
     text: L("断腿老兵坐在桌边，空裤管垂在烟里。“绿皮咬的，”他拍拍木头假腿，“没人赔。”\n他压低声音：“听句实话。奥雷克斯有个连要去伊斯卡隆守船坞。没赏钱，不打仗，就守一道门。”",
             "A one-legged veteran sits by the table, his empty trouser leg hanging in the smoke. “Greenskins did that,” he says, tapping the wooden stump. “Nobody paid me for it.”\nHe lowers his voice. “Take a tip. An Aurex company is going to guard the breaker docks on Iskaron. No bounty, no fighting. Just a gate.”"),
-    choices: [C("天黑了，回家", "Night falls; go home", "u_low_3")]};
+    choices: [C("天黑了，回家", "Night falls; go home", "u_low_side")]};
 
   N.u_low_2d = {chapter: 1, scene: "underhive", speaker: MATE,
     text: L("码头酒馆挨着货梯。凯辛矿船“忍耐号”的大副摊开名册，招九号井的人：“缺人，最深处给双倍工分，路费拿矿抵。”\n邻桌，补给船的事务长招舱工，去卡尔卡罗斯港和更远处，到港结清。没人多问。",
             "The dockside bar sits beside the cargo lifts. The mate of the Kessin ore ship Endurance has a roll open on the table, signing hands for Shaft Nine. “Short-handed. Double points at the deepest face. Passage paid off in ore.”\nAt the next table a supply-ship purser hires hold-hands for Carcharos Port and beyond, settled on arrival. Nobody asks questions."),
-    choices: [C("喝完这杯，回家", "Finish your cup and go home", "u_low_3")]};
+    choices: [C("喝完这杯，回家", "Finish your cup and go home", "u_low_side")]};
+
+  N.u_low_side = {chapter: 1, scene: "hive_hab", speaker: null,
+    text: L("回家的楼道里，靴声炸开：执法者在追一个偷配给票的小子。他钻进你家门边的管道井，看了你一眼。楼梯口，一个外地口音的行商冷眼数着执法者的人数。",
+            "On the stairs home, boots crash: enforcers are after a boy who stole ration chits. He slides into the pipe shaft beside your door and looks at you once. At the stairhead a trader with an off-world accent coolly counts the enforcers."),
+    alt: [
+      ADD("u_job_forge", "你领口挂着新工牌，执法者没多看你一眼。", "With the new tag at your collar, the enforcers do not look at you twice."),
+      ADD("u_job_dock", "你袖子上的粉笔记号，那小子认得。", "The boy knows the chalk mark on your sleeve."),
+      ADD("u_job_runner", "那小子你认识：他也替人跑数字。", "You know the boy: he runs numbers too.")
+    ],
+    choices: [
+      C("朝管道井指了指", "Point at the pipe shaft", "u_low_3", {effects: {set: {u_side_order: true}}, result: L("执法者把他拖了出来。领头的记下你的门牌，算是夸奖。", "The enforcers drag him out. Their leader notes your door number, which is his way of praising you.")}),
+      C("用身子挡住井盖", "Stand in front of the shaft cover", "u_low_3", {effects: {set: {u_side_under: true}}, result: L("靴声往楼上去了。井里传来两下轻敲：他记着了。", "The boots go on upstairs. Two soft knocks come from the shaft: he will remember.")}),
+      C("不管他们，去问行商的船", "Ignore them; ask the trader about his ship", "u_low_3", {effects: {set: {u_side_out: true}}, result: L("行商笑了：“问船的人，心已经不在这儿了。”", "The trader smiles. “Anyone who asks about ships has already left in his heart.”")})
+    ]};
 
   /* ROAD of the low class */
   N.u_low_3 = {chapter: 1, scene: "hive_hab", speaker: null,
-    text: L("夜里，一家人围着一盏灯。母亲把每个人的工牌擦了一遍，放回桌上，没人说话。\n灯油只够烧到天亮。明天，名单就要贴出来。",
-            "Night, and the family sits round a single lamp. Mother wipes every work-tag clean and sets them back on the table. Nobody speaks.\nThere is oil for the lamp until dawn. Tomorrow the list goes up."),
+    text: L("夜里，一家人围着一盏灯。母亲把每个人的工牌擦了一遍，放回桌上，没人说话。\n灯油只够烧到天亮。明天，名单就下来了。",
+            "Night, and the family sits round a single lamp. Mother wipes every work-tag clean and sets them back on the table. Nobody speaks.\nThere is oil for the lamp until dawn. Tomorrow the names come down."),
     alt: [
       ADD("u_low_forge", "征调神甫说过，征调船后天开。", "The Levy-Priest said the levy ship sails the day after tomorrow."),
       ADD("u_low_docks", "“忍耐号”天亮前离港。", "The Endurance leaves the dock before dawn.")
@@ -113,7 +159,10 @@
     choices: [
       D("不签了，等明天的名单", "Sign nothing; wait for tomorrow's list", "imp_101", "imperium", "hive",
         L("你把工牌塞回领口。明天，名单就下来了。", "You tuck your work-tag back into your collar. Tomorrow the names come down."), null,
-        {resultAlt: [{"if": {flag: "u_low_grusk"}, text: L("你把工牌塞回领口。加班的工时，格鲁斯克一笔笔记着。明天，名单就下来了。", "You tuck your work-tag back into your collar. Grusk logged every overtime hour, line by line. Tomorrow the names come down.")}]}),
+        {resultAlt: [{"if": {flag: "u_low_grusk"}, text: L("你把工牌塞回领口。加班的工时，格鲁斯克一笔笔记着。明天，名单就下来了。", "You tuck your work-tag back into your collar. Grusk logged every overtime hour, line by line. Tomorrow the names come down.")},
+          {"if": {flag: "u_side_order"}, text: L("你把工牌塞回领口。执法者记过你的门牌，明天的名单未必记得。", "You tuck your work-tag back into your collar. The enforcers noted your door; tomorrow's list may not care.")},
+          {"if": {flag: "u_side_under"}, text: L("你把工牌塞回领口。管道井里又轻敲了两下。明天，名单就下来了。", "You tuck your work-tag back into your collar. Two soft knocks come from the pipe shaft again. Tomorrow the names come down.")},
+          {"if": {flag: "u_side_out"}, text: L("你把工牌塞回领口，心里还数着行商说的船期。明天，名单就下来了。", "You tuck your work-tag back into your collar, still counting the trader's sailing days. Tomorrow the names come down.")}]}),
       C("回楼梯间，征兵桌还没收", "Back to the stairwell; the table's still out", "u_low_door"),
       C("去码头，找“忍耐号”", "Go to the docks and find the Endurance", "u_low_ship", ONLY("u_low_docks")),
       C("去厂门口，找征调神甫", "Go to the factory gate and the Levy-Priest", "u_low_levy", ONLY("u_low_forge"))
@@ -121,17 +170,19 @@
 
   /* SUB: the army (recruiting table) */
   N.u_low_door = {chapter: 1, scene: "hive_hab", speaker: VETERAN,
-    text: L("天黑了，征兵桌还没收。断腿老兵吐出一口烟：“线列团经卡尔卡罗斯去尘落星打绿皮，赏钱厚，死得快。驻防团守海湾，赏钱薄，对面的白船只做买卖。”",
-            "Dusk, and the recruiting table is still out. A one-legged veteran blows out smoke. “Line regiments go through Carcharos to Dustfall to fight greenskins: fat bounty, quick graves. Garrison regiments watch the Gulf: thin bounty, and the white ships across it only trade.”"),
+    text: L("夜深了，征兵桌还没收。断腿老兵吐出一口烟：“线列团经卡尔卡罗斯去尘落星打绿皮，赏钱厚，死得快。驻防团守海湾，赏钱薄，对面的白船只做买卖。”",
+            "Deep in the night the recruiting table is still out. A one-legged veteran blows out smoke. “Line regiments go through Carcharos to Dustfall to fight greenskins: fat bounty, quick graves. Garrison regiments watch the Gulf: thin bounty, and the white ships across it only trade.”"),
     alt: [
       ADD("u_low_vet", "老兵还在原地，像是在等你。", "The veteran hasn't moved, as if he has been waiting for you."),
-      ADD("u_low_docks", "你从码头回来，征兵桌还没收。", "You come back from the docks, and the table is still out.")
+      ADD("u_low_docks", "码头酒馆的酒气，还在你袖子上。", "The dockside bar still clings to your sleeve.")
     ],
     choices: [
       D("签线列团，领厚赏钱", "Sign for the line regiment and take the fat bounty", "cha_o_deserter_1", "chaos", "deserter",
-        L("赏钱沉甸甸的，够家里吃一年。老兵压低声音：“卡尔卡罗斯的污池，没人问你从哪来。”", "The bounty is heavy in your hand: a year of food for the family. The veteran drops his voice. “In the Sump on Carcharos, nobody asks where you're from.”")),
+        L("赏钱沉甸甸的，够家里吃一年。老兵压低声音：“卡尔卡罗斯的污池，没人问你从哪来。”", "The bounty is heavy in your hand: a year of food for the family. The veteran drops his voice. “In the Sump on Carcharos, nobody asks where you're from.”"), null,
+        {resultAlt: [{"if": {flag: "u_side_under"}, text: L("老兵压低声音：“污池里有咱们这样的人。到了，照旧别问名字。”赏钱你留在了家里桌上。", "The veteran drops his voice. “There are people like us in the Sump. When you get there, same as ever: ask no names.” You leave the bounty on the table at home.")}]}),
       D("签驻防团，去海湾边守着", "Sign for the garrison and go stand watch on the Gulf", "tau_o_pow_1", "tau", "pow",
-        L("赏钱只有一半。中士盖了章：“海湾那边安静，安静得很。”", "The bounty is half as much. The sergeant stamps the slate. “Quiet out on the Gulf. Very quiet.”")),
+        L("赏钱只有一半。中士盖了章：“海湾那边安静，安静得很。”", "The bounty is half as much. The sergeant stamps the slate. “Quiet out on the Gulf. Very quiet.”"), null,
+        {resultAlt: [{"if": {flag: "u_side_out"}, text: L("中士盖了章。你早就想离这一切远些。海湾那边安静，正合你意。", "The sergeant stamps the slate. You have wanted to be far from all of this for a long while. Quiet on the Gulf suits you fine.")}]}),
       D("签船坞连队，去伊斯卡隆", "Sign for the dock company bound for Iskaron", "ork_o_guard_1", "orks", "guard",
         L("没有赏钱，只发一件旧大衣。老兵点头：“守门的活，总比挖坟强。”", "No bounty, only an old greatcoat. The veteran nods. “A gate job beats digging graves.”"), ONLY("u_low_vet"))
     ]};
@@ -142,9 +193,10 @@
             "Before dawn at the cargo ramp of the Endurance. The mate holds up a lamp and ticks names off his roll. “Shaft Nine. The last few berths.”\nTwo berths down, the supply ship is loading too. Its purser leans in the hatchway, smiling politely."),
     choices: [
       D("上“忍耐号”，去凯辛挖矿", "Board the Endurance and go dig on Kessin", "gsc_101", "gsc", "miner",
-        L("大副在你手背盖了矿务章：“九号井缺人，最深处给双倍工分。”", "The mate stamps a mining-board mark on the back of your hand. “Shaft Nine is short-handed. Double points at the deepest face.”")),
+        L("大副在你手背盖了矿务章：“九号井缺人，最深处给双倍工分。”", "The mate stamps a mining-board mark on the back of your hand. “Shaft Nine is short-handed. Double points at the deepest face.”"), null,
+        {resultAlt: [{"if": {flag: "u_faith_kin"}, text: L("大副盖章时，你弯了弯三根手指。他的笔停了一下：“九号井。自己人，往深处走。”", "As the mate stamps your hand you curl three fingers. His pen stops for a moment. “Shaft Nine. Family goes to the deep face.”")}]}),
       D("签舱工合同，跟补给船走", "Sign on as a hold-hand on the supply ship", "nec_o_convict_1", "necrons", "convict",
-        L("事务长折好合同，笑得太客气：“到港结清。”", "The purser folds the contract away, smiling too politely. “Settled on arrival.”"))
+        L("事务长折好合同，笑得太客气：“忒萨零号，到港结清。”", "The purser folds the contract away, smiling too politely. “Thessa Null. Settled on arrival.”"))
     ]};
 
   /* SUB: the levy (forge world) */
@@ -153,9 +205,11 @@
             "Before dawn at the factory gate. The Levy-Priest stands behind a counting lectern, two chalk lines on the floor at his feet: the furnace line, the lot-drum line.\n“Choose now,” he says. “On Gravex there is no time to choose.”"),
     choices: [
       D("站进熔炉的队", "Stand in the furnace line", "mech_101", "mechanicus", "menial",
-        L("他扫过你的手腕：“劳力。编号，到港分配。”", "He scans your wrist. “Labour. Number assigned on arrival.”")),
+        L("他扫过你的手腕：“劳力。编号，到港分配。”", "He scans your wrist. “Labour. Number assigned on arrival.”"), null,
+        {resultAlt: [{"if": {flag: "u_faith_machine"}, text: L("他扫过你的手腕，又扫过你拇指上的油渍：“劳力。懂得敬油。到港分配。”", "He scans your wrist, then the oil stain on your thumb. “Labour. Knows to honour the oil. Assigned on arrival.”")}]}),
       D("站进签筒的队", "Stand in the lot-drum line", "mech_o_conscript_1", "mechanicus", "conscript",
-        L("他的镜头停了一瞬：“自愿抽签者，记录在案。”", "His lens pauses for a moment. “Volunteer for the draw. Recorded.”"))
+        L("他的镜头停了一瞬：“自愿抽签者，记录在案。”", "His lens pauses for a moment. “Volunteer for the draw. Recorded.”"), null,
+        {resultAlt: [{"if": {flag: "u_faith_machine"}, text: L("他的镜头停了一瞬。你低声念了半句敬油的祷词。“自愿抽签者，记录在案。”", "His lens pauses for a moment. Under your breath you say half a prayer to the oil. “Volunteer for the draw. Recorded.”")}]})
     ]};
 
   /* ============ Mid · Dome Farm Seven on the ash plains: the grain depot, the salvage crew, the labour ship ============
@@ -165,27 +219,51 @@
     text: L("七号穹顶农庄。母亲把今年的麦袋数了三遍；父亲爬上梯子，拿胶带去粘玻璃顶的裂缝。\n广播里那句“灰原补粮”，谁也没提。",
             "Dome Farm Seven. Mother counts this year's grain sacks a third time; Father climbs a ladder to tape the crack in the glass roof.\nNobody mentions the line from the broadcast: “the ash plains give grain.”"),
     choices: [
-      C("扶好梯子，再去灰烬路口", "Steady the ladder, then walk down to the ash road", "u_mid_2"),
+      C("扶好梯子，再去灰烬路口", "Steady the ladder, then walk down to the ash road", "u_mid_job"),
       C("替父亲去粮站换胶带", "Go to the depot for Father's tape", "u_mid_2v", {effects: {set: {u_mid_valda: true}}})
     ]};
 
   N.u_mid_2v = {chapter: 1, scene: "ship_interior", speaker: ESCORT,
-    text: L("粮站停机坪，去瓦尔达的补给船在装货。瓦尔达星防卫军押船的军士举着单子：“练过民兵的，签个名，管饭有饷。”\n季节工说，那边麦子铺到天边，田里立着黑石头。你背脊发凉：这片田，你梦了多年。",
-            "On the depot pad a supply ship bound for Valda is taking on stores. The Valdan defence-force sergeant escorting it holds up an enlistment sheet. “Trained with the militia? Sign here. Meals and pay.”\nA seasonal hand says the wheat there runs to the horizon, with black stones in the fields. You go cold. You have dreamed that field for years."),
-    choices: [C("揣好胶带，去灰烬路口", "Pocket the tape and walk on to the ash road", "u_mid_2")]};
+    text: L("粮站停机坪，去瓦尔达的补给船在装货。瓦尔达星防卫军押船的军士举着单子：“练过民兵的，签个名，管饭有饷。”\n季节工说，那边麦子铺到天边，田里立着黑石头。你背脊发凉：这石头，你梦了多年。",
+            "On the depot pad a supply ship bound for Valda is taking on stores. The Valdan defence-force sergeant escorting it holds up an enlistment sheet. “Trained with the militia? Sign here. Meals and pay.”\nA seasonal hand says the wheat there runs to the horizon, with black stones in the fields. You go cold. You have dreamed those stones for years."),
+    choices: [C("揣好胶带，去灰烬路口", "Pocket the tape and walk on to the ash road", "u_mid_job")]};
+
+  N.u_mid_job = {chapter: 1, scene: "jungle", speaker: null,
+    text: L("去路口要穿过晒场。农庄的管事在挑人手：收割队缺镰刀手，粮站缺个会记数的，运粮车缺个押车的。他把三块木牌摊在麦袋上，等你伸手。",
+            "The way to the ash road crosses the drying yard. The farm steward is picking hands: the reaping gang lacks a sickle, the depot lacks someone who can count, the grain wagons lack a rider. He lays three wooden tallies on a sack and waits for your hand."),
+    alt: FAITH_ADDS,
+    choices: [
+      C("拿起镰刀手的木牌", "Pick up the reaper's tally", "u_mid_2", {effects: {set: {u_job_farm: true}}, result: L("管事把一柄旧镰刀扔给你：“刃口自己磨。”", "The steward tosses you an old sickle. “Sharpen it yourself.”")}),
+      C("拿起粮站记数的木牌", "Pick up the depot clerk's tally", "u_mid_2", {effects: {set: {u_job_clerk: true}}, result: L("管事递来一块记数板：“少一袋，记你头上。”", "The steward hands you a tally board. “One sack short, and it goes against your name.”")}),
+      C("拿起押车的木牌", "Pick up the wagon rider's tally", "u_mid_2", {effects: {set: {u_job_hauler: true}}, result: L("管事指了指车尾：“坐那儿。路上掉一袋，你下去捡。”", "The steward points at the tailboard. “Sit there. A sack falls off, you get down and fetch it.”")})
+    ]};
 
   N.u_mid_2 = {chapter: 1, scene: "ruins", speaker: SALVAGE,
     text: L("灰烬路边停着两拨外人。拾荒队的头儿蹲在废铁堆上，给每个帮忙装车的孩子一块干肉，数得清清楚楚。\n稍远处，招工船的船长举着合同板：“三年约，先发一个月工钱。”大人们远远看着，谁也没动。",
             "Two groups of outsiders have set up beside the ash road. The salvage boss squats on a heap of scrap and hands every kid who helps load his wagon one strip of dried meat, counted out exactly.\nA little way off, a labour-ship captain holds up a contract slate. “Three-year term, first month paid up front.” The grown-ups watch from a distance. Nobody moves."),
     choices: [
-      C("回农庄吃晚饭", "Head home for supper", "u_mid_door"),
+      C("回农庄吃晚饭", "Head home for supper", "u_mid_side"),
       C("帮拾荒队装车", "Help the salvage crew load", "u_mid_2s", {effects: {set: {u_mid_scrap: true}}})
     ]};
 
   N.u_mid_2s = {chapter: 1, scene: "ruins", speaker: SALVAGE,
     text: L("你帮拾荒队长把废铁抬上车，他按条数给你干肉。“我在卡尔卡罗斯下巢卖货，在伊斯卡隆的船骨市场进货。拆船星上，机灵的孩子守个摊子，就饿不死。”\n他草草写了张条子，收件人是个老摊主。",
             "You help the Salvage Boss heave scrap onto the wagon. He pays out dried meat by the strip, not one more. “I sell in the Carcharos underhive and buy in the ship-bone market on Iskaron. On a breaker world a sharp kid with a stall doesn't starve.”\nHe scrawls a note to an old stallholder he knows."),
-    choices: [C("揣着干肉和条子回家", "Head home with the meat and the note", "u_mid_door")]};
+    choices: [C("揣着干肉和条子回家", "Head home with the meat and the note", "u_mid_side")]};
+
+  N.u_mid_side = {chapter: 1, scene: "jungle", speaker: null,
+    text: L("回去的田埂上，税警的车拦着路，在搜一个私藏麦种的邻居。他把布袋踢进你脚边的沟里。车后，招工船的人隔着栅栏，向税警打听航线。",
+            "On the field path home a tithe-warden's truck blocks the way; they are searching a neighbour who held back seed grain. He kicks the bag into the ditch at your feet. Behind the truck, a man from the labour ship asks the wardens about sailing lanes through the fence."),
+    alt: [
+      ADD("u_job_farm", "你手上有镰刀磨出的新茧。", "There are fresh sickle blisters on your hands."),
+      ADD("u_job_clerk", "你腋下夹着粮站的记数板。", "The depot's tally board is under your arm."),
+      ADD("u_job_hauler", "你身上还有运粮车的灰。", "The grain wagon's dust is still on you.")
+    ],
+    choices: [
+      C("把沟里的布袋指给税警", "Point the wardens to the bag in the ditch", "u_mid_door", {effects: {set: {u_side_order: true}}, result: L("税警拎起布袋，朝你点了点头。邻居没有看你。", "A warden lifts the bag and nods to you. The neighbour does not look at you.")}),
+      C("一脚把布袋踩进泥里", "Tread the bag down into the mud", "u_mid_door", {effects: {set: {u_side_under: true}}, result: L("泥水没过了布袋。税警的车开走后，邻居才敢喘气。", "Muddy water closes over the bag. The neighbour only dares breathe once the truck has gone.")}),
+      C("绕过去，听招工船的人说话", "Walk round and listen to the labour-ship man", "u_mid_door", {effects: {set: {u_side_out: true}}, result: L("他说的地名，你一个也没去过。你把每一个都记住了。", "You have been to none of the places he names. You remember every one.")})
+    ]};
 
   /* ROAD of the mid class */
   N.u_mid_door = {chapter: 1, scene: "jungle", speaker: null,
@@ -197,7 +275,11 @@
     ],
     choices: [
       D("留下，等税官上门", "Stay and wait for the assessor", "imp_o_agri_1", "imperium", "agri",
-        L("父亲在你碗里多添了一勺，什么也没说。", "Father adds an extra spoonful to your bowl and says nothing.")),
+        L("父亲在你碗里多添了一勺，什么也没说。", "Father adds an extra spoonful to your bowl and says nothing."), null,
+        {resultAlt: [
+          {"if": {flag: "u_side_order"}, text: L("父亲在你碗里多添了一勺。沟里那袋麦种的事，他没有问。", "Father adds an extra spoonful to your bowl. He does not ask about the bag in the ditch.")},
+          {"if": {flag: "u_side_under"}, text: L("父亲在你碗里多添了一勺：邻居的麦种保住了，他知道是谁。", "Father adds an extra spoonful to your bowl: the neighbour kept his seed, and Father knows who saw to it.")},
+          {"if": {flag: "u_side_out"}, text: L("父亲在你碗里多添了一勺。你还在想栅栏边听来的航线。", "Father adds an extra spoonful to your bowl. You are still thinking of the sailing lanes you heard at the fence.")}]}),
       C("趁天没黑，再去灰烬路口", "Back to the ash road before dark", "u_mid_road"),
       C("去粮站，找瓦尔达的船", "Go to the depot and the Valda ship", "u_mid_valda", ONLY("u_mid_valda"))
     ]};
@@ -209,22 +291,25 @@
     alt: [ADD("u_mid_scrap", "队长瞥了一眼你兜里露出的条子。", "The boss glances at the note sticking out of your pocket.")],
     choices: [
       D("跟拾荒队上灰烬路", "Join the salvage crew on the ash road", "cha_101", "chaos", "scavenger",
-        L("队头把一块干肉拍进你手里：“卡尔卡罗斯的下巢，什么废铁都收。”", "The boss slaps a strip of dried meat into your hand. “Down in the Carcharos underhive they buy any scrap.”")),
+        L("队长把一块干肉拍进你手里：“卡尔卡罗斯的下巢，什么废铁都收。”", "The boss slaps a strip of dried meat into your hand. “Down in the Carcharos underhive they buy any scrap.”"), null,
+        {resultAlt: [{"if": {flag: "u_side_under"}, text: L("队长把干肉拍进你手里：“下巢不问来路。你这样的人，在那儿活得下去。”", "The boss slaps dried meat into your hand. “The underhive asks nobody where they came from. Your sort lasts down there.”")}]}),
       D("在招工船的合同上按手印", "Press your thumb to the labour ship's contract", "tau_101", "tau", "colonist",
-        L("船长看也没看你的手：“港口卸货，管饭，月结。新卡尔德那边缺人。”", "The captain doesn't even look at your hand. “Dock work, meals included, paid monthly. New Calder is short of hands.”")),
+        L("船长看也没看你的手：“港口卸货，管饭，月结。新卡尔德那边缺人。”", "The captain doesn't even look at your hand. “Dock work, meals included, paid monthly. New Calder is short of hands.”"), null,
+        {resultAlt: [{"if": {flag: "u_side_out"}, text: L("你按下手印，没有回头。新卡尔德缺人。你只要一个没人认识你的港口。", "You press your thumb down and do not look back. New Calder is short of hands. All you want is a port where nobody knows you.")}]}),
       D("拿着队长的条子去伊斯卡隆", "Take the boss's note to Iskaron", "ork_101", "orks", "scrap",
         L("队长把你塞上一艘废铁货船：“到了船骨市场，找老摊主。”", "The boss shoves you onto a scrap freighter. “At the ship-bone market, ask for the old stallholder.”"), ONLY("u_mid_scrap"))
     ]};
 
   /* SUB: the depot pad (supply ship to Valda) */
   N.u_mid_valda = {chapter: 1, scene: "ship_interior", speaker: ESCORT,
-    text: L("粮站的停机坪上，补给船的舱门还开着。押船的军士把征兵单递到你面前，笔就夹在单子上。\n几个回乡的季节工传着酒壶，没人劝你。船两天后起飞。",
-            "On the depot pad the supply ship's hatch is still open. The escort sergeant holds the enlistment sheet out to you, a pen clipped to it.\nSome seasonal hands heading home pass a flask round, and nobody tries to persuade you. The ship lifts off in two days."),
+    text: L("粮站的停机坪上，补给船的舱门还开着。押船的军士把征兵单递到你面前，笔就夹在单子上。\n几个回乡的季节工传着酒壶，没人劝你。船装完货就起飞。",
+            "On the depot pad the supply ship's hatch is still open. The escort sergeant holds the enlistment sheet out to you, a pen clipped to it.\nSome seasonal hands heading home pass a flask round, and nobody tries to persuade you. The ship lifts off as soon as it is loaded."),
     choices: [
       D("在军士的单子上签名", "Sign the sergeant's sheet", "eld_o_trooper_1", "aeldari", "trooper",
         L("军士把单子叠进胸袋：“落地那天，就发军服。”", "The sergeant folds the sheet into his breast pocket. “You get a uniform the day we land.”")),
       D("不签，买一个货舱角落", "Don't sign; buy a corner of the hold", "eld_o_pilgrim_1", "aeldari", "pilgrim",
-        L("你把攒下的钱都交给船员。梦里那片田，就是这艘船的去处。", "You hand the crew everything you saved. The field from your dream is where this ship is going."))
+        L("你把攒下的钱都交给船员。梦里那圈石头，就在这艘船要去的地方。", "You hand the crew everything you saved. The ring of stones from your dream stands where this ship is going."), null,
+        {resultAlt: [{"if": {flag: "u_faith_creed"}, text: L("你把钱都交给船员，默念了一句祷词。梦里那圈石头，你当它是圣像给的指引。", "You hand the crew everything and say a prayer under your breath. The ring of stones from your dream, you take for a sign from the icon.")}]})
     ]};
 
   /* ============ Up · House Serrin, spire level ninety: the debt is due ============
@@ -234,27 +319,51 @@
     text: L("尖塔第九十层，赛伦家的账房。老管家抄着总督府的谕令，抄到“尖塔清债”四个字，笔停了很久。\n账本上的红字，比黑字多。",
             "Level ninety of the spire, the counting-room of House Serrin. The old steward copies out the governor's decree, and at the words “the spire clears its debts” his pen stops for a long time.\nThere is more red than black in the ledger."),
     choices: [
-      C("接过笔，替他抄完", "Take the pen and finish the copy", "u_up_2"),
+      C("接过笔，替他抄完", "Take the pen and finish the copy", "u_up_job"),
       C("翻到红字最多的那一页", "Turn to the page with the most red", "u_up_1c", {effects: {set: {u_up_cult: true}}})
     ]};
 
   N.u_up_1c = {chapter: 1, scene: "hive_spire", speaker: null,
     text: L("最粗的红线，是总督府的什一税。第二条欠着机械神教：尖塔的电，和账房那台旧计算机的租金。\n你摸了摸耳后的插口：十二岁那年装的，好省下一个书记的工钱。\n老管家低声说，神教的收债人今晚也来。",
             "The thickest red line is the governor's tithe. The second is owed to the Cult of the Machine: the spire's power, and the lease on the counting-room's old cogitator.\nYou touch the socket behind your ear. The house had it fitted when you were twelve, to save a clerk's wages.\nThe old steward murmurs that the Cult's debt-collector is coming tonight too."),
-    choices: [C("合上账本，去前厅", "Close the ledger and go to the antechamber", "u_up_2")]};
+    choices: [C("合上账本，去前厅", "Close the ledger and go to the antechamber", "u_up_job")]};
+
+  N.u_up_job = {chapter: 1, scene: "hive_spire", speaker: null,
+    text: L("去前厅的走廊上，老管家拦住你：税册上，家里得给你报一个身份。他一样样数：缮写生，人头税减半；商路继承人，要押上印章；军校生，学费由总督府垫。",
+            "In the corridor to the antechamber the old steward stops you: the house must enter you in the tithe roll as something. He counts them off. A scribe-apprentice pays half the head tax; an heir to the trade route pledges the seal; a cadet has his fees advanced by the governor."),
+    alt: FAITH_ADDS,
+    choices: [
+      C("在“缮写生”一栏签名", "Sign in the scribe-apprentice column", "u_up_2", {effects: {set: {u_job_scribe: true}}, result: L("老管家吹干墨迹：“字好的人，到哪儿都有饭吃。”", "The old steward blows the ink dry. “A good hand eats anywhere.”")}),
+      C("把印章按在“继承人”一栏", "Press the seal in the heir column", "u_up_2", {effects: {set: {u_job_heir: true}}, result: L("印泥很红。老管家低声说：“商路上的债，也归您了。”", "The ink is very red. The old steward murmurs, “The route's debts are yours as well now.”")}),
+      C("在“军校生”一栏签名", "Sign in the cadet column", "u_up_2", {effects: {set: {u_job_cadet: true}}, result: L("老管家量了量你的肩：“制服得改。站直些，少爷。”", "The old steward measures your shoulders. “The uniform will need altering. Stand straighter, young sir.”")})
+    ]};
 
   N.u_up_2 = {chapter: 1, scene: "hive_spire", speaker: DEACON,
     text: L("前厅来了两位客人。教会的执事称赞你案头的字：“卡尔卡罗斯的缮写室缺人。抄一份存档，原本烧掉。”披旧大衣的船长推来一叠没盖章的货单。\n老管家低声说：楼下有位学者，等了一下午，想借钱。",
             "Two visitors wait in the antechamber. A Church deacon praises the writing on your desk. “The scriptorium on Carcharos is short of copyists. One copy kept, the original burned.” A captain in a worn coat pushes a stack of unsealed manifests across.\nThe old steward murmurs that a scholar downstairs has waited all afternoon to ask the house for money."),
     choices: [
-      C("送走客人，回账房", "See them out and go back to the counting-room", "u_up_door"),
+      C("送走客人，回账房", "See them out and go back to the counting-room", "u_up_side"),
       C("下楼，见那位等了一下午的学者", "Go down to the scholar who has waited all afternoon", "u_up_2m", {effects: {set: {u_up_dig: true}}})
     ]};
 
   N.u_up_2m = {chapter: 1, scene: "hive_spire", speaker: MARROW,
     text: L("楼下的学者起身，自称玛罗教授，要去星区边缘的忒萨零号挖东西，缺个金主。她扫一眼屋子，明白这家没钱，仍把价钱压了又压。\n翻过你的抄页，她说：“我付不起钱，只管饭。”她留下了开船的时间。",
             "The scholar downstairs rises and introduces herself as Professor Marrow. She is digging on Thessa Null at the sector's edge and needs a patron. One glance at the room tells her there is no money here, and she haggles anyway.\nShe leafs through your copied pages. “I can't pay you. I can feed you.” She leaves the sailing time."),
-    choices: [C("送她出门，回账房", "See her out and go back to the counting-room", "u_up_door")]};
+    choices: [C("送她出门，回账房", "See her out and go back to the counting-room", "u_up_side")]};
+
+  N.u_up_side = {chapter: 1, scene: "hive_spire", speaker: null,
+    text: L("回账房的楼梯上，仲裁官的人在查走私货单。披旧大衣的船长把一卷纸塞进你袖口，头也不回地走了。窗外，一艘没有徽记的外来船正慢慢靠港。",
+            "On the stairs back to the counting-room the Arbites' men are checking for smuggled manifests. The captain in the worn coat pushes a roll of paper up your sleeve and walks on without a backward look. Outside the window a ship with no crest is easing in to dock."),
+    alt: [
+      ADD("u_job_scribe", "你指头上还有没洗掉的墨。", "The ink has not washed off your fingers yet."),
+      ADD("u_job_heir", "家族印章在你大衣里，沉得很。", "The family seal is heavy inside your coat."),
+      ADD("u_job_cadet", "你不自觉站得笔直，像已经在队列里。", "You stand straight without thinking, as if already in the ranks.")
+    ],
+    choices: [
+      C("把那卷纸交给仲裁官的人", "Hand the roll to the Arbites' men", "u_up_door", {effects: {set: {u_side_order: true}}, result: L("他们记下了船长的名字，也记下了你的。", "They write down the captain's name, and yours.")}),
+      C("扣紧袖口，照常上楼", "Button your cuff and climb on", "u_up_door", {effects: {set: {u_side_under: true}}, result: L("没人拦你。那卷纸贴着手腕，像一张欠条。", "Nobody stops you. The roll lies against your wrist like a note of debt.")}),
+      C("停在窗前，看那艘外来船", "Stop at the window and watch the strange ship", "u_up_door", {effects: {set: {u_side_out: true}}, result: L("它的灯和尖塔的灯不是一个颜色。你看了很久。", "Its lamps are not the colour of the spire's lamps. You watch for a long time.")})
+    ]};
 
   /* ROAD of the up class */
   N.u_up_door = {chapter: 1, scene: "hive_spire", speaker: null,
@@ -266,7 +375,11 @@
     ],
     choices: [
       D("去书房，陪父亲喝酒", "Go to the study and drink with Father", "imp_o_noble_1", "imperium", "noble",
-        L("老管家替你拉开书房的门：“老爷等您一晚上了，次子少爷。”", "The old steward holds the study door open. “The master has waited all evening, young sir. The second-born.”")),
+        L("老管家替你拉开书房的门：“老爷等您一晚上了，二少爷。”", "The old steward holds the study door open. “The master has waited all evening, young master.”"), null,
+        {resultAlt: [
+          {"if": {flag: "u_side_order"}, text: L("老管家替你拉开书房的门：“仲裁官的人夸了您。老爷等着呢，二少爷。”", "The old steward holds the study door open. “The Arbites' men spoke well of you. The master is waiting, young master.”")},
+          {"if": {flag: "u_side_under"}, text: L("老管家替你拉开书房的门，瞥了一眼你扣紧的袖口：“老爷等您一晚上了，二少爷。”", "The old steward holds the study door open and glances at your buttoned cuff. “The master has waited all evening, young master.”")},
+          {"if": {flag: "u_side_out"}, text: L("老管家替你拉开书房的门。那艘外来船的灯，还亮在你眼里。“老爷等着呢，二少爷。”", "The old steward holds the study door open. The strange ship's lamps are still in your eyes. “The master is waiting, young master.”")}]}),
       C("天亮前，带上荐信和货单去码头", "Before dawn, take the letter and manifests to the dock", "u_up_go"),
       C("去前厅，见神教的收债人", "Go to the antechamber: the Cult's collector", "u_up_cult", ONLY("u_up_cult"))
     ]};
@@ -278,9 +391,11 @@
     alt: [ADD("u_up_dig", "最远的泊位上，玛罗教授的考察船也亮着灯。", "On the farthest berth, Professor Marrow's expedition ship is lit too.")],
     choices: [
       D("登上教会的班船", "Board the Church packet ship", "cha_o_scribe_1", "chaos", "scribe",
-        L("你随教会的班船离开奥雷克斯，去卡尔卡罗斯。赛伦家后来再没来过信。", "You leave Aurex on the Church's packet ship, bound for Carcharos. House Serrin never writes again.")),
+        L("你随教会的班船离开奥雷克斯，去卡尔卡罗斯。赛伦家后来再没来过信。", "You leave Aurex on the Church's packet ship, bound for Carcharos. House Serrin never writes again."), null,
+        {resultAlt: [{"if": {flag: "u_faith_creed"}, text: L("上船前，你朝船头的圣像跪了一跪。班船去卡尔卡罗斯。赛伦家后来再没来过信。", "Before boarding you kneel once to the icon at the prow. The packet ship is bound for Carcharos. House Serrin never writes again.")}]}),
       D("替船长盖下那一枚章", "Stamp the captain's manifests with the seal", "tau_o_trader_1", "tau", "trader",
-        L("船长看着未干的印泥，笑了：“海湾那头，没人认得赛伦这个姓。”", "The captain watches the ink dry and grins. “Across the Gulf, nobody knows the name Serrin.”")),
+        L("船长看着未干的印泥，笑了：“海湾那头，没人认得赛伦这个姓。”", "The captain watches the ink dry and grins. “Across the Gulf, nobody knows the name Serrin.”"), null,
+        {resultAlt: [{"if": {flag: "u_side_out"}, text: L("印泥未干。船长笑了：“海湾那头没人认得赛伦。”这正是你想要的。", "The ink is still wet. The captain grins. “Across the Gulf, nobody knows a Serrin.” That is exactly what you wanted.")}]}),
       D("上玛罗教授的考察船", "Board Professor Marrow's expedition ship", "nec_101", "necrons", "archivist",
         L("教授把素描簿和一盏灯塞给你：“不发工钱，管饭。”", "The professor pushes a sketchbook and a lamp at you. “No wages. Meals.”"), ONLY("u_up_dig"))
     ]};
@@ -291,7 +406,8 @@
             "In the antechamber the Cult's debt-collector reads you from head to foot like an inventory sheet. “Payment in kind. It clears the Cult's account only.”\nHe lays out two contracts: the counting floors of Gravex, ten years; or scribe to a magos on a dig, whose last scribe died of data-burn. The contract is transferable."),
     choices: [
       D("把欠款一笔笔背给他听", "Recite the whole debt back to him", "mech_o_savant_1", "mechanicus", "savant",
-        L("他的镜头转向你：“可用。格拉维克斯的计数台，十年。”", "His lens turns on you. “Serviceable. The counting floors of Gravex, ten years.”")),
+        L("他的镜头转向你：“可用。格拉维克斯的计数台，十年。”", "His lens turns on you. “Serviceable. The counting floors of Gravex, ten years.”"), null,
+        {resultAlt: [{"if": {flag: "u_faith_machine"}, text: L("你背完，顺口加了半句敬油的祷词。他的镜头转向你：“可用。且虔诚。计数台，十年。”", "You finish, and add half a prayer to the oil. His lens turns on you. “Serviceable. And devout. The counting floors, ten years.”")}]}),
       D("把耳后的插口转给他看", "Turn the socket behind your ear to him", "nec_o_lexmech_1", "necrons", "lexmech",
         L("他用探针碰了碰插口：“兼容。合同还剩二十九年，可以转让。”", "He touches the socket with a probe. “Compatible. Twenty-nine years left on the contract, transferable.”"))
     ]};
