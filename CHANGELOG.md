@@ -2,9 +2,10 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
-## [Unreleased]
+## [0.6.1] — 2026-11-25
 ### Changed
 - The opening now settles **faith, profession and allegiance through story acts** (kneel to the procession or touch the cog-shrine; take the furnace shift or the dock chalk; point out the runner or hide him) — 7 new prologue nodes (26 → 33), read back in later lines and door departures (SPEC §37.13).
+- 14 of the 20 doors now leave with a line that fits who you became.
 - Story re-read of all 20 doors: 11 small text fixes (who you know on arrival, introductions, time words, EN/ZH matches).
 
 ## [0.6.0] — 2026-11-20 (universal birth, SPEC §37)
