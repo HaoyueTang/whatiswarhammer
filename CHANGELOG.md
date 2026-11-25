@@ -2,6 +2,11 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
+## [Unreleased]
+### Added
+- **Work lines** (SPEC §38): each of the 8 factions gets a new 8–12-scene strand about your actual job there — with choices the rest of the route remembers.
+- **Perspective switches**: scenes seen through someone else's eyes (the officer who reads your list, the enemy, the alien, the machine), marked by a 「视角：…」 banner and a cold-tinted stage.
+
 ## [0.6.1] — 2026-11-25
 ### Changed
 - The opening now settles **faith, profession and allegiance through story acts** (kneel to the procession or touch the cog-shrine; take the furnace shift or the dock chalk; point out the runner or hide him) — 7 new prologue nodes (26 → 33), read back in later lines and door departures (SPEC §37.13).

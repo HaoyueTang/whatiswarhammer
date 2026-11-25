@@ -363,7 +363,146 @@
         "The pill is bitter. Soon after you lie down, that throat-clearing feels very far away.")),
       C("替卡尔守前半夜", "Take Kaal's first watch", "nec_201", O(Q({flag: "kaalTrust"}, true), X({renown: 3, set: {nightWatch: true}},
         "卡尔把哨位最好的位置让给你。“看沙子，”他说，“沙子不该动。”",
-        "Kaal gives you the best spot on the line. “Watch the sand,” he says. “Sand shouldn't move.”")))
+        "Kaal gives you the best spot on the line. “Watch the sand,” he says. “Sand shouldn't move.”"))),
+      C("教授在点夜班的人——站过去", "The Professor is picking a night shift. Step up", "nec_wl_01", X({renown: 3},
+        "教授的笔停在你身上。“你。手稳，还站得住。”",
+        "The Professor's pen stops on you. “You. Steady hands, still on your feet.”"))
+    ]};
+
+  /* ============ Work line (docs/audit/WORKLINE_BRIEF.md) · the night shift down the bore ============
+   * Entry: nec_108 choice 4 -> wl_01 -> wl_02 -> wl_02a -> wl_03 -> wl_pov1 -> wl_04 -> wl_pov2 -> wl_05 -> wl_05a -> wl_06 -> nec_201.
+   * Flags: wl_nec_sent_deeper | wl_nec_pulled_crew (wl_03; read by wl_pov1, wl_04, wl_06, nec_205, nec_210),
+   *        wl_nec_signed_log | wl_nec_true_count (wl_05; read by nec_206, nec_703). */
+  N.nec_wl_01 = {chapter: 2, scene: "dig_site", speaker: MARROW,
+    text: L("玛罗教授把你从队伍里拉出来，塞给你一块记数板。\n“登陆艇天亮走。锻造世界按箱付钱：十二箱符文板，今晚。你带夜班下钻孔，六个人。”\n她没问你愿不愿意。板上已经写好了你的名字。",
+            "Professor Marrow pulls you out of the queue and puts a tally board in your hands.\n“The lander leaves at dawn. The forge world pays by the crate: twelve crates of glyph plates, tonight. You take the night shift down the bore. Six men.”\nShe doesn't ask if you're willing. Your name is already on the board."),
+    choices: [
+      C("接过记数板", "Take the tally board", "nec_wl_02", X({renown: 3},
+        "板子背面是上一任班长的字迹，写到第九箱就断了。",
+        "On the back is the last shift lead's handwriting. It stops at crate nine.")),
+      C("“按箱算，还是按人算？”", "“By the crate, or by the head?”", "nec_wl_02", X({sanity: -3},
+        "“箱，”她说，“人是总督的账。”她已经在看下一张单子了。",
+        "“Crates,” she says. “Heads are the governor's ledger.” She is already reading the next form."))
+    ]};
+
+  N.nec_wl_02 = {chapter: 2, scene: "dig_site", speaker: null,
+    text: L("钻孔底下是一条黑金属走廊。你用蜡纸拓下板上的符文，编号；工人拿凿子把板撬下来装箱。\n老钻手布拉克在孔口挂了块木牌，粉笔写上七个名字。\n“下去几个，上来几个，”他说，“我只信这个。”",
+            "Below the bore runs a corridor of black metal. You rub each plate's glyphs onto wax paper and number it; the men lever the plate off with chisels and crate it.\nBrack, an old driller, hangs a board at the bore mouth and chalks seven names on it.\n“So many down, so many up,” he says. “That's all I trust.”"),
+    choices: [
+      C("拓得快一点", "Rub faster", "nec_wl_02a", X({hp: -5, renown: 3},
+        "蜡纸割破了指腹，黑灰渗进口子里。第四箱钉上了盖。",
+        "Wax paper slices your fingertips and the black dust gets into the cuts. The fourth crate is nailed shut.")),
+      C("每块都拓清楚", "Rub every plate clean", "nec_wl_02a", X({sanity: -3, taint: {tzeentch: 35}},
+        "同一组符文在每块板上重复。你不认识它，但你的手已经会写了。",
+        "One group of glyphs repeats on every plate. You can't read it, but your hand has learned to write it."))
+    ]};
+
+  N.nec_wl_02a = {chapter: 2, scene: "dig_site", speaker: null,
+    text: L("第六箱。最小的那个工人叫泰夫，十六岁，替他爹顶的名额。他的凿子停了。\n“墙里有东西在数数，”他小声说，“咔哒，咔哒。我凿一下，它数一下。”\n另外五个人没停手，也没笑。",
+            "Crate six. The youngest hand is Tev, sixteen, working his father's place on the roster. His chisel has stopped.\n“Something in the wall is counting,” he whispers. “Click. Click. Every time I strike, it counts one.”\nThe other five keep working. Nobody laughs."),
+    choices: [
+      C("让他去搬箱子，离墙远点", "Put him on hauling crates, away from the wall", "nec_wl_03", X({renown: -3, sanity: 3},
+        "少一把凿子，进度慢了一成。泰夫搬箱子时一直在道谢，谢得你心烦。",
+        "One chisel fewer; the pace drops a tenth. Tev thanks you with every crate he hauls, until you wish he'd stop.")),
+      C("“凿你的。数是我的事。”", "“Strike. Counting is my job.”", "nec_wl_03", X({renown: 3, sanity: -3},
+        "他接着凿。你发现自己也在数：他凿一下，墙里咔哒一下。",
+        "He strikes on. You catch yourself counting too: one blow, one click in the wall."))
+    ]};
+
+  N.nec_wl_03 = {chapter: 2, scene: "dig_site", speaker: null,
+    text: L("第八箱装完，走廊上好撬的板没了。再往下一层，板子松得用手就能掰，可灯一到那儿就发绿。\n通讯器里是教授的声音：“十二箱。”\n六个人看着你。布拉克看着木牌。",
+            "After the eighth crate the corridor has no easy plates left. One level down they are loose enough to pull by hand, but lamps turn green there.\nThe Professor's voice on the vox: “Twelve crates.”\nSix men look at you. Brack looks at his board."),
+    choices: [
+      C("派四个人下去", "Send four men down", "nec_wl_pov1", X({renown: 5, sanity: -5, set: {wl_nec_sent_deeper: true}},
+        "你点了四个名字。他们没争，只把水壶留给了布拉克。",
+        "You name four. They don't argue. They just leave their canteens with Brack.")),
+      C("八箱收工，全员升井", "Stop at eight. Everyone up", "nec_wl_pov1", X({renown: -3, sanity: 3, set: {wl_nec_pulled_crew: true}},
+        "你关掉通讯器。布拉克把七个名字一个一个擦掉，擦得很慢。",
+        "You switch off the vox. Brack wipes the seven names off one by one, slowly."))
+    ]};
+
+  N.nec_wl_pov1 = {chapter: 2, scene: "tomb_interior", speaker: null,
+    pov: L("视角：地下的墓穴技师", "POV: the cryptek below"),
+    text: L("他醒得比规程早。上层有七团热，在刮他的墙。\n六千万年里他数过星辰、裂缝和沉睡者。现在他数这七个。\n害虫，还是访客？规程说：先别动手，先叫醒主人。",
+            "He wakes earlier than protocol allows. Seven warm things are on the upper level, scraping his wall.\nIn sixty million years he has counted stars, cracks and sleepers. Now he counts these seven.\nVermin, or visitors? Protocol says: do nothing yet. Wake the master first."),
+    alt: [
+      {if: {flag: "wl_nec_sent_deeper"}, add: L("四团热走过了门槛。他把门合上，记下：样本，四。", "Four warm things cross the threshold. He closes the door and notes: samples, four.")},
+      {if: {flag: "wl_nec_pulled_crew"}, add: L("七团热往上走了。他把数字改回零，有一点失望。", "The seven climb away. He sets the count back to zero, faintly disappointed.")}
+    ],
+    choices: [
+      C("回到你自己", "Back to yourself", "nec_wl_04")
+    ]};
+
+  N.nec_wl_04 = {chapter: 2, scene: "dig_site", speaker: null,
+    text: L("七个人拉着八箱板子升井。最后一个上来的是你。\n你回头看了一眼：下层的入口刚才还开着，现在是一面平墙。\n布拉克在胸口画了个天鹰。“少四箱，”他说，“总比少四个人强。”",
+            "Seven of you haul eight crates up the bore. You come last.\nYou look back once: the way to the lower level, open a moment ago, is a smooth wall.\nBrack signs the aquila on his chest. “Four crates short,” he says. “Better than four men short.”"),
+    alt: [
+      {if: {flag: "wl_nec_sent_deeper"}, text: L("半小时后，绳子自己松了。你把它拉上来，断口平得像刀切。\n下层入口摆着四箱板子，码得比工人码的整齐。没有人。\n布拉克没擦那四个名字。十二箱，够了。",
+        "Half an hour later the rope goes slack. You haul it up; the end is cut as clean as a blade.\nAt the mouth of the lower level stand four crates, stacked neater than any labourer stacks. No men.\nBrack doesn't wipe the four names. Twelve crates. Enough.")}
+    ],
+    choices: [
+      C("去交记数板", "Hand in the tally board", "nec_wl_pov2")
+    ]};
+
+  N.nec_wl_pov2 = {chapter: 2, scene: "dig_site", speaker: null,
+    pov: L("视角：玛罗教授", "POV: Professor Marrow"),
+    text: L("她写报告用好墨水，账单才用铅笔。\n“夜班下井七人，升井七人。灯色正常。钻孔安全，可继续作业。”\n数字是锻造世界买的东西。她在自己名字下面留了一行空格，给班长。两个签名的报告，没人会查。",
+            "She uses the good ink for reports; pencil is for bills.\n“Night shift: seven down, seven up. Lamp colour normal. Bore safe for continued work.”\nNumbers are what the forge world buys. Under her own name she leaves a blank line for the shift lead. Nobody audits a report with two signatures."),
+    choices: [
+      C("回到你自己", "Back to yourself", "nec_wl_05")
+    ]};
+
+  N.nec_wl_05 = {chapter: 2, scene: "dig_site", speaker: MARROW,
+    text: L("教授把报告推过来，笔帽已经拧开。\n“签在这儿。签了，你的名字就在送锻造世界的名单上，下一班船有你的铺位。”\n纸上写着：灯色正常，钻孔安全。你的指缝里还有黑灰。",
+            "The Professor slides the report across, pen already uncapped.\n“Sign here. Signed, your name goes on the list for the forge world, and the next ship has a bunk for you.”\nThe page says: lamp colour normal, bore safe. There is still black dust between your fingers."),
+    alt: [
+      {if: {flag: "wl_nec_sent_deeper"}, add: L("“七上七下。”她念得很平，没有抬眼。", "“Seven down, seven up.” She reads it flat, not looking up.")}
+    ],
+    choices: [
+      C("签字", "Sign", "nec_wl_05a", X({renown: 5, sanity: -5, set: {wl_nec_signed_log: true}, taint: {tzeentch: 35}},
+        "你的签名比她的小。她吹干墨水，把报告锁进第一只样本箱。",
+        "Your signature is smaller than hers. She blows the ink dry and locks the report in the first sample crate.")),
+      C("在页边写上你看见的", "Write what you saw in the margin", "nec_wl_05a", X({renown: -3, sanity: 5, set: {wl_nec_true_count: true}},
+        "“灯是绿的。门会自己关。”她看了很久，没撕，只把那页压进箱底。",
+        "“The lamps were green. The door closes by itself.” She looks a long time. She doesn't tear it, only buries the page at the bottom of the crate.")),
+      C("把笔推回去", "Push the pen back", "nec_wl_05a", X({renown: -5},
+        "“那就不是班长了，”她说，自己在空格里签了个名字。不是你的。",
+        "“Then you were never shift lead,” she says, and signs the blank herself. Not with your name."))
+    ]};
+
+  N.nec_wl_05a = {chapter: 2, scene: "dig_site", speaker: KAAL,
+    text: L("卡尔中士守在警戒线上。夜班下井时，他数过人头。\n“七个下，七个上，”他说，“你是这营地头一个把数对上的班长。”\n他没问箱子。箱子不归他管。",
+            "Sergeant Kaal stands at the cordon. He counted heads when the night shift went down.\n“Seven down, seven up,” he says. “You're the first shift lead in this camp whose numbers match.”\nHe doesn't ask about crates. Crates are not his business."),
+    alt: [
+      {if: {flag: "wl_nec_sent_deeper"}, text: L("卡尔中士守在警戒线上。夜班下井时，他数过人头。\n“七个下去，”他说，“我只看见三个上来。报告上怎么写的？”\n他的手没放在枪上。只是在等。",
+        "Sergeant Kaal stands at the cordon. He counted heads when the night shift went down.\n“Seven went down,” he says. “I saw three come up. What does the report say?”\nHis hand isn't on his rifle. He is only waiting.")}
+    ],
+    choices: [
+      C("“七上七下。报告上这么写的。”", "“Seven down, seven up. So the report says.”", "nec_wl_06", O(Q({flag: "wl_nec_sent_deeper"}, true), X({sanity: -5},
+        "“报告，”卡尔说。他在自己的本子上写了个四，画了个圈。",
+        "“The report,” Kaal says. In his own notebook he writes a four and circles it."))),
+      C("“四个没上来。名字在木牌上。”", "“Four didn't come up. Their names are on the board.”", "nec_wl_06", O(Q({flag: "wl_nec_sent_deeper"}, true), X({sanity: 3, renown: -3, set: {kaalTrust: true}},
+        "卡尔去孔口看了木牌。回来时，他给守夜的班加了两个人。",
+        "Kaal goes to read the board. When he comes back he adds two men to the night watch."))),
+      C("点点头，回帐篷", "Nod and head for the tent", "nec_wl_06", X(null,
+        "“睡吧，”他在你背后说，“今晚我的人守孔口。”",
+        "“Sleep,” he says to your back. “My men have the bore tonight.”"))
+    ]};
+
+  N.nec_wl_06 = {chapter: 2, scene: "dig_site", speaker: ORIEL,
+    text: L("收工的人在水桶边洗手，黑灰洗不掉。奥里尔医师挨个看手上的口子，往每人手里按一片安神药。\n报酬是一张盖印的条子：到港兑付。\n钻孔还在冒冷气。布拉克的木牌还挂在孔口。",
+            "The shift washes at the water butt; the black dust won't come off. Medicae Oriel checks the cuts on each hand and presses a sedative into every palm.\nThe pay is a stamped chit: redeemable in port.\nThe bore-hole still breathes cold. Brack's board still hangs at its mouth."),
+    alt: [
+      {if: {flag: "wl_nec_sent_deeper"}, add: L("牌上还有四个名字。没人去擦。", "Four names are still on it. Nobody wipes them.")},
+      {if: {flag: "wl_nec_pulled_crew"}, add: L("牌子擦干净了。布拉克把他的糊糊分了你一半。", "It is wiped clean. Brack gives you half his gruel.")}
+    ],
+    choices: [
+      C("吃药，和衣躺下", "Take the pill and lie down dressed", "nec_201", X({sanity: 5, set: {sedated: true}},
+        "药片很苦。你把那张条子叠好，压在枕头下面。",
+        "The pill is bitter. You fold the chit and put it under your pillow.")),
+      C("守着孔口坐到半夜", "Sit by the bore mouth until midnight", "nec_201", X({sanity: -3, set: {nightWatch: true}},
+        "你把药片揣进兜里，坐在木牌下面。沙子很静。静得不对。",
+        "You pocket the pill and sit beneath the board. The sand is quiet. Too quiet."))
     ]};
 
   N.nec_201 = {chapter: 2, scene: "dig_site", speaker: null, foe: "canoptek_scarab", time: {h: 5},
@@ -421,7 +560,9 @@
             "Rows of metal skeletons rise from the sand in perfect step, like a parade.\nLasfire punches through their chests. They fall, then stand again, wounds closing like that wall.\n“They don't die!” Kaal roars. “Then don't let them reach us!”"),
     alt: [
       {if: {fromNode: ["nec_202"]}, add: L("天上那架穿梭机的尾焰还没散。", "The shuttle's trail still hangs in the sky.")},
-      {if: {fromNode: ["nec_204"]}, add: L("你怀里还抱着那摞笔记。", "You are still hugging the notes.")}
+      {if: {fromNode: ["nec_204"]}, add: L("你怀里还抱着那摞笔记。", "You are still hugging the notes.")},
+      {if: {flag: "wl_nec_sent_deeper"}, add: L("防线后面少了四个递电池的：今晚下井没上来的那四个。", "The line is four loaders short: the four who went down tonight and never came up.")},
+      {if: {flag: "wl_nec_pulled_crew"}, add: L("你带上来的夜班工人在防线后面递电池，一个不少。", "The night shift you brought up is passing power packs behind the line, every one of them.")}
     ],
     effects: {sanity: -5},
     codex: ["nec_warriors", "nec_reanimation"],
@@ -443,6 +584,10 @@
   N.nec_206 = {chapter: 2, scene: "dig_site", speaker: KAAL, foe: "necron_warrior", time: {h: 1},
     text: L("你们打光了所有电池。三只骷髅按住卡尔，没杀他，把他拖走了，像拖一件行李。\n他扭头冲你喊：“活下去！记下来！”\n然后一切都安静了。",
             "You run every power pack dry. Three skeletons pin Kaal. Not killed: dragged away like luggage.\nHe twists back and shouts: “Live! Write it down!”\nThen everything goes quiet."),
+    alt: [
+      {if: {flag: "wl_nec_signed_log"}, add: L("记下来。你今晚刚签过一份写着“钻孔安全”的报告。", "Write it down. Tonight you signed a report that says the bore is safe.")},
+      {if: {flag: "wl_nec_true_count"}, add: L("记下来。你今晚在页边写过一次真话，压在箱底。", "Write it down. Tonight you wrote the truth once, in a margin, at the bottom of a crate.")}
+    ],
     codex: ["nec_gauss"],
     choices: [
       C("放下枪", "Put the rifle down", "nec_208")
@@ -521,7 +666,9 @@
     text: L("带记号的人被送进矿坑，替金字塔挖掉身上的沙。\n没有鞭子，没有监工，只有一只甲虫，每小时绕你脚边转一圈，测你还剩多少力气。\n第三天，它多停了一会儿。",
             "The marked are sent to the pits to dig sand off the pyramid.\nNo whips, no overseers. Just a scarab that circles your feet every hour, measuring how much strength you have left.\nOn the third day it lingers."),
     alt: [
-      {if: {flag: "quota"}, add: L("甲虫每转一圈，就在沙上划一道勾，跟监工的手法一模一样。", "Each circuit, the scarab scratches a tick in the sand, just like the overseer used to.")}
+      {if: {flag: "quota"}, add: L("甲虫每转一圈，就在沙上划一道勾，跟监工的手法一模一样。", "Each circuit, the scarab scratches a tick in the sand, just like the overseer used to.")},
+      {if: {flag: "wl_nec_sent_deeper"}, add: L("矿坑里没有下井的那四个人。你每天都数一遍。", "The four you sent down are not in the pits. You count every day.")},
+      {if: {flag: "wl_nec_pulled_crew"}, add: L("老钻手布拉克在你旁边挖，把好挖的那一段让给你。", "Brack, the old driller, digs beside you and leaves you the easy stretch.")}
     ],
     effects: {hp: -10},
     choices: [
@@ -1252,7 +1399,9 @@
     text: L("莫丹审判官听完你的故事，一次都没打断。\n“会走路的金属尸体。收藏人类的博物馆。关在笼子里的神。”她合上记录板，“你知道的每件事都是死罪。\n不过，钻头卡在最后几层光上。先帮我把门打开。”",
             "Inquisitor Mordane hears your story without interrupting once.\n“Walking metal corpses. A museum that collects humans. A god in a cage.” She closes her slate. “Everything you know is a capital crime.\nBut the drill is stuck on the last layers of light. First, help me open that door.”"),
     alt: [
-      {if: {flag: "toldTruth"}, add: L("“你是自己说出来的，”她补充，“这一点我记下了。”", "“You told it of your own accord,” she adds. “I've noted that.”")}
+      {if: {flag: "toldTruth"}, add: L("“你是自己说出来的，”她补充，“这一点我记下了。”", "“You told it of your own accord,” she adds. “I've noted that.”")},
+      {if: {flag: "wl_nec_signed_log"}, add: L("她抽出一页发黄的夜班报告。“钻孔安全。这是你的签名。”", "She draws out a yellowed night-shift report. “Bore safe. This is your signature.”")},
+      {if: {flag: "wl_nec_true_count"}, add: L("她抽出一页发黄的报告，页边有字。“灯是绿的。有人说过真话。”", "She draws out a yellowed report with writing in its margin. “The lamps were green. Someone told the truth.”")}
     ],
     effects: {sanity: -5, set: {inqKnows: true}},
     codex: ["imp_inquisition"],

@@ -804,7 +804,99 @@
       C("和米瑞丝并肩走进去", "Walk through beside Mireth", "eld_400",
         RS("拱门那边传来一阵低语，像风吹过一大片草。", "Beyond the arch a murmur rises, like wind across a great field of grass.")),
       C("在拱门下站一会儿，晚点再进", "Linger under the arch; go in later", "eld_401",
-        RS("你在拱门下站到灯光调暗。米瑞丝陪你站着，一句话也没抱怨。", "You stand under the arch until the lights dim. Mireth waits with you and doesn't complain once."))
+        RS("你在拱门下站到灯光调暗。米瑞丝陪你站着，一句话也没抱怨。", "You stand under the arch until the lights dim. Mireth waits with you and doesn't complain once.")),
+      C("拱门边有个游侠在打量你的肩膀", "A Ranger by the arch is sizing up your shoulders", "eld_w01")
+    ]};
+
+  /* ============ Work line (WORKLINE_BRIEF 2026-11-25) · the Ranger's porter ============
+   * eld_307 → w01 → w02 (pov Taethra) → w03 → w04 → w05 (pov Caleth) → w06 → w07 → eld_400.
+   * Flags: wl_eld_porter; wl_eld_stole | wl_eld_told; wl_eld_warned | wl_eld_silent. */
+  var CALETH = S("aeldari_ranger", "游侠卡莱丝", "Caleth the Ranger");
+  var HESKA  = S("hive_foreman", "老赫斯卡", "Old Heska");
+
+  N.eld_w01 = {chapter: 3, scene: "webway", speaker: CALETH, time: {h: 1},
+    text: L("拱门边蹲着一个女游侠，斗篷上全是灰。她报了名字：卡莱丝。\n“先知，借我这件行李半天。泵站里有三颗石头，我们的手一碰，她就闻得到。猿人没有气味。”\n先知没有回头：“线别弄断。”",
+            "A Ranger crouches by the arch, a woman in a cloak grey with dust. She gives her name: Caleth.\n“Farseer, lend me this luggage for half a day. Three stones lie in a pump station. If our hands touch them, She smells it. A mon-keigh has no scent.”\nThe Farseer doesn't turn. “Do not break the thread.”"),
+    choices: [
+      C("接过她递来的空背囊", "Take the empty pack she holds out", "eld_w02",
+        E({renown: 3, set: {wl_eld_porter: true}}, "背囊很轻，里面缝了三个小袋，大小刚好放一颗鸡蛋。", "The pack is light. Three small pockets are sewn inside, each the size of an egg.")),
+      C("“谁付我工钱？”", "“Who pays me?”", "eld_w02",
+        E({set: {wl_eld_porter: true}}, "“你还活着，”卡莱丝说，“这是预付的。”她把背囊挂到你肩上。", "“You are alive,” Caleth says. “That was paid in advance.” She hangs the pack on your shoulder."))
+    ]};
+
+  N.eld_w02 = {chapter: 3, scene: "webway", speaker: null,
+    pov: L("视角：塔艾丝拉先知", "POV: Farseer Taethra"),
+    text: L("一千条线里，有九百条在泵站断掉：猿人开口说了实话，猿人逃跑，卡莱丝开了枪。\n剩下的一百条里，它背着石头回来，肩膀比去时低。\n她不需要它毫发无损。她只需要它回来。她让符文石继续转。",
+            "Of a thousand threads, nine hundred snap at the pump station: the mon-keigh tells the truth aloud, the mon-keigh runs, Caleth fires.\nIn the hundred left, it comes back carrying the stones, its shoulders lower than when it went.\nShe does not need it unharmed. She needs it back. She lets the runes go on turning."),
+    choices: [
+      C("回到你自己", "Back to yourself", "eld_w03")
+    ]};
+
+  N.eld_w03 = {chapter: 3, scene: "manufactorum", speaker: CALETH, time: {h: 2},
+    text: L("侧门开在一座废矿站的泵房里。铁锈，滴水，远处有人类孩子的哭声。\n卡莱丝留在暗处，架起长枪：“他们把石头当护身符，挂在孩子床头。拿回来。别告诉他们那是什么。”\n她没说枪是对着谁的。",
+            "The side gate opens into the pump room of a dead mining station. Rust, dripping water, and far off a human child crying.\nCaleth stays in the dark and sets up her long rifle. “They hang the stones over their children's beds as charms. Bring them back. Do not tell them what they are.”\nShe doesn't say who the rifle is for."),
+    choices: [
+      C("朝哭声走过去", "Walk toward the crying", "eld_w03b",
+        RS("十几个拾荒的人围着一口锅。没人拿枪指你，你是这里第一个看起来更饿的人。", "A dozen scavengers sit round one pot. Nobody aims at you. You are the first person here who looks hungrier than they are."))
+    ]};
+
+  N.eld_w03b = {chapter: 3, scene: "manufactorum", speaker: null, time: {h: 1},
+    text: L("火堆边睡着一个孩子，身上裹着一件会变色的斗篷，是游侠的斗篷，剪短了下摆。\n墙角的碎石下露出一只细长的手，手指被掰开过。\n卡莱丝的同伴没走出这里。拾荒的人只拿走了有用的东西。",
+            "By the fire a child sleeps wrapped in a cloak that shifts its colour: a Ranger's cloak, the hem cut short.\nFrom the rubble in the corner a long, thin hand shows, its fingers prised open.\nCaleth's partner never left this place. The scavengers took only what was useful."),
+    choices: [
+      C("搬几块石头，盖住那只手", "Move a few rocks to cover the hand", "eld_w04",
+        E({sanity: 3}, "你搬了三块。一个拾荒的男人看着你，过来帮你搬了第四块，没问为什么。", "You move three. A scavenger watches, then comes over and helps with a fourth, and doesn't ask why.")),
+      C("别看，去找管事的人", "Don't look. Find whoever is in charge.", "eld_w04",
+        E({sanity: -3, renown: 2}, "你绕开了墙角。你是来搬石头的，不是来认尸的。", "You walk round the corner of the room. You came to carry stones, not to know the dead."))
+    ]};
+
+  N.eld_w04 = {chapter: 3, scene: "manufactorum", speaker: HESKA, time: {h: 3},
+    text: L("管事的是个缺了两根手指的老妇人，人们叫她老赫斯卡。她分给你半碗汤。\n床头果然挂着三颗乳白的石头。“捡来的，”她说，“挂上以后，孩子们不做噩梦了。”\n其中一颗在轻轻发亮，像在听。",
+            "The one in charge is an old woman missing two fingers; they call her Old Heska. She shares half a bowl of soup with you.\nOver the bunks hang three milky stones. “Found them,” she says. “Since we hung them up, the children don't have nightmares.”\nOne of them glows faintly, as if listening."),
+    choices: [
+      C("等他们睡着，把石头摘走", "Wait until they sleep, then take the stones", "eld_w05",
+        E({sanity: -6, renown: 5, set: {wl_eld_stole: true}}, "你喝完了她的汤，半夜摘下三颗石头。最小的孩子翻了个身，没有醒。", "You finish her soup, and in the night you unhook three stones. The smallest child turns over and does not wake.")),
+      C("告诉她：石头里住着死人", "Tell her: the dead live in those stones", "eld_w05",
+        E({sanity: 3, renown: -3, set: {wl_eld_told: true}}, "赫斯卡盯了你很久，自己把石头摘下来，用布包好。“那就送他们回家，”她说，“别让孩子看见。”", "Heska stares at you a long time, then unhooks the stones herself and wraps them in cloth. “Then take them home,” she says. “Don't let the children see.”"))
+    ]};
+
+  N.eld_w05 = {chapter: 3, scene: "manufactorum", speaker: null,
+    pov: L("视角：游侠卡莱丝", "POV: Caleth the Ranger"),
+    text: L("瞄准镜里，猿人坐在锅边喝汤。它的手在抖，背囊放在膝上。\n她的准星在老妇人和它之间来回了十一次。它值一颗子弹吗？值她弟弟在石头里再等一年吗？\n它站起来了，背囊鼓着。她把手指从扳机上挪开。",
+            "Through the scope the mon-keigh sits by the pot, drinking soup. Its hands shake; the pack lies on its knees.\nEleven times her sight has moved between the old woman and it. Is it worth a shot? Is it worth her brother waiting another year inside a stone?\nIt stands, and the pack is full. She takes her finger off the trigger."),
+    choices: [
+      C("……", "...", "eld_w06")
+    ]};
+
+  N.eld_w06 = {chapter: 3, scene: "manufactorum", speaker: CALETH, time: {h: 1},
+    text: L("泵房里，卡莱丝往水泵底座上贴了一枚扁平的东西。\n“门的光他们见过了。门要封，泵房得塌。”\n“这是他们唯一的水泵。”\n“我知道。”她看着你背囊鼓起的地方，“我数过他们。十四个。”",
+            "In the pump room Caleth presses something flat against the base of the pump.\n“They have seen the gate's light. The gate must be sealed, so this room comes down.”\n“It's their only pump.”\n“I know.” She looks at the bulge in your pack. “I counted them. Fourteen.”"),
+    choices: [
+      C("跑回去，叫他们先接满水", "Run back and tell them to fill every vessel first", "eld_w06b",
+        E({hp: -6, sanity: 3, renown: -3, set: {wl_eld_warned: true}}, "你砸着铁门喊醒了他们。回来时卡莱丝没等，塌下的顶梁擦过你的肩。她什么也没说。", "You hammer on the iron door until they wake. Caleth does not wait for you; a falling beam clips your shoulder as you run back. She says nothing.")),
+      C("背好背囊，走进门里", "Shoulder the pack and step through the gate", "eld_w06b",
+        E({sanity: -8, renown: 5, set: {wl_eld_silent: true}}, "你没有回头。身后闷响了一声，然后是水声，然后门合上了。", "You don't look back. Behind you comes one dull thud, then the sound of water, then the gate closes."))
+    ]};
+
+  N.eld_w06b = {chapter: 3, scene: "webway", speaker: null, time: {h: 1},
+    text: L("回程很长。背带勒进肩膀，三颗石头加起来不到一斤，你却越走越慢。\n其中一颗在哼歌，调子很慢，不是灵族的调子。\n你听出来了：是泵站里哄孩子睡觉的那首。它在床头挂了太久，学会了。",
+            "The way back is long. The straps cut into your shoulders; three stones weigh less than a loaf, and still you walk slower and slower.\nOne of them is humming, a slow tune, not an Aeldari one.\nYou know it: the song they used in the pump station to get the children to sleep. It hung over those bunks long enough to learn it."),
+    alt: [A(F("wl_eld_silent"), "你数了一遍：十四个人，一台水泵，三颗石头。数字对不上。", "You count it once: fourteen people, one pump, three stones. The numbers do not balance.")],
+    choices: [
+      C("跟着它一起哼", "Hum along with it", "eld_w07",
+        E({sanity: 4}, "你哼得很难听。石头停了一拍，等你跟上，然后继续。", "You hum badly. The stone waits one beat for you to catch up, then goes on.")),
+      C("把背囊换到另一边肩上，不出声", "Shift the pack to the other shoulder and keep silent", "eld_w07",
+        E({renown: 2}, "你没出声。卡莱丝走在前头，肩膀跟着那调子动了一下，又停住。", "You make no sound. Ahead of you Caleth's shoulders move once to the tune, then stop."))
+    ]};
+
+  N.eld_w07 = {chapter: 3, scene: "webway", speaker: CALETH, time: {h: 2},
+    text: L("网道里，墙后的挠声没有跟着你。背囊里的石头是暖的。\n卡莱丝一颗一颗取出来，贴在额头上，到第三颗时停了很久。\n“你背的是我弟弟，”她说，“泵站的账记在我名下，不记在你名下。但你会记得。”",
+            "In the webway the scratching behind the walls does not follow you. The stones in the pack are warm.\nCaleth takes them out one at a time and holds each to her forehead; at the third she stops a long while.\n“You carried my brother,” she says. “The pump station goes on my account, not yours. But you will remember it.”"),
+    alt: [A(F("wl_eld_warned"), "“你敲门的那几下，我也记下了，”她说，“记在你名下。”", "“The knocking on that door I also wrote down,” she says. “On your account.”"),
+          A(F("wl_eld_told"), "她看了看包石头的那块布，没有扔掉。", "She looks at the cloth the stones were wrapped in, and does not throw it away.")],
+    choices: [
+      C("回到拱门，走进那片光", "Return to the arch and walk into the light", "eld_400",
+        RS("先知还在原地，像你只离开了一口气的工夫。“线还在，”她说。", "The Farseer hasn't moved, as if you were gone for one breath. “The thread holds,” she says."))
     ]};
 
   /* ============ Chapter 4 · The Craftworld ============ */
@@ -814,7 +906,8 @@
     gather: G("港口", "harbour"),
     text: L("拱门那边是塞卢纳的港口。几十个灵族停下脚步，围着看先知带回来的猿人，低语像风吹过草地。\n先知当众开口：“米瑞丝，从今天起，你是客人的看护者。”\n人群里有人轻笑了一声。米瑞丝的耳朵红了。",
             "Beyond the arch lies Selunar's harbour. Dozens of Aeldari stop to stare at the mon-keigh the Farseer brought home; their murmur moves like wind through grass.\nThe Farseer speaks for all to hear. “Mireth. From today you are the guest's keeper.”\nSomeone in the crowd laughs softly. Mireth's ears go red."),
-    alt: [A(F("harlequinFavor"), "一个孩子指着你的脸：“丑角给这个猿人画过记号。”", "A child points at your face. “The Harlequins have marked this mon-keigh.”")],
+    alt: [A(F("harlequinFavor"), "一个孩子指着你的脸：“丑角给这个猿人画过记号。”", "A child points at your face. “The Harlequins have marked this mon-keigh.”"),
+          A(F("wl_eld_porter"), "卡莱丝捧着三颗石头走在前面。人群先给石头让路，再给你。", "Caleth walks ahead with three stones in her hands. The crowd makes way for the stones first, then for you.")],
     codex: ["place_selunar", "eld_craftworlds"],
     choices: [
       C("跟着米瑞丝去住处", "Follow Mireth to your quarters", "eld_401",
@@ -825,7 +918,8 @@
     effects: {sanity: 5},
     text: L("塞卢纳方舟世界。你的房间按“猿人规格”准备：天花板矮一些，一碗水，一把椅子——他们显然查过资料，才知道椅子是什么。\n门口放着一本小册子：《与客人相处须知》。",
             "Craftworld Selunar. Your room has been prepared “to mon-keigh specifications”: a lower ceiling, a bowl of water, one chair. They clearly had to look up what a chair was.\nA pamphlet waits by the door: On Conduct Around the Guest."),
-    alt: [A(FROM("eld_307"), "米瑞丝在门口站定：“先知让我当你的看护者。我就住隔壁。”", "Mireth plants herself at the door. “The Farseer has made me your keeper. I'm next door.”")],
+    alt: [A(FROM("eld_307"), "米瑞丝在门口站定：“先知让我当你的看护者。我就住隔壁。”", "Mireth plants herself at the door. “The Farseer has made me your keeper. I'm next door.”"),
+          A(F("wl_eld_stole"), "你盯着那碗水，想起泵站的半碗汤，和空了的床头。", "You stare at the bowl of water and think of half a bowl of soup, and the bare hooks over the bunks.")],
     codex: ["place_selunar", "eld_craftworlds", "eld_monkeigh"],
     choices: [
       C("翻开小册子", "Open the pamphlet", "eld_401r"),
@@ -845,6 +939,7 @@
   N.eld_402 = {chapter: 4, scene: "craftworld", speaker: ELLARIS, time: {h: 3},
     text: L("走廊上，一位长者正对着墙上的裂缝唱歌。歌声落到哪里，裂缝就在哪里慢慢长拢，像伤口愈合。\n“灵骨，”他头也不回，“方舟的骨头。它听歌，不听锤子。”\n他停下来打量你：“你会唱歌吗，猿人？”",
             "In a corridor an elder sings to a crack in the wall. Wherever his voice falls, the crack slowly knits, like a healing wound.\n“Wraithbone,” he says without turning. “The craftworld's bones. It listens to song, not hammers.”\nHe stops and looks you over. “Can you sing, mon-keigh?”"),
+    alt: [A(F("wl_eld_porter"), "“墙里新来了三个声音，”他说，“其中一个提到过你的肩膀。”", "“Three new voices have come into the wall,” he says. “One of them mentioned your shoulders.”")],
     codex: ["eld_wraithbone", "eld_bonesinger"],
     choices: [
       C("哼一段瓦尔达的收割歌", "Hum a Valda harvest song", "eld_403",
@@ -1180,6 +1275,8 @@
     jump: J("乘小船穿过网道支路", "By skiff along a webway branch"),
     text: L("一艘灵族小船穿过网道支路。西尔凡领航，米瑞丝和两名守护者坐在你对面，先知在船尾闭着眼。\n三天里谁都没多说话。米瑞丝一直在擦枪，擦了一遍又一遍。\n第三天，舱门外透进了真正的阳光。",
             "An Aeldari skiff runs a webway branch. Sylvaen pilots; Mireth and two Guardians sit across from you; the Farseer rests her eyes at the stern.\nIn three days no one says much. Mireth cleans her rifle over and over.\nOn the third day, real sunlight comes through the hatch."),
+    alt: [A(F("wl_eld_silent"), "西尔凡说：“卡莱丝讲过泵站。她说你没回头。我们也都不回头。”", "Sylvaen says, “Caleth spoke of the pump station. She says you did not look back. None of us do.”"),
+          A(F("wl_eld_warned"), "西尔凡说：“卡莱丝讲过泵站。她说你回去敲了门。她没骂你。”", "Sylvaen says, “Caleth spoke of the pump station. She says you went back and knocked. She did not curse you for it.”")],
     choices: [
       C("第一个走出舱门", "Be the first out of the hatch", "eld_601",
         RS("西尔凡侧身让你先过：“猿人先下。这是规矩，刚定的。”", "Sylvaen stands aside. “Mon-keigh first. A rule. As of now.”"))

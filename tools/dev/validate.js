@@ -1090,6 +1090,17 @@ function checkFaction(f) {
   if (!nodes[f.startNode]) err(`${w}: startNode "${f.startNode}" missing`);
   checkOrigins(f, origins, nodes, flagsSet);
   checkBirth(f, nodes, origins);
+  // SPEC §38 perspective switch: pov = L(zh,en); a pov node changes nothing (no stats, roll, flags, ending, gather, codex on the node or its choices)
+  for (const id of ids) {
+    const n = nodes[id];
+    if (n.pov === undefined) continue;
+    checkL(n.pov, `${f.id}/${id}.pov`, 16, 8);
+    const bad = [];
+    if (n.effects) bad.push("node effects"); if (n.ending) bad.push("ending"); if (n.gather) bad.push("gather"); if (n.eventRoll) bad.push("eventRoll");
+    (n.choices || []).forEach((c, i) => { if (c.roll) bad.push(`choice${i + 1}.roll`); if (c.effects && Object.keys(c.effects).length) bad.push(`choice${i + 1}.effects`); if (c.require) bad.push(`choice${i + 1}.require`); });
+    if (bad.length) err(`${f.id}/${id}: a pov node changes nothing (SPEC §38) — found ${bad.join(", ")}`);
+    if ((n.choices || []).length > 2) warn(`${f.id}/${id}: pov node with ${(n.choices || []).length} choices (SPEC §38: 1–2)`);
+  }
   // SPEC §19 taintMod
   if (f.taintMod === undefined) { if (!SAMPLE && TAINT_GUIDE[f.id]) warn(`${w}: no taintMod (SPEC §19; all gods ×1)`); }
   else if (!f.taintMod || typeof f.taintMod !== "object" || Array.isArray(f.taintMod)) err(`${w}.taintMod: must be {khorne,nurgle,tzeentch,slaanesh}`);

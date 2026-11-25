@@ -3170,6 +3170,7 @@ def run_real_universal(p):
             check(f"universal {cls} road {road} ({what}): shows {st['shown']} choices, none greyed (gated doors hidden)", road == st["node"] and shown == st["shown"] and greyed == 0 and shown >= 2, f"{road} {shown} shown / {greyed} greyed")
         check(f"universal {cls}: the prologue's choices change what the road offers", r.get("min") and r.get("max") and r["max"]["shown"] > r["min"]["shown"], str({k: (v or {}).get("shown") for k, v in r.items()}))
     # --- every door through the real UI
+    pov_seen = set()
     for d in doors:
         tag = f"{d['cls']}→{d['fid']}/{d['oid']}"
         start_universal()
@@ -3190,6 +3191,13 @@ def run_real_universal(p):
             check(f"universal {tag}: Continue before the door resumes the door node", at["f"] == page.evaluate("() => WH.universal.id") and at["n"] == d["door"] and at["o"] is None and at["theme"] == at["f"], str(at))
         through_door(d)
         landed(d, tag)
+        if d["fid"] not in pov_seen:                      # SPEC §38: a pov node shows the perspective banner and tints the scene; the next normal node clears it
+            pov_seen.add(d["fid"])
+            r = page.evaluate("""() => { const N = WH.UI.game.faction.nodes, id = Object.keys(N).find(k => N[k].pov); if (!id) return {id: null};
+                WH.UI.renderNode({nodeId: id}); const b = document.getElementById('pov-banner');
+                const o = {id, shown: !!b && !b.hidden, text: b ? b.textContent : '', scr: document.getElementById('scr-game').classList.contains('pov')};
+                WH.UI.renderNode({nodeId: WH.UI.game.state.nodeId}); o.off = !b || b.hidden; o.scrOff = !document.getElementById('scr-game').classList.contains('pov'); return o; }""")
+            check(f"pov {d['fid']}: {r.get('id')} shows the perspective banner, the next node clears it (SPEC §38)", bool(r.get("id")) and r["shown"] and r["scr"] and r["off"] and r["scrOff"] and len(r["text"]) > 4, str(r))
         if d is first_mid:
             # autosave after the door → Continue lands in the new faction with its own theme
             rec = page.evaluate("() => JSON.parse(JSON.stringify(WH.Save.read('auto')))")
