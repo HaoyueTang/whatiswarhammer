@@ -27,6 +27,7 @@
   var IXARIL  = S("chaos_sorcerer", "伊克萨里尔", "Ixaril");
   var VORGATH = S("heretic_astartes", "沃加斯", "Vorgath");
   var STRAND  = S("inquisitor", "斯特兰德审判官", "Inquisitor Strand");
+  var GRATH   = S("mutant", "监工葛拉", "Overseer Grath");
 
   var N = {};
 
@@ -100,7 +101,7 @@
     codex: ["chaos_mutant"],
     choices: [
       C("道谢，陪他聊会儿", "Thank him and stay a while", "cha_104", {effects: {sanity: 5, hp: 5, set: {whistleFriend: true, metWhistle: true}}, result: L("水有铁锈味，却是你喝过最干净的。哨子吹了支小调，说是他妈妈教的。", "The water tastes of rust, and it's the cleanest you've ever had. Whistle whistles a little tune his mother taught him.")}),
-      C("趁他转身偷走水桶", "Steal his bucket when he turns", "cha_103a", {effects: {hp: 15, corruption: 3, set: {robbedWhistle: true, metWhistle: true, wronged_whistle: true}}, result: L("你抱着哨子的水桶狂奔，喝到呛咳。身后，哨音拉得又尖又长，像在哭。", "You bolt with Whistle's bucket and drink till you choke. Behind you his note rises, thin and long, like crying.")})
+      C("趁他转身偷走水桶", "Steal his bucket when he turns", "cha_103a", {effects: {hp: 15, set: {robbedWhistle: true, metWhistle: true, wronged_whistle: true}}, result: L("你抱着哨子的水桶狂奔，喝到呛咳。身后，哨音拉得又尖又长，像在哭。", "You bolt with Whistle's bucket and drink till you choke. Behind you his note rises, thin and long, like crying.")})
     ]};
 
   N.cha_103a = {chapter: 1, scene: "underhive", speaker: TIKKA, time: {h: 3},
@@ -119,7 +120,7 @@
       C("拉着蒂卡钻进管道", "Drag Tikka into the pipes", "cha_105", {result: L("管道又窄又臭。你们挤在黑暗里，听着外面火焰嘶嘶作响，蒂卡一直在咳。", "The pipe is narrow and foul. You huddle in the dark, listening to the flamers hiss, Tikka coughing into your shoulder.")}),
       C("照雕像说的，往左躲", "Do as the statue said: hide left", "cha_105", {require: {flag: "idol"}, hideIfLocked: true, effects: {sanity: -5, corruption: 3, taint: {tzeentch: 5}}, result: L("左边是一堵墙，墙下却有个你从没见过的洞。灯光从头顶扫过去，一次也没停。", "To the left is a wall, and at its foot a hole you've never seen. The lamps sweep overhead and never once stop.")}),
       C("替哨子引开执法官", "Draw the enforcers away from Whistle", "cha_106", {require: {flag: "whistleFriend"}, hideIfLocked: true}),
-      C("指认哨子，换赏金", "Point out Whistle for the bounty", "cha_105", {require: {flag: "metWhistle"}, hideIfLocked: true, effects: {hp: 10, corruption: 4, sanity: -10, set: {betrayedWhistle: true, wronged_whistle: true}}, result: L("你伸手一指。凯德扔给你一张口粮券，看都没看你。远处，哨音断了。", "You point. Kade flicks you a ration chit without looking at you. Somewhere in the dark, a whistle cuts short.")})
+      C("指认哨子，换赏金", "Point out Whistle for the bounty", "cha_105", {require: {flag: "metWhistle"}, hideIfLocked: true, effects: {hp: 10, sanity: -10, set: {betrayedWhistle: true, wronged_whistle: true}}, result: L("你伸手一指。凯德扔给你一张口粮券，看都没看你。远处，哨音断了。", "You point. Kade flicks you a ration chit without looking at you. Somewhere in the dark, a whistle cuts short.")})
     ]};
 
   N.cha_106 = {chapter: 1, scene: "underhive", speaker: KADE, time: {h: 1},
@@ -877,7 +878,8 @@
     codex: ["place_black_warship"],
     choices: [
       C("挨着他坐下，听他讲", "Sit by him and listen", "cha_508", {effects: {sanity: 5, set: {thrallFriend: true}}, result: L("他讲了一夜：哪些舱壁会咬人，哪个监工收贿，集市上什么不能买。你记住了一半。", "He talks all night: which bulkheads bite, which overseer takes bribes, what never to buy at the market. You remember half.")}),
-      C("看看自己的影子", "Look at your shadow", "cha_508", {effects: {corruption: 4, sanity: -5}, result: L("你低下头。影子慢了半拍，才跟着你低头。独眼老人叹了口气，挪远了一点。", "You look down. Your shadow follows half a beat late. The one-eyed thrall sighs and shifts away.")})
+      C("看看自己的影子", "Look at your shadow", "cha_508", {effects: {corruption: 4, sanity: -5}, result: L("你低下头。影子慢了半拍，才跟着你低头。独眼老人叹了口气，挪远了一点。", "You look down. Your shadow follows half a beat late. The one-eyed thrall sighs and shifts away.")}),
+      C("舱门口有人喊：谁会数数？举手", "A shout at the hatch: who can count? Raise your hand", "cha_wl_01")
     ]};
 
   N.cha_508 = {chapter: 5, scene: "ship_interior", speaker: VORGATH, time: {d: 3},
@@ -901,6 +903,92 @@
       C("把肉干揣起来", "Pocket the meat", "cha_506", {result: L("那天夜里，舱灯变成了紫色。独眼老人说：跃迁开始了，抓紧点。", "That night the hold lights turn violet. The one-eyed thrall says: the jump's starting. Hold on.")})
     ]};
 
+    /* ============ Work line (2026-11-25) · the tally-keeper of the lower hold; rejoins at cha_506 ============ */
+  N.cha_wl_01 = {chapter: 5, scene: "ship_interior", speaker: GRATH, time: {h: 4},
+    text: L("舱门口站着个半边脸烙着铁印的女人，腰上挂一串铁牌。独眼老人压低声音：“监工葛拉。别盯她的脸。”\n她扫了一眼举手的你，扔来一截粉笔：“底舱四百一十二张嘴，一天一桶饭。你来记。”",
+            "A woman with a brand across half her face stands in the hatchway, a string of iron tags at her belt. The one-eyed thrall mutters: “Overseer Grath. Don't stare at her face.”\nShe looks over your raised hand and throws you a stub of chalk. “Four hundred and twelve mouths. One bucket a day. You keep the tally.”"),
+    choices: [
+      C("接住粉笔", "Catch the chalk", "cha_wl_02", {result: L("粉笔是骨头磨的。她把一块石板挂上你的脖子：左边记活的，右边记没的。", "The chalk is ground bone. She hangs a slate round your neck: the living on the left, the gone on the right.")})
+    ]};
+
+  N.cha_wl_02 = {chapter: 5, scene: "ship_interior", speaker: GRATH, time: {d: 1},
+    text: L("天亮前你走遍每一排，敲一块铁牌，画一道。昨夜没了九个，你把名字擦掉，石板轻了一点。\n葛拉用鞭柄敲敲桶：“够六十个人吃。线画在哪儿，你定。画错了，你排在线外头。”",
+            "Before dawn you walk every row: tap an iron tag, chalk a stroke. Nine went in the night. You rub their names out and the slate feels a little lighter.\nGrath raps the bucket with her whip-handle. “Feeds sixty. Where the line falls is yours to say. Draw it wrong and you stand outside it.”"),
+    choices: [
+      C("先喂还能干活的", "Feed those who can still work", "cha_wl_03", {effects: {renown: 5, corruption: 4, set: {wl_cha_fed_strong: true}}, result: L("六十个最壮的吃饱了。线外头有个孩子一直看着你的粉笔，没看桶。", "The sixty strongest eat their fill. Outside the line a child keeps watching your chalk, not the bucket.")}),
+      C("先喂最弱的", "Feed the weakest first", "cha_wl_03", {effects: {hp: -10, sanity: 5, renown: -5, set: {wl_cha_fed_weak: true}}, result: L("孩子和病人先吃。夜里有人按住你，照肋骨打了三拳，一句话没说。", "Children and the sick eat first. That night someone pins you down and hits your ribs three times without a word.")}),
+      C("谁给东西，就把谁画进线里", "Chalk in whoever pays", "cha_wl_03", {effects: {hp: 10, corruption: 4, renown: -5}, result: L("一颗金牙，半条毯子，一个承诺。你的铺位暖和了，石板上的线歪了。", "A gold tooth, half a blanket, a promise. Your bunk gets warmer. The line on the slate runs crooked.")})
+    ]};
+
+  N.cha_wl_03 = {chapter: 5, scene: "ship_interior", speaker: VORGATH, time: {d: 1},
+    text: L("第三天，沃加斯低头钻进底舱，整排人往后缩。他不看石板，只看你。\n“船要跃迁，巫师要八个人垫门槛。晚钟之前给我八个名字。”\n“哪八个？”\n“你是记数的。少一个，就写你自己。”",
+            "On the third day Vorgath stoops into the hold and a whole row shrinks back. He doesn't look at the slate. He looks at you.\n“The ship is about to jump. The sorcerer needs eight to lay under the threshold. Eight names before the night bell.”\n“Which eight?”\n“You keep the tally. If it's one short, write your own.”"),
+    choices: [
+      C("拿着石板走进人堆", "Walk into the rows with the slate", "cha_wl_04")
+    ]};
+
+  N.cha_wl_04 = {chapter: 5, scene: "ship_interior", speaker: S("cultist", "塞拉", "Sella"), time: {h: 3},
+    text: L("你走过的地方，人们把铁牌翻过去扣着。只有一个女人没翻，中巢来的织工，手指上还有针茧。\n“我叫塞拉，”她说，“我会缝。帆布、皮甲、伤口都行。”\n她没求你。她只是在报价。",
+            "Where you walk, people turn their iron tags face down. One woman doesn't: a mid-hive weaver with needle calluses still on her fingers.\n“My name is Sella,” she says. “I can sew. Canvas, leather, wounds.”\nShe isn't begging. She is quoting a price."),
+    choices: [
+      C("粉笔停在她的名字上", "The chalk stops over her name", "cha_wl_pov1")
+    ]};
+
+  N.cha_wl_pov1 = {chapter: 5, scene: "ship_interior", speaker: null, pov: L("视角：塞拉", "POV: Sella"),
+    text: L("记数的在我面前站住了。三个早晨，我一直盯着那截粉笔，它比鞭子安静，也比鞭子准。\n我把会的都说了。我没说我女儿，线外头的孩子不算手艺。\n粉笔悬着。我数自己的呼吸。数到九，它还没落下来。",
+            "The tally-keeper stops in front of me. Three dawns I have watched that stub of chalk. It is quieter than the whip, and it never misses.\nI said everything I can do. I did not mention my daughter. A child outside the line is not a trade.\nThe chalk hangs. I count my breaths. Nine, and it still has not come down."),
+    choices: [
+      C("回到你自己", "Back to yourself", "cha_wl_05")
+    ]};
+
+  N.cha_wl_05 = {chapter: 5, scene: "ship_interior", speaker: null, time: {h: 2},
+    text: L("八个名字。底舱里最弱的八个里有塞拉；最横的八个，是每天抢桶、踩别人手的那几个，他们认得你的脸。\n晚钟快响了。粉笔在你手里出了汗。",
+            "Eight names. The eight weakest in the hold include Sella. The eight hardest are the ones who take the bucket every day and tread on other people's hands, and they know your face.\nThe night bell is close. The chalk is sweating in your hand."),
+    choices: [
+      C("写下最弱的八个", "Write the eight weakest", "cha_wl_06", {effects: {sanity: -10, corruption: 7, renown: 5, set: {wl_cha_gave_sella: true}}, result: L("八道粉笔，一道不抖。写到塞拉时，你发现自己已经记住了她名字的笔画。", "Eight strokes, none of them shaky. Writing Sella, you find you already know the shape of her name.")}),
+      C("写下最横的八个", "Write the eight hardest", "cha_wl_06", {effects: {hp: -10, sanity: 5, renown: -5, set: {wl_cha_spared_sella: true}}, result: L("其中一个被拖走前挣开一只手，在你脸上留了一道。塞拉把铁牌翻了过去。", "One of them gets a hand free before he's dragged off and opens your cheek. Sella turns her tag face down.")}),
+      C("写七个，第八行写你自己", "Write seven, and yourself on the eighth line", "cha_wl_06", {effects: {sanity: -5, renown: 10, set: {wl_cha_gave_sella: true}}, result: L("沃加斯看了很久，笑了。他用拇指抹掉你的名字，随手一指：塞拉。你什么也没救下。", "Vorgath looks a long time, then laughs. He wipes your name off with his thumb and points at random: Sella. You have saved no one.")})
+    ]};
+
+  N.cha_wl_06 = {chapter: 5, scene: "ship_interior", speaker: VORGATH, time: {h: 1},
+    text: L("晚钟响了。八个人排成一列往上走，葛拉一个个数过去，和石板对上了。\n沃加斯把石板扔还给你：“帝国也叫人写名单，还骗你说是为了谁好。这儿不骗你。你写了，他们就没了。”",
+            "The night bell rings. Eight people climb the ladder in a line; Grath counts them off against the slate, and it matches.\nVorgath tosses the slate back. “The Imperium has men write lists too, and lies to them about whose good it serves. Nobody lies to you here. You wrote it, and they are gone.”"),
+    alt: [
+      {if: {flag: "wl_cha_gave_sella"}, add: L("塞拉走在第五个。她没回头，只把顶针摘下来，放在梯子口。", "Sella is fifth in line. She doesn't look back. She only takes off her thimble and leaves it by the ladder.")},
+      {if: {flag: "wl_cha_spared_sella"}, add: L("塞拉坐在原地缝一块帆布，针脚很密。她一次也没抬头看你。", "Sella sits where she was, sewing canvas in tight stitches. She doesn't look up at you once.")}
+    ],
+    effects: {sanity: -5},
+    choices: [
+      C("回铺位对账", "Go back to your bunk and balance the slate", "cha_wl_07")
+    ]};
+
+  N.cha_wl_07 = {chapter: 5, scene: "ship_interior", speaker: null, time: {h: 4},
+    text: L("夜里你对账。数目对了三遍，粉笔却自己多画了一道，画在活人那一边。\n那一道没有名字。你盯着它，它像是也在盯着你。\n舱壁里有什么东西，很轻地笑了一声。",
+            "At night you balance the slate. Three times the sum comes out right, and yet the chalk has drawn one stroke more by itself, on the side of the living.\nThe stroke has no name. You stare at it, and it seems to stare back.\nSomething inside the bulkhead laughs, very softly."),
+    choices: [
+      C("把那一道擦掉", "Rub the stroke out", "cha_wl_pov2", {effects: {sanity: 5}, result: L("你用袖子擦了三次。石板干净了，袖子上那道白印却洗不掉。", "You rub it three times with your sleeve. The slate comes clean. The white mark on the sleeve never washes out.")}),
+      C("在那一道旁边写上你的名字", "Write your name beside it", "cha_wl_pov2", {effects: {corruption: 7, renown: 5, taint: {tzeentch: 10}}, result: L("名字一写完，那一道就不动了，像被认领的行李。你睡得很沉。", "Once the name is written the stroke lies still, like luggage that's been claimed. You sleep deeply.")})
+    ]};
+
+  N.cha_wl_pov2 = {chapter: 5, scene: "barracks", speaker: null, pov: L("视角：斯特兰德审判官", "POV: Inquisitor Strand"),
+    text: L("白塔，深夜。沃恩巢都的清剿账：烧毁四十一层；处决人数一栏，书记官只写了“足额”。\n我把它退了回去。数目不清的账，和异端一样会烂。\n失踪名册上有一行没划掉。我用指甲在那个名字下压了一道。",
+            "The white tower, late. The ledger of the Vorne purge: forty-one levels burned, and under executions the clerk has written only “quota met.”\nI send it back. An account that hides its number rots the way heresy does.\nOne line in the register of the missing is not struck through. I press my nail under that name."),
+    choices: [
+      C("……", "...", "cha_wl_08")
+    ]};
+
+  N.cha_wl_08 = {chapter: 5, scene: "ship_interior", speaker: GRATH, time: {d: 1},
+    text: L("跃迁前，葛拉来收石板。她看了看数目，又看了看你，从腰上解下一块空铁牌扔过来。\n“记数的不上石板，”她说，“可你得有块牌子。哪天轮到别人来数你，好找。”",
+            "Before the jump Grath comes for the slate. She checks the sums, then checks you, unhooks a blank iron tag from her belt and throws it over.\n“Tally-keepers don't go on the slate,” she says. “But you need a tag. The day someone else comes to count you, it makes you easier to find.”"),
+    alt: [
+      {if: {flag: "wl_cha_fed_strong"}, add: L("“你喂的那六十个都还站着，”她说，“沃加斯喜欢站着的。”", "“Your sixty are all still standing,” she says. “Vorgath likes them standing.”")},
+      {if: {flag: "wl_cha_fed_weak"}, add: L("“你喂的那些孩子还活着，”她说，“我不懂你图什么。”", "“Those children you fed are still alive,” she says. “I don't see what you get out of it.”")}
+    ],
+    effects: {hp: 10, renown: 3, set: {wl_cha_tally: true}},
+    choices: [
+      C("把铁牌挂上脖子", "Hang the tag round your neck", "cha_506", {result: L("铁牌是凉的。那天夜里，舱灯变成了紫色。独眼老人说：跃迁开始了，抓紧点。", "The tag is cold. That night the hold lights turn violet. The one-eyed thrall says: the jump's starting. Hold on.")})
+    ]};
+
   N.cha_506 = {chapter: 5, scene: "warp", speaker: null, time: {d: 60, warp: true}, eventRoll: 0.56, jump: L("亚空间跃迁：时间在这里不按常理走", "Warp transit: time runs wrong here"),
     text: L("跃迁开始了。舷窗没封，黑色军团不怕看。\n外面是颜色，是尖叫，是一座用眼睛砌成的城。你的影子站了起来，比你高一头，朝你鞠了一躬。\n舱壁上的计时器在倒着走。",
             "The jump begins. The viewports stay open; the Black Legion isn't afraid to look.\nOutside is colour, is screaming, is a city built of eyes. Your shadow stands up, a head taller than you, and bows.\nThe chronometer on the bulkhead runs backward."),
@@ -914,6 +1002,10 @@
   N.cha_507 = {chapter: 5, scene: "daemon_world", speaker: VORGATH, time: {d: 1, warp: true},
     text: L("这里没有太阳。天上挂着一只巨大的紫色眼睛，一直在看。\n地面是活的，会呼吸。沃加斯走下舷梯，深吸一口气，像终于回了家。\n“欢迎来到恐惧之眼，”他说，“在这里，你想要什么，就会变成什么。”",
             "There is no sun here. A vast violet eye hangs in the sky, always watching.\nThe ground is alive; it breathes. Vorgath walks down the ramp and inhales deeply, like a man home at last.\n“Welcome to the Eye of Terror,” he says. “Here, whatever you want is what you become.”"),
+    alt: [
+      {if: {flag: "wl_cha_fed_strong"}, add: L("下船的奴隶比往常多，都还站得住。沃加斯朝你的铁牌点了下头。", "More slaves than usual walk off the ship, all on their feet. Vorgath nods at your iron tag.")},
+      {if: {flag: "wl_cha_fed_weak"}, add: L("下船的人里有孩子。沃加斯数了数，皱了皱眉，没说什么。", "There are children among those walking off. Vorgath counts them, frowns, and says nothing.")}
+    ],
     codex: ["chaos_eye_of_terror", "place_daemon_world"],
     choices: [
       C("踏上会呼吸的土地", "Step onto the breathing ground", "cha_509", {result: L("地面在你脚下微微起伏，暖烘烘的，像踩在一头睡着的巨兽背上。", "The ground rises and falls beneath your boots, warm, like the back of some vast sleeping beast.")})
@@ -923,6 +1015,10 @@
     gather: L("集市", "bazaar"),
     text: L("码头边的集市挤满了叛徒、变种人和奴隶贩子，什么都能卖：盔甲、名字、昨天、明天。\n一个长着鸟嘴的商人拦住你：“好盔甲，只换你母亲的脸。你反正也快记不清了，对吧？”",
             "The bazaar by the docks teems with traitors, mutants and slavers, and everything is for sale: armour, names, yesterdays, tomorrows.\nA beaked trader blocks your path. “Fine armour. Costs only your mother's face. You barely remember it anyway, don't you?”"),
+    alt: [
+      {if: {flag: "wl_cha_gave_sella"}, add: L("旁边摊子上挂着一串铁牌，八块。有一块你不用看就知道写着什么。", "A string of iron tags hangs at the next stall. Eight. One of them you don't need to read.")},
+      {if: {flag: "wl_cha_spared_sella"}, add: L("塞拉在旁边摊子后头缝帆布，换到了一口吃的。她看见你，把脸转开了。", "Sella is sewing canvas behind the next stall, and has earned a meal by it. She sees you and turns her face away.")}
+    ],
     codex: ["place_bazaar_eye"],
     choices: [
       C("成交", "Deal", "cha_601", {effects: {hp: 20, sanity: -15, corruption: 4, taint: {khorne: 5}, set: {soldMotherFace: true}}, result: L("鸟嘴在你额头上轻轻一啄。盔甲很合身。你努力回想母亲的样子，只想起一团模糊的暖光。", "The beak taps your brow once. The armour fits perfectly. You try to picture your mother and find only a warm blur.")}),
@@ -1052,6 +1148,9 @@
     gather: L("宣誓大厅", "Oath hall"),
     text: L("旗舰的宣誓大厅里，新勇士们排着长队，互相打量，低声议论着战帅。\n大厅尽头只有一道剪影，高大，沉默，一只手是巨大的利爪。\n他没说话。他不需要说话。轮到你了。",
             "In the flagship's oath hall, the new champions stand in a long queue, sizing each other up, murmuring about the Warmaster.\nAt the hall's end stands only a silhouette: tall, silent, one hand a monstrous talon.\nHe says nothing. He doesn't need to. It's your turn."),
+    alt: [
+      {if: {flag: "wl_cha_tally"}, add: L("你下意识把队伍数了一遍。数到第八个，你的手指在铁牌上停了一下。", "Without meaning to, you count the queue. At the eighth, your fingers stop on the iron tag.")}
+    ],
     codex: ["chaos_abaddon"],
     choices: [
       C("向战帅宣誓", "Swear to the Warmaster", "cha_612", {effects: {renown: 10, set: {swornAbaddon: true}}, result: L("你念完誓词。剪影一动不动，但大厅里每一盏灯都暗了一瞬。", "You finish the oath. The silhouette doesn't move, but every lamp in the hall dims for an instant.")}),

@@ -42,6 +42,7 @@
   var HOLLON   = S("tech_priest", "数据铸匠赫隆", "Datasmith Hollon");
   var FULGUR   = S("electro_priest", "电祭司", "Electro-Priest");
   var CALANTIS = S("explorator", "探索贤者卡兰提斯", "Explorator Calantis");
+  var KOVAR    = S("tech_priest", "司仪神甫科瓦", "Ritemaster Kovar");
   var MEK      = S("ork_mek", "兽人机械佬", "Ork Mek");
   var SYRREDIN = S("dark_mechanicus", "黑暗马戈斯塞瑞丁", "Dark Magos Syrredin");
   var OMNI     = S("omen_omnissiah", "金色齿轮", "The Golden Gear");
@@ -142,9 +143,9 @@
       C("按老杂役的规矩，拍它三下", "Slap it three times, the old menials' way", "mech_105", X({renown: 3, set: {tapped: true}},
         "左侧，右侧，再左侧。冲压机抖了抖，像被人挠醒。神甫假装没看见。",
         "Left side, right side, left again. The press shivers as if tickled awake. The enginseer pretends not to see.")),
-      C("踢它一脚", "Kick it", "mech_106", X({hp: -10, taint: {khorne: 25}},
-        "你的脚趾比钢板先认输。疼痛让你想再踢一脚。",
-        "Your toes surrender before the steel does. The pain makes you want to kick again."))
+      C("踢它一脚", "Kick it", "mech_106", X({hp: -5, renown: -3, taint: {khorne: 25}},
+        "你的脚趾比钢板先认输。神甫记下了你的编号。疼痛让你想再踢一脚。",
+        "Your toes surrender before the steel does. The enginseer notes your number. The pain makes you want to kick again."))
     ]};
 
   N.mech_105 = {chapter: 1, scene: "manufactorum", speaker: VALLEN, time: {h: 1},
@@ -156,7 +157,7 @@
       C("鞠躬", "Bow", "mech_107", X({renown: 2, set: {vallenBow: true}},
         "你鞠躬的角度大概不合规程，但贤者的镜头记下了它。",
         "Your bow is probably not to regulation, but the Magos's lens records it.")),
-      C("问他机魂是不是真的", "Ask him if machine spirits are real", "mech_107", X({sanity: -3, set: {askedSpirit: true}},
+      C("问他机魂是不是真的", "Ask him if machine spirits are real", "mech_107", X({renown: -3, set: {askedSpirit: true}},
         "贤者停了半秒。“问题已记录。答案需要更高权限。”",
         "The Magos pauses half a second. “Query logged. The answer requires higher clearance.”"))
     ]};
@@ -172,9 +173,9 @@
       C("跟他们走", "Go with them", "mech_107", X(null,
         "你自己迈开了腿。护教军的手只是虚扶着你。",
         "You start walking on your own. The Skitarii's hands barely touch you.")),
-      C("挣扎", "Struggle", "mech_107", X({hp: -10, set: {struggled: true}},
-        "护教军没打你，只是握得更紧。他们的手是机器，不会累。",
-        "The Skitarii don't strike you. They just grip tighter. Their hands are machines; they don't tire."))
+      C("挣扎", "Struggle", "mech_107", X({hp: -5, renown: -2, set: {struggled: true}},
+        "护教军没打你，只是握得更紧，紧到骨头作响。他们的手是机器，不会累。",
+        "The Skitarii don't strike you. They just grip tighter, until the bones creak. Their hands are machines; they don't tire."))
     ]};
 
   N.mech_107 = {chapter: 1, scene: "manufactorum", speaker: null, time: {h: 3}, gather: L("候审队列", "Holding queue"),
@@ -195,10 +196,10 @@
       C("背出一段刚听来的祷文", "Recite a litany you overheard", null, R(0.55, "sanity", "mech_108", "mech_109",
         RR("你背得磕磕巴巴，但每个音都对。神甫歪了歪头，记下一笔。", "You stumble, but every syllable is right. The priest tilts his head and notes something.",
            "你背错了一个音。神甫连头都没抬。", "You get one syllable wrong. The priest doesn't even look up."))),
-      C("把前面那人往后拽", "Pull the man ahead back out of line", "mech_109", X({hp: -10, sanity: -5, set: {pulledTobin: true}},
-        "你拽住他的袖子。护教军把你们分开，像拆开两根缠住的电线。",
-        "You grab his sleeve. The Skitarii pull you apart like two tangled cables.")),
-      C("把托宾往前推，抢出十分钟", "Shove Tobin ahead of you and buy ten minutes", "mech_109", O(Q({flag: "knowsTobin"}, true), X({sanity: -5, set: {wronged_tobin: true}},
+      C("把前面那人往后拽", "Pull the man ahead back out of line", "mech_109", X({hp: -5, sanity: -3, renown: -3, set: {pulledTobin: true}},
+        "你拽住他的袖子。护教军把你们分开，像拆开两根缠住的电线，把你掼在门框上。他还是进去了。",
+        "You grab his sleeve. The Skitarii pull you apart like two tangled cables and slam you into the doorframe. He goes in anyway.")),
+      C("把托宾往前推，抢出十分钟", "Shove Tobin ahead of you and buy ten minutes", "mech_109", O(Q({flag: "knowsTobin"}, true), X({sanity: -8, set: {wronged_tobin: true}},
         "你把托宾往前一推。他回头看你，没生气，像早就料到，然后继续哼歌。你多出了十分钟，他多出了一张台。",
         "You shove Tobin forward. He glances back, not angry, as if he expected it, and goes on humming. You gain ten minutes. He gains a table.")))
     ]};
@@ -406,7 +407,111 @@
         "You dream in ones and zeros. When you wake, your teeth are keeping time.")),
       C("问她机仆还记不记得从前", "Ask her if servitors remember", "mech_202", X({set: {askedServitor: true}},
         "奥西娅停下笔。“正式答案：不记得。”她顿了顿，“非正式答案：去问问它们。”",
-        "Ossia stops writing. “Official answer: no.” A pause. “Unofficial answer: go and ask them.”"))
+        "Ossia stops writing. “Official answer: no.” A pause. “Unofficial answer: go and ask them.”")),
+      C("接下转化线仪式助手的差事", "Take the rite-assistant post on the conversion line", "mech_wl_01", X({renown: 3},
+        "奥西娅把调令推过来。“他们缺一个会念祷词的。别看他们的眼睛。”她顿了顿：“我是说，尽量。”",
+        "Ossia slides the order across. “They're short of someone who can pray. Don't look at their eyes.” A pause. “I mean, try not to.”"))
+    ]};
+
+  /* ---- Work line (docs/audit/WORKLINE_BRIEF.md): rite-assistant on the servitor-conversion line. mech_201 → wl_01…08 → mech_202.
+   * Flags: wl_mech_forged / wl_mech_true (Hedda's ledger; read in wl_08, mech_208, mech_701), wl_mech_kept / wl_mech_wiped (wipe depth; read in wl_08, mech_202, mech_608).
+   * pov nodes: mech_wl_03 (the old furnace-hand), mech_wl_06 (Kovar's evaluation). ---- */
+  N.mech_wl_01 = {chapter: 2, scene: "manufactorum", speaker: KOVAR, time: {d: 1},
+    text: L("转化线的仪式间。司仪神甫科瓦个子很矮，袖口沾着防腐油，递给你一只香炉和一块祷词板。\n“我动手，你念《核销祷》。念错一个音，机魂不收，就得重来。”\n“重来的时候，他们是醒着的。”",
+            "The rite-chamber of the conversion line. Ritemaster Kovar is a short priest with preserving-oil on his cuffs. He hands you a censer and a litany slate.\n“I cut. You recite the Litany of Quittance. Miss one tone and the machine spirit refuses; we start over.”\n“When we start over, they are awake.”"),
+    codex: ["imp_servitor"],
+    choices: [
+      C("先把祷词背熟", "Learn the litany by heart first", "mech_wl_02", X({sanity: -2, renown: 3, set: {wl_mech_byheart: true}},
+        "一共六十四个音。最后一句的意思是：此债已清，此身归公。",
+        "Sixty-four tones. The last line means: this debt is cleared; this body reverts to the common stock.")),
+      C("问他：他们欠了什么", "Ask what they owed", "mech_wl_02", X(null,
+        "“电力什一税，口粮，空气。”他想了想，“还有葬礼费。预付的。”",
+        "“Power tithe. Rations. Air.” He considers. “And the funeral fee. Paid in advance.”"))
+    ]};
+
+  N.mech_wl_02 = {chapter: 2, scene: "manufactorum", speaker: KOVAR, time: {h: 2},
+    text: L("第一个是老炉工，手指被钢水烫得并在一起。他欠了四十年的电力什一税。\n科瓦把颅钻对准，朝你点头。你开始念。\n老人看着你的嘴，好像想跟着学。",
+            "The first is an old furnace-hand, fingers fused together by molten steel. He owes forty years of power tithe.\nKovar lines up the cranial drill and nods to you. You begin.\nThe old man watches your mouth, as if trying to learn the words."),
+    choices: [
+      C("一个音不错地念完", "Recite it without one wrong tone", "mech_wl_03", O(X({sanity: -5, renown: 5},
+        "六十四个音，一个不错。钻头停下时，他的眼睛还看着你的嘴，只是不再学了。",
+        "Sixty-four tones, none wrong. When the drill stops his eyes are still on your mouth. He has stopped learning."),
+        {resultAlt: [RA(F("wl_mech_byheart"), "你背熟了，不用看板子，只能看着他。钻头停下时，他的眼睛还在你嘴上。", "You know it by heart, so you need not read the slate. You can only look at him. When the drill stops his eyes are still on your mouth.")]})),
+      C("念快些，让它早点结束", "Recite faster, to get it over", "mech_wl_03", X({sanity: -3, renown: -2, set: {wl_mech_rushed: true}},
+        "你快了半拍。科瓦没抬头：“机魂不赶时间。他也不赶了。”",
+        "You run half a beat fast. Kovar doesn't look up. “The machine spirit is in no hurry. Neither is he, now.”"))
+    ]};
+
+  N.mech_wl_03 = {chapter: 2, scene: "manufactorum", speaker: null, time: {h: 1},
+    pov: L("视角：老炉工", "POV: the old furnace-hand"),
+    text: L("有个年轻人在念数字。念得很好听。\n我记得第七炉的门有多烫，记得口粮券是蓝的，记得女儿把汤吹凉了才递过来。\n炉门没了。蓝色没了。汤还——",
+            "A young one is reciting numbers. It sounds lovely.\nI remember how hot the door of Furnace Seven was. I remember ration chits were blue. I remember my daughter blowing on the soup before she passed it over.\nThe door goes. The blue goes. The soup is still—"),
+    choices: [
+      C("……", "…", "mech_wl_04")
+    ]};
+
+  N.mech_wl_04 = {chapter: 2, scene: "manufactorum", speaker: KOVAR, time: {h: 1},
+    text: L("下一个叫赫达，纺线工，三十出头。科瓦把账簿翻给你盖章。\n机仆的身体按“残值”折价。残值够，债务核销；不够，余额转给直系亲属。\n赫达的残值差十一点。她有个九岁的女儿。",
+            "The next is Hedda, a thread-spinner, barely thirty. Kovar turns the ledger for your stamp.\nA servitor's body is priced at “residual value.” Enough, and the debt is written off. Short, and the balance passes to next of kin.\nHedda is eleven points short. She has a daughter of nine."),
+    choices: [
+      C("把残值改高十一点", "Raise the residual value by eleven", "mech_wl_05", X({sanity: 3, renown: -3, set: {wl_mech_forged: true}},
+        "你把“纺线”写成“精密纺线”。章盖下去，债清了。赫达不知道，她只是一直看着门。",
+        "You write “precision” before “thread-work.” The stamp falls; the debt is cleared. Hedda doesn't know. She only keeps watching the door.")),
+      C("照实盖章", "Stamp the true figure", "mech_wl_05", X({sanity: -4, renown: 5, set: {wl_mech_true: true}},
+        "十一点，转给一个九岁的编号。科瓦说：“字迹工整。”这是他今天第一次夸你。",
+        "Eleven points, passed to a nine-year-old's number. “Neat hand,” says Kovar. His first praise today.")),
+      C("问科瓦能不能通融", "Ask Kovar if there is any leeway", "mech_wl_05", X({renown: -2, sanity: -3, set: {wl_mech_true: true}},
+        "“通融是一种误差。”他替你盖了章。十一点，转给了那个九岁的编号。",
+        "“Leeway is a form of error.” He stamps it for you. Eleven points pass to the nine-year-old's number."))
+    ]};
+
+  N.mech_wl_05 = {chapter: 2, scene: "manufactorum", speaker: null, time: {h: 1},
+    text: L("赫达躺上台子时开了口：“我听说可以留一样。”\n规程里没有这一条。可抹除深度的旋钮就在你手边，科瓦正背对着你换钻头。\n“我女儿叫伊尔，”赫达说，“就留这个名字。”",
+            "On the slab, Hedda speaks. “I heard you can leave one thing.”\nNo such clause exists. But the wipe-depth dial is under your hand, and Kovar has his back turned, changing the drill.\n“My daughter's name is Ile,” says Hedda. “Leave just the name.”"),
+    choices: [
+      C("把旋钮往回拧一格", "Turn the dial back one notch", "mech_wl_06", X({sanity: 3, set: {wl_mech_kept: true}},
+        "一格。祷词你照样念完了。新机仆站起来时，嘴唇动了两下，没有声音。",
+        "One notch. You still recite the litany to the end. When the new servitor stands, its lips move twice, without sound.")),
+      C("按规程，抹到底", "Follow the rite: wipe to the end", "mech_wl_06", X({sanity: -4, renown: 3, set: {wl_mech_wiped: true}},
+        "你说：“好。”然后把旋钮拧到底。她是带着这个“好”字睡过去的。",
+        "You say, “I will.” Then you turn the dial all the way. She goes under holding that promise."))
+    ]};
+
+  N.mech_wl_06 = {chapter: 2, scene: "manufactorum", speaker: null, time: {h: 1},
+    pov: L("视角：司仪神甫科瓦", "POV: Ritemaster Kovar"),
+    text: L("评估对象：仪式助手，肉体，未改造。\n祷词准确率：合格。手部震颤：0.3，可容忍。注视受术者面部的时长：过量。\n结论：可用。备注：我第一年也看。01110011。删除此备注。",
+            "Subject of evaluation: rite-assistant, flesh, unaugmented.\nLitany accuracy: pass. Hand tremor: 0.3, tolerable. Time spent looking at the subjects' faces: excessive.\nConclusion: usable. Note: I looked too, my first year. 01110011. Delete this note."),
+    choices: [
+      C("回到你自己", "Back to yourself", "mech_wl_07")
+    ]};
+
+  N.mech_wl_07 = {chapter: 2, scene: "manufactorum", speaker: KOVAR, time: {h: 3},
+    alt: [ADD(F("wl_mech_rushed"), "他又补了一句：“明天别抢拍。抢拍的那个，我重钻了一次。”", "He adds: “Do not rush the beat tomorrow. The one you rushed, I had to drill twice.”")],
+    text: L("交班时你数了数：今天十九个。香炉的灰积了半指厚，祷词板被你的拇指磨亮了一块。\n科瓦在洗手，洗得很仔细。“明天二十二个。”\n他看了你一眼：“吃得下饭，就算过关。”",
+            "At shift's end you count: nineteen today. Ash lies half a finger deep in the censer; your thumb has polished a patch on the litany slate.\nKovar washes his hands, carefully. “Twenty-two tomorrow.”\nHe glances at you. “If you can still eat, you pass.”"),
+    choices: [
+      C("去食堂，把饭吃完", "Go to the mess and finish the meal", "mech_wl_08", X({hp: 3, sanity: -3},
+        "你吃完了，连汤也喝了。你发现自己在把它吹凉，不知道是跟谁学的。",
+        "You finish it, the soup too. You catch yourself blowing on it to cool it, and don't know where you learned that.")),
+      C("回仪式间把台子擦干净", "Go back and scrub the slab clean", "mech_wl_08", X({hp: -3, renown: 3, set: {wl_mech_scrubbed: true}},
+        "台子擦得发亮。明天第一个躺上来的人，至少不会躺在别人的油里。",
+        "The slab shines. Whoever lies on it first tomorrow will at least not lie in someone else's oil."))
+    ]};
+
+  N.mech_wl_08 = {chapter: 2, scene: "manufactorum", speaker: KOVAR, time: {d: 5},
+    alt: [ADD(F("wl_mech_forged"), "伊尔的编号牌上没有红杠。她不知道该谢谁。", "Ile's plate carries no red bar. She doesn't know whom to thank."),
+          ADD(F("wl_mech_true"), "伊尔的编号牌上多了一道红杠：十一点，利息另计。", "Ile's plate carries a new red bar: eleven points, interest extra.")],
+    text: L("第六天，一个九岁的女孩被带来认领遗物：一只线轴。她说她叫伊尔。\n一台新机仆正好推车经过。女孩盯着它看，它没有停。\n科瓦递给你调令：“助手期满。回圣库去。”",
+            "On the sixth day a nine-year-old girl is brought to claim the effects: one spool of thread. She says her name is Ile.\nA new servitor happens to pass, pushing a cart. The girl stares at it. It doesn't stop.\nKovar hands you an order. “Assistant's term complete. Back to the Vault.”"),
+    choices: [
+      C("把线轴放到她手里", "Put the spool in her hand", "mech_202", O(X({sanity: 2, set: {wl_mech_spool: true}},
+        "她攥紧线轴，没有哭。这里的孩子很早就学会了：哭是要记账的。",
+        "She grips the spool and doesn't cry. Children here learn early that crying goes on the ledger."),
+        {resultAlt: [RA(F("wl_mech_kept"), "她攥紧线轴。走远的机仆嘴唇动了两下。女孩忽然回头，像听见有人叫她。", "She grips the spool. The servitor, already far off, moves its lips twice. The girl turns, as if someone had called her.")]})),
+      C("什么也不说，去收拾香炉", "Say nothing; pack up the censer", "mech_202", O(X({sanity: -3, renown: 2},
+        "你倒掉香灰。十九加二十二，再加四天。你没有往下算。",
+        "You tip out the ash. Nineteen, plus twenty-two, plus four more days. You don't finish the sum."),
+        {resultAlt: [RA(F("wl_mech_scrubbed"), "你倒掉香灰，又把台子擦了一遍。它已经够干净了。你还是擦。", "You tip out the ash and scrub the slab once more. It is clean enough already. You scrub anyway.")]}))
     ]};
 
   N.mech_202 = {chapter: 2, scene: "forge_floor", speaker: TOBIN, time: {h: 4},
@@ -423,7 +528,9 @@
           note: L("格里斯在场：你在他的炉前偷懒，他会罚你多搬钢锭。", "Gries is watching: loitering at his furnace, you'll be docked extra ingots.")}},
         X({sanity: 5, set: {tobinSong: true, keeper: true}},
         "你哼第二遍时，它的手停了半秒。只有半秒。然后钢锭继续往前走。",
-        "On your second time through, its hands stop for half a second. Only half. Then the ingots move on."))),
+        "On your second time through, its hands stop for half a second. Only half. Then the ingots move on."),
+        {resultAlt: [RA(F("wl_mech_kept"), "它的手停了半秒。你认得这种停顿：你拧回去的那一格，也只有这么长。", "Its hands stop for half a second. You know that pause: the notch you turned back was exactly that long."),
+                     RA(F("wl_mech_wiped"), "它的手停了半秒。有人没把它的旋钮拧到底。那个人不是你。", "Its hands stop for half a second. Someone did not turn its dial all the way. That someone was not you.")]})),
       C("别过脸去", "Look away", "mech_203", X({sanity: -5, set: {avoidedTobin: true}},
         "歌声一直跟着你，直到被熔炉的轰鸣吞掉。",
         "The humming follows you until the furnace's roar swallows it.")),
@@ -456,7 +563,7 @@
             "Late at night Ossia shows you something small: a spanner she designed herself, fitting seven bolt gauges.\nNo STC, no precedent. She thought of it.\n“It works beautifully,” she whispers. “That's what makes it heresy.”"),
     codex: ["mech_tech_heresy"],
     choices: [
-      C("帮她改进设计", "Help her improve the design", "mech_205", X({renown: 3, set: {ossiaFriend: true}, taint: {tzeentch: 25}},
+      C("帮她改进设计", "Help her improve the design", "mech_205", X({sanity: 3, set: {ossiaFriend: true}, taint: {tzeentch: 25}},
         "你们改到天亮。第八种规格成功时，你笑出了声，把自己吓了一跳。",
         "You work till dawn. When the eighth gauge works you laugh aloud, startling yourself.")),
       C("劝她熔掉它", "Urge her to melt it down", "mech_205", X({set: {ossiaWarned: true}},
@@ -529,6 +636,8 @@
     ]};
 
   N.mech_208 = {chapter: 2, scene: "mars_vista", speaker: MARS, time: {h: 2},
+    alt: [ADD(F("wl_mech_forged"), "什一税提高。你改过的那一笔，查账时会不会被翻出来？", "Tithes raised. The figure you altered: will an audit turn it up?"),
+          ADD(F("wl_mech_true"), "什一税提高。伊尔继承的那十一点，又要长一截。", "Tithes raised. The eleven points Ile inherited will grow again.")],
     text: L("庆典的高潮：一段火星广播，经星语者转录，迟到了四十年。\n画面里，红色星球被熔炉的光环包围。一个声音宣读铸造将军的诏令：什一税提高，祈祷加倍。\n全场的神甫同时跪下。",
             "The feast's climax: a broadcast from Mars, relayed by astropaths, forty years late.\nOn screen the Red Planet is ringed with forge-light. A voice reads the Fabricator-General's decree: tithes raised, prayers doubled.\nEvery tech-priest kneels at once."),
     codex: ["place_mars", "mech_fabricator_general"],
@@ -558,7 +667,7 @@
       C("“我申请。”", "“I petition.”", "mech_300", X({renown: 5},
         "贤者在数据圈里给你开了新档案。名字一栏，暂时空着。",
         "The Magos opens a new file for you in the noosphere. The name field stays blank for now.")),
-      C("“入教要换掉多少肉？”", "“How much flesh does initiation cost?”", "mech_209b", X({sanity: -3},
+      C("“入教要换掉多少肉？”", "“How much flesh does initiation cost?”", "mech_209b", X({renown: -3},
         "贤者没回答，转身就走。走了几步，他回头：“跟上。”",
         "The Magos doesn't answer; he turns and walks. A few steps on, he looks back. “Follow.”"))
     ]};
@@ -665,7 +774,7 @@
       C("替赫隆校对指令", "Proofread Hollon's protocols", null, O(Q({notFlag: "binary"}, true), R(0.5, "sanity", "mech_305", "mech_306",
         RR("指令无误。机器人举拳，把靶子砸进了地里。赫隆点头。", "Protocols correct. The robot raises a fist and drives the target into the ground. Hollon nods.",
            "你漏了一个分号。机器人转身，朝错误的方向开了火。", "You miss a semicolon. The robot turns and fires the wrong way.")))),
-      C("对它的机魂念祷文", "Pray to its machine spirit", "mech_305", X({sanity: -3, renown: 3, set: {prayedKastelan: true}},
+      C("对它的机魂念祷文", "Pray to its machine spirit", "mech_305", X({renown: 3, set: {prayedKastelan: true}},
         "机器人听完，胸口的灯闪了两下。赫隆说这是故障。你不太确定。",
         "The robot listens; its chest light blinks twice. Hollon calls it a fault. You're not so sure.")),
       C("请求替它按下第一发的指令键", "Ask to key its first shot yourself", "mech_305", X({hp: -5, renown: 3, taint: {khorne: 30}},
@@ -715,7 +824,7 @@
             "The night of oaths. You kneel before the furnace and recite the vow you wrote: flesh tires, the machine endures; knowledge belongs to the god, you are only its scribe.\nMagos Vallen touches sacred oil to your brow.\nFrom today you are a lexmechanic."),
     effects: {set: {initiate: true}},
     choices: [
-      C("全心全意地发誓", "Swear with your whole heart", "mech_309", X({renown: 8, sanity: -3, set: {devout: true}},
+      C("全心全意地发誓", "Swear with your whole heart", "mech_309", X({renown: 8, set: {devout: true}},
         "誓词说完，你觉得自己轻了一点。也许是灵魂，也许只是一部分怀疑。",
         "When the vow ends you feel lighter. Perhaps your soul. Perhaps just some doubt.")),
       C("发誓，但在心里留一句保留", "Swear, keeping one silent reservation", "mech_309", X({sanity: 5, set: {doubter: true}},
@@ -785,7 +894,7 @@
             "Thousands of metal skeletons stand in the tomb halls, utterly still.\nCalantis slices one open with a melta-cutter. The cut slowly closes before her eyes.\n“Self-repair!” both her brains shriek. “Take it back, take all of it!”"),
     codex: ["nec_living_metal"],
     choices: [
-      C("“它们只是在睡觉。”", "“They're only sleeping.”", "mech_404", X({renown: 3, set: {warnedTomb: true}},
+      C("“它们只是在睡觉。”", "“They're only sleeping.”", "mech_404", X({renown: -2, sanity: 3, set: {warnedTomb: true}},
         "卡兰提斯把你的意见归档为：“胆怯，但可能正确。”凯什却悄悄让护教军列了阵。",
         "Calantis files your opinion under ‘cowardly, but possibly correct’. Kesh quietly has the Skitarii form up.")),
       C("帮她拆一具下来", "Help her dismantle one", "mech_404", X({renown: 5, hp: -5, set: {tookMetal: true}},
@@ -864,8 +973,8 @@
         "你给文件加了个标签：未完成。所有好问题都该有这个标签。",
         "You tag the file: incomplete. Every good question should carry that tag.")),
       C("删掉损坏的文件", "Delete the corrupted file", "mech_408", X({sanity: 5, renown: -3},
-        "文件消失了。那串零还在你脑子里响了很多天。",
-        "The file is gone. The zeros ring in your head for days."))
+        "文件消失了。那串零在你脑子里又响了一夜，然后终于停了。归档记录上多了一处空缺。",
+        "The file is gone. The zeros ring in your head one more night, then stop at last. The archive log shows a gap."))
     ]};
 
   N.mech_408 = {chapter: 4, scene: "ship_interior", speaker: KESH, time: {d: 30, warp: true}, eventRoll: 0.3,
@@ -935,7 +1044,7 @@
     text: L("圣库门口，一个小绿皮抱着神甫的香炉往外跑，后面三个扛着一卷数据线。\n它们看见你，愣住了。\n领头的把香炉举起来，好像在问：换不换？",
             "At the Vault door a little greenskin is running off with a priest's censer; three more follow, lugging a coil of data-cable.\nThey see you and freeze.\nThe leader holds up the censer, as if asking: wanna trade?"),
     choices: [
-      C("追上去夺回香炉", "Chase it down and take the censer", "mech_504", X({hp: -10, set: {censer: true}},
+      C("追上去夺回香炉", "Chase it down and take the censer", "mech_504", X({hp: -10, renown: 5, set: {censer: true}},
         "你抢回了香炉，也挨了一口。剩下的小绿皮拖着数据线钻进废铁场，你追了进去。",
         "You get the censer back, and a bite. The rest drag the cable into the scrapyard; you follow.")),
       C("用一个亮闪闪的齿轮换", "Trade it for a shiny cog", "mech_504", X({renown: 3, set: {grotDeal: true}},
@@ -1007,7 +1116,7 @@
             "The orks are driven off with three power plants and half a foundry. The STC fragment is gone from the Vault too.\nKesh has lost a leg. She stands guard propped on a pipe.\n“Losses logged,” she says. “Grief not logged. There is no field for it.”"),
     effects: {hp: 10},
     choices: [
-      C("帮凯什修腿", "Repair Kesh's leg", "mech_508", X({renown: 5, hp: -5, set: {keshRepair: true}},
+      C("帮凯什修腿", "Repair Kesh's leg", "mech_508", X({renown: 3, sanity: 3, set: {keshRepair: true}},
         "你用冲压机的连杆给她做了条新腿。不太合规，但她站得很稳。",
         "You make her a new leg from a press linkage. Not quite canonical, but she stands firm.")),
       C("去点算死去的杂役", "Go and count the dead menials", "mech_508", O({grudge: {npc: "gries", effects: {sanity: -6},
@@ -1070,7 +1179,7 @@
     choices: [
       C("听她说下去", "Let her talk", "mech_602", O({grudge: {npc: "ossia", effects: {sanity: -6},
           note: L("奥西娅记得是你把她交了出去，每个字都扎在你身上。", "Ossia remembers who gave her up; every word she says lands on you.")}},
-        X({sanity: -5, set: {heardOssia: true}, taint: {tzeentch: 20}},
+        X({corruption: 5, set: {heardOssia: true}, taint: {tzeentch: 20}},
         "她说得很快，用了很多你没听过的概念。每一个都像一扇刚推开的门。",
         "She speaks fast, using concepts you've never heard. Each one is like a door just pushed open."))),
       C("“回来吧，奥西娅。”", "“Come back, Ossia.”", "mech_602", O(Q({flag: "ossiaFriend"}), {grudge: {npc: "ossia", effects: {sanity: -8},
@@ -1095,7 +1204,7 @@
       C("握紧钥匙", "Close your hand on the key", "mech_604", X({corruption: 10, set: {ossiaKey: true}, taint: {tzeentch: 20}},
         "钥匙在掌心发热，像一颗小小的心脏。你没告诉任何人。",
         "The key warms in your palm like a tiny heart. You tell no one.")),
-      C("把钥匙扔进焚档炉", "Throw the key into the archive incinerator", "mech_604", X({sanity: -5, renown: 5, set: {burnedKey: true}},
+      C("把钥匙扔进焚档炉", "Throw the key into the archive incinerator", "mech_604", X({renown: 5, set: {burnedKey: true}},
         "奥西娅看着它熔化，没阻止。“它会再长出来的，”她说，“知识都这样。”",
         "Ossia watches it melt and doesn't stop you. “It'll grow back,” she says. “Knowledge always does.”")),
       C("问她：他从哪里进来？", "Ask her: where will he come in?", "mech_604", O(Q({flag: "ossiaOwes"}, true), X({sanity: -3, set: {knowLanding: true}},
@@ -1150,7 +1259,7 @@
       C("“你自己做过吗？”", "“Have you done it yourself?”", "mech_605", X({sanity: 5, set: {fleshKept: true}},
         "贤者沉默了很久。“做过一半。所以我还会犹豫，所以我知道你还没准备好。”他关掉了锯子。",
         "The Magos is silent a long time. “Half of it. That is why I still hesitate, and why I know you are not ready.” He switches off the saw.")),
-      C("“停下！我要留着它们。”", "“Stop! I'm keeping them.”", "mech_605", X({sanity: -5, renown: -5, set: {fleshKept: true}},
+      C("“停下！我要留着它们。”", "“Stop! I'm keeping them.”", "mech_605", X({renown: -5, set: {fleshKept: true}},
         "贤者关掉了锯子。“记录：候选者选择了痛苦。有意思。”",
         "The Magos switches off the saw. “Logged: candidate chose pain. Interesting.”"))
     ]};
@@ -1186,10 +1295,12 @@
     ]};
 
   N.mech_608 = {chapter: 6, scene: "forge_floor", speaker: RUMM, time: {h: 4},
+    alt: [ADD(F("wl_mech_kept"), "一台对着墙的机仆嘴唇在动，反复念两个音：伊尔。", "One servitor facing the wall moves its lips over two syllables, again and again: Ile."),
+          ADD(F("wl_mech_wiped"), "对着墙的机仆里有一台曾是赫达。它什么也没念。你确认过的。", "One of the servitors at the wall was once Hedda. It says nothing. You made sure of that.")],
     text: L("废码在熔炉间蔓延。传送带倒着转，机仆停下来对着墙发呆。\n铸工神甫鲁姆抱着反应堆的控制台哭：“它害怕！它说它听见了别的声音！”\n格拉维克斯的心脏，一座等离子反应堆，在颤抖。",
             "Scrapcode spreads among the furnaces. Conveyors run backward; servitors stop and stare at walls.\nEnginseer Rumm clings to the reactor console, weeping. “It's afraid! It says it hears other voices!”\nGravex's heart, a plasma reactor, is trembling."),
     choices: [
-      C("对反应堆唱祷文", "Sing a litany to the reactor", "mech_609", O(X({sanity: -5, taint: {all: -10}, set: {calmedReactor: true, keeper: true}},
+      C("对反应堆唱祷文", "Sing a litany to the reactor", "mech_609", O(X({hp: -5, renown: 3, taint: {all: -10}, set: {calmedReactor: true, keeper: true}},
         "你唱到嗓子出血。反应堆的颤抖慢慢平了，像一只被抚摸的巨兽。",
         "You sing until your throat bleeds. The trembling slowly stills, like a great beast being stroked."),
         {resultAlt: [RA(F("censer"), "你点起从小绿皮手里抢回的香炉，唱到嗓子出血。反应堆慢慢平静下来。", "You light the censer you wrested from the greenskins and sing till your throat bleeds. The reactor slowly calms."),
@@ -1226,13 +1337,16 @@
     ]};
 
   N.mech_701 = {chapter: 7, scene: "burning_city", speaker: KESH, foe: "dark_mechanicus", time: {h: 6},
+    alt: [ADD(F("wl_mech_forged"), "隧道口有个女孩，编号牌上没有红杠。是伊尔。", "A girl at the tunnel mouth, no red bar on her plate. Ile."),
+          ADD(F("wl_mech_true"), "隧道口有个女孩，编号牌上三道红杠。伊尔没认出你。", "A girl at the tunnel mouth wears three red bars on her plate. Ile doesn't know you."),
+          ADD(F("wl_mech_spool"), "她手里还攥着你递给她的那只线轴。", "She still grips the spool of thread you put in her hand.")],
     text: L("黑暗马戈斯的部队降落了：浑身管线的异端神甫、废码驱动的机仆，和叫不出名字的东西。\n凯什的分队在燃烧的街道上列阵。冷却隧道口挤满了等人带路的杂役。\n“选吧，”凯什说，“去死，或者去活。”",
             "The Dark Magos's forces land: heretek priests bristling with cables, scrapcode-driven servitors, things you cannot name.\nIn the burning streets Kesh's maniple forms a line. At the coolant tunnels, menials crowd, waiting for someone to lead.\n“Choose,” says Kesh. “A place to die, or to live.”"),
     choices: [
       C("留在防线上", "Hold the line", "mech_702", X({hp: -18, renown: 5, taint: {khorne: 30}},
         "开火，装弹，开火。你不再数打倒了多少。数字开始让你觉得无聊。",
         "Fire, reload, fire. You stop counting how many you've dropped. The numbers start to bore you.")),
-      C("带杂役们撤进地下", "Lead the menials underground", "mech_701b", X({hp: -5, sanity: 5, set: {savedMenials: true}},
+      C("带杂役们撤进地下", "Lead the menials underground", "mech_701b", X({hp: -5, sanity: 5, renown: -3, set: {savedMenials: true}},
         "你领着杂役们钻进冷却隧道。他们没有名字，只有编号，可他们都活着。",
         "You lead the menials into the coolant tunnels. They have only numbers, no names. But they're alive.")),
       C("去圣库", "Go to the Vault", "mech_703", X(null,
@@ -1309,7 +1423,7 @@
         X({sanity: -8, set: {tobinOff: true}},
         "你按下它后颈的开关。它倒下时很轻，像一件终于脱下的外套。",
         "You press the switch at its neck. It falls lightly, like a coat finally taken off."))),
-      C("让锈接管它", "Let the rust take it", "mech_705", O(X({sanity: -5, set: {tobinRust: true}, taint: {nurgle: 40}},
+      C("让锈接管它", "Let the rust take it", "mech_705", O(X({corruption: 5, set: {tobinRust: true}, taint: {nurgle: 40}},
         "锈从它的关节里开出花来，橙色的，很暖。它又能动了，比以前更有耐心。",
         "Rust blooms from its joints, orange and warm. It moves again, more patient than before."),
         {resultAlt: [RA(F("sporePet"), "你想起管道里那片蘑菇。锈从它的关节里开出花来，橙红相间，很暖。它又能动了。", "You think of the fungus in the pipes. Rust blooms from its joints, orange and red, warm. It moves again.")]}))
@@ -1321,7 +1435,7 @@
     text: L("瓦伦贤者挡在反应堆外闸前，六根触手断了五根。\n他把一枚权限芯片塞进你手里：“熔炉的心脏不认职衔，只认虔诚。”\n“维修通道还通。去。我来计算怎么让他们慢一点。”他的发声器在冒烟。",
             "Magos Vallen blocks the reactor's outer gate, five of his six mechadendrites severed.\nHe presses an override chip into your hand. “The forge's heart heeds no rank. Only devotion.”\n“The maintenance passage is still open. Go. I'll calculate a way to slow them.” His vox-grille is smoking."),
     choices: [
-      C("收下芯片，走", "Take the chip and go", "mech_706", X({renown: 10, set: {vallenKey: true}},
+      C("收下芯片，走", "Take the chip and go", "mech_706", X({renown: 10, sanity: -3, set: {vallenKey: true}},
         "你跑出很远才回头。贤者的最后一根触手正在把外闸焊死，从里面。",
         "You run a long way before looking back. His last tendril is welding the outer gate shut. From the inside.")),
       C("拖着他一起走", "Drag him with you", "mech_706", X({hp: -10, renown: 5, set: {vallenKey: true, draggedVallen: true}},
@@ -1340,7 +1454,7 @@
         "冲到一半，凯什把你推了回来。她最后说的不是二进制，是一个你听不懂的音节。",
         "Halfway in, Kesh shoves you back. Her last word isn't binary. It's a syllable you don't understand."),
         {resultAlt: [RA(F("keshTalk"), "冲到一半，凯什把你推了回来。她最后说的不是二进制，是她名字剩下的那个音节：“凯。”", "Halfway in, Kesh shoves you back. Her last word isn't binary. It's the one syllable left of her name: ‘Ke.’")]})),
-      C("跑向反应堆", "Run for the reactor", "mech_707", X({sanity: -5},
+      C("跑向反应堆", "Run for the reactor", "mech_707", X({sanity: -5, renown: 3},
         "你没有回头。你知道她会这么计算：这是最优解。",
         "You don't look back. You know how she'd calculate it: optimal.")),
       C("走向马戈斯的旗帜", "Walk toward the Dark Magos's banner", "mech_end_heretek", O(Q([{flag: "heardOssia"}, {flag: "ossiaKey"}], true), X({corruption: 15},
@@ -1386,7 +1500,7 @@
       C("用瓦伦的芯片唤醒反应堆", "Wake the reactor with Vallen's chip", "mech_802", O(Q([{flag: "vallenKey"}, {stat: "renown", min: 30}]), X({renown: 5, set: {chipWoke: true}},
         "芯片插进控制台。反应堆用二进制说了一个字，声音大得你从没听过：“是。”",
         "The chip slots in. The reactor speaks one binary word, louder than you've ever heard: “Yes.”"))),
-      C("给反应堆唱那段祷文", "Sing the reactor that litany", "mech_802", O(Q({flag: "calmedReactor"}, true), X({sanity: -5},
+      C("给反应堆唱那段祷文", "Sing the reactor that litany", "mech_802", O(Q({flag: "calmedReactor"}, true), X({sanity: 3},
         "它认出了你的声音。整个大厅的灯，同时变回了金色。",
         "It knows your voice. Every light in the hall turns gold at once."))),
       C("调来卡斯特兰机器人", "Summon the Kastelan robots", null, R(0.45, "renown", "mech_803", "mech_804",

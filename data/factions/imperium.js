@@ -521,7 +521,105 @@
     codex: ["xenos_ork"],
     choices: [
       C("好好睡一觉", "Get some real sleep", "imp_400", {effects: {sanity: 10}, result: L("你睡了整整十四个小时，没有做梦。醒来时，邻床已经换了三个人。", "You sleep fourteen hours straight, dreamless. When you wake, the next bed has had three different occupants.")}),
-      C("多要点止痛药", "Ask for extra painkillers", "imp_400", {effects: {hp: 10, sanity: -5, set: {painkillers: true}, taint: {nurgle: 25}}, result: L("阿诺多给了你两支。疼痛退得很远，远到这副身体好像不是你的。", "Arno slips you two extra. The pain drifts so far away the body no longer feels like yours.")})
+      C("多要点止痛药", "Ask for extra painkillers", "imp_400", {effects: {hp: 10, sanity: -5, set: {painkillers: true}, taint: {nurgle: 25}}, result: L("阿诺多给了你两支。疼痛退得很远，远到这副身体好像不是你的。", "Arno slips you two extra. The pain drifts so far away the body no longer feels like yours.")}),
+      C("应政委的召，去抄伤亡名册", "Answer the commissar: copy the casualty ledger", "imp_w01", {result: L("阿诺剪断缝线。“能写字的手，”他说，“在这儿比能开枪的少。”", "Arno snips the thread. “Hands that can write,” he says, “are rarer here than hands that can shoot.”")})
+    ]};
+
+  /* ---- Work line (2026-11-25): the commissar's ledger — entered from imp_311, rejoins imp_400. Flags wl_imp_named / wl_imp_forged ---- */
+  var KETT = S("guardsman", "新兵凯特", "Trooper Kett");
+
+  N.imp_w01 = {chapter: 3, scene: "barracks", speaker: DRAVIK, time: {h: 2},
+    text: L("德拉维克政委站在帐篷口，手里是一本沾血的名册。\n“我的书记官死在山脊上了。你的手还能写字。”\n她把名册放在你膝上：“阵亡、负伤、不堪用。三栏。死人不领口粮。”",
+            "Commissar Dravik stands at the tent flap holding a blood-stained ledger.\n“My clerk died on the ridge. Your hands can still write.”\nShe lays it on your knees. “Killed, wounded, unfit. Three columns. The dead draw no rations.”"),
+    choices: [
+      C("接过笔", "Take the stylus", "imp_w02", {result: L("笔杆上还有上一个人的牙印。你擦了擦，没擦掉。", "The stylus still carries the last man's tooth-marks. You wipe it. They stay.")})
+    ]};
+
+  N.imp_w02 = {chapter: 3, scene: "barracks", speaker: null, time: {h: 3},
+    text: L("你把一麻袋身份牌倒在弹药箱上，一枚一枚抄进名册。二百一十二个。\n军需官守在旁边：划掉一个名字，就省下一份口粮。\n重伤帐里还有三个人没断气。他要你现在就划。",
+            "You tip a sack of ident-tags onto an ammo crate and copy them into the ledger one by one. Two hundred and twelve.\nThe quartermaster waits at your elbow: every name struck is a ration saved.\nThree men in the critical tent are still breathing. He wants them struck now."),
+    choices: [
+      C("照办，现在就划", "Strike them now, as told", "imp_w03", {effects: {renown: 3, sanity: -5}, result: L("三道横线。当晚有一个人醒了，要水喝。名册上他已经死了，水壶没有他的份。", "Three strokes. That night one of them wakes and asks for water. On paper he is dead, and the dead are issued no canteen.")}),
+      C("等他们断气再划", "Wait until they stop breathing", "imp_w03", {effects: {sanity: 3, renown: -2}, result: L("军需官记下了你的名字。三份口粮多发了一天，其中两份没人来得及吃。", "The quartermaster notes your name. Three rations go out for one more day. Two are never eaten.")})
+    ]};
+
+  N.imp_w03 = {chapter: 3, scene: "barracks", speaker: DRAVIK, time: {h: 2},
+    text: L("名册抄完，德拉维克翻到最后一页。十一个人伤在手上、脚上。\n“条例说，十个里总有一个是自己打的。日落前给我一个名字。”\n“惩戒班明天清晨蹚雷区。”",
+            "When the copying is done, Dravik turns to the ledger's last page. Eleven men wounded in the hand or foot.\n“Regulation says one in ten did it to himself. Give me a name by sundown.”\n“The penal squad walks the minefield at dawn.”"),
+    choices: [
+      C("去看那十一个人", "Go and look at the eleven", "imp_w04", {result: L("你夹着名册穿过病床。看见封皮的人，都把手往被子里缩。", "You carry the ledger down the rows of cots. Men who see its cover pull their hands under the blankets.")})
+    ]};
+
+  N.imp_w04 = {chapter: 3, scene: "barracks", speaker: ARNO, time: {h: 1},
+    text: L("阿诺医师掀开一只手的绷带：掌心一圈焦黑。\n“枪口顶着打的。新兵凯特，灰原来的，十七岁。”他把烟换到另一边嘴角。\n“我可以写成弹片。可我没法连写十一次。”",
+            "Medicae Arno lifts the dressing from a hand: a black scorch-ring in the palm.\n“Muzzle pressed to the skin. Trooper Kett, off the ash plains, seventeen.” He shifts the lho-stick to the other corner of his mouth.\n“I can write shrapnel. I can't write it eleven times.”"),
+    choices: [
+      C("坐到凯特床边", "Sit down by Kett's cot", "imp_w05", {result: L("少年盯着你腋下的名册，像盯着一支已经上膛的枪。", "The boy stares at the ledger under your arm as if it were already loaded.")})
+    ]};
+
+  N.imp_w05 = {chapter: 3, scene: "barracks", speaker: KETT, time: {h: 1},
+    text: L("“我数到三，数了两遍。”新兵凯特的声音很轻。\n“农庄只剩我妈一个人。我想着，少一只手也能赶牲口。”\n他没求你。他只是把那只好手摊开，给你看上面的茧。",
+            "“I counted to three. Twice.” Trooper Kett's voice is very quiet.\n“There's only my mum left on the farm. I thought, you can still drive beasts with one hand.”\nHe doesn't beg. He just opens his good hand and shows you the calluses."),
+    effects: {sanity: -5},
+    choices: [
+      C("什么也没答应", "Promise him nothing", "imp_w06p", {result: L("你站起来。帐篷外，太阳已经压到战壕沿上。", "You stand up. Outside, the sun is already down on the lip of the trench.")})
+    ]};
+
+  N.imp_w06p = {chapter: 3, scene: "barracks", speaker: null, time: {h: 1},
+    pov: L("视角：德拉维克政委", "POV: Commissar Dravik"),
+    text: L("她在帐篷外等那本名册。团部的命令折在她袖口里：每十个可疑的伤口，交一个人；交不出，就抽签枪毙十个。\n她自己的本子上记着四十一个名字。她不想知道第四十二个是谁挑的。",
+            "She waits outside the tent for the ledger. The order from regiment sits folded in her cuff: one man for every ten doubtful wounds. If no name comes, ten are shot by lot.\nHer own book holds forty-one names. She would rather not know who chooses the forty-second."),
+    choices: [
+      C("回到你自己", "Back to yourself", "imp_w06")
+    ]};
+
+  N.imp_w06 = {chapter: 3, scene: "barracks", speaker: DRAVIK, time: {h: 1},
+    text: L("日落。德拉维克伸出手，名册最后一页还空着一行。\n笔尖悬在纸上。昨夜死在重伤帐里的人，名字的墨迹还没干透。",
+            "Sundown. Dravik holds out her hand. One line on the ledger's last page is still empty.\nYour stylus hangs over the paper. The names of the men who died in the critical tent last night are barely dry."),
+    choices: [
+      C("写下凯特的名字", "Write Kett's name", "imp_w07n", {effects: {renown: 5, sanity: -10, set: {wl_imp_named: true}}, result: L("两个字，你写得比任何一行都工整。德拉维克看了一眼，合上名册。", "Four letters, neater than any other line you wrote. Dravik glances once and shuts the ledger.")}),
+      C("把罪名记给一个死人", "Put the charge on a dead man", null, R(0.55, null, "imp_w07g", "imp_w07f", L("你写下昨夜伤重而死的炮手哈尔，把他的伤口从腹部改到手上。她看了很久，没有说话。", "You write Harl, a gunner who died of his wounds in the night, and move his wound from belly to hand. She reads for a long time and says nothing."), L("她用指甲刮了刮那行字，墨迹比别的行新。“你改过死因。”", "She scratches the line with a fingernail. The ink is fresher than the rest. “You changed a cause of death.”")))
+    ]};
+
+  N.imp_w07f = {chapter: 3, scene: "barracks", speaker: DRAVIK, time: {h: 1},
+    text: L("“死人不能替活人蹚雷。”德拉维克把笔塞回你手里，握住你的手腕，一笔一笔写下凯特的名字。\n“伪造名册，十鞭。明天你带着伤，站在我身后看。”",
+            "“The dead can't walk a minefield for the living.” Dravik pushes the stylus back into your hand, holds your wrist, and writes Kett's name with it, stroke by stroke.\n“Falsifying a ledger: ten lashes. Tomorrow you stand behind me, bleeding, and watch.”"),
+    effects: {hp: -10, renown: -3, set: {wl_imp_named: true}},
+    choices: [
+      C("挨完十鞭", "Take the ten lashes", "imp_w07n", {result: L("沃斯克中士数的数。他每一鞭都落在同一个地方，这算是照顾。", "Sergeant Vosk keeps the count. He lays every stroke in the same place, which is his idea of kindness.")})
+    ]};
+
+  N.imp_w07n = {chapter: 3, scene: "trench", speaker: null, time: {h: 10},
+    text: L("清晨，惩戒班蹚雷区。凯特戴着爆炸项圈走在第三个，那只伤手吊在胸前。\n走到一半他回了一次头，在找人。你站在政委身后，夹着名册。\n第四声爆炸之后，队伍还在往前走。",
+            "Dawn. The penal squad walks the minefield. Kett goes third in an explosive collar, the hurt hand slung on his chest.\nHalfway out he looks back once, searching. You stand behind the commissar with the ledger under your arm.\nAfter the fourth blast the line is still walking."),
+    choices: [
+      C("在名册上补记", "Enter it in the ledger", "imp_w08p", {result: L("“惩戒班，出勤九人，归队五人。”你没有去查那五个人里有没有他。", "“Penal squad: nine out, five back.” You do not check whether he is one of the five.")})
+    ]};
+
+  N.imp_w07g = {chapter: 3, scene: "barracks", speaker: null, time: {h: 10},
+    text: L("名额填上了，雷区由惩戒班的老犯人去蹚。凯特活了下来，没人告诉他为什么。\n军需官照章办事：怯战者哈尔，抚恤取消。他在巢都有个女儿，等着那笔钱。",
+            "The quota is filled; the old hands of the penal squad walk the mines. Kett lives, and nobody tells him why.\nThe quartermaster follows the book: Harl, coward, death-grant cancelled. He had a daughter in the hive, waiting on that money."),
+    effects: {sanity: -5, set: {wl_imp_forged: true}},
+    choices: [
+      C("把那一页抄清", "Copy the page out clean", "imp_w08p", {result: L("你把哈尔的名字抄得很工整。这是你唯一能给他的东西。", "You copy Harl's name very neatly. It is the only thing you can give him.")})
+    ]};
+
+  N.imp_w08p = {chapter: 3, scene: "ship_interior", speaker: null, time: {h: 1},
+    pov: L("视角：军务部抄写员", "POV: a Munitorum clerk"),
+    text: L("星区军务部，第九抄写厅。抄写员翻开你的名册，这是他今天的第四百本。他不读名字，只数行数。\n阵亡二百一十五，怯战一。他在奥雷克斯明年的什一税上添了一笔：再征二百一十六人。",
+            "Sector Munitorum, Ninth Scriptorium. A clerk opens your ledger, the four-hundredth of his shift. He reads no names; he counts lines.\nKilled, two hundred and fifteen. Cowardice, one. He adds a stroke to next year's tithe for Aurex: raise two hundred and sixteen more."),
+    choices: [
+      C("回到你自己", "Back to yourself", "imp_w08")
+    ]};
+
+  N.imp_w08 = {chapter: 3, scene: "barracks", speaker: DRAVIK, time: {h: 2},
+    alt: [ADD(F("wl_imp_named"), "你后来还是查了归队的五个人。没有凯特。", "Later you did check the five who came back. Kett was not among them."),
+          ADD(F("wl_imp_forged"), "凯特出院那天向你敬了个礼。你没有还礼。", "The day Kett is discharged he salutes you. You don't return it.")],
+    text: L("德拉维克把名册锁进铁箱，把那支笔留给了你。\n“字很干净，”她说，“以后的名单都由你抄。”\n阿诺医师隔着帐篷看了你一眼，把没点着的烟吐在地上。",
+            "Dravik locks the ledger in an iron box and leaves the stylus with you.\n“A clean hand,” she says. “You'll copy the lists from now on.”\nAcross the tent Medicae Arno looks at you once and spits his unlit lho-stick onto the ground."),
+    effects: {renown: 3},
+    choices: [
+      C("把笔收进胸袋", "Put the stylus in your breast pocket", "imp_400", {effects: {sanity: 5}, result: L("它比激光枪轻得多。你花了很久才睡着。", "It weighs far less than a lasgun. It takes you a long time to fall asleep.")})
     ]};
 
   /* ============ Chapter 4 · Whispers in the Rain ============ */
@@ -536,6 +634,8 @@
     ]};
 
   N.imp_401 = {chapter: 4, scene: "ruins", speaker: BRIN, time: {d: 2}, gather: L("施汤队伍", "Soup line"),
+    alt: [ADD(F("wl_imp_named"), "队伍里有个瘦高的少年，一只手揣在怀里。不是凯特。你还是挪开了眼。", "A lanky boy in the line keeps one hand tucked in his coat. It isn't Kett. You look away anyway."),
+          ADD(F("wl_imp_forged"), "你习惯性地数了数队伍的人头，像在核对一本名册。", "Out of habit you count heads down the line, as if checking a ledger.")],
     text: L("雨城维瑟尔。城里人很和善，太和善了。布琳婆婆每天在广场施汤，从不收钱，士兵和市民排成长长的施汤队伍。\n排在你后面的女人，一直在指间转一枚旧硬币。",
             "Vessel, the city of rain. The locals are kind. Too kind. Every day Old Brin ladles soup in the square for free, and soldiers and townsfolk form a long soup line.\nThe woman behind you in the line keeps turning an old coin across her fingers."),
     effects: {sanity: 15, hp: 10},
@@ -551,7 +651,7 @@
     codex: ["chaos_cult"],
     choices: [
       C("她说得……有点道理", "She... has a point", "imp_404", {effects: {corruption: 10, taint: {nurgle: 40}, set: {cultTouched: true}}, result: L("你没有抽回手。布琳笑得更深了：“今晚来地窖，带上你的问题。”", "You don't pull your hand away. Brin's smile deepens. “Come to the cellar tonight. Bring your questions.”")}),
-      C("去报告政委", "Report this to the commissar", "imp_405", {result: L("你放下碗，径直去找政委。她听完，只点了一下头。", "You set down the bowl and go straight to the commissar. She hears you out and nods, once.")})
+      C("去报告政委", "Report this to the commissar", "imp_405", {effects: {renown: 3}, result: L("你放下碗，径直去找政委。她听完，只点了一下头。", "You set down the bowl and go straight to the commissar. She hears you out and nods, once.")})
     ]};
 
   N.imp_403 = {chapter: 4, scene: "ruins", speaker: null, time: {h: 2}, eventRoll: 0.3,
@@ -561,7 +661,7 @@
     codex: ["chaos_mutant"],
     choices: [
       C("跟踪布琳", "Follow Brin", "imp_404"),
-      C("去报告政委", "Report this to the commissar", "imp_405", {result: L("你找到政委，说了老鼠和那第三只眼。她没笑。", "You find the commissar and tell her about the rat and its third eye. She doesn't laugh.")})
+      C("去报告政委", "Report this to the commissar", "imp_405", {effects: {renown: 3}, result: L("你找到政委，说了老鼠和那第三只眼。她没笑。", "You find the commissar and tell her about the rat and its third eye. She doesn't laugh.")})
     ]};
 
   N.imp_404 = {chapter: 4, scene: "cult_shrine", speaker: S("cult_magus", "镜面人", "The Mirrored Man"), time: {h: 6},
@@ -893,6 +993,8 @@
     ]};
 
   N.imp_602 = {chapter: 6, scene: "ship_interior", speaker: DRAVIK, time: {d: 2},
+    alt: [ADD(F("wl_imp_named"), "“你写过名单，”她补了一句，“开枪不比写字难。”", "“You've written a list,” she adds. “The shot is no harder than the writing.”"),
+          ADD(F("wl_imp_forged"), "她的目光在你胸袋的笔上停了一秒。“这次别替死人做主。”", "Her eyes rest a second on the stylus in your breast pocket. “This time, don't decide for the dead.”")],
     text: L("德拉维克政委把一枚铜徽章别在你领口。\n“下士，”她说，“这意味着以后有人逃跑，由你开枪。”\n她的语气，像在通知今天的口粮是什么。",
             "Commissar Dravik pins a copper badge to your collar.\n“Corporal,” she says. “It means from now on, when someone runs, you take the shot.”\nShe says it the way she'd announce today's rations."),
     effects: {renown: 5, set: {corporal: true}},
@@ -902,6 +1004,8 @@
     ]};
 
   N.imp_604 = {chapter: 6, scene: "ship_interior", speaker: DRAVIK, time: {d: 2},
+    alt: [ADD(F("wl_imp_named"), "这种纸你认得。凯特那一页，也是你亲手写的。", "You know this paper. Kett's page was in your own hand too."),
+          ADD(F("wl_imp_forged"), "这种纸你认得。哈尔的罪名，就是你在这种纸上写的。", "You know this paper. You wrote Harl's charge on a sheet like it.")],
     text: L("惩戒连的舱室。德拉维克把一张纸拍在你面前：赫斯珀的撤离名单，你的签名还在上面。\n“远征战斗群要来了，”她说，“他们不要惩戒兵。你的命还没还清。下一仗，第一排。”",
             "The penal company's hold. Dravik slaps a sheet down in front of you: the Hesper manifest, your signature still on it.\n“The crusade battle group is coming,” she says. “They don't take penal troops. Your debt isn't paid. Next battle, front rank.”"),
     effects: {sanity: -5, set: {penal: true}},
@@ -1030,7 +1134,7 @@
     choices: [
       C("朝它背包上的管线开火", "Shoot the conduit on its power pack", null, Object.assign({require: {notFlag: "blessedGun"}, hideIfLocked: true}, R(0.35, "renown", "imp_704", "imp_705", L("你瞄准那根泛着蓝光的管子，开了一枪。只有一枪，正中。", "You sight the conduit glowing blue and fire. One shot. Dead on."), L("激光打在管线旁的装甲上，只留下一个黑点。巨人停下了脚步。", "Your shot scorches the armour beside the conduit, leaving a black dot. The giant stops walking.")))),
       C("朝管线开火——奎尔-7祝福过这把枪", "Shoot the conduit with Quell-7's blessed rifle", null, Object.assign({require: {flag: "blessedGun"}, hideIfLocked: true}, R(0.45, "renown", "imp_704", "imp_705", L("枪托上那道圣油的痕迹还在。它原谅过你一次，这次也没让你失望。", "The oil-mark on the stock is still there. It forgave you once; it doesn't fail you now."), L("枪没让你失望。是你的手抖了。巨人停下了脚步。", "The rifle doesn't fail you. Your hand does. The giant stops walking.")))),
-      C("缩在泥里，等它走远", "Press into the mud until it passes", "imp_707", {effects: {sanity: -10, hp: -10}, result: L("你把脸埋进泥里，听着它的脚步从头顶跨过。有人没趴下，你听见了。", "You bury your face in the mud as its footsteps pass overhead. Someone didn't get down. You hear it.")})
+      C("缩在泥里，等它走远", "Press into the mud until it passes", "imp_707", {effects: {sanity: -10, renown: -5}, result: L("你把脸埋进泥里，听着它的脚步从头顶跨过。有人没趴下，你听见了。", "You bury your face in the mud as its footsteps pass overhead. Someone didn't get down. You hear it.")})
     ]};
 
   N.imp_704 = {chapter: 7, scene: "trench", speaker: S("astartes", "守塔的星际战士", "The Tower's Space Marine"), foe: "heretic_astartes", time: {h: 1},

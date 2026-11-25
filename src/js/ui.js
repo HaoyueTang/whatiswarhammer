@@ -591,6 +591,7 @@
   }
 
   function show(name) {
+    if (name !== "game") { var pb = $("pov-banner"); if (pb) pb.hidden = true; var sg = $("scr-game"); if (sg) sg.classList.remove("pov"); var dg = $("dialogue"); if (dg) dg.classList.remove("pov"); }
     closeMusicPop(true);
     ["title", "select", "game", "ending"].forEach(function (s) { $("scr-" + s).hidden = s !== name; });
     UI.screen = name;
@@ -602,6 +603,7 @@
     window.scrollTo(0, 0);
   }
   UI.show = show;
+  UI.renderNode = renderNode;                                  // smoke tests (SPEC §38 pov banner)
 
   function langButton() {
     return h("button", {class: "btn small px", type: "button", onclick: toggleLang, "aria-label": t("language") + ": " + t("lang_toggle")},
@@ -1180,6 +1182,7 @@
     np.textContent = name;
     np.className = "nameplate" + (name ? "" : " narration");
     $("dlg-text").classList.toggle("narr", !node.speaker);
+    renderPov(node);
     if (opts.nodeId) { UI.typer.run(L(opts.body || node.text), "instant"); renderRumor(null); renderGrudgeLine(null); return; }
     renderRumor(g.currentRumor ? g.currentRumor() : null, opts.instant);
     renderGrudgeLine(g.grudgeLine ? g.grudgeLine() : null, opts.instant);
@@ -1193,6 +1196,22 @@
     UI.typer.run(text, opts.instant ? "instant" : UI.settings.textSpeed, revealChoices);
     if (!opts.instant) taintWhisper();
     updateDlgH();
+  }
+
+  /* ---------- perspective switch (SPEC §38) ----------
+   * node.pov = L("视角：…", "POV: …") → a banner above the dialogue box and a cooler, desaturated stage while the scene is
+   * seen through someone else's eyes. The player's HUD stays as it is (nothing on a pov node changes stats). */
+  function renderPov(node) {
+    var dlg = $("dialogue"), scr = $("scr-game"), el = $("pov-banner");
+    if (!dlg) return;
+    if (!el) { el = h("div", {class: "pov-banner px", id: "pov-banner", role: "note"}); el.hidden = true; dlg.insertBefore(el, dlg.firstChild); }
+    var on = !!(node && node.pov);
+    clear(el);
+    if (on) el.appendChild(document.createTextNode("◈ " + L(node.pov) + " ◈"));
+    el.hidden = !on;
+    dlg.classList.toggle("pov", on);
+    if (scr) scr.classList.toggle("pov", on);
+    if (on) { var nm = $("nameplate"); if (nm && !node.speaker) nm.className = "nameplate narration"; }
   }
 
   /* ---------- grudges (SPEC §28) ----------

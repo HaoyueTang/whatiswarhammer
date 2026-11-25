@@ -575,7 +575,7 @@
       C("站着别动，相信他们打不准", "Stand still. Trust their aim is bad", "ork_211", X({hp: -10, renown: 5, set: {steadyUmie: true}},
         "子弹打得到处都是，唯独没打中铁板。你被擦破几处皮，小子们为你的勇气欢呼。",
         "Bullets go everywhere except the plate. You get grazed a few times, and the boyz cheer your nerve.")),
-      C("扔下铁板趴下", "Drop the plate and hit the dirt", "ork_211", X({sanity: -5},
+      C("扔下铁板趴下", "Drop the plate and hit the dirt", "ork_211", X({sanity: -3, renown: -3},
         "你趴下的瞬间，铁板被打成了筛子。小子们对你的反应速度表示失望。",
         "The instant you drop, the plate becomes a sieve. The boyz are disappointed by your reflexes."))
     ]};
@@ -609,7 +609,8 @@
       C("去打架坑下注", "Go bet at the fight pit", "ork_304"),
       C("把牙藏好，攒着", "Hide the toof. Save up", "ork_303", X({renown: 2, set: {savedToof: true}},
         "你把牙缝进了衣角。走到半路，有人拦住了你。",
-        "You sew the toof into your hem. Halfway back, someone blocks your way."))
+        "You sew the toof into your hem. Halfway back, someone blocks your way.")),
+      C("跟瓦兹格布去后墙谈买卖", "Follow Wazgob behind the wall to talk trade", "ork_w01")
     ]};
 
   N.ork_302 = {chapter: 3, scene: "ork_fort", speaker: TRADER, time: {h: 2},
@@ -735,6 +736,10 @@
   N.ork_308 = {chapter: 3, scene: "manufactorum", speaker: WAZ, time: {d: 2},
     text: L("瓦兹格布听说了大老大的事，把你拉回作坊，第一次跟你说悄悄话。\n“格鲁卡喜欢俺的枪，不喜欢俺。等大亮闪好了，斯卡巴德当老大，俺当大机械佬。”\n兽人的悄悄话，整条街都听得见。",
             "Wazgob hears about the warboss and drags you back to the workshop. For the first time, he whispers.\n“Grukka likes my guns, not me. When Big Shiny's done, Skarbad's boss, I'm Big Mek.”\nAn ork whisper carries the whole street."),
+    alt: [
+      {if: {flag: "wl_ork_sold_guns"}, add: L("作坊门口停着“四张嘴”，炮闩上你那三道口子已经被炮油糊住了。", "Four Gobs is parked at the workshop door; gun oil has filled in your three notches on its breeches.")},
+      {if: {flag: "wl_ork_kept_guns"}, add: L("那辆只有两张嘴的战车停在门口。瓦兹格布每次路过都瞪你一眼。", "The wagon with only two gobs sits by the door. Wazgob glares at you every time he passes it.")}
+    ],
     choices: [
       C("“我能帮什么？”", "“How can I help?”", "ork_311", X({renown: 3, set: {mekLoyal: true}},
         "瓦兹格布咧嘴一笑：“活着。别被吃了。”他拍你的那一下，比平时轻。",
@@ -768,13 +773,125 @@
         "The bread is hard. Old Edna doesn't cry out; she draws her empty hand slowly into her sleeve. The slaves all watch you. Nobody speaks."))
     ]};
 
+  /* ============ Work line (WORKLINE_BRIEF 2026-11-25) · Da East Wall guns — entered from ork_301, rejoins ork_303 ============
+   * Flags: wl_ork_fedline (w02) · wl_ork_sold_guns / wl_ork_kept_guns (w05). Read by ork_w07, ork_w09, ork_308, ork_312, ork_402, ork_406.
+   * POV nodes: ork_w04 (Wazgob), ork_w08 (Lieutenant Tarin). */
+  var RAKKO = S("guardsman", "军需下士拉科", "Corporal Rakko");
+
+  N.ork_w01 = {chapter: 3, scene: "ork_fort", speaker: WAZ, time: {h: 1},
+    text: L("瓦兹格布把你拽到集市后墙，指着东边。\n“东墙，人仔的炮，四门。好突突！小子们一冲，炮就砸烂了，可惜。”\n他塞给你一袋史奎格肉干。“你是收破烂的。去，把炮给俺收回来。”",
+            "Wazgob hauls you behind the market wall and points east.\n“East wall. 'Umie guns, four of 'em. Good dakka! Boyz charge it, guns get smashed. Waste.”\nHe shoves a sack of squig jerky at you. “You're a scrap 'umie. Go buy me dem guns.”"),
+    choices: [
+      C("扛起肉干往东墙走", "Shoulder the jerky and head east", "ork_w02"),
+      C("“他们会开枪打我。”", "“They'll shoot me.”", "ork_w02", X({sanity: -3},
+        "“打你？”他想了想，把铁牌从你领口拽出来挂正。“举高点。打坏了，俺再找一个。”",
+        "“Shoot ya?” He thinks, then straightens the tag on your chest. “'Old it up 'igh. Dey break ya, I get anuvver.”"))
+    ]};
+
+  N.ork_w02 = {chapter: 3, scene: "trench", speaker: RAKKO, time: {h: 3},
+    text: L("东墙炮阵还在帝国手里：四十个防卫军，四门自动炮，断粮十一天。\n铁丝网后走出个瘦得只剩军装的人，夹着账本：军需下士拉科。\n他没看你的铁牌，只盯着那袋肉。“开价。”",
+            "The east wall battery is still Imperial: forty PDF, four autocannon, eleven days without rations.\nA man worn down to his uniform comes to the wire with a ledger under his arm: Quartermaster Corporal Rakko.\nHe doesn't look at your tag, only at the sack. “Name a price.”"),
+    choices: [
+      C("一袋肉换一个备用炮闩", "One sack for a spare breech block", "ork_w03", X({renown: 3},
+        "他把炮闩从网下推过来，在账本上写：损耗，战斗。字写得很工整。",
+        "He slides the breech block under the wire and writes in the ledger: lost in action. Very neat handwriting.")),
+      C("先白给一袋，明天再谈", "Give one sack free; talk tomorrow", "ork_w03", X({hp: -3, sanity: 5, set: {wl_ork_fedline: true}},
+        "你自己那份口粮也在袋里。拉科站了很久。“明天，”他说，“我带备件来。”",
+        "Your own ration is in that sack too. Rakko stands a long while. “Tomorrow,” he says. “I'll bring spares.”"))
+    ]};
+
+  N.ork_w03 = {chapter: 3, scene: "trench", speaker: RAKKO, time: {d: 3},
+    text: L("三天里你跑了六趟：复进簧、瞄具、供弹盘，全是备件。\n你照摆摊的老习惯，在每个件上划三道小口子：你的记号，童叟无欺。\n拉科的账本多了一页“战斗损耗”。他的兵脸上有了点血色。",
+            "Six trips in three days: recoil springs, sights, feed trays, all spares.\nOut of old stall habit you scratch three small notches on every part: your mark, honest dealing.\nRakko's ledger gains a page of “lost in action”. His men have some colour back in their faces."),
+    effects: {renown: 3},
+    choices: [
+      C("把这车货推回作坊", "Push the cartload back to the workshop", "ork_w04")
+    ]};
+
+  N.ork_w04 = {chapter: 3, scene: "manufactorum", speaker: WAZ, time: {h: 2},
+    pov: L("视角：机械佬瓦兹格布", "POV: Wazgob da Mek"),
+    text: L("人仔的炮，没劲！四门长得一个样，谁造的？没脑子。\n俺把它们拧到一辆车上，四张嘴一块儿吼，这才像话。\n俺的人仔送来的件上都划着三道小口子，齐齐整整。俺喜欢。不告诉他。",
+            "'Umie guns. Borin'! Four of 'em, all da same. 'Oo builds dat? No brains.\nSo I bolt 'em on one wagon. Four gobs shoutin' togevver. Dat's proper.\nMy 'umie brings da bitz wiv free little scratches on each, all neat. I like dat. Not tellin' 'im."),
+    choices: [
+      C("回到你自己", "Back to yourself", "ork_w05")
+    ]};
+
+  N.ork_w05 = {chapter: 3, scene: "trench", speaker: RAKKO, time: {d: 1},
+    text: L("拉科这回没带备件。他压低声音：“三号、四号炮的炮闩，在用的。换够四十个人走到南边的肉。”\n“塔琳中尉不知道。她要守到最后一发。”\n他的手在抖，账本合着。",
+            "This time Rakko brings no spares. He drops his voice. “The breech blocks of guns three and four. The live ones. For enough meat to walk forty men south.”\n“Lieutenant Tarin doesn't know. She means to hold to the last round.”\nHis hands shake. The ledger stays shut."),
+    choices: [
+      C("收下炮闩，把肉全给他", "Take the blocks; give him all the meat", "ork_w06", X({renown: 8, sanity: -8, set: {wl_ork_sold_guns: true}},
+        "两个炮闩还带着炮油的热气。你划上三道口子，手一点没抖。这才是最怪的。",
+        "The two blocks are still warm with gun oil. You scratch your three notches without a tremor. That's the strange part.")),
+      C("“在用的炮，我不收。”", "“I don't buy guns still in use.”", "ork_w06b", X({renown: -5, sanity: 5, set: {wl_ork_kept_guns: true}},
+        "拉科盯着你，像盯一个疯子。你把剩下的半袋肉从网下推过去，空着手往回走。",
+        "Rakko stares at you as at a madman. You push the last half-sack under the wire and walk back empty-handed."))
+    ]};
+
+  N.ork_w06 = {chapter: 3, scene: "manufactorum", speaker: WAZ, time: {h: 4},
+    text: L("瓦兹格布把两个炮闩举到灯下，笑得牙全露了出来。\n“在用的！还热乎！”一夜之间，四门人仔炮全长在了一辆战车上，他管它叫“四张嘴”。\n“明早打东墙。你认得这些炮，你装弹。”",
+            "Wazgob holds the two breech blocks to the lamp and grins with every tooth.\n“Live ones! Still warm!” By morning all four 'umie guns have grown onto one wagon. He names it Four Gobs.\n“We 'it da east wall at dawn. You know dese guns. You load.”"),
+    choices: [
+      C("爬上“四张嘴”", "Climb onto Four Gobs", "ork_w07")
+    ]};
+
+  N.ork_w06b = {chapter: 3, scene: "manufactorum", speaker: WAZ, time: {h: 4},
+    text: L("瓦兹格布看着你的空手，扳手敲在你肩上，不轻。\n“没炮闩？那俺只有两张嘴。”他把备件拼成两门，照样焊上战车。\n“明早打东墙。墙上的炮还会响。你站车上，你装弹。”",
+            "Wazgob looks at your empty hands and raps your shoulder with his spanner. Not gently.\n“No breeches? Den I only got two gobs.” He builds two guns from the spares and welds them on a wagon anyway.\n“We 'it da east wall at dawn. Dem wall guns still shoot. You ride. You load.”"),
+    effects: {hp: -6},
+    choices: [
+      C("爬上战车", "Climb onto the wagon", "ork_w07")
+    ]};
+
+  N.ork_w07 = {chapter: 3, scene: "trench", speaker: null, foe: "ork", time: {h: 8},
+    text: L("天亮，战车冲向东墙。墙上只有两门炮响，三号、四号一声没出。\n你往炮膛里塞弹，每个炮闩上都有你的三道口子。四张嘴一起吼。\n小子们笑着翻过了墙。前后不到一顿饭的工夫。",
+            "At dawn the wagon charges the east wall. Only two guns answer from it; three and four stay silent.\nYou feed the breeches, your three notches on every block. Four Gobs roars as one.\nThe boyz go over the wall laughing. It takes less time than a meal."),
+    alt: [
+      {if: {flag: "wl_ork_kept_guns"}, text: L("天亮，战车冲向东墙。墙上四门炮齐响，冲在前头的小子成片倒下，倒下时还在笑。\n你往两门炮里塞弹，炮件上是你的三道口子。\n墙撑到下午，打光了最后一发。然后小子们翻了过去。",
+        "At dawn the wagon charges the east wall. All four wall guns fire; the front boyz fall in rows, still laughing.\nYou feed two guns built from parts with your three notches on them.\nThe wall holds until afternoon and fires its last round. Then the boyz go over.")}
+    ],
+    choices: [
+      C("继续装弹", "Keep loading", "ork_w08", X({renown: 5, corruption: 4, hp: -4},
+        "炮管烫掉了你手上一层皮。瓦兹格布在车头吼：“好人仔！更多突突！”",
+        "The barrels take a layer of skin off your hands. Wazgob bellows from the front, “Good 'umie! More dakka!”")),
+      C("装慢一点，再慢一点", "Load slower, and slower still", "ork_w08", X({sanity: -4, renown: -3, hp: -6},
+        "你把弹链卡歪了两回。瓦兹格布回头给了你一扳手，自己伸手理顺了。炮没停多久。",
+        "You jam the belt twice. Wazgob turns, clouts you with the spanner and clears it himself. The guns don't stop for long."))
+    ]};
+
+  N.ork_w08 = {chapter: 3, scene: "trench", speaker: null, time: {h: 2},
+    pov: L("视角：炮兵中尉塔琳", "POV: Lieutenant Tarin, battery commander"),
+    text: L("塔琳中尉靠在三号炮位的沙袋上，腿已经不听使唤。\n缺口里歪着一辆兽人战车，车上的炮件打着她连队的编号。\n炮闩上有三道小口子，和战前船坞那个阀门摊的记号一样。她把它记进了阵地日志。",
+            "Lieutenant Tarin lies against the sandbags of gun three; her legs no longer answer.\nAn ork wagon sits crooked in the breach. The gun parts on it carry her battery's numbers.\nThree small notches on a breech block: the same mark as a valve stall at the docks before the war. She writes it in the battery log."),
+    choices: [
+      C("……", "…", "ork_w09")
+    ]};
+
+  N.ork_w09 = {chapter: 3, scene: "trench", speaker: WAZ, time: {h: 3},
+    text: L("仗打完，你在东墙上走了一遍。拉科下士趴在三号炮位旁，账本压在身下，口袋里还有没吃完的肉干。\n瓦兹格布数出三颗牙，拍在你手里：“工钱！收破烂的，干得好。”",
+            "After the fight you walk the east wall. Corporal Rakko lies beside gun three with the ledger under him and uneaten jerky still in his pocket.\nWazgob counts three teef into your palm. “Wages! Good job, scrap 'umie.”"),
+    alt: [
+      {if: {flag: "wl_ork_sold_guns"}, add: L("三号炮的炮膛是空的。它的炮闩在你身后那辆车上。", "Gun three's breech is empty. Its block is on the wagon behind you.")},
+      {if: {flag: "wl_ork_kept_guns"}, add: L("三号炮的炮管还烫手。它打到了最后一发。", "Gun three's barrel is still too hot to touch. It fired to its last round.")},
+      {if: {flag: "wl_ork_fedline"}, add: L("南边的沟里有几串脚印，走得不快，可是走出去了。", "In the ditch to the south there are a few lines of footprints. Slow ones. But they lead out.")}
+    ],
+    choices: [
+      C("收下三颗牙", "Take the three teef", "ork_303", X({renown: 5, corruption: 3},
+        "牙在你手里咯咯响。你发现自己在想：按件算，这价开低了。",
+        "The teef click in your hand. You catch yourself thinking: per part, you undercharged.")),
+      C("把牙埋在三号炮位下", "Bury the teef under gun three", "ork_303", X({renown: -2, sanity: 3},
+        "你用手刨了个坑。瓦兹格布看不懂，耸耸肩：“人仔的规矩。”他没拦你。",
+        "You dig the hole with your hands. Wazgob doesn't get it and shrugs. “'Umie rules.” He doesn't stop you."))
+    ]};
+
   /* ============ Chapter 4 · Da Green Tide ============ */
   N.ork_312 = {chapter: 4, scene: "ruins", speaker: null, time: {d: 90}, bridge: true, effects: {hp: 15, sanity: 5},
     text: L("三个月过去了。你脖子上的铁牌磨得发亮，堡垒的守卫看见它就挥手放行。\n这天，瓦兹格布派你带几个地精去旧居住区的地下室拆铜管。\n地下室的门一推开，一股潮乎乎的甜味扑了出来。",
             "Three months pass. The tag round your neck is worn shiny; the fort's guards wave you through at the sight of it.\nToday Wazgob sends you with a few grots to strip copper pipe in the old hab cellars.\nWhen the cellar door swings open, a damp, sweet smell rolls out."),
     alt: [
       {if: {flag: "ednaCircle"}, add: L("临走前，奴隶圈有人捎话：埃德娜让你这两天夜里去找她。", "Before you go, word comes from the slave pen: Edna wants to see you, some night soon.")},
-      {if: {flag: "wronged_edna"}, add: L("路过奴隶圈时，里面的人看见你的铁牌，都把脸转开了。", "Passing the slave pen, the people inside see your tag and turn their faces away.")}
+      {if: {flag: "wronged_edna"}, add: L("路过奴隶圈时，里面的人看见你的铁牌，都把脸转开了。", "Passing the slave pen, the people inside see your tag and turn their faces away.")},
+      {if: {flag: "wl_ork_fedline"}, add: L("有地精说，旧居住区那边躲着几个从东墙走出来的兵。", "A grot says a few soldiers who walked out of the east wall are hiding around the old habs.")}
     ],
     choices: [
       C("推门进去", "Push the door open", "ork_401")
@@ -814,7 +931,9 @@
     alt: [
       {if: {flag: "ednaCircle"}, text: L("夜里，埃德娜在奴隶圈角落把一台通讯器塞给你：“祷告圈不只念经。”\n里面传来一个冷硬的声音：“我是黑尔政委。埃德娜说你在机械佬身边。”\n“我要你的眼睛，你的手，必要时，你的命。”",
         "That night, in a corner of the slave pen, Edna presses a vox-unit into your hands. “The prayer circle does more than pray.”\nA cold, hard voice: “This is Commissar Hale. Edna says you're close to the Mek.”\n“I want your eyes, your hands, and if need be, your life.”")},
-      {if: {flag: "ednaDoubt"}, add: L("你想起问埃德娜的那句话：帝皇在哪儿？也许就在这台通讯器那头。", "You remember what you asked Edna: where is the Emperor? Perhaps at the other end of this vox.")}
+      {if: {all: [{flag: "ednaDoubt"}, {notFlag: "wl_ork_sold_guns"}, {notFlag: "wl_ork_kept_guns"}]}, add: L("你想起问埃德娜的那句话：帝皇在哪儿？也许就在这台通讯器那头。", "You remember what you asked Edna: where is the Emperor? Perhaps at the other end of this vox.")},
+      {if: {flag: "wl_ork_sold_guns"}, add: L("“东墙的炮闩上有三道刻痕，”他说，“我在找刻它的人。”", "“There were three notches on the east wall's breech blocks,” he says. “I am looking for whoever cut them.”")},
+      {if: {flag: "wl_ork_kept_guns"}, add: L("“东墙打到了最后一发，”他说，“有人没卖炮闩。我记下了。”", "“The east wall fired to its last round,” he says. “Someone refused to sell its breeches. I have noted that.”")}
     ],
     codex: ["imp_commissar", "imp_imperium"],
     choices: [
@@ -904,7 +1023,8 @@
     text: L("小子们顺着通讯器的信号，在旧教堂的地窖里找到了抵抗军。仗打得很短：兽人比人多，也比人高兴。\n斯卡巴德把一面帝国旗帜披在肩上当披风。\n“好人仔！”他拍你的背，“下回有架打，先告诉俺！”",
             "Following the vox signal, the boyz find the resistance in the old chapel crypt. It's short: more orks than people, and the orks are having more fun.\nSkarbad wears an Imperial banner as a cape.\n“Good 'umie!” He slaps your back. “Next fight, tell me first!”"),
     alt: [
-      {if: {flag: "origin_guard"}, add: L("地窖深处有人喊了一声你的名字。是沃斯中士的声音。", "From deep in the crypt someone shouts your name. It's Sergeant Voss's voice.")}
+      {if: {flag: "origin_guard"}, add: L("地窖深处有人喊了一声你的名字。是沃斯中士的声音。", "From deep in the crypt someone shouts your name. It's Sergeant Voss's voice.")},
+      {if: {flag: "wl_ork_fedline"}, add: L("倒下的人里有张脸你认得：东墙上吃过你那袋肉的兵。", "Among the fallen is a face you know: a soldier from the east wall who ate from your sack.")}
     ],
     effects: {sanity: -10, renown: 5, set: {betrayedResistance: true}},
     choices: [

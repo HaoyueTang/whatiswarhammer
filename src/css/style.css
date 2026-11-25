@@ -1085,3 +1085,12 @@ body.portrait .gather-tag { margin: calc(2 * var(--pb)) 0 calc(2 * var(--pb)) 4p
 .fam-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; width: 100%; padding: 10px 12px; }
 .fam-opt b { font-weight: normal; font-size: 15px; }
 .fam-opt .fam-d { font-size: 12px; line-height: 1.45; opacity: .8; }
+
+/* SPEC §38 — perspective switch: someone else's eyes */
+.pov-banner { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); padding: 3px 14px; font-size: 13px; letter-spacing: 1px;
+  color: #d9e6f2; background: #1c2633; border: 2px solid #8fb3d9; white-space: nowrap; z-index: 3; animation: povIn .6s ease-out; }
+#scr-game[data-faction] .dialogue.pov, .dialogue.pov { border-color: #8fb3d9; background: rgba(16, 22, 32, .94); }
+.dialogue.pov .dlg-text { color: #d6e2ee; }
+#scr-game.pov #scene-box { filter: grayscale(.65) hue-rotate(185deg) brightness(.85); transition: filter .6s; }
+@keyframes povIn { from { opacity: 0; transform: translate(-50%, -6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (prefers-reduced-motion: reduce) { .pov-banner { animation: none; } #scr-game.pov #scene-box { transition: none; } }

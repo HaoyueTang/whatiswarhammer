@@ -88,7 +88,7 @@
     codex: ["tau_water_caste", "tau_greater_good", "place_dalnor_port"],
     choices: [
       C("跟着鼓掌", "Applaud with the others", "tau_104", {effects: {renown: 5}, result: L("你拍着手。瓦尚的目光扫过人群，在你身上停了一瞬，满意地移开。", "You clap along. Vash'aun's gaze sweeps the crowd, rests on you a moment, and moves on, satisfied.")}),
-      C("举手问工钱的事", "Raise your hand about the wages", "tau_105", {result: L("掌声停了。周围的工友同时往旁边让开半步，好像你身上有病。", "The applause stops. The workers around you all shift half a step away, as if you're contagious.")})
+      C("举手问工钱的事", "Raise your hand about the wages", "tau_105", {effects: {renown: -3}, result: L("掌声停了。周围的工友同时往旁边让开半步，好像你身上有病。", "The applause stops. The workers around you all shift half a step away, as if you're contagious.")})
     ]};
 
   N.tau_103 = {chapter: 1, scene: "hive_hab", speaker: RENA, time: {h: 2},
@@ -114,7 +114,7 @@
     effects: {sanity: -5, set: {flagged: true}},
     choices: [
       C("道歉，退回人群", "Apologise and step back", "tau_104", {effects: {renown: 2}, result: L("你低头道歉。无人机的红光熄灭了，瓦尚朝你点头，像在表扬一个学生。", "You bow your head and apologise. The drone's red light goes out. Vash'aun nods at you like a teacher praising a pupil.")}),
-      C("坚持要一个答案", "Insist on an answer", "tau_106", {result: L("瓦尚只是微笑，转向下一个提问。无人机跟着你回了家，一直飘在窗外。", "Vash'aun only smiles and takes the next question. The drone follows you home and hovers outside your window.")})
+      C("坚持要一个答案", "Insist on an answer", "tau_106", {effects: {renown: -3}, result: L("瓦尚只是微笑，转向下一个提问。无人机跟着你回了家，一直飘在窗外。", "Vash'aun only smiles and takes the next question. The drone follows you home and hovers outside your window.")})
     ]};
 
   N.tau_106 = {chapter: 1, scene: "tau_city", speaker: VASH, time: {h: 10},
@@ -342,7 +342,7 @@
     codex: ["tau_kauyon"],
     choices: [
       C("一动不动", "Don't move", null, R(0.5, "sanity", "tau_206", "tau_207", L("虫子爬过你的脊背，又爬了出去。你数着心跳，一直数到第十四个小时。", "The bug crawls down your spine and out again. You count heartbeats until hour fourteen."), L("虫子停在你脖子上，咬了一口。你的手自己动了。", "The bug stops on your neck and bites. Your hand moves on its own."))),
-      C("让92号帮你赶走它", "Let Drone 92 shoo it away", "tau_206", {require: {flag: "namedDrone"}, hideIfLocked: true, result: L("92号无声地降下来，用气流把虫子吹走，又悄悄升回原位。", "Drone 92 sinks without a sound, blows the bug away with its downdraft, and rises back into place.")})
+      C("让92号帮你赶走它", "Let Drone 92 shoo it away", "tau_206", {require: {flag: "namedDrone"}, hideIfLocked: true, effects: {renown: -4}, result: L("92号无声地降下来，用气流把虫子吹走，又悄悄升回原位。", "Drone 92 sinks without a sound, blows the bug away with its downdraft, and rises back into place.")})
     ]};
 
   N.tau_206 = {chapter: 2, scene: "jungle", speaker: KELRA, time: {h: 5},
@@ -426,7 +426,7 @@
     choices: [
       C("跟着跳下去", "Jump down with them", null, M(R(0.45, "hp", "tau_306", "tau_307", L("你落在一只兽人背上，枪托砸了下去。四周全是羽毛、刀光和吼叫。", "You land on an ork's back and bring the stock down. All around: feathers, blades and roaring."), L("跳下去的瞬间你就知道不对——树枝太高了，地面太硬了。", "The moment you jump, you know: the branch is too high, the ground too hard.")), {require: {notFlag: "ateWithKroot"}, hideIfLocked: true, effects: {taint: {khorne: 20}}})),
       C("跟着格拉克萨跳下去", "Jump right behind Grrak'tha", null, M(R(0.65, "hp", "tau_306", "tau_307", L("格拉克萨先落地，替你清出一块空地。你落下去，枪托砸进一只兽人的后脑。", "Grrak'tha lands first and clears you a space. You drop in and drive your stock into an ork's skull."), L("他护得住一边，护不住两边。一只兽人从侧面撞上了你。", "He can cover one side, not both. An ork slams into you from the flank.")), {require: {flag: "ateWithKroot"}, hideIfLocked: true, effects: {taint: {khorne: 20}}})),
-      C("留在树上掩护", "Stay up and give cover", "tau_306", {effects: {renown: 3}, result: L("你在树上一枪一枪点射。每倒下一个，下面就有个克鲁特冲你咔哒一声。", "You fire shot by shot from the branches. Each time one drops, a Kroot below clicks up at you.")})
+      C("留在树上掩护", "Stay up and give cover", "tau_306", {effects: {renown: -2}, result: L("你在树上一枪一枪点射。每倒下一个，下面就有个克鲁特冲你咔哒一声。", "You fire shot by shot from the branches. Each time one drops, a Kroot below clicks up at you.")})
     ]};
 
   N.tau_304 = {chapter: 3, scene: "tau_outpost", speaker: KELRA, foe: "ork", time: {h: 1},
@@ -512,7 +512,100 @@
     ],
     choices: [
       C("什么也不说", "Say nothing", "tau_312", {effects: {renown: 3, set: {silentReport: true}, taint: {nurgle: 10}}, result: L("你什么也没说。瓦尚念完名单，朝沉默的你满意地点了点头。", "You say nothing. Vash'aun finishes the list and nods at your silence, pleased.")}),
-      C("去陪雷娜姨坐一会儿", "Go sit with Aunt Rena", "tau_312", {effects: {sanity: 10, set: {satWithRena: true, rooted: true}}, result: L("雷娜姨给你泡了一杯苦茶。你们坐到天黑，谁也没提乔里的手。", "Rena makes you bitter tea. You sit until dark, and neither of you mentions Jory's arm.")})
+      C("去陪雷娜姨坐一会儿", "Go sit with Aunt Rena", "tau_312", {effects: {sanity: 10, set: {satWithRena: true, rooted: true}}, result: L("雷娜姨给你泡了一杯苦茶。你们坐到天黑，谁也没提乔里的手。", "Rena makes you bitter tea. You sit until dark, and neither of you mentions Jory's arm.")}),
+      C("接下瓦尚的登记差事", "Take Vash'aun's registry job", "tau_w01", {effects: {renown: 3}, result: L("瓦尚念完名单，朝你招了招手。“我们需要一个会两种话的人。”", "Vash'aun finishes the list and beckons you. “We need someone who speaks both tongues.”")})
+    ]};
+
+  /* ---- Work line (2026-11-25, WORKLINE_BRIEF): the registry desk. tau_311 -> tau_w01..w10 -> tau_312.
+   *      Flags wl_tau_stamped / wl_tau_fudged (read: tau_w05, tau_w10, tau_401, tau_405, tau_411) and
+   *      wl_tau_coached (read: tau_w09, tau_601, tau_609). pov nodes: tau_w04, tau_w07. ---- */
+  N.tau_w01 = {chapter: 3, scene: "tau_city", speaker: VASH, time: {h: 3},
+    text: L("散会后，瓦尚请你去水族办公楼喝茶。桌上一叠淡蓝表格。\n“边境卫星撤下三百户人类拓荒户。他们怕我们的脸，不怕你的。你来问，你来写。”\n他递来一支登记笔，比步枪还轻。",
+            "After the square empties, Vash'aun invites you to tea at the water-caste office. A stack of pale blue forms waits on the desk.\n“Three hundred human settler households are coming down from the border moon. They fear our faces, not yours. You ask. You write.”\nHe hands you a registry stylus, lighter than the rifle."),
+    codex: ["tau_water_caste"],
+    choices: [
+      C("坐到登记桌后面", "Sit down behind the desk", "tau_w02", {result: L("登记员的椅子是按钛人的身量做的。你的膝盖顶着桌板，顶了一整天。", "The registrar's chair is built to T'au measure. Your knees press the desk all day.")})
+    ]};
+
+  N.tau_w02 = {chapter: 3, scene: "tau_city", speaker: null, time: {d: 1},
+    text: L("转运场，一张桌，一块掌纹板，十二道题。你问，他们答，你写。\n有人答之前先看你的脸，然后才说实话。\n第九题：“你是否仍向旧神像祈祷？”备注栏很窄，只够写两个字。",
+            "The transit yard: one desk, one palm-plate, twelve questions. You ask, they answer, you write.\nSome study your face before answering, and then tell the truth.\nQuestion nine: “Do you still pray to the old icons?” The remarks box is narrow. Room for one word."),
+    choices: [
+      C("照表一题一题问", "Ask them in order, as written", "tau_w03", {effects: {renown: 3}, result: L("到中午你已经不看题了。嘴自己会问，手自己会写。", "By noon you no longer read the questions. Your mouth asks; your hand writes.")}),
+      C("第九题问得很轻", "Ask question nine very quietly", "tau_w03", {effects: {sanity: 3}, result: L("你把第九题说得像闲聊。头顶的无人机降低了半米，听得更清楚了。", "You make question nine sound like small talk. The drone overhead sinks half a metre to hear better.")})
+    ]};
+
+  N.tau_w03 = {chapter: 3, scene: "tau_city", speaker: S("preacher", "布雷尔老爹", "Old Brell"), time: {h: 5},
+    text: L("第四十一户。布雷尔老爹，磨坊主，七十岁，手抖。他女儿米拉是水泵技工，抱着个孩子。\n技能栏：米拉，有用。老人，无。\n第九题，老人挺直了背：“每天。”米拉闭上了眼。",
+            "Household forty-one. Old Brell, a miller, seventy, hands trembling. His daughter Mira, a pump mechanic, holds a child on her hip.\nSkills column: Mira, useful. The old man, none.\nQuestion nine. The old man straightens. “Every day.” Mira shuts her eyes."),
+    choices: [
+      C("照实写：每天", "Write it as said: daily", "tau_w04", {effects: {renown: 5, sanity: -5, taint: {tzeentch: 10}, set: {wl_tau_stamped: true}}, result: L("两个字，刚好填满备注栏。表格自己变了颜色，老人那一行浮到了另一页。", "One word fills the remarks box exactly. The form changes colour by itself; the old man's line drifts onto another page.")}),
+      C("写成：已不祈祷", "Write: no longer prays", "tau_w04", {effects: {renown: -3, sanity: 3, set: {wl_tau_fudged: true}}, result: L("你的笔悬了一会儿，写下“否”。老人张了张嘴。米拉踩了他一脚。", "Your stylus hangs a moment, then writes “no.” The old man opens his mouth. Mira steps on his foot.")})
+    ]};
+
+  N.tau_w04 = {chapter: 3, scene: "tau_city", speaker: VASH, time: {h: 2}, pov: L("视角：瓦尚使节", "POV: Envoy Vash'aun"),
+    text: L("评估记录，瓦尚。\n古维萨登记员工作良好。人类对它说实话，因为它长着他们的脸。\n第四十一户，第九题，它的笔停了四秒。四秒很长。\n建议：继续使用。它也该有一张表。",
+            "Assessment log, Vash'aun.\nThe gue'vesa registrar performs well. Humans tell it the truth because it wears their face.\nHousehold forty-one, question nine: its stylus paused four seconds. Four seconds is long.\nRecommendation: continue use. It should have a form of its own."),
+    choices: [
+      C("回到你自己", "Back to yourself", "tau_w05")
+    ]};
+
+  N.tau_w05 = {chapter: 3, scene: "tau_city", speaker: null, time: {h: 3},
+    text: L("傍晚，你照名单念名字。有用的去街区，领工牌。另一列去城北的白楼，“对话”，暂时的。\n布雷尔老爹被念进白楼那一列。米拉抱着孩子站在另一列，没有哭，一直看着你的嘴。",
+            "At dusk you read names off the list. The useful go to the Quarter and get work cards. The other line goes to the white building north of town for “dialogue.” Temporarily.\nOld Brell is read into the white line. Mira stands in the other with the child, not crying, watching your mouth."),
+    alt: [
+      {if: {flag: "wl_tau_fudged"}, text: L("傍晚，你照名单念名字。有用的去街区，领工牌。另一列去城北的白楼，“对话”，暂时的。\n布雷尔一家三口进了街区那一列。老人经过你，嘴唇在动。他在祈祷，为你。", "At dusk you read names off the list. The useful go to the Quarter and get work cards. The other line goes to the white building north of town for “dialogue.” Temporarily.\nAll three Brells go into the Quarter line. As the old man passes you his lips are moving. He is praying. For you.")}
+    ],
+    choices: [
+      C("把名单念完", "Read the list to the end", "tau_w06", {effects: {sanity: -3}, result: L("白楼那一列走了十一户。运输车的门关得很轻，像怕吵到谁。", "Eleven households go in the white line. The transport doors close softly, as if not to wake anyone.")})
+    ]};
+
+  N.tau_w06 = {chapter: 3, scene: "tau_city", speaker: GRRAK, time: {h: 4},
+    text: L("夜里，转运场的围栏由克鲁特看守。塑形者格拉克萨蹲在灯柱上，喙朝着天。\n“你身上有纸味，”他说，“纸比刀慢，一样切肉。”\n他又闻了闻风，颈后的翎一根根竖了起来。",
+            "At night the Kroot guard the transit yard fence. The shaper Grrak'tha crouches on a lamp post, beak to the sky.\n“You smell of paper,” he says. “Paper is slower than a knife. Cuts meat the same.”\nHe tastes the wind again, and the quills on his neck rise one by one."),
+    alt: [
+      {if: {flag: "grrakBond"}, add: L("“吃过沙蜥的那个，”他说，“别让纸吃了你。”", "“The one who ate lizard,” he says. “Do not let the paper eat you.”")}
+    ],
+    choices: [
+      C("问他闻到了什么", "Ask what he smells", "tau_w07", {result: L("他很久没回答。克鲁特不犹豫，可他犹豫了。", "He doesn't answer for a long time. Kroot don't hesitate. He hesitates.")}),
+      C("陪他站一会儿", "Keep him company a while", "tau_w07", {effects: {sanity: 3}, result: L("你们一个看天，一个看围栏里睡着的人。谁也没说话。", "One of you watches the sky, the other the sleepers behind the fence. Neither speaks.")})
+    ]};
+
+  N.tau_w07 = {chapter: 3, scene: "tau_city", speaker: GRRAK, time: {h: 1}, pov: L("视角：格拉克萨", "POV: Grrak'tha"),
+    text: L("软的那个身上有纸味，墨味，还有一点悔味。围栏里是怕，旧的怕，嚼惯了的。\n风从天那边来，带着别的。很远，很淡。是饿。\n他吃过很多东西。没有一样记得这种饿。\n钛人不信鼻子。他磨了磨刀。",
+            "The soft one smells of paper, ink, and a little regret. Behind the fence is fear: old fear, well chewed.\nThe wind from the sky side carries something else. Far off, faint. Hunger.\nHe has eaten many things. Nothing he ever ate remembers a hunger like this.\nThe T'au do not trust noses. He sharpens his knife."),
+    choices: [
+      C("回到你自己", "Back to yourself", "tau_w08")
+    ]};
+
+  N.tau_w08 = {chapter: 3, scene: "tau_city", speaker: null, time: {h: 1},
+    text: L("回营的路上，围栏缝里伸出一只手，拽住你的袖子。是个寡妇，叫森娜，明天那一批的，身后睡着两个孩子。\n“登记官，”她压低声音，“那些题，怎么答才对？”\n无人机在围栏另一头。",
+            "On your way back, a hand comes through the fence and catches your sleeve. A widow named Senna, in tomorrow's batch, two children asleep behind her.\n“Registrar,” she whispers, “those questions. What are the right answers?”\nThe drone is at the far end of the fence."),
+    choices: [
+      C("一题一题教她", "Teach her, question by question", "tau_w09", {effects: {sanity: 3, renown: -3, set: {wl_tau_coached: true}}, result: L("你教到第九题，她跟着念了三遍。走出十步，你听见她在教隔壁那一户。", "You get to question nine; she repeats it three times. Ten steps on, you hear her teaching the next household.")}),
+      C("“照实答就好。”", "“Just answer honestly.”", "tau_w09", {effects: {renown: 3, sanity: -3, taint: {nurgle: 10}}, result: L("她松开了手。“照实，”她重复了一遍，好像这个词是你发明的。", "She lets go. “Honestly,” she repeats, as if you had invented the word.")})
+    ]};
+
+  N.tau_w09 = {chapter: 3, scene: "tau_city", speaker: VASH, time: {d: 1},
+    text: L("第二天，瓦尚站在你身后看了一上午。森娜答第九题时声音在抖：“有时候。”\n“诚实，”瓦尚微笑，“是可以被帮助的。”\n她那一行浮到了另一页。孩子那两行没有。",
+            "Next day Vash'aun stands behind you all morning. Senna's voice shakes on question nine: “Sometimes.”\n“Honesty,” Vash'aun smiles, “is something that can be helped.”\nHer line drifts onto the other page. Her children's two lines do not."),
+    alt: [
+      {if: {flag: "wl_tau_coached"}, text: L("第二天，瓦尚站在你身后看了一上午。四十户人答第九题，用的是同一句话，一字不差。\n“多么整齐的进步，”他微笑，在表格末尾添了第十三题。\n“明天起，换一位登记员来问。”", "Next day Vash'aun stands behind you all morning. Forty households answer question nine in the same sentence, word for word.\n“Such orderly progress,” he smiles, and adds a thirteenth question to the form.\n“From tomorrow, another registrar will do the asking.”")}
+    ],
+    choices: [
+      C("交回登记笔", "Hand back the stylus", "tau_w10", {result: L("笔很轻。放回桌上时，你的手指还保持着握笔的形状。", "The stylus weighs nothing. When you set it down, your fingers keep its shape.")})
+    ]};
+
+  N.tau_w10 = {chapter: 3, scene: "tau_city", speaker: VASH, time: {d: 2},
+    text: L("三百户登记完了。瓦尚把工钱推过来，比火线上那个月多一截。\n“大义记得每一份贡献。白楼的人过得很好，只是暂时不便探视。”\n夜里，城北白楼的窗全亮着，没有一扇有影子。",
+            "Three hundred households, registered. Vash'aun slides your pay across the desk: more than your month on the firing line.\n“The Greater Good remembers every contribution. Those in the white building are well. Visits are merely inconvenient for now.”\nAt night every window of the white building is lit. Not one shows a shadow."),
+    alt: [
+      {if: {flag: "wl_tau_stamped"}, add: L("米拉在街区修水泵。她见了你，就低头看扳手。", "Mira fixes pumps in the Quarter now. When she sees you she studies her wrench.")},
+      {if: {flag: "wl_tau_fudged"}, add: L("布雷尔老爹每晚在街区的窗后动嘴唇。", "Every night Old Brell's lips move behind a Quarter window.")}
+    ],
+    choices: [
+      C("收下工钱", "Take the pay", "tau_312", {effects: {renown: 5, taint: {tzeentch: 10}}, result: L("钱是干净的，数目一分不差。你数了两遍。", "The money is clean and exact to the coin. You count it twice.")}),
+      C("把多出的那截留在桌上", "Leave the extra on the desk", "tau_312", {effects: {sanity: 5}, result: L("瓦尚看着那几枚硬币，笑容没变。第二天，它们出现在你的枕头下。", "Vash'aun regards the coins, smile unchanged. Next day they are under your pillow.")})
     ]};
 
   /* ============ Chapter 4 · The Old Masters ============ */
@@ -533,7 +626,9 @@
     effects: {sanity: -5},
     codex: ["imp_imperium", "imp_indomitus"],
     alt: [
-      {if: {flag: "origin_pow"}, add: L("你等了好几年的船，终于来了。来抓你的。", "The ships you waited years for have come at last. For you.")}
+      {if: {flag: "origin_pow"}, add: L("你等了好几年的船，终于来了。来抓你的。", "The ships you waited years for have come at last. For you.")},
+      {if: {flag: "wl_tau_stamped"}, add: L("城北白楼的窗还亮着。那里面的人听不见广播。", "The white building's windows are still lit. Nobody in there can hear the broadcast.")},
+      {if: {flag: "wl_tau_fudged"}, add: L("隔两条街，布雷尔老爹跪下了。是你替他瞒过的。", "Two streets over, Old Brell kneels. You lied on a form for that.")}
     ],
     choices: [
       C("关掉广播", "Switch it off", "tau_402", {result: L("你按下开关。街上，每扇窗户里还在传出同一个声音。", "You switch it off. Out in the street, the same voice still pours from every window.")}),
@@ -590,6 +685,9 @@
   N.tau_405 = {chapter: 4, scene: "tau_city", speaker: VASH, time: {h: 3},
     text: L("瓦尚听完，握住你的手，笑容完美：“谢谢你。你为大义做了一件困难而正确的事。”\n当晚，雷娜姨被“请”去参加一次友好的对话。\n乔里整整一年没再跟你说一句话。",
             "Vash'aun hears you out, takes your hand, and smiles perfectly. “Thank you. You have done a difficult and correct thing for the Greater Good.”\nThat night Aunt Rena is invited to a friendly dialogue.\nJory doesn't speak a word to you for a whole year."),
+    alt: [
+      {if: {flag: "wl_tau_stamped"}, add: L("这是你交给水族的第二个名字。第一个是布雷尔。", "This is the second name you have given the water caste. The first was Brell.")}
+    ],
     choices: [
       C("回营地", "Go back to barracks", "tau_405b", {result: L("你走得很快，好像有人在后面追。其实没有。", "You walk fast, as if someone were after you. No one is.")})
     ]};
@@ -699,7 +797,11 @@
       {if: {flag: "firedHigh"}, add: L("他没提你抬高的枪口。你不确定他不知道。", "He doesn't mention your raised muzzle. You aren't sure he doesn't know.")}
     ],
     choices: [
-      C("接受", "Accept", "tau_501", {effects: {renown: 10, set: {liaison: true}, taint: {tzeentch: 10}}, result: L("瓦尚给你别上一枚淡蓝色的徽章。从今天起，你开口说话，就代表人类。", "Vash'aun pins a pale blue badge on you. From today, when you speak, you speak for the humans.")}),
+      C("接受", "Accept", "tau_501", {effects: {renown: 10, set: {liaison: true}, taint: {tzeentch: 10}}, result: L("瓦尚给你别上一枚淡蓝色的徽章。从今天起，你开口说话，就代表人类。", "Vash'aun pins a pale blue badge on you. From today, when you speak, you speak for the humans."),
+        resultAlt: [
+          {if: {flag: "wl_tau_stamped"}, text: L("瓦尚给你别上淡蓝徽章。“你写过‘每天’，”他说，“我们记得谁的笔是直的。”", "Vash'aun pins a pale blue badge on you. “You once wrote ‘daily,’” he says. “We remember whose stylus runs straight.”")},
+          {if: {flag: "wl_tau_fudged"}, text: L("瓦尚给你别上淡蓝徽章。“第四十一户，”他轻声说，“我们都当它是笔误。暂时的。”", "Vash'aun pins a pale blue badge on you. “Household forty-one,” he says softly. “We are all calling it a slip of the stylus. Temporarily.”")}
+        ]}),
       C("推说自己只会打仗", "Say you're only good for fighting", "tau_501", {effects: {sanity: 5}, result: L("瓦尚的笑容一丝不变：“当然。大义尊重每个人的位置。”他收回了茶杯。", "Vash'aun's smile doesn't flicker. “Of course. The Greater Good respects everyone's place.” He takes back the teacup.")}),
       C("先谈谈联络官的报酬", "Negotiate the liaison's pay first", "tau_501", {require: {flag: "origin_trader"}, hideIfLocked: true, effects: {renown: 8, set: {liaison: true}}, result: L("瓦尚的笑容第一次顿了半秒。最后，人类那栏工钱长了一截。只长了你那一行。", "Vash'aun's smile pauses, for the first time, half a second. The human wage column grows a little. Only your line."),
         resultAlt: [{if: {flag: "askedTerms"}, text: L("“这次别说‘暂时的’，”你说。瓦尚顿了半秒，在合同上写了年限。只写了你那一行。", "“Not ‘temporary’ this time,” you say. Vash'aun pauses half a second, then writes a term into the contract. Only your line.")}]})
@@ -862,6 +964,9 @@
             "Twenty days after your return, every human child in the city has the same dream. The T'au children sleep soundly.\nLong-range sensors send one cold line: “Large-scale biomass detected. Bearing: from Hesper. Approaching.”\nAt dusk every channel orders the gue'vesa to the briefing hall."),
     effects: {sanity: -5},
     codex: ["xenos_shadow_in_warp", "xenos_tyranid", "xenos_hive_mind", "place_hesper", "place_arcosa"],
+    alt: [
+      {if: {flag: "wl_tau_coached"}, add: L("森娜的两个孩子也做了那个梦。这回她没来问你怎么答。", "Senna's two children dream it too. This time she doesn't ask you for the right answer.")}
+    ],
     choices: [
       C("去简报厅", "Go to the briefing hall", "tau_602", {result: L("简报厅门口，人类和钛人排成了两列。你站进了更长的那一列。", "At the briefing hall, humans and T'au queue in two lines. You join the longer one.")})
     ]};
@@ -950,7 +1055,8 @@
       {if: {flag: "toldQuarter"}, add: L("有人认出你：“是联络官！早就跟我们说实话了！”", "Someone recognises you. “The liaison! Told us straight!”")}
     ],
     choices: [
-      C("回到防线去", "Return to the defence line", "tau_611", {effects: {renown: 5, taint: {nurgle: 20}}, result: L("你转身逆着人群走。身后的哭喊越来越远，你没有回头。", "You turn and push against the crowd. The cries behind you fade. You don't look back.")}),
+      C("回到防线去", "Return to the defence line", "tau_611", {effects: {renown: 5, taint: {nurgle: 20}}, result: L("你转身逆着人群走。身后的哭喊越来越远，你没有回头。", "You turn and push against the crowd. The cries behind you fade. You don't look back."),
+        resultAlt: [{if: {flag: "wl_tau_coached"}, text: L("你转身逆着人群走。有人在背后喊：“登记官！这回怎么答？”你没有回头。", "You turn and push against the crowd. Someone calls after you: “Registrar! What's the right answer this time?” You don't look back.")}]}),
       C("带着人群往大门冲", "Lead the crowd at the gates", "tau_610", {result: L("你举枪大喊一声。人群跟着你涌向能量屏，像决了堤的水。", "You raise your rifle and shout. The crowd surges after you toward the energy screen like a burst dam.")}),
       C("以联络官身份对人群讲话", "Address the crowd as liaison", null, M(R(0.5, "renown", "tau_611", "tau_610", L("你爬上货箱，一句一句地讲。人群慢慢停了下来，有人开始往难民营走。", "You climb a crate and speak, sentence by sentence. The crowd slows, stops; some turn back toward the camp."), L("你刚开口，后面的人就推了上来。人群把你卷着冲向能量屏。", "You've barely begun when the people behind shove forward. The crowd sweeps you toward the energy screen.")), {require: {flag: "liaison"}, hideIfLocked: true})),
       C("带人走第七泊位下的水道", "Lead them through the channel under Berth Seven", "tau_609a", {require: {flag: "knowSmuggler"}, hideIfLocked: true, effects: {renown: -5, set: {smuggledRefugees: true, rooted: true}}, result: L("你拍拍身边几个人的肩，往人群外挤。“跟我来，别出声。”", "You tap a few shoulders and squeeze out of the crowd. “Follow me. Not a sound.”")})
