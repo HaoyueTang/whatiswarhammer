@@ -178,9 +178,11 @@
     ],
     choices: [
       D("签线列团，领厚赏钱", "Sign for the line regiment and take the fat bounty", "cha_o_deserter_1", "chaos", "deserter",
-        L("赏钱沉甸甸的，够家里吃一年。老兵压低声音：“卡尔卡罗斯的污池，没人问你从哪来。”", "The bounty is heavy in your hand: a year of food for the family. The veteran drops his voice. “In the Sump on Carcharos, nobody asks where you're from.”")),
+        L("赏钱沉甸甸的，够家里吃一年。老兵压低声音：“卡尔卡罗斯的污池，没人问你从哪来。”", "The bounty is heavy in your hand: a year of food for the family. The veteran drops his voice. “In the Sump on Carcharos, nobody asks where you're from.”"), null,
+        {resultAlt: [{"if": {flag: "u_side_under"}, text: L("老兵压低声音：“污池里有咱们这样的人。到了，照旧别问名字。”赏钱你留在了家里桌上。", "The veteran drops his voice. “There are people like us in the Sump. When you get there, same as ever: ask no names.” You leave the bounty on the table at home.")}]}),
       D("签驻防团，去海湾边守着", "Sign for the garrison and go stand watch on the Gulf", "tau_o_pow_1", "tau", "pow",
-        L("赏钱只有一半。中士盖了章：“海湾那边安静，安静得很。”", "The bounty is half as much. The sergeant stamps the slate. “Quiet out on the Gulf. Very quiet.”")),
+        L("赏钱只有一半。中士盖了章：“海湾那边安静，安静得很。”", "The bounty is half as much. The sergeant stamps the slate. “Quiet out on the Gulf. Very quiet.”"), null,
+        {resultAlt: [{"if": {flag: "u_side_out"}, text: L("中士盖了章。你早就想离这一切远些。海湾那边安静，正合你意。", "The sergeant stamps the slate. You have wanted to be far from all of this for a long while. Quiet on the Gulf suits you fine.")}]}),
       D("签船坞连队，去伊斯卡隆", "Sign for the dock company bound for Iskaron", "ork_o_guard_1", "orks", "guard",
         L("没有赏钱，只发一件旧大衣。老兵点头：“守门的活，总比挖坟强。”", "No bounty, only an old greatcoat. The veteran nods. “A gate job beats digging graves.”"), ONLY("u_low_vet"))
     ]};
@@ -206,7 +208,8 @@
         L("他扫过你的手腕：“劳力。编号，到港分配。”", "He scans your wrist. “Labour. Number assigned on arrival.”"), null,
         {resultAlt: [{"if": {flag: "u_faith_machine"}, text: L("他扫过你的手腕，又扫过你拇指上的油渍：“劳力。懂得敬油。到港分配。”", "He scans your wrist, then the oil stain on your thumb. “Labour. Knows to honour the oil. Assigned on arrival.”")}]}),
       D("站进签筒的队", "Stand in the lot-drum line", "mech_o_conscript_1", "mechanicus", "conscript",
-        L("他的镜头停了一瞬：“自愿抽签者，记录在案。”", "His lens pauses for a moment. “Volunteer for the draw. Recorded.”"))
+        L("他的镜头停了一瞬：“自愿抽签者，记录在案。”", "His lens pauses for a moment. “Volunteer for the draw. Recorded.”"), null,
+        {resultAlt: [{"if": {flag: "u_faith_machine"}, text: L("他的镜头停了一瞬。你低声念了半句敬油的祷词。“自愿抽签者，记录在案。”", "His lens pauses for a moment. Under your breath you say half a prayer to the oil. “Volunteer for the draw. Recorded.”")}]})
     ]};
 
   /* ============ Mid · Dome Farm Seven on the ash plains: the grain depot, the salvage crew, the labour ship ============
@@ -288,9 +291,11 @@
     alt: [ADD("u_mid_scrap", "队长瞥了一眼你兜里露出的条子。", "The boss glances at the note sticking out of your pocket.")],
     choices: [
       D("跟拾荒队上灰烬路", "Join the salvage crew on the ash road", "cha_101", "chaos", "scavenger",
-        L("队长把一块干肉拍进你手里：“卡尔卡罗斯的下巢，什么废铁都收。”", "The boss slaps a strip of dried meat into your hand. “Down in the Carcharos underhive they buy any scrap.”")),
+        L("队长把一块干肉拍进你手里：“卡尔卡罗斯的下巢，什么废铁都收。”", "The boss slaps a strip of dried meat into your hand. “Down in the Carcharos underhive they buy any scrap.”"), null,
+        {resultAlt: [{"if": {flag: "u_side_under"}, text: L("队长把干肉拍进你手里：“下巢不问来路。你这样的人，在那儿活得下去。”", "The boss slaps dried meat into your hand. “The underhive asks nobody where they came from. Your sort lasts down there.”")}]}),
       D("在招工船的合同上按手印", "Press your thumb to the labour ship's contract", "tau_101", "tau", "colonist",
-        L("船长看也没看你的手：“港口卸货，管饭，月结。新卡尔德那边缺人。”", "The captain doesn't even look at your hand. “Dock work, meals included, paid monthly. New Calder is short of hands.”")),
+        L("船长看也没看你的手：“港口卸货，管饭，月结。新卡尔德那边缺人。”", "The captain doesn't even look at your hand. “Dock work, meals included, paid monthly. New Calder is short of hands.”"), null,
+        {resultAlt: [{"if": {flag: "u_side_out"}, text: L("你按下手印，没有回头。新卡尔德缺人。你只要一个没人认识你的港口。", "You press your thumb down and do not look back. New Calder is short of hands. All you want is a port where nobody knows you.")}]}),
       D("拿着队长的条子去伊斯卡隆", "Take the boss's note to Iskaron", "ork_101", "orks", "scrap",
         L("队长把你塞上一艘废铁货船：“到了船骨市场，找老摊主。”", "The boss shoves you onto a scrap freighter. “At the ship-bone market, ask for the old stallholder.”"), ONLY("u_mid_scrap"))
     ]};
@@ -303,7 +308,8 @@
       D("在军士的单子上签名", "Sign the sergeant's sheet", "eld_o_trooper_1", "aeldari", "trooper",
         L("军士把单子叠进胸袋：“落地那天，就发军服。”", "The sergeant folds the sheet into his breast pocket. “You get a uniform the day we land.”")),
       D("不签，买一个货舱角落", "Don't sign; buy a corner of the hold", "eld_o_pilgrim_1", "aeldari", "pilgrim",
-        L("你把攒下的钱都交给船员。梦里那圈石头，就在这艘船要去的地方。", "You hand the crew everything you saved. The ring of stones from your dream stands where this ship is going."))
+        L("你把攒下的钱都交给船员。梦里那圈石头，就在这艘船要去的地方。", "You hand the crew everything you saved. The ring of stones from your dream stands where this ship is going."), null,
+        {resultAlt: [{"if": {flag: "u_faith_creed"}, text: L("你把钱都交给船员，默念了一句祷词。梦里那圈石头，你当它是圣像给的指引。", "You hand the crew everything and say a prayer under your breath. The ring of stones from your dream, you take for a sign from the icon.")}]})
     ]};
 
   /* ============ Up · House Serrin, spire level ninety: the debt is due ============
@@ -388,7 +394,8 @@
         L("你随教会的班船离开奥雷克斯，去卡尔卡罗斯。赛伦家后来再没来过信。", "You leave Aurex on the Church's packet ship, bound for Carcharos. House Serrin never writes again."), null,
         {resultAlt: [{"if": {flag: "u_faith_creed"}, text: L("上船前，你朝船头的圣像跪了一跪。班船去卡尔卡罗斯。赛伦家后来再没来过信。", "Before boarding you kneel once to the icon at the prow. The packet ship is bound for Carcharos. House Serrin never writes again.")}]}),
       D("替船长盖下那一枚章", "Stamp the captain's manifests with the seal", "tau_o_trader_1", "tau", "trader",
-        L("船长看着未干的印泥，笑了：“海湾那头，没人认得赛伦这个姓。”", "The captain watches the ink dry and grins. “Across the Gulf, nobody knows the name Serrin.”")),
+        L("船长看着未干的印泥，笑了：“海湾那头，没人认得赛伦这个姓。”", "The captain watches the ink dry and grins. “Across the Gulf, nobody knows the name Serrin.”"), null,
+        {resultAlt: [{"if": {flag: "u_side_out"}, text: L("印泥未干。船长笑了：“海湾那头没人认得赛伦。”这正是你想要的。", "The ink is still wet. The captain grins. “Across the Gulf, nobody knows a Serrin.” That is exactly what you wanted.")}]}),
       D("上玛罗教授的考察船", "Board Professor Marrow's expedition ship", "nec_101", "necrons", "archivist",
         L("教授把素描簿和一盏灯塞给你：“不发工钱，管饭。”", "The professor pushes a sketchbook and a lamp at you. “No wages. Meals.”"), ONLY("u_up_dig"))
     ]};
@@ -399,7 +406,8 @@
             "In the antechamber the Cult's debt-collector reads you from head to foot like an inventory sheet. “Payment in kind. It clears the Cult's account only.”\nHe lays out two contracts: the counting floors of Gravex, ten years; or scribe to a magos on a dig, whose last scribe died of data-burn. The contract is transferable."),
     choices: [
       D("把欠款一笔笔背给他听", "Recite the whole debt back to him", "mech_o_savant_1", "mechanicus", "savant",
-        L("他的镜头转向你：“可用。格拉维克斯的计数台，十年。”", "His lens turns on you. “Serviceable. The counting floors of Gravex, ten years.”")),
+        L("他的镜头转向你：“可用。格拉维克斯的计数台，十年。”", "His lens turns on you. “Serviceable. The counting floors of Gravex, ten years.”"), null,
+        {resultAlt: [{"if": {flag: "u_faith_machine"}, text: L("你背完，顺口加了半句敬油的祷词。他的镜头转向你：“可用。且虔诚。计数台，十年。”", "You finish, and add half a prayer to the oil. His lens turns on you. “Serviceable. And devout. The counting floors, ten years.”")}]}),
       D("把耳后的插口转给他看", "Turn the socket behind your ear to him", "nec_o_lexmech_1", "necrons", "lexmech",
         L("他用探针碰了碰插口：“兼容。合同还剩二十九年，可以转让。”", "He touches the socket with a probe. “Compatible. Twenty-nine years left on the contract, transferable.”"))
     ]};
