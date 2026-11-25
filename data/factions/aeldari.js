@@ -857,7 +857,7 @@
       C("等他们睡着，把石头摘走", "Wait until they sleep, then take the stones", "eld_w05",
         E({sanity: -6, renown: 5, set: {wl_eld_stole: true}}, "你喝完了她的汤，半夜摘下三颗石头。最小的孩子翻了个身，没有醒。", "You finish her soup, and in the night you unhook three stones. The smallest child turns over and does not wake.")),
       C("告诉她：石头里住着死人", "Tell her: the dead live in those stones", "eld_w05",
-        E({sanity: 3, renown: -3, set: {wl_eld_told: true}}, "赫斯卡盯了你很久，自己把石头摘下来，用布包好。“那就送他们回家，”她说，“别让孩子看见。”", "Heska stares at you a long time, then unhooks the stones herself and wraps them in cloth. “Then take them home,” she says. “Don't let the children see.”"))
+        E({sanity: 3, set: {wl_eld_told: true}}, "赫斯卡盯了你很久，自己把石头摘下来，用布包好。“那就送他们回家，”她说，“别让孩子看见。”", "Heska stares at you a long time, then unhooks the stones herself and wraps them in cloth. “Then take them home,” she says. “Don't let the children see.”"))
     ]};
 
   N.eld_w05 = {chapter: 3, scene: "manufactorum", speaker: null,
@@ -1020,7 +1020,7 @@
     choices: [
       C("“让我试一试面具。”", "“Let me try a mask.”", "eld_410"),
       C("鞠躬，退出神殿", "Bow and leave the shrine", "eld_408",
-        E({renown: 2}, "他回礼的角度精确到分毫，正好是对客人的标准。不多，也不少。",
+        E(null, "他回礼的角度精确到分毫，正好是对客人的标准。不多，也不少。",
           "He returns the bow at a precise angle, exactly what a guest is owed. No more, no less."))
     ]};
 
@@ -1416,7 +1416,7 @@
           {resultAlt: [RA(F("forgiven_edda"), "你守住了入口，像那天和埃达一样，这回没跑。可他们从另一侧来了。", "You hold the gate as you did with Edda, and you don't run. But they come in from the far side."),
                        RA(F("wronged_edda"), "你守住了入口。这回你没跑，埃达看不见了。可他们从另一侧来了。", "You hold the gate. This time you don't run; Edda isn't here to see. They come in from the far side.")]}))),
       C("躲进树洞", "Hide in a hollow tree", "eld_610h",
-        E({sanity: -8, set: {wronged_mireth: true}}, "你钻进树洞，捂住嘴。外面，米瑞丝在喊你的名字。你没有回答。",
+        E({sanity: -8, renown: -5, set: {wronged_mireth: true}}, "你钻进树洞，捂住嘴。外面，米瑞丝在喊你的名字。你没有回答。",
           "You crawl into the hollow and cover your mouth. Outside, Mireth is calling your name. You don't answer."))
     ]};
 

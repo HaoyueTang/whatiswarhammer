@@ -651,7 +651,7 @@
     codex: ["chaos_cult"],
     choices: [
       C("她说得……有点道理", "She... has a point", "imp_404", {effects: {corruption: 10, taint: {nurgle: 40}, set: {cultTouched: true}}, result: L("你没有抽回手。布琳笑得更深了：“今晚来地窖，带上你的问题。”", "You don't pull your hand away. Brin's smile deepens. “Come to the cellar tonight. Bring your questions.”")}),
-      C("去报告政委", "Report this to the commissar", "imp_405", {result: L("你放下碗，径直去找政委。她听完，只点了一下头。", "You set down the bowl and go straight to the commissar. She hears you out and nods, once.")})
+      C("去报告政委", "Report this to the commissar", "imp_405", {effects: {renown: 3}, result: L("你放下碗，径直去找政委。她听完，只点了一下头。", "You set down the bowl and go straight to the commissar. She hears you out and nods, once.")})
     ]};
 
   N.imp_403 = {chapter: 4, scene: "ruins", speaker: null, time: {h: 2}, eventRoll: 0.3,
@@ -661,7 +661,7 @@
     codex: ["chaos_mutant"],
     choices: [
       C("跟踪布琳", "Follow Brin", "imp_404"),
-      C("去报告政委", "Report this to the commissar", "imp_405", {result: L("你找到政委，说了老鼠和那第三只眼。她没笑。", "You find the commissar and tell her about the rat and its third eye. She doesn't laugh.")})
+      C("去报告政委", "Report this to the commissar", "imp_405", {effects: {renown: 3}, result: L("你找到政委，说了老鼠和那第三只眼。她没笑。", "You find the commissar and tell her about the rat and its third eye. She doesn't laugh.")})
     ]};
 
   N.imp_404 = {chapter: 4, scene: "cult_shrine", speaker: S("cult_magus", "镜面人", "The Mirrored Man"), time: {h: 6},
@@ -1134,7 +1134,7 @@
     choices: [
       C("朝它背包上的管线开火", "Shoot the conduit on its power pack", null, Object.assign({require: {notFlag: "blessedGun"}, hideIfLocked: true}, R(0.35, "renown", "imp_704", "imp_705", L("你瞄准那根泛着蓝光的管子，开了一枪。只有一枪，正中。", "You sight the conduit glowing blue and fire. One shot. Dead on."), L("激光打在管线旁的装甲上，只留下一个黑点。巨人停下了脚步。", "Your shot scorches the armour beside the conduit, leaving a black dot. The giant stops walking.")))),
       C("朝管线开火——奎尔-7祝福过这把枪", "Shoot the conduit with Quell-7's blessed rifle", null, Object.assign({require: {flag: "blessedGun"}, hideIfLocked: true}, R(0.45, "renown", "imp_704", "imp_705", L("枪托上那道圣油的痕迹还在。它原谅过你一次，这次也没让你失望。", "The oil-mark on the stock is still there. It forgave you once; it doesn't fail you now."), L("枪没让你失望。是你的手抖了。巨人停下了脚步。", "The rifle doesn't fail you. Your hand does. The giant stops walking.")))),
-      C("缩在泥里，等它走远", "Press into the mud until it passes", "imp_707", {effects: {sanity: -10, hp: -10}, result: L("你把脸埋进泥里，听着它的脚步从头顶跨过。有人没趴下，你听见了。", "You bury your face in the mud as its footsteps pass overhead. Someone didn't get down. You hear it.")})
+      C("缩在泥里，等它走远", "Press into the mud until it passes", "imp_707", {effects: {sanity: -10, renown: -5}, result: L("你把脸埋进泥里，听着它的脚步从头顶跨过。有人没趴下，你听见了。", "You bury your face in the mud as its footsteps pass overhead. Someone didn't get down. You hear it.")})
     ]};
 
   N.imp_704 = {chapter: 7, scene: "trench", speaker: S("astartes", "守塔的星际战士", "The Tower's Space Marine"), foe: "heretic_astartes", time: {h: 1},

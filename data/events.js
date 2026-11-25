@@ -16,7 +16,7 @@
              "You dream of an arena, its stands packed with headless spectators.\nA voice like an anvil: “Next time, strike first. I will make your hands faster than theirs.”\nYou wake with your fists clenched white."),
      codex: ["god_khorne"],
      choices: [
-       O("“好。”", "“Yes.”", {hp: 15, corruption: 8, renown: 3, taint: {khorne: 30}},
+       O("“好。”", "“Yes.”", {hp: 15, corruption: 8, taint: {khorne: 30}},
          "你的伤口在发热，愈合得快得不正常。之后好几天，你走路都想撞上点什么。",
          "Your wounds run hot and heal unnaturally fast. For days afterward you walk around looking for something to collide with."),
        O("松开拳头", "Unclench your fists", {sanity: -5},
@@ -31,9 +31,9 @@
              "A comrade shoves you over half a ration bar. A small thing.\nBut the edges of your vision suddenly redden, and something in your ear starts counting: one, two, three...\nIt wants to know whether you can count to eight."),
      codex: ["god_khorne"],
      choices: [
-       O("还手", "Hit back", {corruption: 5, renown: 3, hp: -5, taint: {khorne: 25}},
-         "数到八之前，他已经躺在地上了。周围的人看你的眼神变了。有人怕你，有人敬你。",
-         "Before the count reaches eight, he's on the floor. The way people look at you changes. Some fear you. Some respect you."),
+       O("还手", "Hit back", {corruption: 5, hp: -3, taint: {khorne: 25}},
+         "数到八之前，他已经躺在地上了，你的指节也破了。口粮归你。周围的人有的怕你，有的敬你。",
+         "Before the count reaches eight he's on the floor, and your knuckles are split. The ration is yours. Some of the others fear you now. Some respect you."),
        O("把口粮扔给他", "Toss him the ration", {sanity: 5, hp: -5, taint: {khorne: -5}},
          "红雾慢慢退了。你饿了一晚上，但睡得很安稳。",
          "The red haze slowly recedes. You go hungry that night, but sleep soundly."),
@@ -83,7 +83,7 @@
        O("摘下来闻一闻", "Pick it and smell it", {sanity: 8, corruption: 5, taint: {nurgle: 25}},
          "很香，香得让你想起家。之后几天，你总觉得口袋里暖暖的。",
          "It smells wonderful, like home. For days afterward your pocket feels pleasantly warm."),
-       O("一脚踩烂", "Crush it underfoot", {sanity: -3, renown: 2},
+       O("一脚踩烂", "Crush it underfoot", {sanity: -3},
          "苍蝇停止了哼歌，飞走了。你的靴子从此有股甜味，洗不掉。",
          "The flies stop humming and leave. Your boot keeps a sweet smell that never washes out.")
      ]},
@@ -97,11 +97,11 @@
      codex: ["god_tzeentch"],
      choices: [
        O("照纸条做", "Do as the note says", {renown: 5, corruption: 5, taint: {tzeentch: 30}},
-         "第二天，左边的走廊塌了。你没事。可你开始怀疑，是谁在替你做决定。",
-         "Next day the left-hand corridor collapses. You're fine. But you begin to wonder who is making your decisions."),
-       O("偏要走左边", "Go left on purpose", {hp: -10, sanity: 5, taint: {tzeentch: 10}},
-         "左边什么都没发生。你松了口气，回头时发现右边的走廊塌了。纸条上的字变了：“猜对了。”",
-         "Nothing happens on the left. Relieved, you look back—and the right-hand corridor has collapsed. The note now reads: “Good guess.”"),
+         "第二天，左边的走廊塌了。你提前拦住了同行的人，他们从此信你的话。可你开始怀疑，是谁在替你做决定。",
+         "Next day the left-hand corridor collapses. You had held the others back; they trust your word now. But you begin to wonder who is making your decisions."),
+       O("偏要走左边", "Go left on purpose", {sanity: -3, taint: {tzeentch: 10}},
+         "左边什么都没发生。你刚松了口气，回头就看见右边的走廊塌了。纸条上的字变了：“猜对了。”你后背发凉。",
+         "Nothing happens on the left. You have barely breathed out when you look back: the right-hand corridor has collapsed. The note now reads: “Good guess.” Your spine goes cold."),
        O("把纸条烧掉", "Burn the note", {sanity: -5},
          "纸烧完了，灰烬落在地上，排成了一个你看不懂的字。",
          "The note burns away. Its ashes settle into a letter you can't read.")
@@ -115,8 +115,8 @@
      codex: ["god_tzeentch"],
      choices: [
        O("问它是哪一步", "Ask which step", {renown: 6, corruption: 6, sanity: -5, taint: {tzeentch: 30}},
-         "它告诉了你。它说的是对的。你不知道该感激，还是该害怕。",
-         "It tells you. It's right. You don't know whether to be grateful or afraid."),
+         "它告诉了你。它说的是对的，你躲过了那一步，旁人都当你有先见之明。你不知道该感激，还是该害怕。",
+         "It tells you. It's right; you avoid that step, and the others take it for foresight. You don't know whether to be grateful or afraid."),
        O("踩碎水洼", "Stamp through the puddle", {sanity: -3},
          "水花溅起，倒影碎了。等水面平静下来，那里有两个你。",
          "Water splashes; the reflection shatters. When the surface settles, there are two of you.")
@@ -133,7 +133,7 @@
        O("“我还要。”", "“More.”", {sanity: 8, corruption: 10, taint: {slaanesh: 30}},
          "第二颗没有第一颗好吃，第三颗更差。可你停不下来，一直在找第一颗的味道。",
          "The second isn't as good as the first, the third worse still. But you can't stop. You keep chasing that first taste."),
-       O("把剩下的扔掉", "Throw the rest away", {sanity: -8, renown: 3, taint: {slaanesh: -5}},
+       O("把剩下的扔掉", "Throw the rest away", {sanity: -5, hp: -3, taint: {slaanesh: -5}},
          "你连着几天吃不下东西。后来，粗糙的口粮慢慢又有了味道。",
          "For days you can't eat. Slowly, the coarse rations start to taste of something again.")
      ]},
@@ -145,9 +145,9 @@
              "You do a small thing well, and applause rings in your ears. No one is near.\nIt's sincere and warm. No one has ever praised you like this.\nA voice whispers: “Again. Do it a little more beautifully.”"),
      codex: ["god_slaanesh"],
      choices: [
-       O("再做一次给它看", "Do it again for it", {renown: 6, corruption: 6, sanity: 3, taint: {slaanesh: 30}},
-         "掌声更响了。从那以后，你做什么都想做到完美，做不到就睡不着。",
-         "The applause swells. From then on you need everything perfect, and cannot sleep when it isn't."),
+       O("再做一次给它看", "Do it again for it", {renown: 6, corruption: 6, sanity: -3, taint: {slaanesh: 30}},
+         "掌声更响了。从那以后，你做什么都要做到完美，活计人人挑不出错；可做不到，你就睡不着。",
+         "The applause swells. From then on everything you do must be perfect, and no one can fault your work; but when it isn't, you cannot sleep."),
        O("假装没听见", "Pretend you didn't hear", {sanity: -5},
          "掌声停了。接下来的寂静，比任何时候都冷。",
          "The applause stops. The silence after is colder than any you've known.")
@@ -164,7 +164,7 @@
        O("用指尖描一遍", "Trace it with a fingertip", {hp: 10, corruption: 10, taint: {all: 12}},
          "星星在你指尖下微微发烫。那一晚，四个声音在你梦里客客气气地互相谦让。",
          "The star warms beneath your finger. That night, four voices in your dream politely defer to one another."),
-       O("用刀刮掉", "Scrape it away with a knife", {sanity: -5, renown: 3},
+       O("用刀刮掉", "Scrape it away with a knife", {sanity: -5},
          "你刮了一整夜。第二天早上，它出现在了你的枕头底下。",
          "You scrape all night. Next morning, it's under your pillow."),
        O("上报", "Report it", {renown: 5, sanity: -3},
@@ -179,9 +179,9 @@
              "At night something knocks on the wall beside you. Three times, a pause, three more.\nVery polite.\nOn the other side of the wall there should be nothing at all."),
      codex: ["chaos_warp"],
      choices: [
-       O("敲回去", "Knock back", {corruption: 12, renown: 5, sanity: -5, taint: {all: 15}},
-         "敲门声停了。然后，墙那边有个声音说：“谢谢。我们会再来的。”",
-         "The knocking stops. Then a voice from the other side says: “Thank you. We'll be back.”"),
+       O("敲回去", "Knock back", {corruption: 12, sanity: -2, taint: {all: 15}},
+         "敲门声停了。墙那边有个声音说：“谢谢。我们会再来的。”之后一夜安静，你居然睡着了。",
+         "The knocking stops. A voice from the other side says: “Thank you. We'll be back.” The rest of the night is quiet, and somehow you sleep."),
        O("捂住耳朵念祷词", "Cover your ears and recite a prayer", {sanity: -8},
          "敲了一整夜。天亮时停了。墙上多了一个小小的、圆圆的凹痕，正好是指节的形状。",
          "It knocks all night, stopping at dawn. In the wall is a small round dent, exactly the shape of a knuckle.")
@@ -199,9 +199,9 @@
        O("对着光祷告", "Pray toward the light", {sanity: 10, corruption: -8, taint: {all: -10}},
          "什么奇迹都没发生。可那一晚，你睡了几个月来最安稳的一觉。",
          "No miracle happens. But that night you sleep more soundly than you have in months."),
-       O("背过身去", "Turn your back on it", {corruption: 3, renown: 2},
-         "光没有追过来。它从来不追任何人。",
-         "The light doesn't follow you. It never follows anyone.")
+       O("背过身去", "Turn your back on it", {sanity: -3},
+         "光没有追过来。它从来不追任何人。噪音又回来了，比刚才更响。",
+         "The light doesn't follow you. It never follows anyone. The noise comes back, louder than before.")
      ]},
 
     {id: "evt_other_2", god: "other", factions: ["imperium", "tau", "gsc"], minChapter: 4,

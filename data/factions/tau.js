@@ -88,7 +88,7 @@
     codex: ["tau_water_caste", "tau_greater_good", "place_dalnor_port"],
     choices: [
       C("跟着鼓掌", "Applaud with the others", "tau_104", {effects: {renown: 5}, result: L("你拍着手。瓦尚的目光扫过人群，在你身上停了一瞬，满意地移开。", "You clap along. Vash'aun's gaze sweeps the crowd, rests on you a moment, and moves on, satisfied.")}),
-      C("举手问工钱的事", "Raise your hand about the wages", "tau_105", {result: L("掌声停了。周围的工友同时往旁边让开半步，好像你身上有病。", "The applause stops. The workers around you all shift half a step away, as if you're contagious.")})
+      C("举手问工钱的事", "Raise your hand about the wages", "tau_105", {effects: {renown: -3}, result: L("掌声停了。周围的工友同时往旁边让开半步，好像你身上有病。", "The applause stops. The workers around you all shift half a step away, as if you're contagious.")})
     ]};
 
   N.tau_103 = {chapter: 1, scene: "hive_hab", speaker: RENA, time: {h: 2},
@@ -114,7 +114,7 @@
     effects: {sanity: -5, set: {flagged: true}},
     choices: [
       C("道歉，退回人群", "Apologise and step back", "tau_104", {effects: {renown: 2}, result: L("你低头道歉。无人机的红光熄灭了，瓦尚朝你点头，像在表扬一个学生。", "You bow your head and apologise. The drone's red light goes out. Vash'aun nods at you like a teacher praising a pupil.")}),
-      C("坚持要一个答案", "Insist on an answer", "tau_106", {result: L("瓦尚只是微笑，转向下一个提问。无人机跟着你回了家，一直飘在窗外。", "Vash'aun only smiles and takes the next question. The drone follows you home and hovers outside your window.")})
+      C("坚持要一个答案", "Insist on an answer", "tau_106", {effects: {renown: -3}, result: L("瓦尚只是微笑，转向下一个提问。无人机跟着你回了家，一直飘在窗外。", "Vash'aun only smiles and takes the next question. The drone follows you home and hovers outside your window.")})
     ]};
 
   N.tau_106 = {chapter: 1, scene: "tau_city", speaker: VASH, time: {h: 10},
@@ -342,7 +342,7 @@
     codex: ["tau_kauyon"],
     choices: [
       C("一动不动", "Don't move", null, R(0.5, "sanity", "tau_206", "tau_207", L("虫子爬过你的脊背，又爬了出去。你数着心跳，一直数到第十四个小时。", "The bug crawls down your spine and out again. You count heartbeats until hour fourteen."), L("虫子停在你脖子上，咬了一口。你的手自己动了。", "The bug stops on your neck and bites. Your hand moves on its own."))),
-      C("让92号帮你赶走它", "Let Drone 92 shoo it away", "tau_206", {require: {flag: "namedDrone"}, hideIfLocked: true, result: L("92号无声地降下来，用气流把虫子吹走，又悄悄升回原位。", "Drone 92 sinks without a sound, blows the bug away with its downdraft, and rises back into place.")})
+      C("让92号帮你赶走它", "Let Drone 92 shoo it away", "tau_206", {require: {flag: "namedDrone"}, hideIfLocked: true, effects: {renown: -4}, result: L("92号无声地降下来，用气流把虫子吹走，又悄悄升回原位。", "Drone 92 sinks without a sound, blows the bug away with its downdraft, and rises back into place.")})
     ]};
 
   N.tau_206 = {chapter: 2, scene: "jungle", speaker: KELRA, time: {h: 5},
@@ -426,7 +426,7 @@
     choices: [
       C("跟着跳下去", "Jump down with them", null, M(R(0.45, "hp", "tau_306", "tau_307", L("你落在一只兽人背上，枪托砸了下去。四周全是羽毛、刀光和吼叫。", "You land on an ork's back and bring the stock down. All around: feathers, blades and roaring."), L("跳下去的瞬间你就知道不对——树枝太高了，地面太硬了。", "The moment you jump, you know: the branch is too high, the ground too hard.")), {require: {notFlag: "ateWithKroot"}, hideIfLocked: true, effects: {taint: {khorne: 20}}})),
       C("跟着格拉克萨跳下去", "Jump right behind Grrak'tha", null, M(R(0.65, "hp", "tau_306", "tau_307", L("格拉克萨先落地，替你清出一块空地。你落下去，枪托砸进一只兽人的后脑。", "Grrak'tha lands first and clears you a space. You drop in and drive your stock into an ork's skull."), L("他护得住一边，护不住两边。一只兽人从侧面撞上了你。", "He can cover one side, not both. An ork slams into you from the flank.")), {require: {flag: "ateWithKroot"}, hideIfLocked: true, effects: {taint: {khorne: 20}}})),
-      C("留在树上掩护", "Stay up and give cover", "tau_306", {effects: {renown: 3}, result: L("你在树上一枪一枪点射。每倒下一个，下面就有个克鲁特冲你咔哒一声。", "You fire shot by shot from the branches. Each time one drops, a Kroot below clicks up at you.")})
+      C("留在树上掩护", "Stay up and give cover", "tau_306", {effects: {renown: -2}, result: L("你在树上一枪一枪点射。每倒下一个，下面就有个克鲁特冲你咔哒一声。", "You fire shot by shot from the branches. Each time one drops, a Kroot below clicks up at you.")})
     ]};
 
   N.tau_304 = {chapter: 3, scene: "tau_outpost", speaker: KELRA, foe: "ork", time: {h: 1},

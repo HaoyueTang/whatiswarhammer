@@ -30,12 +30,12 @@
      codex: ["god_tzeentch"],
      choices: [
        O("再翻一张", "Turn another", {renown: 5, sanity: -3, taint: {tzeentch: 30}},
-         "第二张画的是你的手，握着一样你还没见过的东西。牌面的颜色每看一次都不太一样。",
-         "The second card shows your hand, holding something you haven't seen yet. The colours are a little different every time you look."),
+         "第二张画的是你的手，握着一样你还没见过的东西。同铺的人说帝皇在给你指路。牌面的颜色每看一次都不太一样。",
+         "The second card shows your hand, holding something you haven't seen yet. Your bunkmates say the Emperor is guiding you. The colours are a little different every time you look."),
        O("把牌扔进焚化口", "Throw the deck into the incinerator", {sanity: -3},
          "牌在火里卷了起来，没有一张烧黑，全都变成了蓝色。",
          "The cards curl in the flames. Not one turns black. Every one of them turns blue."),
-       O("交给随军牧师", "Hand it to the regimental priest", {renown: 2, taint: {tzeentch: -5}},
+       O("交给随军牧师", "Hand it to the regimental priest", {renown: 3, taint: {tzeentch: -5}},
          "牧师用圣布把牌包好，什么也没问。那天夜里，你的梦很普通。",
          "The priest wraps the deck in a sanctified cloth and asks nothing. That night your dreams are ordinary.")
      ]},
@@ -47,12 +47,12 @@
              "The ork charge falls back for a moment. You count the nicks on your bayonet: eleven. You only remember striking three times.\nSomewhere a drum is beating in time with your heart. The sergeant is shouting for you to get back in cover."),
      codex: ["god_khorne"],
      choices: [
-       O("翻出战壕，追上去", "Climb out and give chase", {renown: 6, hp: -6, taint: {khorne: 30}},
+       O("翻出战壕，追上去", "Climb out and give chase", {renown: 4, hp: -6, taint: {khorne: 30}},
          "你回来时浑身是泥，刺刀上又多了几道缺口。中士没骂你，只是再也不让你站在他旁边。",
          "You come back caked in mud, with more nicks in the blade. The sergeant doesn't shout. He just never stands next to you again."),
-       O("回掩体，按口令射击", "Back to cover. Fire on command", {sanity: -3},
-         "鼓声渐渐跟不上你的心跳了。缺口还是十一个，你决定再也不数了。",
-         "Slowly the drum loses step with your heart. Still eleven nicks. You decide never to count them again.")
+       O("回掩体，按口令射击", "Back to cover. Fire on command", {sanity: -3, renown: 2},
+         "鼓声渐渐跟不上你的心跳了。中士朝你点了下头。缺口还是十一个，你决定再也不数了。",
+         "Slowly the drum loses step with your heart. The sergeant gives you a nod. Still eleven nicks. You decide never to count them again.")
      ]},
 
     {id: "evt_t_imp_cleanse", god: "other", cleanse: true, factions: ["imperium"], minChapter: 3,
@@ -63,8 +63,8 @@
      codex: ["imp_ecclesiarchy"],
      choices: [
        O("把这些日子的怪事都说出来", "Tell him every strange thing lately", {sanity: 8, renown: -2, taint: {all: -20}},
-         "你说得磕磕巴巴。他听完，用圣油在你额头上按了一下。那一夜，梦里没有任何声音。",
-         "You stumble through it. When you finish, he presses holy oil to your brow. That night, no voices come to your dreams."),
+         "你说得磕磕巴巴。他在簿子上记了一笔，才用圣油在你额头上按了一下。那一夜，梦里没有任何声音。",
+         "You stumble through it. He writes a line in his ledger, then presses holy oil to your brow. That night, no voices come to your dreams."),
        O("只说几件无关紧要的小罪", "Confess a few harmless little sins", {sanity: 3, taint: {all: -5}},
          "他照例为你祝福。蜡烛的火苗朝你这边歪了一下，又直了。",
          "He blesses you as usual. The candle flame leans toward you for a moment, then straightens."),
@@ -83,7 +83,7 @@
        O("接过他的药膏", "Take his salve", {hp: 15, taint: {nurgle: 30}},
          "药膏是温的，伤口当晚就不疼了。第二天那张床空了，床单上落着几只不肯飞走的苍蝇。",
          "The salve is warm, and the wound stops hurting that night. Next day the bed is empty. A few flies sit on the sheet and will not leave."),
-       O("去找医师", "Go and find the medicae", {hp: -5, sanity: 2},
+       O("去找医师", "Go and find the medicae", {hp: 3, sanity: -3},
          "医师用最后一点酒精给你清洗伤口，疼得你咬破了嘴唇。他回头看了那张床一眼，脸色变了。",
          "The medicae cleans the wound with the last of the alcohol; you bite your lip through. He glances at the corner bed, and his face changes.")
      ]},
@@ -193,7 +193,7 @@
        O("再读一遍那一页", "Read that page again", {renown: 5, sanity: -3, taint: {tzeentch: 30}},
          "字又动了，这次告诉你明天巡逻会遇上什么。它说对了。从此你每晚都要读一遍。",
          "The letters move again, telling you what tomorrow's patrol will meet. They're right. From then on you read it every night."),
-       O("拿着手册去问使节", "Take the primer to the envoy", {renown: 2, taint: {tzeentch: -5}},
+       O("拿着手册去问使节", "Take the primer to the envoy", {renown: 3, taint: {tzeentch: -5}},
          "使节又惊又喜：“你想听我讲解？”他讲了两个小时。那些字一个都没再动过。",
          "The envoy is surprised and delighted. “You want it explained?” He talks for two hours. Not one letter moves again.")
      ]},
@@ -206,8 +206,8 @@
      codex: ["tau_kroot"],
      choices: [
        O("敲到天亮", "Drum until dawn", {renown: 5, hp: 8, taint: {khorne: 30}},
-         "掌心敲出了水泡，却一点也不疼。第二天出击，你第一个冲了出去。火族战友看你的眼神有点担心。",
-         "Your palms blister, yet nothing hurts. On the next sortie you're first out. Your fire caste comrades watch you with something like worry."),
+         "你敲到天亮，旧伤不疼了，浑身是劲。第二天出击，你第一个冲了出去。火族战友看你的眼神有点担心。",
+         "You drum until dawn; your old hurts stop aching and you brim with strength. On the next sortie you're first out. Your fire caste comrades watch you with something like worry."),
        O("敲三下就还给他", "Three beats, then hand it back", {sanity: 3},
          "鼓手咕噜了一声，大概是在笑。鼓声在你身后响了一夜，你没有回头。",
          "The drummer makes a clicking sound that might be laughter. The drums beat behind you all night. You don't look back.")
@@ -253,9 +253,9 @@
        O("喝下去", "Drink it", {hp: 12, sanity: 4, taint: {nurgle: 30}},
          "汤一直暖到骨头里。那天起你再没咳过，只是身边总有一只苍蝇，怎么赶也赶不走。",
          "The warmth reaches your bones. You never cough again. There's just always one fly near you, and it won't be shooed away."),
-       O("去检疫站排队", "Queue at the drone quarantine post", {hp: -6, renown: 3},
-         "针头冰凉，你排了四个小时。无人机在你手背上贴了个绿色标签：“健康。为了大义。”",
-         "The needle is cold and the queue takes four hours. A drone sticks a green tag on your hand: “Healthy. For the Greater Good.”")
+       O("去检疫站排队", "Queue at the drone quarantine post", {hp: -2, sanity: -2, renown: 3},
+         "你咳着排了四个小时，针头冰凉，身后的巷子一条条被封。无人机在你手背上贴了个绿色标签：“健康。为了大义。”",
+         "You cough through a four-hour queue while the alleys behind you are sealed one by one. The needle is cold. A drone sticks a green tag on your hand: “Healthy. For the Greater Good.”")
      ]},
 
     /* ================= Aeldari ================= */
@@ -299,7 +299,7 @@
        O("把灵魂石贴身戴好", "Wear the stone against your skin", {sanity: 6, set: {wardStone: true}, taint: {all: -15, slaanesh: -10}},
          "那一夜，你第一次没有梦见黑暗里那双找你的眼睛。灵魂石微微发烫，像在替你挡着什么。",
          "That night, for the first time, you don't dream of the eyes searching for you in the dark. The stone grows warm, as if holding something off."),
-       O("道谢，但不收", "Thank her, but decline", {sanity: -2, renown: 2},
+       O("道谢，但不收", "Thank her, but decline", {sanity: -2},
          "她没有勉强，只说：“那就别在夜里唱歌。”",
          "She doesn't insist. She only says, “Then don't sing at night.”")
      ]},
@@ -311,10 +311,10 @@
              "In the aspect shrine, Aeldari warriors don their masks and become someone else.\nAn empty mask hangs on the wall, ownerless. You touch it, and your ears fill with the roar of iron and fire. Something growls: “Put it on. Slaughter needs no Path.”"),
      codex: ["eld_aspect_warriors"],
      choices: [
-       O("把面具戴上", "Put the mask on", {hp: 10, renown: 5, taint: {khorne: 30}},
-         "面具里热得像铁匠炉。摘下来时，你脸上留了一道红印，好几天都没褪。你也不想让它褪。",
-         "Inside it's hot as a forge. When you take it off, a red mark stays on your face for days. You don't want it to fade."),
-       O("把面具挂回去", "Hang the mask back up", {sanity: -3},
+       O("把面具戴上", "Put the mask on", {hp: 10, renown: -3, taint: {khorne: 30}},
+         "面具里热得像铁匠炉，那股热把你的伤都烧合了。守卫厉声喝止，你才摘下。脸上的红印几天没褪，你也不想让它褪。",
+         "Inside it's hot as a forge, and the heat sears your wounds shut. You take it off only when the guard shouts. A red mark stays on your face for days. You don't want it to fade."),
+       O("把面具挂回去", "Hang the mask back up", {sanity: -3, renown: 3},
          "轰鸣声退了。门口的守卫看见你空着手出来，第一次向你行了个礼。",
          "The roar recedes. The guard at the door sees you leave empty-handed, and for the first time salutes you.")
      ]},
@@ -387,9 +387,9 @@
              "A squad of Imperial guards lies on the sand outside the tomb; necron warriors have just passed this way. You pull a chainsword from the sand.\nIt's still running, on its own. The grip is hot, and something inside growls: “Those tin husks have no souls. Not worth killing. Go find some that are.”"),
      codex: ["god_khorne"],
      choices: [
-       O("握紧它", "Grip it tight", {hp: 8, renown: 5, taint: {khorne: 30}},
-         "你从没用过武器，可这把剑知道怎么用。那晚你和同伴吵了一架，差点动手，事后想不起为什么。",
-         "You've never used a weapon, but the sword knows how. That night you nearly come to blows with a fellow prisoner, and later can't remember why."),
+       O("握紧它", "Grip it tight", {hp: 8, taint: {khorne: 30}},
+         "你从没用过武器，可这把剑知道怎么用，握着它，累和疼都退了。那晚你和同伴差点动手，事后想不起为什么。",
+         "You've never used a weapon, but the sword knows how; holding it, the ache and weariness drain away. That night you nearly come to blows with a fellow prisoner, and later can't remember why."),
        O("关掉它，扔回地上", "Switch it off and drop it", {sanity: -3},
          "链锯停了。周围静得可怕，只剩远处的金属脚步声，一下一下，不急不慢。",
          "The chain stops. The quiet is terrible, broken only by distant metal footsteps, one after another, unhurried.")
@@ -436,7 +436,7 @@
              "You dream of a banquet. Two empty chairs wait for you at the long table.\nOne at the lively end, where everyone glitters and the laughter never stops. One in the quiet corner, where a stout old man ladles out hot soup.\nBoth ends beckon."),
      codex: ["chaos_gods"],
      choices: [
-       O("坐到热闹的那一头", "Sit at the lively end", {sanity: 8, renown: 3, taint: {slaanesh: 25}},
+       O("坐到热闹的那一头", "Sit at the lively end", {sanity: 8, taint: {slaanesh: 25}},
          "每个人都夸你，夸得恰到好处。醒来以后，现实里的人说话都显得粗糙刺耳。",
          "Everyone praises you, exactly as much as you'd like. After you wake, real voices all sound coarse and grating."),
        O("坐到老人身边", "Sit beside the old man", {hp: 10, taint: {nurgle: 25}},

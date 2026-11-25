@@ -2,7 +2,9 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
-## [Unreleased]
+## [0.6.2] — 2026-11-25
+### Changed
+- **Choice → effect logic** (SPEC §39): every faction and the random events were reviewed against one rule set (body / mind / warp / what the faction values); ~90 effects and result lines fixed so that what you choose and what you read match the numbers. New tool `tools/dev/effect_audit.js`.
 ### Added
 - **Work lines** (SPEC §38): each of the 8 factions gets a new 8–12-scene strand about your actual job there — with choices the rest of the route remembers.
 - **Perspective switches**: scenes seen through someone else's eyes (the officer who reads your list, the enemy, the alien, the machine), marked by a 「视角：…」 banner and a cold-tinted stage.

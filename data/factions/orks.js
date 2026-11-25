@@ -575,7 +575,7 @@
       C("站着别动，相信他们打不准", "Stand still. Trust their aim is bad", "ork_211", X({hp: -10, renown: 5, set: {steadyUmie: true}},
         "子弹打得到处都是，唯独没打中铁板。你被擦破几处皮，小子们为你的勇气欢呼。",
         "Bullets go everywhere except the plate. You get grazed a few times, and the boyz cheer your nerve.")),
-      C("扔下铁板趴下", "Drop the plate and hit the dirt", "ork_211", X({sanity: -5},
+      C("扔下铁板趴下", "Drop the plate and hit the dirt", "ork_211", X({sanity: -3, renown: -3},
         "你趴下的瞬间，铁板被打成了筛子。小子们对你的反应速度表示失望。",
         "The instant you drop, the plate becomes a sieve. The boyz are disappointed by your reflexes."))
     ]};

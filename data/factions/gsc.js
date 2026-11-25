@@ -155,7 +155,7 @@
             "Foreman Gant is at the lift with his ledger. “Left your face. Three days docked.”\nAt midnight the Hollin cousins carry Teo up: grey with dust, alive.\nThe first thing Teo says when he sees you is: “Good. You're all right.”"),
     effects: {renown: -3},
     choices: [
-      C("向他道歉", "Apologise to him", "gsc_105", X({sanity: -3, renown: 5},
+      C("向他道歉", "Apologise to him", "gsc_105", X({sanity: 2, renown: 5},
         "提奥摆摆手。“谁都会跑。家里人不记这种账。”你不知道他说的“家里人”是谁。",
         "Teo waves it off. “Anyone would run. Family doesn't keep that kind of ledger.” You don't know whose family he means.")),
       C("对提奥一言不发，转身走开", "Say nothing to Teo and walk away", "gsc_104b", X({sanity: -5, set: {wronged_teo: true}},
@@ -180,7 +180,7 @@
       C("一拳砸烂告示板", "Smash the notice board", "gsc_105a", X({hp: -8, renown: 5, set: {protested: true, smashedBoard: true}, taint: {khorne: 45}},
         "木板碎了，你的指节也破了。执法官把你按在地上。人群里，几个戴兜帽的人记住了你的脸。",
         "The board splinters, and so do your knuckles. Enforcers pin you down. In the crowd, a few hooded faces remember yours.")),
-      C("替咳嗽的老工友说句话", "Speak up for the coughing old miner", "gsc_106", O(X({renown: 4, sanity: -3, set: {protested: true, ganttMarked: true}},
+      C("替咳嗽的老工友说句话", "Speak up for the coughing old miner", "gsc_106", O(X({renown: 4, set: {protested: true, ganttMarked: true}},
         "甘特把你的名字写进本子里。散工后，提奥拍了拍你的背：“你是个好人。家里人会喜欢你。”",
         "Gant writes your name in his book. After shift Teo claps your back. “You're a good one. The family will like you.”"),
         {resultAlt: [RA(F("wronged_teo"), "甘特把你的名字写进本子里。散工后，提奥远远看了你一眼，没过来，也没走开。",
@@ -424,7 +424,7 @@
       C("悄悄溜走", "Slip away quietly", "gsc_204", X({sanity: -5, renown: -3},
         "你躲在矿车后面，听着棍子落下的声音，一下，又一下。",
         "You hide behind an ore cart and listen to the mauls come down. Again. Again.")),
-      C("向执法官指认带头的提奥", "Point out Teo as the ringleader to Vask", "gsc_203b", X({renown: -10, set: {informer: true, wronged_teo: true}},
+      C("向执法官指认带头的提奥", "Point out Teo as the ringleader to Vask", "gsc_203b", X({renown: -10, sanity: -3, set: {informer: true, wronged_teo: true}},
         "瓦斯克塞给你一张口粮券。电击棍落在提奥肩上，他没喊，只抬头看了你一眼。",
         "Vask slips you a ration chit. The maul comes down on Teo's shoulder. He doesn't cry out. He only looks up at you."))
     ]};
@@ -483,10 +483,10 @@
       C("说出你看见的划痕", "Tell him about the scratches", "gsc_205b", O(Q({flag: "sawOffice"}, true), X({renown: -10, set: {toldVask: true}},
         "瓦斯克的笔停了。“四条？”他把这页撕下来，折好，放进贴身口袋，抓起了外套。",
         "Vask's pen stops. “Four?” He tears the page out, folds it into an inside pocket, and reaches for his coat."))),
-      C("压低声音：“又是星期天。”", "Lower your voice: “Sunday again.”", "gsc_206", O(Q({flag: "origin_warden"}, true), X({sanity: 3, set: {reported: true}},
+      C("压低声音：“又是星期天。”", "Lower your voice: “Sunday again.”", "gsc_206", O(Q({flag: "origin_warden"}, true), X({sanity: 3, renown: -3, set: {reported: true}},
         "瓦斯克在本子上写下“星期天”，画了两道线。“回去吃你的饭，”他说，“记住你在为谁吃。”",
         "Vask writes SUNDAY in his book and underlines it twice. “Go eat your supper,” he says. “Remember whose table you eat it for.”"))),
-      C("一言不发", "Say nothing at all", "gsc_206", X({hp: -8, set: {cellNight: true}},
+      C("一言不发", "Say nothing at all", "gsc_206", X({hp: -6, renown: 3, set: {cellNight: true}},
         "瓦斯克叹了口气，让人把你在禁闭室关了一夜。地上很冷，墙那边有人在哼霍林家的歌。",
         "Vask sighs and has you locked in a cell overnight. The floor is cold. Through the wall someone hums a Hollin song."))
     ]};
@@ -732,7 +732,7 @@
       C("直视它的眼睛", "Meet its eyes", "gsc_308", X({sanity: -10, set: {lookedEye: true}, taint: {tzeentch: 55}},
         "它的眼睛里有一片星空，正在慢慢靠近。在那片嗡鸣底下，还有别的什么，在很远的地方看了你一眼。",
         "In its eyes is a field of stars, slowly drawing closer. And beneath the hum, something else, very far off, glances at you.")),
-      C("在心里默念帝皇之名", "Pray to the Throne in silence", "gsc_308", X({sanity: 4, hp: -6, set: {prayedThrone: true}},
+      C("在心里默念帝皇之名", "Pray to the Throne in silence", "gsc_308", X({sanity: 4, hp: -3, set: {prayedThrone: true}},
         "你念得很用力，太阳穴生疼。帝皇离这里太远了，可你还是念完了。",
         "You pray so hard your temples ache. The Emperor is very far from here. You finish the prayer anyway.")),
       C("按下领口的通讯珠", "Press the vox-bead in your collar", "gsc_309", O(Q({flag: "wire"}, true), X({sanity: -5},
@@ -771,7 +771,7 @@
   N.gsc_309 = {chapter: 3, scene: "cult_shrine", speaker: PRIMUS, time: {h: 1},
     text: L("哈斯克首领从你领口里捏出通讯珠，在两指之间碾碎。\n他没有打你。整个洞窟都在等老祖宗的意思。\n嗡鸣很久之后才响起来，像一声叹息。首领说：“原谅。一次。”",
             "Primus Hask plucks the bead from your collar and crushes it between two fingers.\nHe doesn't strike you. The whole cavern waits on the Grandsire.\nThe hum comes at last, like a sigh. The Primus says: “Forgiven. Once.”"),
-    effects: {hp: -10, renown: -10, set: {forgiven: true}},
+    effects: {sanity: -4, renown: -10, set: {forgiven: true}},
     choices: [
       C("跪下谢恩", "Kneel in thanks", "gsc_310", X({renown: 6, corruption: 5},
         "你跪下的时候，心里竟然真的觉得感激。这件事，后来让你害怕了很多年。",
@@ -858,7 +858,7 @@
       C("“交给我。我的字，他们认。”", "“Leave it to me. They know my hand.”", "gsc_wl_02", X({renown: 4, corruption: 2},
         "主祭把笔放进你手里。笔杆是暖的，像刚被很多只手握过。",
         "The Magus lays the pen in your hand. The barrel is warm, as if many hands had just held it.")),
-      C("“要是她数出来不对呢？”", "“And if her count comes out wrong?”", "gsc_wl_02", X({sanity: -2, renown: 2, set: {wl_gsc_asked_count: true}},
+      C("“要是她数出来不对呢？”", "“And if her count comes out wrong?”", "gsc_wl_02", X({sanity: -2, set: {wl_gsc_asked_count: true}},
         "“那就让数对上，”主祭温和地说，“你没有撒谎。你只是先替她把账写好。”",
         "“Then make the count come right,” the Magus says gently. “You are not lying. You are only writing her accounts before she does.”"))
     ]};
@@ -880,7 +880,7 @@
     text: L("傍晚，卡莱医官把一箱肺药放在桌上：“药按册子发，写了黑肺的一人一瓶。就这一箱。”\n老布兰的深处班咳了一整年。霍林家那四十七行，还空着等你填。\n她出去洗手了。笔在你手里。",
             "At dusk Medic Kale sets a case of lung medicine on the table. “It goes by the register: one bottle per black-lung entry. This case is all there is.”\nOld Brann's deep crew has coughed all year. The Hollins' forty-seven lines are still blank, waiting for you.\nShe steps out to wash her hands. The pen is in yours."),
     choices: [
-      C("四十七行都写黑肺，药归家里", "Write all forty-seven as black-lung; the family gets the medicine", "gsc_wl_pov1", X({renown: 8, sanity: -3, corruption: 3, set: {wl_gsc_took_medicine: true}},
+      C("四十七行都写黑肺，药归家里", "Write all forty-seven as black-lung; the family gets the medicine", "gsc_wl_pov1", X({renown: 8, sanity: -4, set: {wl_gsc_took_medicine: true}},
         "四十七瓶，当晚就进了霍林家的柜子。布兰的班领到九瓶。册子上，每一行都对得上。",
         "Forty-seven bottles are in the Hollin cupboard by night. Brann's crew draws nine. On the page, every line adds up.")),
       C("写成健康，药留给深处的班", "Write them healthy; leave the medicine for the deep crews", "gsc_wl_pov1", X({renown: -3, sanity: 3, set: {wl_gsc_fair_page: true}},
@@ -902,7 +902,7 @@
       C("拿通行条，领他们走排水巷", "Lead them through the drain gallery on the pass", "gsc_wl_05", X({hp: -4, renown: 5, set: {wl_gsc_drain: true}},
         "你领着他们在齐膝的黑水里走了两个钟头。巡逻的灯照过来，乔里把孩子按进影子里。没人出声。",
         "You lead them two hours through knee-deep black water. When a patrol lamp swings over, Jory presses the children into the shadow. Nobody makes a sound.")),
-      C("让表亲顶别人的工牌，走正门", "Send them through the gate on other men's tags", "gsc_wl_05", X({sanity: -2, renown: 3, corruption: 2},
+      C("让表亲顶别人的工牌，走正门", "Send them through the gate on other men's tags", "gsc_wl_05", X({sanity: -3, renown: 3},
         "表亲们戴着兜帽，分批过了门。执法官对的是工牌，不是脸。那四十七块工牌的主人，今天没领到口粮。",
         "The cousins pass the gate hooded, a few at a time. The enforcers check tags, not faces. The forty-seven men who own those tags draw no rations today."))
     ]};
@@ -931,7 +931,7 @@
     text: L("当晚，奥莎大娘端着两口汤锅出门，让你提灯。凯尔家开了门；佩尔家也开了，四邻都看着。\n“只是一顿饭，”大娘说，“吃了饭，就是家里人。”\n你提着灯站在门口，替她照路。",
             "That night Ma Ossa goes out with two soup pots and has you hold the lamp. The Kerrs open their door; so do the Pells, with every neighbour watching.\n“Only a meal,” Ma says. “Eat with us and you're family.”\nYou stand on the step with the lamp and light her way."),
     choices: [
-      C("提着灯，等到他们吃完", "Hold the lamp until they've eaten", "gsc_wl_pov2", X({sanity: -2, corruption: 2, set: {wl_gsc_held_lamp: true}},
+      C("提着灯，等到他们吃完", "Hold the lamp until they've eaten", "gsc_wl_pov2", X({sanity: -3, corruption: 2, renown: 3, set: {wl_gsc_held_lamp: true}},
         "汤很香。回去的路上大娘挽着你的胳膊，一句话没说。那盏灯的重量，你带了很多年。",
         "The soup smells good. On the way home Ma takes your arm and says nothing. You carry the weight of that lamp for many years.")),
       C("把灯放在门口，先走", "Leave the lamp on the step and go", "gsc_wl_pov2", X({sanity: 3, renown: -3},
@@ -1225,7 +1225,7 @@
     text: L("五天后，内尔半夜来敲你的门，光着脚。她十五岁了。\n“我又梦见星之子了。他们好大，好饿。”\n“他们饿成那样，”她小声问，“也是爱吗？”",
             "Five days later Nell knocks on your door at midnight, barefoot. She is fifteen now.\n“I dreamed of the Star Children again. They're so big. So hungry.”\n“If they're that hungry,” she whispers, “is it still love?”"),
     choices: [
-      C("“是爱。睡吧。”", "“It's love. Go to sleep.”", "gsc_505", X({corruption: 3, renown: 4},
+      C("“是爱。睡吧。”", "“It's love. Go to sleep.”", "gsc_505", X({sanity: -3, renown: 4},
         "她点点头，回去睡了。你一夜没合眼。",
         "She nods and goes back to bed. You don't sleep at all.")),
       C("“把你的梦全讲给我听。”", "“Tell me the whole dream.”", "gsc_505", X({sanity: -5, set: {nellDream: true}},
@@ -1269,7 +1269,7 @@
     effects: {sanity: -15, set: {knowsTruth: true}},
     codex: ["xenos_tyranid", "gsc_star_children"],
     choices: [
-      C("看那行蓝色的小字", "Read the small blue line", "gsc_510", O(Q({taint: "tzeentch", min: 40}, true), X({sanity: -6, renown: 4, taint: {tzeentch: 60}},
+      C("看那行蓝色的小字", "Read the small blue line", "gsc_510", O(Q({taint: "tzeentch", min: 40}, true), X({sanity: -6, renown: -4, taint: {tzeentch: 60}},
         "那行字不在画面上，在你眼睛里：“他们是饭。你不必是。”你笑了，笑得不像任何一个家人。",
         "The line isn't in the picture but in your eyes: THEY ARE THE MEAL. YOU NEED NOT BE. You smile, unlike any of the family."))),
       C("去告诉主祭", "Go tell the Magus", "gsc_508", X({renown: 2},
@@ -1486,10 +1486,10 @@
             "The Inquisitor circles a spot on the map. “When the cult rises, the Grandsire leaves its lair. Then we kill it.”\n“It is their heart. Stop it and their song breaks. The astropath might scream one word through a crack in the Shadow.”\n“As for your ‘family,’” he pauses, “I promise nothing.”"),
     codex: ["xenos_genestealer"],
     choices: [
-      C("“我带你去。”", "“I'll take you there.”", "gsc_701", X({renown: -5, set: {thornePlan: true, teamPrecinct: true, noTerms: true}},
+      C("“我带你去。”", "“I'll take you there.”", "gsc_701", X({renown: -5, sanity: -3, set: {thornePlan: true, teamPrecinct: true, noTerms: true}},
         "他递给你一把小手枪。“它的眼睛，”他说，“别看它的眼睛。”",
         "He hands you a small pistol. “Its eyes,” he says. “Don't look into its eyes.”")),
-      C("“先答应我：放过孩子们。”", "“Promise me first: spare the children.”", "gsc_701", X({sanity: -3, set: {thornePlan: true, teamPrecinct: true, askedMercy: true}},
+      C("“先答应我：放过孩子们。”", "“Promise me first: spare the children.”", "gsc_701", X({renown: -5, sanity: 2, set: {thornePlan: true, teamPrecinct: true, askedMercy: true}},
         "审判官沉默了很久。“验过血的，可以上船。”这已经是他能给的全部。",
         "The Inquisitor is silent a long time. “Those whose blood tests clean may board.” It's all he has to give."))
     ]};
@@ -1685,7 +1685,7 @@
       C("一拳接一拳地打他", "Hit him, again and again", "gsc_801", O(Q({taint: "khorne", min: 30}, true), X({hp: -5, renown: -5, taint: {khorne: 65}},
         "你停不下来，也不想停。天上那么多东西你打不着，眼前这一个，你打得着。",
         "You can't stop and don't want to. You can't hit all those things in the sky. This one, you can."))),
-      C("拉他一起走", "Pull him along with you", "gsc_707b", X({hp: -5, renown: 4},
+      C("拉他一起走", "Pull him along with you", "gsc_707b", X({renown: 4},
         "他跟着你走了两条街，然后挣开你的手。",
         "He follows you two streets, then shakes free.")),
       C("一拳打在他脸上", "Punch him in the face", "gsc_801", X({sanity: 3, hp: -3, taint: {khorne: 45}},
@@ -1727,7 +1727,7 @@
     text: L("第二天早上，矿城在燃烧。高大的虫族武士在街上走，身后的小虫像潮水一样跟着。\n没有人在唱了。\n远处，星港的灯还亮着；脚下，十三号矿井的深处，有什么东西正在往上爬。",
             "Next morning the mining city burns. Tall warrior-beasts stalk the streets, small creatures following like a tide.\nNo one is singing anymore.\nFar off, the starport's lights still burn. Underfoot, deep in Shaft Thirteen, something is climbing."),
     choices: [
-      C("带审判官去找老祖宗", "Take the Inquisitor to the Grandsire", "gsc_802", O(Q({flag: "thornePlan"}, true), X({renown: 2},
+      C("带审判官去找老祖宗", "Take the Inquisitor to the Grandsire", "gsc_802", O(Q({flag: "thornePlan"}, true), X({renown: -6},
         "你用索恩给的通讯器发了信号。半小时后，风暴兵在十三号矿井口等你。",
         "You signal on the vox Thorne gave you. Half an hour later his storm-troopers wait for you at Shaft Thirteen."))),
       C("去星港", "Head for the starport", "gsc_805", X({hp: -6},
@@ -1761,7 +1761,7 @@
             "The Grandsire is dead. Across the city every remaining kin stumbles at the same instant.\nFor the first time your head is truly quiet. Only you are left in it.\nThe Inquisitor's vox crackles. “Astropathic tower... the song's stopped! He's screaming, screaming with his life!”"),
     effects: {sanity: 10, set: {grandsireDead: true}},
     choices: [
-      C("去星语塔，帮他把警告发完", "Go to the tower and help finish the warning", "gsc_end_shadow", X({hp: -10, renown: 5},
+      C("去星语塔，帮他把警告发完", "Go to the tower and help finish the warning", "gsc_end_shadow", X({hp: -10, sanity: 3},
         "你爬了九百级台阶。老星语者握着你的手，把这颗星的名字一遍遍喊进影子的缝里。",
         "You climb nine hundred steps. The old astropath grips your hand and screams this world's name into the crack in the Shadow, again and again.")),
       C("跟审判官上他的穿梭机", "Board the Inquisitor's shuttle", "gsc_end_witness", X({sanity: -5},

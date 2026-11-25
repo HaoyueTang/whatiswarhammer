@@ -101,7 +101,7 @@
     codex: ["chaos_mutant"],
     choices: [
       C("道谢，陪他聊会儿", "Thank him and stay a while", "cha_104", {effects: {sanity: 5, hp: 5, set: {whistleFriend: true, metWhistle: true}}, result: L("水有铁锈味，却是你喝过最干净的。哨子吹了支小调，说是他妈妈教的。", "The water tastes of rust, and it's the cleanest you've ever had. Whistle whistles a little tune his mother taught him.")}),
-      C("趁他转身偷走水桶", "Steal his bucket when he turns", "cha_103a", {effects: {hp: 15, corruption: 3, set: {robbedWhistle: true, metWhistle: true, wronged_whistle: true}}, result: L("你抱着哨子的水桶狂奔，喝到呛咳。身后，哨音拉得又尖又长，像在哭。", "You bolt with Whistle's bucket and drink till you choke. Behind you his note rises, thin and long, like crying.")})
+      C("趁他转身偷走水桶", "Steal his bucket when he turns", "cha_103a", {effects: {hp: 15, set: {robbedWhistle: true, metWhistle: true, wronged_whistle: true}}, result: L("你抱着哨子的水桶狂奔，喝到呛咳。身后，哨音拉得又尖又长，像在哭。", "You bolt with Whistle's bucket and drink till you choke. Behind you his note rises, thin and long, like crying.")})
     ]};
 
   N.cha_103a = {chapter: 1, scene: "underhive", speaker: TIKKA, time: {h: 3},
@@ -120,7 +120,7 @@
       C("拉着蒂卡钻进管道", "Drag Tikka into the pipes", "cha_105", {result: L("管道又窄又臭。你们挤在黑暗里，听着外面火焰嘶嘶作响，蒂卡一直在咳。", "The pipe is narrow and foul. You huddle in the dark, listening to the flamers hiss, Tikka coughing into your shoulder.")}),
       C("照雕像说的，往左躲", "Do as the statue said: hide left", "cha_105", {require: {flag: "idol"}, hideIfLocked: true, effects: {sanity: -5, corruption: 3, taint: {tzeentch: 5}}, result: L("左边是一堵墙，墙下却有个你从没见过的洞。灯光从头顶扫过去，一次也没停。", "To the left is a wall, and at its foot a hole you've never seen. The lamps sweep overhead and never once stop.")}),
       C("替哨子引开执法官", "Draw the enforcers away from Whistle", "cha_106", {require: {flag: "whistleFriend"}, hideIfLocked: true}),
-      C("指认哨子，换赏金", "Point out Whistle for the bounty", "cha_105", {require: {flag: "metWhistle"}, hideIfLocked: true, effects: {hp: 10, corruption: 4, sanity: -10, set: {betrayedWhistle: true, wronged_whistle: true}}, result: L("你伸手一指。凯德扔给你一张口粮券，看都没看你。远处，哨音断了。", "You point. Kade flicks you a ration chit without looking at you. Somewhere in the dark, a whistle cuts short.")})
+      C("指认哨子，换赏金", "Point out Whistle for the bounty", "cha_105", {require: {flag: "metWhistle"}, hideIfLocked: true, effects: {hp: 10, sanity: -10, set: {betrayedWhistle: true, wronged_whistle: true}}, result: L("你伸手一指。凯德扔给你一张口粮券，看都没看你。远处，哨音断了。", "You point. Kade flicks you a ration chit without looking at you. Somewhere in the dark, a whistle cuts short.")})
     ]};
 
   N.cha_106 = {chapter: 1, scene: "underhive", speaker: KADE, time: {h: 1},

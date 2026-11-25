@@ -64,11 +64,11 @@
        O("“那是很久以前了。”", "“That was long ago.”", {renown: 5},
          "“对你们是很久。对我们，是好几代人。”他点点头，“所以我们记得更清楚。”",
          "“Long for you. For us, many generations.” He nods. “So we remember it better.”"),
-       O("问他人类为什么撤走", "Ask why the humans withdrew", {sanity: 5},
+       O("问他人类为什么撤走", "Ask why the humans withdrew", {sanity: -3},
          "“因为饥饿从银河外来了，你们的舰队得回去喂它。”他看着水面，“敌人的敌人未必是朋友，有时只是时机。”",
          "“Because a hunger came from beyond the galaxy, and your fleets had to go home and feed it.” He watches the water. “An enemy's enemy is not always a friend. Sometimes it is only timing.”",
          ["chr_macragge"]),
-       O("陪他看鱼", "Watch the fish with him", {},
+       O("陪他看鱼", "Watch the fish with him", {sanity: 4},
          "鱼群抢食，水花一片。他没再说话，走的时候拍了拍你的肩。",
          "The fish churn the water over the bait. He says nothing more, but pats your shoulder as he leaves.")
      ]},
@@ -102,7 +102,7 @@
          "它讲了三小时古圣、星神与背叛，最后说：“我们打碎了自己的神，睡了一觉。你们的历史只是我们的一个梦。”",
          "It talks for three hours: Old Ones, star gods, betrayal upon betrayal. At last: “We shattered our own gods, then took a nap. Your entire history is one of our dreams.”",
          ["nec_great_sleep"]),
-       O("问它为什么叫你“有机体”", "Ask why it calls you ‘organic’", {sanity: 5},
+       O("问它为什么叫你“有机体”", "Ask why it calls you ‘organic’", {sanity: -2, renown: 2},
          "“因为你们会腐烂。”它想了想，“我们也曾经会。那是我最不怀念的东西。”",
          "“Because you rot.” It considers. “So did we, once. It is the thing I miss least.”"),
        O("帮它贴标签", "Help with the labels", {renown: 5},
@@ -125,7 +125,7 @@
          "霸主沉默了很久。“虫群，”他说，“王在星系之间见过它们。所以他回来了。”他不再踱步。",
          "The overlord is silent a long time. “The swarm,” he says. “The King saw it between the galaxies. That is why he came back.” He stops pacing.",
          ["chr_leviathan"]),
-       O("一言不发", "Say nothing", {sanity: 3},
+       O("一言不发", "Say nothing", {},
          "他把你当成一件会点头的家具，又踱了一个小时。你记住了一句：“寂静之王回来时，从不寂静。”",
          "He treats you as furniture that nods, and paces for another hour. One line sticks: “The Silent King never returns silently.”")
      ]},
@@ -154,16 +154,16 @@
              "A Black Legion veteran sits on an ammunition crate, polishing an old pauldron with an oily rag. Its emblem has been scraped away; the old colour still shows beneath the scratches.\n“Isstvan Five,” he says without looking up. “Heard of it?”"),
      codex: ["chr_isstvan"],
      choices: [
-       O("“听说过。你们在那儿背叛了兄弟。”", "“I have. You betrayed your brothers there.”", {hp: -5, renown: 5},
-         "他终于抬起头，看了你很久。“是他们先选错了边。”说完又低头去擦，擦得更用力了。",
-         "He finally looks up and studies you for a long time. “They chose the wrong side first.” Then he goes back to polishing, harder."),
+       O("“听说过。你们在那儿背叛了兄弟。”", "“I have. You betrayed your brothers there.”", {sanity: -3, renown: 5},
+         "他终于抬起头，看了你很久，久到你后颈发凉。“有胆子。是他们先选错了边。”他又低头去擦，擦得更用力了。",
+         "He finally looks up and studies you until your neck prickles. “You've got nerve. They chose the wrong side first.” Then he goes back to polishing, harder."),
        O("“讲给我听。”", "“Tell me.”", {sanity: -5, renown: 3, taint: {khorne: 5}},
          "他讲着陆场，讲第二波援军转过来的枪口，讲那天的天色。讲到最后他在笑。你发现自己也在笑。",
          "He tells of the drop site, the second wave's guns turning, the colour of the sky that day. By the end he's laughing. So, you notice, are you.",
          ["chaos_horus_heresy"]),
-       O("悄悄走开", "Slip away", {sanity: 5},
-         "走出很远，你还能听见油布擦过陶钢的声音，一下，一下，像在擦一样怎么也擦不掉的东西。",
-         "Far down the corridor you can still hear the rag on ceramite, stroke after stroke, as if scrubbing at something that will never come off.")
+       O("悄悄走开", "Slip away", {sanity: 3, renown: -2},
+         "他哼了一声，没再看你。走出很远，你还能听见油布擦过陶钢的声音，像在擦一样怎么也擦不掉的东西。",
+         "He snorts and doesn't look at you again. Far down the corridor you can still hear the rag on ceramite, as if scrubbing at something that will never come off.")
      ]},
 
     /* The Badab War — a Red Corsair recruiting over an open channel */
@@ -174,13 +174,13 @@
              "A transmission cuts into a nearby channel. A lazy voice:\n“Friends from the Maelstrom here. Our boss paid the Imperium's tithe once. Gene-seed, lives, everything. Then he stopped paying. Want in? We don't ask where you're from.”"),
      codex: ["chr_badab_war"],
      choices: [
-       O("关掉频道", "Switch it off", {renown: 5},
+       O("关掉频道", "Switch it off", {renown: 3},
          "静电声里，你最后听见他笑：“巴达布那会儿，他们也是这么说的。”",
          "Through the static you hear him laugh one last time: “That's what they said at Badab, too.”"),
        O("多听几句", "Listen a little longer", {sanity: -5, corruption: 3, taint: {tzeentch: 5}},
          "他讲巴达布暴君，讲星际战士打了十年星际战士。你听得入了神，直到频道里只剩呼吸声——你自己的。",
          "He talks of the Tyrant of Badab, of Space Marines fighting Space Marines for ten years. You listen, rapt, until only breathing is left on the channel. Your own."),
-       O("记下频率，报告上级", "Note the frequency and report it", {renown: 3, sanity: 3},
+       O("记下频率，报告上级", "Note the frequency and report it", {renown: 5},
          "你把频率交了上去。几天后，那片星域多了一支巡逻队。没人告诉你结果，也没人谢你。",
          "You hand the frequency up the chain. Days later, a patrol appears in that stretch of space. No one tells you what happened. No one thanks you.")
      ]}

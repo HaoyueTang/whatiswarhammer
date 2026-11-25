@@ -571,8 +571,8 @@
         "一道绿光擦过你的肩膀。外套袖子一层层化成了灰，下面的皮肤火辣辣地疼。",
         "A green beam grazes your shoulder. Your sleeve flakes away layer by layer into ash; the skin beneath burns.")),
       C("守住卡尔指给你的出口", "Hold the exit Kaal points you to", "nec_206", O(Q({flag: "kaalTrust"}, true), X({hp: -6, renown: 5},
-        "卡尔认得你，朝出口一指：“守住！”你守在出口的阴影里，绿光一次也没碰到你。",
-        "Kaal knows you and points at the exit. “Hold it!” You keep to its shadow, and the green light never touches you."))),
+        "卡尔认得你，朝出口一指：“守住！”你守在出口的阴影里，绿光只燎到了你的手背。",
+        "Kaal knows you and points at the exit. “Hold it!” You keep to its shadow; the green light only sears the back of your hand."))),
       C("把受伤的奥里尔医师拖进壕沟", "Drag the wounded Medicae Oriel into a trench", "nec_207", X({hp: -5, set: {savedOriel: true}},
         "医师比看上去重。你们滚进壕沟时，头顶的空气被绿光削掉了一层。",
         "The medicae is heavier than he looks. As you tumble in, green light shaves the air overhead.")),
@@ -718,8 +718,8 @@
             "The banquet is magnificent. Silver, candelabra, twelve courses, every plate empty.\nThe courtiers raise empty cups in perfect unison. The overlord toasts you: “To taste. None of us remember what it was.”\nOnly you are actually hungry."),
     choices: [
       C("假装吃得很香", "Pretend to savour it", "nec_302", X({renown: 5, hp: -5, set: {ateAir: true}, taint: {slaanesh: 35}},
-        "你对着空盘子咀嚼、点头、赞叹。霸主看得入了迷。",
-        "You chew at nothing, nod, sigh with pleasure. The overlord watches, enthralled.")),
+        "你对着空盘子咀嚼、点头、赞叹，胃在偷偷地叫。霸主看得入了迷。",
+        "You chew at nothing, nod, sigh with pleasure while your stomach growls. The overlord watches, enthralled.")),
       C("掏出口袋里的口粮吃", "Eat the ration bar in your pocket", "nec_302", X({hp: 10, renown: -3, set: {rudeEater: true}},
         "整个大厅的眼睛都转向你。你的咀嚼声响得像一场失礼的雷暴。",
         "Every eye in the hall turns to you. Your chewing is loud as a rude thunderstorm."))
@@ -827,8 +827,8 @@
         "霸主赞许地点头，给王和风暴领主各口述了一封四十页的回信，全是问候语。",
         "The overlord nods approvingly and dictates two forty-page replies, to King and Stormlord, entirely greetings.")),
       C("建议他向风暴领主效忠", "Suggest he swears to the Stormlord", "nec_313", X({renown: -3, sanity: 5, set: {ahmetSubmit: true}},
-        "霸主沉默片刻。“明智，也庸俗。”他还是派出了使者，带着一份不情不愿的礼物。",
-        "A pause. “Wise. And vulgar.” He sends an envoy anyway, with a grudging gift.")),
+        "霸主沉默片刻。“明智，也庸俗。”他还是派出了使者，带着一份不情不愿的礼物。那一夜没有打雷。",
+        "A pause. “Wise. And vulgar.” He sends an envoy anyway, with a grudging gift. That night there is no thunder.")),
       C("建议他应王的召集，回绝风暴领主", "Suggest he answers the King and refuses", "nec_313", O(X({renown: 3, hp: -10, set: {ahmetKing: true}, taint: {khorne: 40}},
         "霸主大笑：“王是旧秩序，旧秩序配得上我家门廊。”当晚雷暴劈中金字塔一角，你被震下了台阶。",
         "The overlord laughs. “The King is the old order; it suits my porch.” That night lightning strikes a corner of the pyramid and throws you down the steps."),
@@ -912,9 +912,9 @@
         "You give the bow the overlord taught you. Both nobles hum with satisfaction."),
         {resultAlt: [{if: {flag: "taughtBow"}, text: L("你行的礼，角度分毫不差——你教过别人四十天。两位贵族同时发出满意的嗡鸣。",
           "Your bow is exact to the degree; you taught it for forty days. Both nobles hum with satisfaction.")}]})),
-      C("“带我走，但放了我的同伴。”", "“Take me, but free my companions.”", "nec_406", O(Q({stat: "renown", min: 30}), X({renown: -5, set: {freedColleagues: true}},
-        "霸主想了想，挥挥手。“好。害虫多的是。”",
-        "The overlord considers, then waves a hand. “Fine. Vermin are plentiful.”"))),
+      C("“带我走，但放了我的同伴。”", "“Take me, but free my companions.”", "nec_406", O(Q({stat: "renown", min: 30}), X({renown: -5, sanity: 5, set: {freedColleagues: true}},
+        "霸主想了想，挥挥手。“好。害虫多的是。”一件会讲价的回礼：他的眼光暗了一度。你却松了口气。",
+        "The overlord considers, then waves a hand. “Fine. Vermin are plentiful.” A gift that haggles: his eyes dim a shade. You breathe easier."))),
       C("趁交接时逃进墓道", "Bolt into the tomb corridors", null, O({effects: {set: {wronged_sekhrat: true}}}, R(0.4, "hp", "nec_407", "nec_408",
         RR("你钻进维修通道。霸主刚送出的回礼，当着使者的面跑了。门在身后合上。", "You squeeze into a duct. The overlord's return gift bolts in front of his guest. The door seals behind you.",
            "你才跑出十步，地板就伸出了手。塞赫拉特叹气，像看一件摔坏的礼物。", "Ten steps, and the floor grows hands. Sekhrat sighs, as at a gift dropped in transit."))))
@@ -943,9 +943,9 @@
     effects: {sanity: -10, corruption: 5, set: {sawShard: true}, taint: {tzeentch: 35}},
     codex: ["nec_tesseract", "place_tesseract_vault"],
     choices: [
-      C("后退，直到撞上什么", "Back away until you hit something", "nec_408a", X({hp: -5},
-        "你撞上的是一只蜘蛛构造体。它很温柔地把你夹起来，送了回去。",
-        "What you hit is a spyder construct. It picks you up very gently and carries you back.")),
+      C("后退，直到撞上什么", "Back away until you hit something", "nec_408a", X({renown: -3},
+        "你撞上的是一只蜘蛛构造体。它很温柔地把你夹起来，送了回去，像送回一件想逃的回礼。",
+        "What you hit is a spyder construct. It picks you up very gently and carries you back, like a gift that tried to run.")),
       C("问它的名字", "Ask its name", "nec_408a", X({corruption: 10, set: {shardName: true}, taint: {tzeentch: 70}},
         "它告诉了你。那个名字没有音节，只有一种感觉：所有活物死前的最后一秒。",
         "It tells you. The name has no syllables, only a feeling: the last second of every living thing."))
@@ -1201,7 +1201,7 @@
             "The night before departure the gallery alarms blare. Cloaked Aeldari rangers slip through a seam of light, straight for the seer's display.\nTheir leader sees you and stops.\n“Mon-keigh?” she whispers. “In the museum of the dead?”"),
     codex: ["eld_aeldari", "eld_rangers", "eld_monkeigh"],
     choices: [
-      C("帮她们解开先知的停滞场", "Help them free the seer", "nec_602", O(X({renown: -5, set: {aeldariFriend: true}},
+      C("帮她们解开先知的停滞场", "Help them free the seer", "nec_602", O(X({renown: -5, sanity: 3, set: {aeldariFriend: true}},
         "你照游侠指的地方按下去，按错了两次。第三次，锁开了，先知倒进她们怀里。",
         "You press where the ranger points, wrong twice. The third time the lock opens and the seer falls into their arms."),
         {resultAlt: [{if: {flag: "readsGlyphs"}, text: L("你认得那种符文锁，几百年前你在墙上见过。锁开了，先知倒进她们怀里。",
@@ -1630,8 +1630,8 @@
         "那只手很轻，很冷。它没有握住你。它在喝。",
         "The hand is light and cold. It doesn't grasp you. It drinks.")),
       C("“我只是个普通人。”", "“I'm nobody special.”", "nec_802", X({sanity: -10},
-        "碎片停住了，像被一个太无聊的答案噎住。技师们趁机抛出了光网。",
-        "The shard stops, as if choking on an answer too boring to eat. The crypteks seize the moment and cast their net."))
+        "碎片停住了，像被一个太无聊的答案噎住。它的目光刮过你，冷进骨头。技师们趁机抛出了光网。",
+        "The shard stops, as if choking on an answer too boring to eat. Its gaze scrapes over you, cold to the bone. The crypteks seize the moment and cast their net."))
     ]};
 
   N.nec_806 = {chapter: 8, scene: "tomb_interior", speaker: SEKHRAT, time: {h: 2},
@@ -1693,8 +1693,8 @@
     ],
     choices: [
       C("站到两边中间", "Stand between the two sides", "nec_808", X({renown: 5, hp: -5, set: {stoodBetween: true}},
-        "两边的枪口都对准了你。你发现，这是你这辈子最有价值的时刻。",
-        "Both sides aim at you. You realise this is the most valuable moment of your life.")),
+        "两边的枪口都对准了你，一发走火擦破了你的小腿。你发现，这是你这辈子最有价值的时刻。",
+        "Both sides aim at you; one nervous shot grazes your calf. You realise this is the most valuable moment of your life.")),
       C("找个弹坑躲着", "Find a crater to hide in", "nec_808", X({sanity: 5},
         "弹坑里已经躲着一个机仆。它挪了挪，给你让了个位置。",
         "A servitor is already hiding in the crater. It shuffles over to make room.")),
@@ -1720,7 +1720,7 @@
     choices: [
       C("带着报告冲向穿梭机", "Run for a shuttle with the report", null, O(Q({flag: "records"}), R(0.65, null, "nec_end_truth", "nec_809",
         RR("子弹擦着你的耳朵飞过。舱门在你身后合上。", "A round clips past your ear. The hatch seals behind you.",
-           "一发子弹打穿了你的腿。你滚回墓道，墓门替你合上了。", "A round goes through your leg. You roll back into the tunnel; the tomb door seals for you.")),
+           "一发子弹打飞了你脚边的沙。你滚回墓道，墓门替你合上了。", "A round kicks up the sand at your feet. You roll back into the tunnel; the tomb door seals for you.")),
         G("mordane", "她的枪手认得你：那三处哨位的死者，人人记得。",
           "Her riflemen know your face; every one remembers the dead at those three posts.", -0.15))),
       C("“两边都退一步。”", "“Both sides, one step back.”", null, O(Q({flag: "stoodBetween"}, true), R(0.45, "renown", "nec_end_ceasefire", "nec_809",
