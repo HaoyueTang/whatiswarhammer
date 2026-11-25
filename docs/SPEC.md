@@ -597,3 +597,12 @@ Static (`checkUniversal`, SPEC §37.12 invariants): ids `u_*`; chapter 1; reacha
 - **Entry alts**: one `born_universal` text alt per door origin in its faction file (11 new in orks/aeldari/necrons/mechanicus/gsc; the 9 original ones unchanged). Newcomer fixes: `mech_101` gets the Tobin introduction, `eld_o_trooper_5` serves both `born_shared` and `born_universal`, `eld_210` stops saying "the place you grew up" for non-farmers; codex `place_gravex` no longer ends "你的家" (neutral line).
 - Start-screen note: "最终通向 N 个势力之一" (N = selectable factions).
 - Known limits: the echo world of a universal convict is Carcharos (the origin's `world`); at 06:00 the clock does not know that some doors happen at night (the entry text never says a time of day); the 4 unreachable origins; the human read of introductions/prose.
+
+### 37.13 Identity through story acts (Howie 2026-11-25: "不是选择 是在故事线选项中确定 职业信仰阵营")
+- Faith, profession and allegiance are **not** picked from a menu; each is fixed by an act in a scene and read back later. Prologue 26 → **33 nodes** (birth 4: `u_b01 → u_b02 → u_b04 → u_b03`; low 11, mid 9, up 9; a run passes 10–12).
+- **Faith** (`u_b04`, shared, seen from the doorway): kneel to the procession → `u_faith_creed`; touch the oil on the cog-shrine → `u_faith_machine`; return the miner's hand-sign → `u_faith_kin`; shut the door → `u_faith_none`.
+- **Profession** (`u_low_job` / `u_mid_job` / `u_up_job`, after each class's first scene): forge / dock / runner · farm / clerk / hauler · scribe / heir / cadet → `u_job_<x>`.
+- **Allegiance** (`u_low_side` / `u_mid_side` / `u_up_side`: enforcers or wardens search someone in front of you): point them out → `u_side_order`; cover for them → `u_side_under`; look to the off-worlder → `u_side_out`.
+- Read back: faith adds on the job nodes, job adds on the side nodes, faith `resultAlt` on mechanicus/menial, gsc/miner, chaos/scribe, allegiance `resultAlt` on the three Imperium "stay" doors. Identity does **not** open doors (`require` has no OR); the matrix (§37.12) is unchanged. Later: echo identity on the other 14 doors; an identity-aware door gate would need `require` OR support.
+- Fable re-read of all 20 doors (2026-11-25): `docs/audit/FABLE_READ_A.md`, `FABLE_READ_B.md` — 11 entry-alt / early-node text fixes.
+

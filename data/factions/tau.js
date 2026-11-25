@@ -74,8 +74,8 @@
         "Three days with a work card. You unload cargo at the port; the T'au pay wages, never a day late.\nThe boat with no lights hasn't come back, nor has the old stallkeeper. His stall behind Berth Seven is boarded up.")},
       {if: {flag: "born_shared"}, text: L("工牌到手三天了。你在港口卸货，钛人发工钱，从不迟到一天。\n有时你会想起海堤上那个抱孩子的女人。你再没见过她。",
         "Three days with a work card. You unload cargo at the port; the T'au pay wages, never a day late.\nSometimes you think of the woman on the sea wall with the child on her hip. You never saw her again.")},
-      {if: {flag: "born_universal"}, text: L("招工船把你放在这座港口，已有半年。这里原叫新卡尔德，现在叫达尔诺尔：帝国的船不再来了，白色的船来了，广场上的帝皇像换成了圆环。\n你在港口卸货。钛人发工钱，从不迟到一天。",
-        "Half a year since the labour ship set you down at this port. It was New Calder; it's Dal'nor now. The Imperial ships stopped coming, the white ships came, and the Emperor's statue in the square became a smooth ring.\nYou unload cargo at the port. The T'au pay wages, never a day late.")}
+      {if: {flag: "born_universal"}, text: L("招工船把你放在这座港口，已有半年。这里原叫新卡尔德，现在叫达尔诺尔：帝国的税船不再来了，白色的船来了，广场上的帝皇像换成了圆环。\n你在港口卸货。钛人发工钱，从不迟到一天。",
+        "Half a year since the labour ship set you down at this port. It was New Calder; it's Dal'nor now. The Imperial tithe ships stopped coming, the white ships came, and the Emperor's statue in the square became a smooth ring.\nYou unload cargo at the port. The T'au pay wages, never a day late.")}
     ],
     choices: [
       C("去港口上工", "Head to the docks", "tau_102", {result: L("汽笛响了。今天码头不开工——所有人都被叫去听演讲。", "The whistle blows. No unloading today: everyone is called to hear a speech.")}),
@@ -243,7 +243,7 @@
         "Next morning the port market opens as usual. The little stall behind Berth Seven is yours, bought with the price of your place in the queue; the old man left on that boat.\nOld icons and eagle pendants are rare now, and so are smuggled power cells. You sell to both sides.")},
       {if: {flag: "born_shared"}, text: L("第二天，港口集市照常开张。第七泊位后面的小货摊归你了，货款还欠着老摊主。\n旧圣像、双头鹰吊坠成了稀罕货，走私来的电池也一样。你两边都卖，先把账还上。",
         "Next morning the port market opens as usual. The little stall behind Berth Seven is yours, and you still owe the old man for the stock.\nOld icons and eagle pendants are rare now, and so are smuggled power cells. You sell to both sides, to pay off the debt first.")},
-      {if: {flag: "born_universal"}, text: L("达尔诺尔的港口集市，两边的货都有人叫卖。半年前走私船把你放在这里，替船长盖章挣的钱，盘下了第七泊位后面那个小货摊。\n旧圣像、双头鹰吊坠成了稀罕货，钛人的电池也一样。你两边都卖。",
+      {if: {flag: "born_universal"}, text: L("达尔诺尔的港口集市，两边的货都有人叫卖。半年前走私船把你放在这里，你用替船长盖章挣的钱，盘下了第七泊位后面那个小货摊。\n旧圣像、双头鹰吊坠成了稀罕货，钛人的电池也一样。你两边都卖。",
         "Dal'nor's port market, with both sides' goods on sale. Half a year ago the smugglers' boat set you down here, and the pay for stamping the captain's manifests bought the little stall behind Berth Seven.\nOld icons and eagle pendants have grown rare; so have T'au power cells. You sell to both.")}
     ],
     choices: [

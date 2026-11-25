@@ -2,6 +2,11 @@
 
 Format follows Keep a Changelog; versions follow SemVer.
 
+## [Unreleased]
+### Changed
+- The opening now settles **faith, profession and allegiance through story acts** (kneel to the procession or touch the cog-shrine; take the furnace shift or the dock chalk; point out the runner or hide him) — 7 new prologue nodes (26 → 33), read back in later lines and door departures (SPEC §37.13).
+- Story re-read of all 20 doors: 11 small text fixes (who you know on arrival, introductions, time words, EN/ZH matches).
+
 ## [0.6.0] — 2026-11-20 (universal birth, SPEC §37)
 ### Added — "Let my choices decide" (all 8 factions)
 - **v2 (SPEC §37.12): all 8 factions are reachable — 20 doors / 20 origins** (low 8, mid 6, up 6). The prologue grew from 12 to 26 nodes (a run passes 8–10): in each class you choose *whom you meet and what you learn* — carry the Levy-Priest's roll, sit with the one-legged veteran or go down to the dock bar; fetch tape at the depot where a Valda supply ship loads, help the salvage crew; open the ledger's red page, go down to the waiting scholar — and those choices open the extra doors (orks, aeldari, necrons, mechanicus, genestealer cult). Doors you did not earn are hidden. Four origins tied to a home world from birth stay in 预选势力 (aeldari/agri, gsc/warden, gsc/kin, orks/ganger). 11 new entry texts + small newcomer fixes in the five faction files; codex Gravex no longer says "your home".

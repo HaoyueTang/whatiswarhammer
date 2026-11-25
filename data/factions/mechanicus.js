@@ -101,8 +101,8 @@
     ]};
 
   N.mech_102 = {chapter: 1, scene: "forge_floor", speaker: GRIES, time: {h: 1},
-    text: L("监工格里斯用烙铁敲了敲你的数字。“两次红。”\n他身后，一台机仆推着矿车，脸上还留着一道你认识的伤疤。\n“再红一次，”他说，“你就再也不用吃饭了。”",
-            "Overseer Gries taps your number with a branding rod. “Two reds.”\nBehind him a servitor pushes an ore cart. Its face still bears a scar you recognise.\n“One more,” he says, “and you'll never need to eat again.”"),
+    text: L("监工格里斯用烙铁敲了敲你的数字。“两次红。”\n他身后，一台机仆推着矿车，脸上还留着一道做人时落下的伤疤。\n“再红一次，”他说，“你就再也不用吃饭了。”",
+            "Overseer Gries taps your number with a branding rod. “Two reds.”\nBehind him a servitor pushes an ore cart. Its face still bears a scar from when it was a man.\n“One more,” he says, “and you'll never need to eat again.”"),
     choices: [
       C("连上两个班", "Work a double shift", "mech_104", X({hp: -10, renown: 3, set: {doubleShift: true}},
         "你在熔炉边站了二十个小时。数字变黄了，手掌变黑了。",
@@ -324,7 +324,7 @@
     alt: [ALT(F("born_shared"), "阿尔法没让你回家，直接押进兵营。手术只花了十分钟：后颈多了一个插槽。\n她插进一枚晶片，你突然不怕了，不怕得很奇怪。\n“恐惧已关闭，”凯什-43阿尔法说，“以后由我决定你什么时候怕。”",
               "The Alpha doesn't let you go home; she marches you straight to the barracks. The surgery takes ten minutes: a socket in the back of your neck.\nShe slots in a wafer and suddenly you're unafraid. Strangely so.\n“Fear disabled,” says Alpha Kesh-43. “From now on, I decide when you're afraid.”"),
           ALT(F("born_universal"), "征调船落地，签筒里的齿轮硌着掌心。护教军的凯什-43阿尔法押你直奔兵营：十分钟手术，后颈多一个插槽，一枚晶片，你就不怕了。\n“恐惧已关闭，”她说，“以后由我决定你什么时候怕。”",
-              "The levy ship lands; the cog from the lot-drum bites your palm. Skitarii Alpha Kesh-43 marches you straight to the barracks, no rest. Ten minutes of surgery: a socket in the back of your neck, a wafer, and you're unafraid.\n“Fear disabled,” she says. “From now on, I decide when you're afraid.”"),
+              "The levy ship lands; the cog from the lot-drum bites your palm. Skitarii Alpha Kesh-43 marches you straight to the barracks. Ten minutes of surgery: a socket in the back of your neck, a wafer, and you're unafraid.\n“Fear disabled,” she says. “From now on, I decide when you're afraid.”"),
           ADD(F("drewForBoy"), "那支签本是那个少年的。她只记是谁的手抽出来的。", "That lot was the boy's. She only logs whose hand drew it.")],
     text: L("你抽中了护教军辅兵的签。手术只花了十分钟：后颈多了一个插槽。\n凯什-43阿尔法插进一枚晶片，你突然不怕了，不怕得很奇怪。\n“恐惧已关闭，”她说，“以后由我决定你什么时候怕。”",
             "Your lot was drawn for the Skitarii auxilia. The surgery took ten minutes: a socket in the back of your neck.\nAlpha Kesh-43 slots in a wafer and suddenly you're unafraid. Strangely so.\n“Fear disabled,” she says. “From now on, I decide when you're afraid.”"),
